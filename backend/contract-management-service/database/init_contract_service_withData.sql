@@ -7,7 +7,7 @@
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
-CREATE DATABASE IF NOT EXISTS `docgo_contract_service` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_uca1400_ai_ci */;
+CREATE DATABASE IF NOT EXISTS `docgo_contract_service`;
 USE `docgo_contract_service`;
 
 CREATE TABLE IF NOT EXISTS `contracts` (
@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS `contracts` (
   `version` bigint(20) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`),
   UNIQUE KEY `contract_number` (`contract_number`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 DELETE FROM `contracts`;
 INSERT INTO `contracts` (`id`, `contract_number`, `title`, `status`, `parties_json`, `start_date`, `end_date`, `system_id`, `created_at`, `created_by`, `deleted_at`, `deleted_by`, `is_deleted`, `version`) VALUES
@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS `contract_attachments` (
   PRIMARY KEY (`id`),
   KEY `fk_contract_attachment_contract` (`contract_id`),
   CONSTRAINT `fk_contract_attachment_contract` FOREIGN KEY (`contract_id`) REFERENCES `contracts` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 DELETE FROM `contract_attachments`;
 INSERT INTO `contract_attachments` (`id`, `contract_id`, `file_id`, `file_name`, `created_at`, `created_by`, `deleted_at`, `deleted_by`, `is_deleted`, `version`) VALUES
@@ -69,7 +69,7 @@ CREATE TABLE IF NOT EXISTS `contract_events` (
   PRIMARY KEY (`id`),
   KEY `idx_contract_events_contract_id` (`contract_id`),
   CONSTRAINT `fk_event_contract` FOREIGN KEY (`contract_id`) REFERENCES `contracts` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 DELETE FROM `contract_events`;
 INSERT INTO `contract_events` (`id`, `contract_id`, `event_type`, `event_data`, `actor`, `event_time`, `note`) VALUES
