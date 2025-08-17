@@ -1,5 +1,9 @@
 package com.devgo2003.docgo.contractmanagement.controller;
 
+import com.devgo2003.docgo.contractmanagement.common.response.PaginatedResponse;
+import com.devgo2003.docgo.contractmanagement.common.response.RequestInfo;
+import com.devgo2003.docgo.contractmanagement.common.response.ResultInfo;
+import com.devgo2003.docgo.contractmanagement.common.response.SortInfo;
 import com.devgo2003.docgo.contractmanagement.common.response.RestResponse;
 import com.devgo2003.docgo.contractmanagement.entity.Contract;
 import com.devgo2003.docgo.contractmanagement.entity.ContractAttachment;
@@ -21,9 +25,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import org.springframework.data.domain.Page;
 
 @RestController
@@ -59,23 +65,59 @@ public class ContractController {
 
     @Operation(summary = "Lấy danh sách hợp đồng với phân trang và sắp xếp", description = "Lấy danh sách hợp đồng với phân trang và sắp xếp")
     @GetMapping
-    public ResponseEntity<RestResponse<Page<Contract>>> getAllContracts( // Changed List to Page
+    public ResponseEntity<RestResponse<PaginatedResponse<Contract>>> getAllContracts(
             @RequestParam(defaultValue = "0") int pageNumber,
             @RequestParam(defaultValue = "10") int pageSize,
-            @RequestParam(defaultValue = "createdAt") String sortBy,
-            @RequestParam(defaultValue = "ASC") String sortDirection,
+            @RequestParam(required = false) List<String> sortBy,
+            @RequestParam(required = false) List<String> sortDirection,
+            @RequestParam(required = false) String searchTerm,
             @RequestParam(defaultValue = "false") boolean includeDeleted) {
-        Page<Contract> contracts = contractService.getAllContracts(pageNumber, pageSize, sortBy, sortDirection, includeDeleted);
-        RestResponse<Page<Contract>> response = RestResponse.<Page<Contract>>builder()
+
+        Page<Contract> contractsPage = contractService.getAllContracts(pageNumber, pageSize, sortBy, sortDirection, includeDeleted);
+        if (contractsPage.getContent().isEmpty()) {
+            throw new NoContentException("Không có hợp đồng nào.");
+        }
+
+        RequestInfo requestInfo = RequestInfo.builder()
+                .page(pageNumber)
+                .size(pageSize)
+                .searchTerm(searchTerm)
+                .sortBy(sortBy)
+                .sortDirection(sortDirection)
+                .build();
+
+        List<SortInfo> sortInfoList = new ArrayList<>();
+        if (contractsPage.getSort().isSorted()) {
+            contractsPage.getSort().forEach(order -> {
+                sortInfoList.add(new SortInfo(order.getProperty(), order.getDirection().name()));
+            });
+        }
+
+        ResultInfo resultInfo = ResultInfo.builder()
+                .page(contractsPage.getNumber())
+                .size(contractsPage.getSize())
+                .totalElements(contractsPage.getTotalElements())
+                .totalPages(contractsPage.getTotalPages())
+                .first(contractsPage.isFirst())
+                .last(contractsPage.isLast())
+                .numberOfElements(contractsPage.getNumberOfElements())
+                .empty(contractsPage.isEmpty())
+                .sort(sortInfoList)
+                .build();
+
+        PaginatedResponse<Contract> paginatedResponse = new PaginatedResponse<>(requestInfo, resultInfo, contractsPage.getContent());
+
+        RestResponse<PaginatedResponse<Contract>> response = RestResponse.<PaginatedResponse<Contract>>builder()
                 .apiVersion("v1")
                 .statusCode(HttpStatus.OK.value())
                 .shortMessage("Success")
                 .description("Danh sách hợp đồng đã được lấy thành công.")
-                .data(contracts)
+                .data(paginatedResponse)
                 .timestamp(ZonedDateTime.now())
                 .requestId(UUID.randomUUID().toString())
                 .path(request.getRequestURI())
                 .build();
+
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 

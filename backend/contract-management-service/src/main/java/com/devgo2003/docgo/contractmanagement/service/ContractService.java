@@ -18,7 +18,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Optional;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.Arrays;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -31,6 +35,11 @@ public class ContractService {
     private final ContractAttachmentRepository attachmentRepository;
     private final ContractEventRepository eventRepository;
     private final ContractEventPublisher eventPublisher;
+
+    private static final Set<String> VALID_SORT_BY_PROPERTIES = new HashSet<>(Arrays.asList(
+            "id", "contractNumber", "title", "status", "partiesJson", "startDate", "endDate", "systemId",
+            "createdAt", "createdBy", "deletedAt", "deletedBy", "isDeleted", "version"
+    ));
 
     @Autowired
     public ContractService(ContractRepository contractRepository,
@@ -73,8 +82,22 @@ public class ContractService {
         return contractRepository.findById(id);
     }
 
-    public Page<Contract> getAllContracts(int pageNumber, int pageSize, String sortBy, String sortDirection, boolean includeDeleted) {
-        Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortBy);
+    public Page<Contract> getAllContracts(int pageNumber, int pageSize, List<String> sortBy, List<String> sortDirection, boolean includeDeleted) {
+        List<Sort.Order> orders = new ArrayList<>();
+        if (sortBy != null && !sortBy.isEmpty()) {
+            for (int i = 0; i < sortBy.size(); i++) {
+                String property = sortBy.get(i);
+                if (!VALID_SORT_BY_PROPERTIES.contains(property)) {
+                    throw new InvalidInputException("Thuộc tính sắp xếp không hợp lệ: " + property);
+                }
+                Sort.Direction direction = (sortDirection != null && i < sortDirection.size())
+                        ? Sort.Direction.fromString(sortDirection.get(i))
+                        : Sort.Direction.ASC;
+                orders.add(new Sort.Order(direction, property));
+            }
+        }
+
+        Sort sort = Sort.by(orders);
         Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
 
         if (includeDeleted) {
@@ -203,5 +226,3 @@ public class ContractService {
         return eventRepository.findByContractIdOrderByEventTimeDesc(contractId);
     }
 }
-
-
