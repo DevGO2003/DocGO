@@ -8,6 +8,10 @@ import com.devgo2003.docgo.contractmanagement.repository.ContractAttachmentRepos
 import com.devgo2003.docgo.contractmanagement.repository.ContractEventRepository;
 import com.devgo2003.docgo.contractmanagement.service.event.ContractEventPublisher;
 import com.devgo2003.docgo.contractmanagement.service.event.ContractEventPayload;
+import com.devgo2003.docgo.contractmanagement.common.exception.ConflictException;
+import com.devgo2003.docgo.contractmanagement.common.exception.InvalidInputException;
+import com.devgo2003.docgo.contractmanagement.common.exception.NoContentException;
+import com.devgo2003.docgo.contractmanagement.common.exception.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -82,17 +86,17 @@ public class ContractService {
             Contract.ContractStatus contractStatus = Contract.ContractStatus.valueOf(status.toUpperCase());
             return contractRepository.findByStatusAndIsDeletedFalse(contractStatus);
         } catch (IllegalArgumentException e) {
-            throw new RuntimeException("Trạng thái hợp đồng không hợp lệ: " + status);
+            throw new InvalidInputException("Trạng thái hợp đồng không hợp lệ: " + status);
         }
     }
 
     @Transactional
     public Contract updateContract(Long id, Contract updatedContract) {
         Contract existingContract = contractRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy hợp đồng với ID: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy hợp đồng với ID: " + id));
 
         if (existingContract.getIsDeleted()) {
-            throw new RuntimeException("Không thể cập nhật hợp đồng đã bị xóa");
+            throw new ConflictException("Không thể cập nhật hợp đồng đã bị xóa");
         }
         
         // Cập nhật các trường
@@ -119,10 +123,10 @@ public class ContractService {
     @Transactional
     public void softDeleteContract(Long id) {
         Contract contract = contractRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy hợp đồng với ID: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy hợp đồng với ID: " + id));
 
         if (contract.getIsDeleted()) {
-            throw new RuntimeException("Hợp đồng đã bị xóa trước đó");
+            throw new ConflictException("Hợp đồng đã bị xóa trước đó");
         }
 
         // Thực hiện soft delete bằng cách gọi phương thức đã có trong BaseEntity
@@ -143,10 +147,10 @@ public class ContractService {
     @Transactional
     public void restoreContract(Long id) {
         Contract contract = contractRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy hợp đồng với ID: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy hợp đồng với ID: " + id));
         
         if (!contract.getIsDeleted()) {
-            throw new RuntimeException("Hợp đồng chưa bị xóa");
+            throw new ConflictException("Hợp đồng chưa bị xóa");
         }
 
         contract.restore();
@@ -166,10 +170,10 @@ public class ContractService {
     @Transactional
     public ContractAttachment addAttachment(Long contractId, ContractAttachment attachment) {
         Contract contract = contractRepository.findById(contractId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy hợp đồng với ID: " + contractId));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy hợp đồng với ID: " + contractId));
 
         if (contract.getIsDeleted()) {
-            throw new RuntimeException("Không thể thêm file đính kèm cho hợp đồng đã bị xóa");
+            throw new ConflictException("Không thể thêm file đính kèm cho hợp đồng đã bị xóa");
         }
 
         attachment.setContractId(contractId);

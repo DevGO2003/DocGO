@@ -14,9 +14,12 @@ import java.time.ZonedDateTime;
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class RestResponse<T> {
+    private String apiVersion;
     private int statusCode;
     private String shortMessage;
     private String description;
     private T data;
     private ZonedDateTime timestamp;
+    private String requestId;
+    private String path;
 }

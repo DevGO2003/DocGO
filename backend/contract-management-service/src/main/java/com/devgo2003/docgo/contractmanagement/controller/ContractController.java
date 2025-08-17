@@ -1,5 +1,6 @@
 package com.devgo2003.docgo.contractmanagement.controller;
 
+import com.devgo2003.docgo.contractmanagement.common.response.RestResponse;
 import com.devgo2003.docgo.contractmanagement.entity.Contract;
 import com.devgo2003.docgo.contractmanagement.entity.ContractAttachment;
 import com.devgo2003.docgo.contractmanagement.entity.ContractEvent;
@@ -11,13 +12,18 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import com.devgo2003.docgo.contractmanagement.common.exception.NoContentException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import org.springframework.data.domain.Page;
 
 @RestController
@@ -26,67 +32,170 @@ import org.springframework.data.domain.Page;
 public class ContractController {
 
     private final ContractService contractService;
+    private final HttpServletRequest request;
 
     @Autowired
-    public ContractController(ContractService contractService) {
+    public ContractController(ContractService contractService, HttpServletRequest request) {
         this.contractService = contractService;
+        this.request = request;
     }
 
     @Operation(summary = "Tạo hợp đồng mới", description = "Tạo hợp đồng mới với trạng thái DRAFT")
     @PostMapping
-    public ResponseEntity<Contract> createContract(@Valid @RequestBody Contract contract) {
+    public ResponseEntity<RestResponse<Contract>> createContract(@Valid @RequestBody Contract contract) {
         Contract created = contractService.createContract(contract);
-        return ResponseEntity.ok(created);
+        RestResponse<Contract> response = RestResponse.<Contract>builder()
+                .apiVersion("v1")
+                .statusCode(HttpStatus.CREATED.value())
+                .shortMessage("Success")
+                .description("Hợp đồng đã được tạo thành công.")
+                .data(created)
+                .timestamp(ZonedDateTime.now())
+                .requestId(UUID.randomUUID().toString())
+                .path(request.getRequestURI())
+                .build();
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     @Operation(summary = "Lấy danh sách hợp đồng với phân trang và sắp xếp", description = "Lấy danh sách hợp đồng với phân trang và sắp xếp")
     @GetMapping
-    public ResponseEntity<Page<Contract>> getAllContracts( // Changed List to Page
+    public ResponseEntity<RestResponse<Page<Contract>>> getAllContracts( // Changed List to Page
             @RequestParam(defaultValue = "0") int pageNumber,
             @RequestParam(defaultValue = "10") int pageSize,
-            @RequestParam(defaultValue = "created_at") String sortBy,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
             @RequestParam(defaultValue = "ASC") String sortDirection,
             @RequestParam(defaultValue = "false") boolean includeDeleted) {
-        return ResponseEntity.ok(contractService.getAllContracts(pageNumber, pageSize, sortBy, sortDirection, includeDeleted));
+        Page<Contract> contracts = contractService.getAllContracts(pageNumber, pageSize, sortBy, sortDirection, includeDeleted);
+        RestResponse<Page<Contract>> response = RestResponse.<Page<Contract>>builder()
+                .apiVersion("v1")
+                .statusCode(HttpStatus.OK.value())
+                .shortMessage("Success")
+                .description("Danh sách hợp đồng đã được lấy thành công.")
+                .data(contracts)
+                .timestamp(ZonedDateTime.now())
+                .requestId(UUID.randomUUID().toString())
+                .path(request.getRequestURI())
+                .build();
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @Operation(summary = "Lấy hợp đồng theo ID", description = "Lấy thông tin chi tiết hợp đồng theo ID")
     @GetMapping("/{id}")
-    public ResponseEntity<Contract> getContract(@PathVariable Long id) {
+    public ResponseEntity<RestResponse<Contract>> getContract(@PathVariable Long id) {
         Optional<Contract> contract = contractService.getContract(id);
-        return contract.map(ResponseEntity::ok)
-                       .orElse(ResponseEntity.notFound().build());
+        if (contract.isPresent()) {
+            RestResponse<Contract> response = RestResponse.<Contract>builder()
+                    .apiVersion("v1")
+                    .statusCode(HttpStatus.OK.value())
+                    .shortMessage("Success")
+                    .description("Thông tin hợp đồng đã được lấy thành công.")
+                    .data(contract.get())
+                    .timestamp(ZonedDateTime.now())
+                    .requestId(UUID.randomUUID().toString())
+                    .path(request.getRequestURI())
+                    .build();
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } else {
+            RestResponse<Contract> response = RestResponse.<Contract>builder()
+                    .apiVersion("v1")
+                    .statusCode(HttpStatus.NOT_FOUND.value())
+                    .shortMessage("Not Found")
+                    .description("Không tìm thấy hợp đồng với ID đã cung cấp.")
+                    .data(null)
+                    .timestamp(ZonedDateTime.now())
+                    .requestId(UUID.randomUUID().toString())
+                    .path(request.getRequestURI())
+                    .build();
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
     }
 
     @Operation(summary = "Cập nhật hợp đồng", description = "Cập nhật thông tin hợp đồng")
     @PutMapping("/{id}")
-    public ResponseEntity<Contract> updateContract(@PathVariable Long id, @Valid @RequestBody Contract contract) {
-        return ResponseEntity.ok(contractService.updateContract(id, contract));
+    public ResponseEntity<RestResponse<Contract>> updateContract(@PathVariable Long id, @Valid @RequestBody Contract contract) {
+        Contract updatedContract = contractService.updateContract(id, contract);
+        RestResponse<Contract> response = RestResponse.<Contract>builder()
+                .apiVersion("v1")
+                .statusCode(HttpStatus.OK.value())
+                .shortMessage("Success")
+                .description("Hợp đồng đã được cập nhật thành công.")
+                .data(updatedContract)
+                .timestamp(ZonedDateTime.now())
+                .requestId(UUID.randomUUID().toString())
+                .path(request.getRequestURI())
+                .build();
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @Operation(summary = "Xóa mềm hợp đồng", description = "Thay đổi trạng thái hợp đồng thành EXPIRED thay vì xóa vật lý")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> softDeleteContract(@PathVariable Long id) {
-                contractService.softDeleteContract(id);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<RestResponse<Void>> softDeleteContract(@PathVariable Long id) {
+        contractService.softDeleteContract(id);
+        RestResponse<Void> response = RestResponse.<Void>builder()
+                .apiVersion("v1")
+                .statusCode(HttpStatus.OK.value())
+                .shortMessage("Success")
+                .description("Hợp đồng đã được xóa mềm thành công.")
+                .data(null)
+                .timestamp(ZonedDateTime.now())
+                .requestId(UUID.randomUUID().toString())
+                .path(request.getRequestURI())
+                .build();
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @Operation(summary = "Khôi phục hợp đồng", description = "Khôi phục hợp đồng đã bị xóa")
     @PutMapping("/{id}/restore")
-    public ResponseEntity<Void> restoreContract(@PathVariable Long id) {
+    public ResponseEntity<RestResponse<Void>> restoreContract(@PathVariable Long id) {
         contractService.restoreContract(id);
-        return ResponseEntity.ok().build();
+        RestResponse<Void> response = RestResponse.<Void>builder()
+                .apiVersion("v1")
+                .statusCode(HttpStatus.OK.value())
+                .shortMessage("Success")
+                .description("Hợp đồng đã được khôi phục thành công.")
+                .data(null)
+                .timestamp(ZonedDateTime.now())
+                .requestId(UUID.randomUUID().toString())
+                .path(request.getRequestURI())
+                .build();
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @Operation(summary = "Lấy lịch sử sự kiện của hợp đồng", description = "Lấy lịch sử sự kiện của hợp đồng")
     @GetMapping("/{id}/events")
-    public ResponseEntity<List<ContractEvent>> getContractEvents(@PathVariable Long id) {
-        return ResponseEntity.ok(contractService.getContractEvents(id));
+    public ResponseEntity<RestResponse<List<ContractEvent>>> getContractEvents(@PathVariable Long id) {
+        List<ContractEvent> events = contractService.getContractEvents(id);
+        RestResponse<List<ContractEvent>> response = RestResponse.<List<ContractEvent>>builder()
+                .apiVersion("v1")
+                .statusCode(HttpStatus.OK.value())
+                .shortMessage("Success")
+                .description("Lịch sử sự kiện hợp đồng đã được lấy thành công.")
+                .data(events)
+                .timestamp(ZonedDateTime.now())
+                .requestId(UUID.randomUUID().toString())
+                .path(request.getRequestURI())
+                .build();
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @Operation(summary = "Lấy file đính kèm của hợp đồng", description = "Lấy file đính kèm của hợp đồng")
     @GetMapping("/{id}/attachments")
-    public ResponseEntity<List<ContractAttachment>> getAttachments(@PathVariable Long id) {
-        return ResponseEntity.ok(contractService.getAttachments(id));
+    public ResponseEntity<RestResponse<List<ContractAttachment>>> getAttachments(@PathVariable Long id) {
+        List<ContractAttachment> attachments = contractService.getAttachments(id);
+        if (attachments.isEmpty()) {
+            throw new NoContentException("Không tìm thấy file đính kèm nào cho hợp đồng này.");
+        } else {
+            RestResponse<List<ContractAttachment>> response = RestResponse.<List<ContractAttachment>>builder()
+                    .apiVersion("v1")
+                    .statusCode(HttpStatus.OK.value())
+                    .shortMessage("Success")
+                    .description("File đính kèm hợp đồng đã được lấy thành công.")
+                    .data(attachments)
+                    .timestamp(ZonedDateTime.now())
+                    .requestId(UUID.randomUUID().toString())
+                    .path(request.getRequestURI())
+                    .build();
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }
     }
 }

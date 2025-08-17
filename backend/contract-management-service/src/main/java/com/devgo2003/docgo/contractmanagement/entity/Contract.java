@@ -38,6 +38,6 @@ public class Contract extends BaseEntity {
     private String systemId;
 
     public enum ContractStatus {
-        DRAFT, PENDING_APPROVAL, ACTIVE, EXPIRED, ARCHIVED
+        DRAFT, PENDING, PENDING_APPROVAL, ACTIVE, EXPIRED, ARCHIVED
     }
 }
