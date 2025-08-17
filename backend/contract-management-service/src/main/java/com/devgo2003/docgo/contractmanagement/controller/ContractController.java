@@ -13,8 +13,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -29,7 +27,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import org.springframework.data.domain.Page;
 
 @RestController
@@ -46,9 +43,22 @@ public class ContractController {
         this.request = request;
     }
 
-    @Operation(summary = "Tạo hợp đồng mới", description = "Tạo hợp đồng mới với trạng thái DRAFT")
+    @Operation(summary = "Tạo hợp đồng mới", description = "Tạo hợp đồng mới với trạng thái DRAFT",
+        requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            required = true,
+            content = @Content(
+                schema = @Schema(implementation = Contract.class),
+                examples = @ExampleObject(
+                    value = "{\n  \"contractNumber\": \"string\",\n  \"title\": \"string\",\n  \"status\": \"DRAFT\",\n  \"partiesJson\": \"string\",\n  \"startDate\": \"2025-08-17\",\n  \"endDate\": \"2025-08-17\",\n  \"systemId\": \"string\"\n}"
+                )
+            )
+        )
+    )
     @PostMapping
     public ResponseEntity<RestResponse<Contract>> createContract(@Valid @RequestBody Contract contract) {
+        if (contract.getId() != null) {
+            throw new com.devgo2003.docgo.contractmanagement.common.exception.InvalidInputException("Không được gửi id khi tạo hợp đồng mới.");
+        }
         Contract created = contractService.createContract(contract);
         RestResponse<Contract> response = RestResponse.<Contract>builder()
                 .apiVersion("v1")
