@@ -43,19 +43,26 @@ public class ContractService {
         this.eventPublisher = eventPublisher;
     }
 
+    /**
+     * Hàm tiện ích để lấy contract hoặc ném ResourceNotFoundException
+     */
+    private Contract getContractOrThrow(Long id) {
+        return contractRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy hợp đồng với ID: " + id));
+    }
+
     @Transactional
     public Contract createContract(Contract contract) {
         contract.setContractNumber("CONTRACT-" + System.currentTimeMillis());
         contract.setStatus(Contract.ContractStatus.DRAFT);
-        // BaseEntity sẽ tự động xử lý created_at và is_deleted
 
         Contract savedContract = contractRepository.save(contract);
-        
+
         ContractEvent event = new ContractEvent();
         event.setContractId(savedContract.getId());
         event.setEventType("CREATE");
         event.setEventData("{\"message\": \"Tạo hợp đồng mới\"}");
-        event.setActor("system"); // Placeholder
+        event.setActor("system");
 
         eventRepository.save(event);
         eventPublisher.publishEvent(new ContractEventPayload(savedContract, "created"));
@@ -92,28 +99,26 @@ public class ContractService {
 
     @Transactional
     public Contract updateContract(Long id, Contract updatedContract) {
-        Contract existingContract = contractRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy hợp đồng với ID: " + id));
+        Contract existingContract = getContractOrThrow(id);
 
         if (existingContract.getIsDeleted()) {
             throw new ConflictException("Không thể cập nhật hợp đồng đã bị xóa");
         }
-        
-        // Cập nhật các trường
+
         existingContract.setTitle(updatedContract.getTitle());
         existingContract.setStatus(updatedContract.getStatus());
         existingContract.setPartiesJson(updatedContract.getPartiesJson());
         existingContract.setStartDate(updatedContract.getStartDate());
         existingContract.setEndDate(updatedContract.getEndDate());
         existingContract.setSystemId(updatedContract.getSystemId());
-        
+
         Contract savedContract = contractRepository.save(existingContract);
-        
+
         ContractEvent event = new ContractEvent();
         event.setContractId(savedContract.getId());
         event.setEventType("UPDATE");
         event.setEventData("{\"message\": \"Cập nhật hợp đồng\"}");
-        event.setActor("system"); // Placeholder
+        event.setActor("system");
         eventRepository.save(event);
 
         eventPublisher.publishEvent(new ContractEventPayload(savedContract, "updated"));
@@ -122,18 +127,16 @@ public class ContractService {
 
     @Transactional
     public void softDeleteContract(Long id) {
-        Contract contract = contractRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy hợp đồng với ID: " + id));
+        Contract contract = getContractOrThrow(id);
 
         if (contract.getIsDeleted()) {
             throw new ConflictException("Hợp đồng đã bị xóa trước đó");
         }
 
-        // Thực hiện soft delete bằng cách gọi phương thức đã có trong BaseEntity
-        contract.markAsDeleted("system"); // Placeholder cho người xóa
-        contract.setStatus(Contract.ContractStatus.EXPIRED); // Cập nhật trạng thái
+        contract.markAsDeleted("system");
+        contract.setStatus(Contract.ContractStatus.EXPIRED);
         contractRepository.save(contract);
-        
+
         ContractEvent event = new ContractEvent();
         event.setContractId(contract.getId());
         event.setEventType("SOFT_DELETE");
@@ -146,41 +149,37 @@ public class ContractService {
 
     @Transactional
     public void restoreContract(Long id) {
-        Contract contract = contractRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy hợp đồng với ID: " + id));
-        
+        Contract contract = getContractOrThrow(id);
+
         if (!contract.getIsDeleted()) {
             throw new ConflictException("Hợp đồng chưa bị xóa");
         }
 
         contract.restore();
-        contract.setStatus(Contract.ContractStatus.DRAFT); // Khôi phục trạng thái về DRAFT
+        contract.setStatus(Contract.ContractStatus.DRAFT);
         contractRepository.save(contract);
-        
+
         ContractEvent event = new ContractEvent();
         event.setContractId(contract.getId());
         event.setEventType("RESTORE");
         event.setEventData("{\"message\": \"Khôi phục hợp đồng\"}");
         event.setActor("system");
         eventRepository.save(event);
-        
+
         eventPublisher.publishEvent(new ContractEventPayload(contract, "restored"));
     }
 
     @Transactional
     public ContractAttachment addAttachment(Long contractId, ContractAttachment attachment) {
-        Contract contract = contractRepository.findById(contractId)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy hợp đồng với ID: " + contractId));
+        Contract contract = getContractOrThrow(contractId);
 
         if (contract.getIsDeleted()) {
             throw new ConflictException("Không thể thêm file đính kèm cho hợp đồng đã bị xóa");
         }
 
         attachment.setContractId(contractId);
-        // BaseEntity sẽ tự động xử lý created_at và is_deleted
-        
         ContractAttachment savedAttachment = attachmentRepository.save(attachment);
-        
+
         ContractEvent event = new ContractEvent();
         event.setContractId(contractId);
         event.setEventType("ATTACHMENT_ADD");
@@ -192,12 +191,17 @@ public class ContractService {
     }
 
     public List<ContractAttachment> getAttachments(Long contractId) {
-        // Sử dụng repository method thay vì Java Stream để tối ưu hơn
-        return attachmentRepository.findByContractIdAndIsDeletedFalse(contractId);
+        getContractOrThrow(contractId);
+        List<ContractAttachment> attachments = attachmentRepository.findByContractIdAndIsDeletedFalse(contractId);
+        if (attachments.isEmpty()) {
+            throw new NoContentException("Không tìm thấy file đính kèm nào cho hợp đồng này.");
+        }
+        return attachments;
     }
-    
+
     public List<ContractEvent> getContractEvents(Long contractId) {
-        // Sử dụng repository method thay vì Java Stream để tối ưu hơn
         return eventRepository.findByContractIdOrderByEventTimeDesc(contractId);
     }
 }
+
+

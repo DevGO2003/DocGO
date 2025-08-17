@@ -10,7 +10,6 @@ import com.devgo2003.docgo.contractmanagement.common.exception.ConflictException
 import com.devgo2003.docgo.contractmanagement.common.exception.InvalidInputException;
 import com.devgo2003.docgo.contractmanagement.common.exception.NoContentException;
 import com.devgo2003.docgo.contractmanagement.common.exception.ResourceNotFoundException;
-import com.devgo2003.docgo.contractmanagement.common.exception.NoContentException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -22,8 +21,6 @@ import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-
-        
 
         @ExceptionHandler(NoContentException.class)
         public ResponseEntity<RestResponse<Void>> handleNoContentException(NoContentException ex,
@@ -39,7 +36,7 @@ public class GlobalExceptionHandler {
                                 .path(request.getRequestURI())
                                 .build();
 
-                return new ResponseEntity<>(response, HttpStatus.NO_CONTENT);
+                return new ResponseEntity<>(response, HttpStatus.OK);
         }
 
         @ExceptionHandler(MethodArgumentNotValidException.class)

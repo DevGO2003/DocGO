@@ -182,20 +182,16 @@ public class ContractController {
     @GetMapping("/{id}/attachments")
     public ResponseEntity<RestResponse<List<ContractAttachment>>> getAttachments(@PathVariable Long id) {
         List<ContractAttachment> attachments = contractService.getAttachments(id);
-        if (attachments.isEmpty()) {
-            throw new NoContentException("Không tìm thấy file đính kèm nào cho hợp đồng này.");
-        } else {
-            RestResponse<List<ContractAttachment>> response = RestResponse.<List<ContractAttachment>>builder()
-                    .apiVersion("v1")
-                    .statusCode(HttpStatus.OK.value())
-                    .shortMessage("Success")
-                    .description("File đính kèm hợp đồng đã được lấy thành công.")
-                    .data(attachments)
-                    .timestamp(ZonedDateTime.now())
-                    .requestId(UUID.randomUUID().toString())
-                    .path(request.getRequestURI())
-                    .build();
-            return new ResponseEntity<>(response, HttpStatus.OK);
-        }
+        RestResponse<List<ContractAttachment>> response = RestResponse.<List<ContractAttachment>>builder()
+                .apiVersion("v1")
+                .statusCode(HttpStatus.OK.value())
+                .shortMessage("Success")
+                .description("File đính kèm hợp đồng đã được lấy thành công.")
+                .data(attachments)
+                .timestamp(ZonedDateTime.now())
+                .requestId(UUID.randomUUID().toString())
+                .path(request.getRequestURI())
+                .build();
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }
