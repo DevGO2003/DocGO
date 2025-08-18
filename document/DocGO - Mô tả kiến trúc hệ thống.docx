@@ -1,0 +1,41 @@
+# DocGO - Mô tả Kiến trúc Hệ thống
+
+## 1. Tổng quan hệ thống
+DocGO là hệ thống quản lý tài liệu, hợp đồng, hỗ trợ xử lý AI/ML, OCR, phân loại, tóm tắt, phát hiện rủi ro, tích hợp nhiều microservice độc lập, giao tiếp qua API Gateway.
+
+## 2. Danh sách Microservice
+
+| Tên | Công nghệ | Chức năng chính | Ghi chú/DB |
+|-----|-----------|-----------------|------------|
+| API Gateway / BFF | Kong | Điều phối các luồng (ủy quyền, định tuyến, trạng thái hệ thống...), cung cấp các API gateway cho các dịch vụ backend | Cache, redirect, version, JWT, shape response, health metrics, gateway cho log, OCR, Contract Management, File Storage, E-Signature, Notification... |
+| Authentication / Identity Service | Spring Boot | Xác thực/ủy quyền, lưu trữ user, cấp phát token | DB chính: MariaDB, cache: Redis, lưu trữ user, JWT, token, session, password hash, 2FA, search, audit log... |
+| User Management Service | FastAPI | Tạo, sửa, xóa, quản lý user, phân quyền | DB chính: MariaDB, cache: Redis, lưu trữ profile, roles, JWT, email, audit, search, multi-tenant... |
+| Contract Management | FastAPI | Tạo, sửa, xóa, quản lý hợp đồng, upload file, ký số, lưu trữ file, tích hợp AI/ML, OCR, E-Signature | DB chính: MariaDB, cache: Redis, lưu trữ file, audit, contract, approval, sign, email, search, multi-tenant... |
+| Community / Collaboration | FastAPI | Quản lý cộng đồng, nhóm, chat, thông báo, bình luận, chia sẻ tài liệu | DB chính: MariaDB, cache: Redis, lưu trữ chat, group, comment, notification, search, multi-tenant... |
+| Approval / Workflow Service | FastAPI | Quản lý quy trình phê duyệt, trạng thái, lịch sử, tích hợp notification, audit | DB chính: MariaDB, cache: Redis, lưu trữ process, approval, state, audit, notification, search, multi-tenant... |
+| Reminder / Scheduler Service | FastAPI | Nhắc việc, lịch, trạng thái reminder, tích hợp Contract/Community/Task Dashboard | DB chính: MariaDB, cache: Redis, lưu trữ reminder, schedule, event, search, multi-tenant... |
+| File Storage Service | FastAPI | Lưu trữ, quản lý file, trạng thái, tích hợp AI/ML, OCR, E-Signature, Notification | DB chính: MinIO/S3, lưu trữ file, trạng thái, search, multi-tenant... |
+| Notification Service | FastAPI | Gửi thông báo, email, push, trạng thái, tích hợp các service khác | DB chính: MariaDB, cache: Redis, lưu trữ notification, email, push, search, multi-tenant... |
+| E-Signature Integration Service | FastAPI | Tích hợp ký số, trạng thái, lưu trữ, tích hợp Contract/Approval, cung cấp file ký số | DB chính: MariaDB, cache: Redis, lưu trữ signature, state, contract, approval, search, multi-tenant... |
+| ML Statistics Service | FastAPI | Thống kê, phân tích, AI/ML, lưu trữ kết quả, trạng thái | DB chính: MariaDB, cache: Redis, lưu trữ statistics, result, search, multi-tenant... |
+| BI Reporting & Analytics Service | FastAPI | Cung cấp báo cáo, dashboard, phân tích, lưu trữ kết quả, trạng thái | DB chính: MariaDB, cache: Redis, lưu trữ report, dashboard, result, search, multi-tenant... |
+| API Documentation Service | FastAPI | Cung cấp tài liệu API, trạng thái, tích hợp các service khác | DB chính: MariaDB, cache: Redis, lưu trữ doc, state, search, multi-tenant... |
+| SLA & Alerting / Monitoring Agent | FastAPI | Giám sát, cảnh báo, thống kê, metrics, tích hợp Prometheus, cảnh báo khi có sự cố | DB chính: Redis, lưu trữ health_metrics, alert, system, search, multi-tenant... |
+| AI Processing Service | FastAPI | Xử lý AI/ML, OCR, trích xuất, phân loại, tóm tắt, phát hiện rủi ro, cung cấp API cho các service khác | DB chính: Redis, lưu trữ health_metrics, alert, system, search, multi-tenant... |
+
+## 3. Mô tả ngắn từng service
+- **API Gateway / BFF:** Điều phối, định tuyến, bảo mật, health check, tích hợp các service backend.
+- **Authentication / Identity Service:** Xác thực, ủy quyền, quản lý user, cấp phát token, bảo mật.
+- **User Management Service:** Quản lý user, phân quyền, profile, multi-tenant.
+- **Contract Management:** Quản lý hợp đồng, upload, ký số, lưu trữ file, tích hợp AI/ML, OCR.
+- **Community / Collaboration:** Quản lý cộng đồng, nhóm, chat, thông báo, chia sẻ tài liệu.
+- **Approval / Workflow Service:** Quản lý quy trình phê duyệt, trạng thái, lịch sử, notification.
+- **Reminder / Scheduler Service:** Nhắc việc, lịch, trạng thái reminder, tích hợp dashboard.
+- **File Storage Service:** Lưu trữ, quản lý file, trạng thái, tích hợp AI/ML, OCR, notification.
+- **Notification Service:** Gửi thông báo, email, push, trạng thái, tích hợp các service khác.
+- **E-Signature Integration Service:** Tích hợp ký số, trạng thái, lưu trữ, cung cấp file ký số.
+- **ML Statistics Service:** Thống kê, phân tích, AI/ML, lưu trữ kết quả, trạng thái.
+- **BI Reporting & Analytics Service:** Báo cáo, dashboard, phân tích, lưu trữ kết quả, trạng thái.
+- **API Documentation Service:** Tài liệu API, trạng thái, tích hợp các service khác.
+- **SLA & Alerting / Monitoring Agent:** Giám sát, cảnh báo, thống kê, metrics, Prometheus, alert.
+- **AI Processing Service:** Xử lý AI/ML, OCR, trích xuất, phân loại, tóm tắt, phát hiện rủi ro, cung cấp API cho các service khác.
