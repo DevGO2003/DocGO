@@ -41,12 +41,14 @@ public class User extends BaseEntity {
 
     @Column(name = "status", nullable = false)
     @Enumerated(EnumType.STRING)
+    @Builder.Default
     private UserStatus status = UserStatus.ACTIVE;
 
     @Column(name = "last_login_at")
     private LocalDateTime lastLoginAt;
 
     @Column(name = "failed_login_attempts")
+    @Builder.Default
     private Integer failedLoginAttempts = 0;
 
     @Column(name = "account_locked_until")

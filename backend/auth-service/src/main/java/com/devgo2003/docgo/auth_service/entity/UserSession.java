@@ -80,6 +80,7 @@ public class UserSession extends BaseEntity {
      */
     @Enumerated(EnumType.STRING)
     @Column(name = "session_status", nullable = false)
+    @Builder.Default
     private SessionStatus sessionStatus = SessionStatus.ACTIVE;
 
     /**

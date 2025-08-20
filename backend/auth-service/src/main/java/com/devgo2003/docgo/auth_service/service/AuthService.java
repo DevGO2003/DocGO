@@ -34,7 +34,6 @@ public class AuthService {
                 .email(email)
                 .passwordHash(passwordEncoder.encode(password))
                 .role(Role.USER)
-                .createdAt(LocalDateTime.now())
                 .build();
         
         User savedUser = userRepository.save(user);
