@@ -15,13 +15,8 @@ spring.datasource.password=sapassword
 Run (PowerShell):
 ```powershell
 cd backend/contract-management-service
+Copy-Item .env.example .env -Force
 ./mvnw spring-boot:run -Dspring-boot.run.profiles=default
-```
-
-Packaging:
-```powershell
-./mvnw clean package
-java -jar target/contract-management-*.jar
 ```
 
 Docs: `http://localhost:8081/docs#/`

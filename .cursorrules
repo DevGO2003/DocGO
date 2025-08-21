@@ -178,3 +178,12 @@ Khi thêm API mới trong 2 service trên, hãy tuân thủ các quy tắc này 
   - Với input có 2 lựa chọn (ví dụ summarize), ghi rõ chỉ sử dụng 1 trong 2 và nêu ví dụ cho mỗi lựa chọn.
 
 
+## 14) Tệp môi trường (.env, .env.example)
+- Mỗi microservice PHẢI kèm tệp `.env.example` tại thư mục gốc của service.
+- `.env.example` liệt kê đầy đủ các biến môi trường tối thiểu để chạy local và kiểm thử; KHÔNG chứa secrets thật.
+- Trước khi chạy, developer tạo `.env` từ `.env.example`. Hướng dẫn chạy phải có bước:
+  - PowerShell: `Copy-Item .env.example .env -Force`
+- Python (FastAPI): dùng `python-dotenv` để tự động nạp `.env` (đã có trong cấu hình hiện tại).
+- Java (Spring Boot): `.env.example` đóng vai trò template biến môi trường; giá trị thực được truyền qua system env và/hoặc cấu hình `application.properties`. Ưu tiên cho phép env override properties theo chuẩn Spring.
+
+
