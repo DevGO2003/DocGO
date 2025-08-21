@@ -24,5 +24,5 @@ Packaging:
 java -jar target/contract-management-*.jar
 ```
 
-Docs: `http://localhost:8081/swagger-ui.html`
+Docs: `http://localhost:8081/docs#/`
 

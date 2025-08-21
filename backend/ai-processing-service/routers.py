@@ -9,7 +9,7 @@ import json
 import uuid
 from datetime import datetime, timezone
 
-router = APIRouter()
+router = APIRouter(prefix="/api/v1/ai-processing-service")
 
 RESULTS_DIR = os.path.join(os.path.dirname(__file__), 'results')
 os.makedirs(RESULTS_DIR, exist_ok=True)
@@ -37,7 +37,7 @@ def ask_gemini(api_key: str, content: str, question: str) -> str:
 
 
 # API 1: EXTRACT (doc, pdf)
-@router.post("/api/v1/ai-processing-service/extract", summary="Trích xuất thông tin hợp đồng (doc/pdf)", tags=["AI Processing Service"])
+@router.post("/extract", summary="Trích xuất thông tin hợp đồng (doc/pdf)", tags=["AI Processing Service"])
 async def extract_api(
     file: UploadFile = File(..., description="File hợp đồng (docx, pdf)"),
     gemini_api_key: str = Header(None, description="Gemini API Key (tùy chọn)")
@@ -99,7 +99,7 @@ async def extract_api(
 
 
 # API 3: SUMMARIZE (txt, string input)
-@router.post("/api/v1/ai-processing-service/summarize", summary="Tóm tắt hợp đồng (txt/string)", tags=["AI Processing Service"])
+@router.post("/summarize", summary="Tóm tắt hợp đồng (txt/string)", tags=["AI Processing Service"])
 async def summarize_api(
     file: UploadFile = File(None, description="File txt cần tóm tắt"),
     text: str = Body(None, description="Nội dung văn bản dạng chuỗi (txt)", embed=True),

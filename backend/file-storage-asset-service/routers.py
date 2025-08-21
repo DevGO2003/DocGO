@@ -5,7 +5,7 @@ from uuid import uuid4
 from config import s3_client, S3_BUCKET, get_presigned_get_url
 
 
-router = APIRouter(prefix="/api/v1/file-storage", tags=["File Storage"])
+router = APIRouter(prefix="/api/v1/file-storage-asset-service", tags=["File Storage"])
 
 
 @router.post("/upload", summary="Upload a file to S3/Filebase")

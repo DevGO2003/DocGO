@@ -17,5 +17,5 @@ pip install -r requirements.txt
 uvicorn main:app --reload --port 8011
 ```
 
-Docs: `http://localhost:8011/docs`
+Docs: `http://localhost:8011/docs#/`
 

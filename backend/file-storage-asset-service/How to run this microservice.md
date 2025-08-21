@@ -5,7 +5,7 @@ Prerequisites:
 - S3-compatible storage (Filebase recommended)
 
 Environment:
-1) Create `.env` by copying `env.example` and fill values:
+1) Create `.env` by copying `.env.example` and fill values:
 ```
 S3_ENDPOINT=https://s3.filebase.com
 S3_REGION=us-east-1
@@ -28,5 +28,5 @@ pip install -r requirements.txt
 uvicorn main:app --reload --port 8012
 ```
 
-Docs: `http://localhost:8012/docs`
+Docs: `http://localhost:8012/docs#/`
 
