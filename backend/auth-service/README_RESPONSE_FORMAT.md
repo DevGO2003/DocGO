@@ -121,3 +121,7 @@ RestResponse<Object> response = ResponseBuilder.error(
 - Timestamp và requestId được tự động generate
 - Path được lấy từ request context
 - API version được set mặc định là "v1"
+
+## Docs
+- Swagger UI: `http://localhost:8082/docs#/`
+- Tất cả response trong tài liệu cũng theo `RestResponse<T>` ở trên.

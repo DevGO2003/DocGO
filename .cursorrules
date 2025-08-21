@@ -1,0 +1,189 @@
+### Chuẩn hóa API cho DocGO (áp dụng cho ai-processing-service và contract-management-service)
+
+Mục tiêu: Đồng bộ cách đặt URL, payload, xử lý lỗi (handler), và viết tài liệu API. Quy tắc này dựa trên hiện trạng `contract-management-service` (Spring Boot + GlobalExceptionHandler + RestResponse) và `ai-processing-service` (FastAPI) và hướng tới đồng nhất giữa các service.
+
+## 1) Quy tắc URL
+- Base path: `/api/v1/{service-name}/...`
+- `service-name` dùng kebab-case trùng tên service trong code:
+  - `ai-processing-service`
+  - `contract-management-service`
+- Tài nguyên (resource) dùng số nhiều, kebab-case: `contracts`, `events`, `attachments`.
+- Hành động (sub-resource) dùng tiếp đầu ngữ theo REST; chỉ khi là hành động phi-CRUD rõ ràng thì dùng hậu tố dạng action:
+  - Chuẩn REST: `POST /contracts`, `GET /contracts`, `GET /contracts/{id}`, `PUT /contracts/{id}`, `DELETE /contracts/{id}`
+  - Sub-resource: `GET /contracts/{id}/events`, `GET /contracts/{id}/attachments`, `PUT /contracts/{id}/restore`
+  - Tác vụ AI chuyên biệt (file hoặc chuỗi):
+    - `POST /ai-processing-service/extract`
+    - `POST /ai-processing-service/summarize`
+- Query chuẩn phân trang, sắp xếp và lọc (giữ nguyên như trong controller):
+  - `pageNumber`, `pageSize`, `sortBy`, `sortDirection`, `searchTerm`, `includeDeleted`
+
+## 2) Tên hàm handler (Controller/Router)
+- Java (Spring): dùng động từ rõ ràng, hiện tại đơn và mô tả ngắn: `createContract`, `getAllContracts`, `getContract`, `updateContract`, `softDeleteContract`, `restoreContract`, `getContractEvents`, `getAttachments`.
+- Python (FastAPI): dùng snake_case tương đương: `extract_api`, `summarize_api`.
+- Tên biến path: dùng `{id}` cho định danh chính; sub-resource đặt sau `{id}`.
+
+## 3) Payload và Content-Type
+- CRUD JSON: `application/json` với body là DTO/entity tương ứng.
+- Upload file: `multipart/form-data` với trường `file` (FastAPI) hoặc `@RequestPart`/`MultipartFile` (Spring) nếu có.
+- AI summarize cho phép 2 dạng đầu vào (chỉ 1 trong 2):
+  - `multipart/form-data`: `file` (txt)
+  - `application/json`: `{ "text": "..." }`
+- Phân trang: dùng query params như mục 1.
+
+## 4) Chuẩn hóa Response Envelope (RestResponse)
+- Tất cả response nên bọc trong cấu trúc sau để đồng nhất giữa Java và Python:
+```
+{
+  "apiVersion": "v1",
+  "statusCode": 200,
+  "shortMessage": "Success | Not Found | Bad Request | Conflict | No Content | Internal Server Error",
+  "description": "Mô tả ngắn gọn kết quả",
+  "data": <object|null>,
+  "timestamp": <ISO-8601>,
+  "requestId": <uuid>,
+  "path": "/api/v1/..."
+}
+```
+- Java đã có `RestResponse<T>` và `GlobalExceptionHandler` sinh đúng schema. Python service cần trả về cùng định dạng (đã có trong router của AI service; tiếp tục duy trì).
+- HTTP status:
+  - 201 Created: tạo mới
+  - 200 OK: trả dữ liệu thành công
+  - 204 No Content: không có dữ liệu (Java hiện dùng `NoContentException` → handler trả 204)
+  - 400 Bad Request: dữ liệu không hợp lệ (validation)
+  - 404 Not Found: không tìm thấy tài nguyên
+  - 409 Conflict: xung đột nghiệp vụ
+  - 500 Internal Server Error: lỗi không lường trước
+
+## 5) Chuẩn hóa Exception Handling
+- Java: sử dụng `GlobalExceptionHandler` hiện có để map các exception thành `RestResponse` với mã HTTP tương ứng: 400/404/409/500 và tổng hợp lỗi validation từ `MethodArgumentNotValidException`.
+- Python (FastAPI): với các lỗi dự kiến, ném `HTTPException(status_code=...)` hoặc tạo tương đương `RestResponse`; với lỗi không lường trước, dùng middleware/exception handler để trả về `RestResponse` 500 có `requestId`, `timestamp`, `path`.
+
+## 6) Quy tắc viết tài liệu (tiếng Việt)
+- Tiêu đề và mô tả API dùng giọng văn ngắn gọn, chủ động, tiếng Việt chuẩn.
+- Java (SpringDoc):
+  - `@Tag(name = "…", description = "…")`
+  - `@Operation(summary = "…", description = "…")`
+  - Khai báo `@RequestBody` với `schema` và `examples` khi cần.
+- Python (FastAPI):
+  - Dùng `summary`, `description` trong decorator và docstring cho Input/Output.
+  - Gắn `tags` nhất quán: `AI Processing Service`, `API Quản lý Hợp đồng`.
+- Luôn nêu rõ:
+  - URL đầy đủ (method + path)
+  - Headers quan trọng (ví dụ: `Authorization: Bearer <token>`, `GEMINI_API_KEY` nếu dùng)
+  - Payload request (JSON hoặc multipart) kèm ví dụ
+  - Mẫu response `RestResponse` kèm ví dụ thành công và lỗi
+  - Ghi chú quy tắc phân trang/sắp xếp nếu áp dụng
+
+## 7) Ví dụ mô hình hóa từ hiện trạng
+- Tạo hợp đồng (Java):
+  - `POST /api/v1/contract-management-service/contracts`
+  - Body: `Contract` JSON (không gửi `id` khi tạo)
+  - 201 + `RestResponse<Contract>`
+
+- Danh sách hợp đồng (Java):
+  - `GET /api/v1/contract-management-service/contracts?pageNumber=0&pageSize=10&sortBy=...`
+  - 200 + `RestResponse<PaginatedResponse<Contract>>` hoặc 204 No Content
+
+- Lấy chi tiết (Java):
+  - `GET /api/v1/contract-management-service/contracts/{id}` → 200 hoặc 404
+
+- Khôi phục (Java):
+  - `PUT /api/v1/contract-management-service/contracts/{id}/restore` → 200
+
+- AI Extract (Python):
+  - `POST /api/v1/ai-processing-service/extract`
+  - multipart: `file` (docx/pdf) + header `GEMINI_API_KEY` (tùy chọn)
+  - 200 + `RestResponse<string>` nội dung trích xuất
+
+- AI Summarize (Python):
+  - `POST /api/v1/ai-processing-service/summarize`
+  - multipart `file` (txt) hoặc JSON `{ "text": "..." }`
+  - 200 + `RestResponse<object|string>`; có làm sạch JSON trong handler
+
+## 8) Quy ước đặt tên mã nguồn
+- Controller class (Java): `*Controller` theo tài nguyên chính, ví dụ `ContractController`.
+- Service class (Java): `*Service` với nghiệp vụ: `ContractService`.
+- Router (Python): nhóm theo `tags` và prefix chung; tên hàm ngắn, rõ mục đích (`extract_api`, `summarize_api`).
+- Tên biến phản ánh ý nghĩa nghiệp vụ, tránh viết tắt.
+
+## 9) Bảo mật và versioning
+- Luôn đặt tiền tố `/api/v1/…`. Khi thay đổi lớn không tương thích, phát hành `/api/v2/…` song song.
+- Định nghĩa rõ header bảo mật (ví dụ JWT) ở tài liệu, ngay trong phần mô tả endpoint.
+
+---
+Khi thêm API mới trong 2 service trên, hãy tuân thủ các quy tắc này để đảm bảo tính nhất quán, dễ đọc và dễ tích hợp.
+
+## 10) Quy tắc cấu trúc dịch vụ (structure)
+- Python (FastAPI) – áp dụng cho `ai-processing-service` và các service Python khác:
+  - Thư mục gốc service gồm: `main.py`, `routers.py` (hoặc thư mục `routers/`), `config.py`, `requirements.txt`, `README.md`, `How to run this microservice.md`, `__init__.py`, các thư mục dữ liệu phụ (`results/`, `models/`, `schemas/`, `services/` nếu phát sinh).
+  - `main.py`: khởi tạo `FastAPI(...)`, include router(s), khai báo route root `/`.
+  - `routers.py`: định nghĩa `APIRouter` với `tags`, `summary`, `description` và tuân thủ URL ở mục 1; các handler trả về `RestResponse` tương đồng.
+  - `config.py`: load biến môi trường (dùng `python-dotenv`), cấu hình SDK/clients (ví dụ: Gemini, S3/Filebase) và helper (ví dụ: `get_presigned_get_url`).
+  - Xử lý lỗi chủ động bằng `HTTPException(status_code=...)`; lỗi không lường trước phải được middleware/handler trả về `RestResponse` 500 kèm `requestId`, `timestamp`, `path`.
+  - Dùng `pydantic` schema nếu cần validate input/output ở lớp router/service; đặt trong thư mục `schemas/`.
+  - Module nghiệp vụ đặt trong `services/` (ví dụ: thao tác S3, parse tài liệu…), các hàm đặt tên theo động từ rõ ràng, snake_case.
+
+- Java (Spring Boot) – áp dụng cho `contract-management-service`:
+  - Cấu trúc gói chuẩn: `controller/`, `service/`, `repository/`, `entity/`, `common/exception`, `common/handler`, `common/response`, `config/`.
+  - `GlobalExceptionHandler` gom map các exception → `RestResponse` và HTTP status tương ứng.
+  - Controller dùng `@RequestMapping("/api/v1/...")`, `@Tag`, `@Operation` và trả `ResponseEntity<RestResponse<...>>`.
+  - DTO/entity validate với `jakarta.validation`; lỗi validate được gom trong handler thành thông báo ngắn gọn.
+  - Cấu hình nằm ở `src/main/resources/application.properties`.
+
+## 11) Quản lý phụ thuộc (dependencies)
+- Python:
+  - Mọi thư viện mới phải được thêm vào `requirements.txt` với phiên bản cố định (pinned). Ví dụ: `python-dotenv==1.0.1`.
+  - Khi dùng SDK/dịch vụ bên ngoài (S3, AI, DB…), thêm ngay dependency tương ứng và cập nhật hướng dẫn cài đặt trong `How to run this microservice.md`.
+  - Nếu tách phụ thuộc cho dev/test, dùng thêm `requirements-dev.txt` (không bắt buộc).
+- Java:
+  - Thêm dependency vào `pom.xml` với version rõ ràng; tránh sử dụng snapshot nếu không cần thiết.
+  - Khi thay đổi phụ thuộc ảnh hưởng runtime, cập nhật `How to run this microservice.md`.
+
+## 12) Port mapping và đường dẫn tài liệu (Docs)
+- Mặc định tài liệu OpenAPI hiển thị tại: `http://localhost:<PORT>/docs#/` cho MỌI microservice.
+- BẮT BUỘC cấu hình để tài liệu luôn ở `/docs#/` (không dùng đường dẫn mặc định khác):
+  - FastAPI: mặc định đã là `/docs` → không cần đổi.
+  - Spring Boot (SpringDoc): cấu hình trong `application.properties`:
+    - `springdoc.swagger-ui.path=/docs`
+    - (tuỳ chọn) nếu đã có cấu hình cũ, phải thay thế để Swagger UI mount tại `/docs`.
+    - Kết quả docs: `http://localhost:<PORT>/docs#/`.
+- Port cố định cho toàn bộ microservice của DocGO:
+  - `api-gateway` (BFF): 8000 → Docs: `http://localhost:8000/docs#/`
+  - `user-service`: 8001 → Docs: `http://localhost:8001/docs#/`
+  - `community-service`: 8002 → Docs: `http://localhost:8002/docs#/`
+  - `approval-workflow-service`: 8003 → Docs: `http://localhost:8003/docs#/`
+  - `reminder-scheduler-service`: 8004 → Docs: `http://localhost:8004/docs#/`
+  - `notification-service`: 8005 → Docs: `http://localhost:8005/docs#/`
+  - `e-signature-integration-service`: 8006 → Docs: `http://localhost:8006/docs#/`
+  - `ml-statistics-service`: 8007 → Docs: `http://localhost:8007/docs#/`
+  - `bi-reporting-analytics-service`: 8008 → Docs: `http://localhost:8008/docs#/`
+  - `api-documentation-service`: 8009 → Docs: `http://localhost:8009/docs#/`
+  - `sla-alerting-monitor-service`: 8010 → Docs: `http://localhost:8010/docs#/`
+  - `ai-processing-service`: 8011 → Docs: `http://localhost:8011/docs#/`
+  - `file-storage-asset-service`: 8012 → Docs: `http://localhost:8012/docs#/`
+  - `contract-management-service` (Spring): 8081 → Docs: `http://localhost:8081/docs#/`
+  - `auth-service` (Spring): 8082 → Docs: `http://localhost:8082/docs#/`
+- Khi thêm microservice mới, phải chọn cổng trống theo dãy 80xx hoặc 81xx, cập nhật mục này và README/How-to-run tương ứng.
+
+## 13) Chuẩn hóa mô tả Input/Output cho API
+- Mọi endpoint phải có chú thích rõ ràng về đầu vào/đầu ra ngay trong tài liệu API:
+  - Ghi đầy đủ: method + URL đầy đủ, mô tả ngắn (summary) và mô tả chi tiết (description).
+  - Liệt kê headers quan trọng (ví dụ: `Authorization: Bearer <token>`, `GEMINI_API_KEY`).
+  - Tham số path (`{id}`), query (`pageNumber`, `pageSize`, ...), và body: kiểu dữ liệu + ví dụ payload.
+  - Mô tả cấu trúc `RestResponse` cho success và error, kèm ví dụ giá trị thực tế; liệt kê status code có thể trả về (200/201/204/400/404/409/500...).
+- Spring (SpringDoc):
+  - Dùng `@Tag`, `@Operation(summary, description)`, `@RequestBody` + `@Schema` + `@ExampleObject` cho ví dụ JSON; response mặc định bọc trong `RestResponse<T>`.
+- FastAPI:
+  - Dùng `tags`, `summary`, `description` trong decorator; viết docstring phần "Đầu vào/Đầu ra"; chỉ rõ `multipart/form-data` hoặc `application/json` và ví dụ.
+  - Với input có 2 lựa chọn (ví dụ summarize), ghi rõ chỉ sử dụng 1 trong 2 và nêu ví dụ cho mỗi lựa chọn.
+
+
+## 14) Tệp môi trường (.env, .env.example)
+- Mỗi microservice PHẢI kèm tệp `.env.example` tại thư mục gốc của service.
+- `.env.example` liệt kê đầy đủ các biến môi trường tối thiểu để chạy local và kiểm thử; KHÔNG chứa secrets thật.
+- Trước khi chạy, developer tạo `.env` từ `.env.example`. Hướng dẫn chạy phải có bước:
+  - PowerShell: `Copy-Item .env.example .env -Force`
+- Python (FastAPI): dùng `python-dotenv` để tự động nạp `.env` (đã có trong cấu hình hiện tại).
+- Java (Spring Boot): `.env.example` đóng vai trò template biến môi trường; giá trị thực được truyền qua system env và/hoặc cấu hình `application.properties`. Ưu tiên cho phép env override properties theo chuẩn Spring.
+
+

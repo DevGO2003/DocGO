@@ -133,7 +133,7 @@ curl -X GET http://localhost:8082/api/v1/auth-service/auth/health
 ```
 
 ## Swagger Documentation
-- **URL:** `http://localhost:8082/api/v1/auth-service/swagger-ui.html`
+- **URL:** `http://localhost:8082/docs#/`
 - **Mô tả:** Tài liệu API đầy đủ với các annotation OpenAPI
 
 ## Lưu ý quan trọng
