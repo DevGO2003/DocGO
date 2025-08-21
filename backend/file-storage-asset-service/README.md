@@ -8,6 +8,8 @@ Run locally:
 cd backend/file-storage-asset-service
 python -m venv venv && venv\Scripts\activate
 pip install -r requirements.txt
+# Prepare environment
+copy env.example .env   # or manually create .env and fill values
 set S3_ENDPOINT=https://s3.filebase.com
 set S3_ACCESS_KEY_ID=YOUR_KEY
 set S3_SECRET_ACCESS_KEY=YOUR_SECRET

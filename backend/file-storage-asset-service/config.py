@@ -3,6 +3,10 @@ from typing import Optional
 
 import boto3
 from botocore.client import Config
+from dotenv import load_dotenv
+
+
+load_dotenv()  # Load variables from .env if present
 
 
 def get_env(name: str, default: Optional[str] = None) -> Optional[str]:
