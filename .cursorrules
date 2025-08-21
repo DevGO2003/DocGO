@@ -139,4 +139,26 @@ Khi thêm API mới trong 2 service trên, hãy tuân thủ các quy tắc này 
   - Thêm dependency vào `pom.xml` với version rõ ràng; tránh sử dụng snapshot nếu không cần thiết.
   - Khi thay đổi phụ thuộc ảnh hưởng runtime, cập nhật `How to run this microservice.md`.
 
+## 12) Port mapping và đường dẫn tài liệu (Docs)
+- Mặc định tài liệu OpenAPI hiển thị tại: `http://localhost:<PORT>/docs#/` cho mọi microservice.
+- Cố định cổng cho các dịch vụ hiện tại:
+  - `user-service`: 8001 → Docs: `http://localhost:8001/docs#/`
+  - `ai-processing-service`: 8011 → Docs: `http://localhost:8011/docs#/`
+  - `file-storage-asset-service`: 8012 → Docs: `http://localhost:8012/docs#/`
+  - `contract-management-service` (Spring): 8081 → Docs: `http://localhost:8081/swagger-ui.html` (hoặc map qua gateway thành `/docs#/` nếu cần)
+  - `auth-service` (Spring): 8082 → Docs: `http://localhost:8082/swagger-ui.html`
+- Khi thêm microservice mới, phải chọn cổng trống, cập nhật mục này và README/How-to-run tương ứng.
+
+## 13) Chuẩn hóa mô tả Input/Output cho API
+- Mọi endpoint phải có chú thích rõ ràng về đầu vào/đầu ra ngay trong tài liệu API:
+  - Ghi đầy đủ: method + URL đầy đủ, mô tả ngắn (summary) và mô tả chi tiết (description).
+  - Liệt kê headers quan trọng (ví dụ: `Authorization: Bearer <token>`, `GEMINI_API_KEY`).
+  - Tham số path (`{id}`), query (`pageNumber`, `pageSize`, ...), và body: kiểu dữ liệu + ví dụ payload.
+  - Mô tả cấu trúc `RestResponse` cho success và error, kèm ví dụ giá trị thực tế; liệt kê status code có thể trả về (200/201/204/400/404/409/500...).
+- Spring (SpringDoc):
+  - Dùng `@Tag`, `@Operation(summary, description)`, `@RequestBody` + `@Schema` + `@ExampleObject` cho ví dụ JSON; response mặc định bọc trong `RestResponse<T>`.
+- FastAPI:
+  - Dùng `tags`, `summary`, `description` trong decorator; viết docstring phần "Đầu vào/Đầu ra"; chỉ rõ `multipart/form-data` hoặc `application/json` và ví dụ.
+  - Với input có 2 lựa chọn (ví dụ summarize), ghi rõ chỉ sử dụng 1 trong 2 và nêu ví dụ cho mỗi lựa chọn.
+
 
