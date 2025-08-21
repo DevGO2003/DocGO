@@ -140,14 +140,30 @@ Khi thêm API mới trong 2 service trên, hãy tuân thủ các quy tắc này 
   - Khi thay đổi phụ thuộc ảnh hưởng runtime, cập nhật `How to run this microservice.md`.
 
 ## 12) Port mapping và đường dẫn tài liệu (Docs)
-- Mặc định tài liệu OpenAPI hiển thị tại: `http://localhost:<PORT>/docs#/` cho mọi microservice.
-- Cố định cổng cho các dịch vụ hiện tại:
+- Mặc định tài liệu OpenAPI hiển thị tại: `http://localhost:<PORT>/docs#/` cho MỌI microservice.
+- BẮT BUỘC cấu hình để tài liệu luôn ở `/docs#/` (không dùng đường dẫn mặc định khác):
+  - FastAPI: mặc định đã là `/docs` → không cần đổi.
+  - Spring Boot (SpringDoc): cấu hình trong `application.properties`:
+    - `springdoc.swagger-ui.path=/docs`
+    - (tuỳ chọn) nếu đã có cấu hình cũ, phải thay thế để Swagger UI mount tại `/docs`.
+    - Kết quả docs: `http://localhost:<PORT>/docs#/`.
+- Port cố định cho toàn bộ microservice của DocGO:
+  - `api-gateway` (BFF): 8000 → Docs: `http://localhost:8000/docs#/`
   - `user-service`: 8001 → Docs: `http://localhost:8001/docs#/`
+  - `community-service`: 8002 → Docs: `http://localhost:8002/docs#/`
+  - `approval-workflow-service`: 8003 → Docs: `http://localhost:8003/docs#/`
+  - `reminder-scheduler-service`: 8004 → Docs: `http://localhost:8004/docs#/`
+  - `notification-service`: 8005 → Docs: `http://localhost:8005/docs#/`
+  - `e-signature-integration-service`: 8006 → Docs: `http://localhost:8006/docs#/`
+  - `ml-statistics-service`: 8007 → Docs: `http://localhost:8007/docs#/`
+  - `bi-reporting-analytics-service`: 8008 → Docs: `http://localhost:8008/docs#/`
+  - `api-documentation-service`: 8009 → Docs: `http://localhost:8009/docs#/`
+  - `sla-alerting-monitor-service`: 8010 → Docs: `http://localhost:8010/docs#/`
   - `ai-processing-service`: 8011 → Docs: `http://localhost:8011/docs#/`
   - `file-storage-asset-service`: 8012 → Docs: `http://localhost:8012/docs#/`
-  - `contract-management-service` (Spring): 8081 → Docs: `http://localhost:8081/swagger-ui.html` (hoặc map qua gateway thành `/docs#/` nếu cần)
-  - `auth-service` (Spring): 8082 → Docs: `http://localhost:8082/swagger-ui.html`
-- Khi thêm microservice mới, phải chọn cổng trống, cập nhật mục này và README/How-to-run tương ứng.
+  - `contract-management-service` (Spring): 8081 → Docs: `http://localhost:8081/docs#/`
+  - `auth-service` (Spring): 8082 → Docs: `http://localhost:8082/docs#/`
+- Khi thêm microservice mới, phải chọn cổng trống theo dãy 80xx hoặc 81xx, cập nhật mục này và README/How-to-run tương ứng.
 
 ## 13) Chuẩn hóa mô tả Input/Output cho API
 - Mọi endpoint phải có chú thích rõ ràng về đầu vào/đầu ra ngay trong tài liệu API:
