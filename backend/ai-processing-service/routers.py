@@ -78,8 +78,8 @@ async def extract_api(
         "statusCode": 200,
         "shortMessage": "Success",
         "description": "Trích xuất điều khoản thành công.",
-        "data": {"extracted": answer},
-        "path": "/api/v1/ai-processing/extract"
+        "data": answer,
+    "path": "/api/v1/ai-processing-service/extract"
     }
 
 
@@ -150,7 +150,7 @@ async def classify_api(
         "shortMessage": "Success",
         "description": "Phân loại hợp đồng thành công.",
         "data": {"classify": answer},
-        "path": "/api/v1/ai-processing/classify"
+    "path": "/api/v1/ai-processing-service/classify"
     }
 
 
@@ -212,7 +212,7 @@ async def summarize_api(
         "shortMessage": "Success",
         "description": "Tóm tắt hợp đồng thành công.",
         "data": {"summary": answer},
-        "path": "/api/v1/ai-processing/summarize"
+    "path": "/api/v1/ai-processing-service/summarize"
     }
 
 
