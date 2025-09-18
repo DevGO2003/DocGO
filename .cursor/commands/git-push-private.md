@@ -4,10 +4,7 @@
 
 ## Mô tả
 - Tự động và không yêu cầu xác nhận.
-- Xác định nhánh hiện tại; nếu không xác định được sẽ tự chọn theo danh tính dev:
-  - Nếu user là “thaiGO” → dùng nhánh `thaiGO`
-  - Nếu user là “LocTruongLuan” → dùng nhánh `LocTruongLuan`
-  - Nếu nhánh chưa tồn tại → tự tạo mới (`git checkout -B <branch>`)
+- Xác định nhánh hiện tại; nếu không xác định được thì MẶC ĐỊNH dùng nhánh `main` (tạo mới nếu chưa có).
 - Push lên remote `private` cùng tên nhánh, sau đó khôi phục upstream về `origin/<branch>` để tiếp tục làm việc trên origin.
 - Đảm bảo các file env được force-add: `**/.env`, `**/.env.local`, `**/.env.example`.
 - Không thêm các file nhạy cảm khác như `.env` gốc, `.env.production` (đang bị ignore theo quy tắc Git của dự án).
@@ -22,13 +19,10 @@
 ## Lệnh thực thi (PowerShell - Windows)
 ```powershell
 $ErrorActionPreference = 'Stop'
-# 1) Xác định nhánh làm việc
 $branch = (git rev-parse --abbrev-ref HEAD 2>$null)
 if (-not $branch -or $branch -eq 'HEAD') {
-  $user = (git config user.name 2>$null); if (-not $user) { $user = $env:USERNAME }
-  if ($user -match 'thai' -or $user -match 'thaiGO') { $branch = 'thaiGO' }
-  elseif ($user -match 'LocTruongLuan' -or $user -match 'Luan') { $branch = 'LocTruongLuan' }
-  else { $branch = 'thaiGO' }
+  # Mặc định dùng nhánh main nếu không xác định được nhánh hiện tại
+  $branch = 'main'
   git checkout -B $branch
 }
 $prevUpstream = (git rev-parse --abbrev-ref --symbolic-full-name '@{u}' 2>$null)
@@ -51,13 +45,10 @@ if (git push --set-upstream private $branch) {
 ## Lệnh thực thi (Bash)
 ```bash
 set -e
-# 1) Xác định nhánh làm việc
+# 1) Xác định nhánh làm việc (mặc định main)
 branch="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || true)"
 if [ -z "$branch" ] || [ "$branch" = "HEAD" ]; then
-  user="$(git config user.name 2>/dev/null || echo "$USER")"
-  if echo "$user" | grep -qi "thai"; then branch="thaiGO"
-  elif echo "$user" | grep -qi "LocTruongLuan\|Luan"; then branch="LocTruongLuan"
-  else branch="thaiGO"; fi
+  branch="main"
   git checkout -B "$branch"
 fi
 prev_upstream="$(git rev-parse --abbrev-ref --symbolic-full-name '@{u}' 2>/dev/null || true)"
