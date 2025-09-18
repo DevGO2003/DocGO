@@ -1,0 +1,196 @@
+# DocGO Workspace .gitignore
+
+# Environment Variables
+.env
+.env.local
+.env.production
+.env.staging
+.env.*.local
+# Exception: .env.example should be tracked as template
+!.env.example
+# Exception: env/ directory should be tracked (contains .env.example)
+!**/env/
+
+# Ignore sensitive environment files inside env/ directories
+**/env/.env
+**/env/.env.local
+**/env/.env.production
+**/env/.env.staging
+
+# But DO track the example file
+!**/env/.env.example
+
+
+# IDE/Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+temp/
+tmp/
+
+# Logs
+*.log
+logs/
+*.out
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+# lib/ - Commented out to allow API Gateway lib/ directory
+# lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+venv/
+env/
+ENV/
+# Exception: env/ directory in microservices should be tracked (contains .env.example)
+!backend/*/env/
+.venv/
+
+# Java
+*.class
+*.jar
+*.war
+*.ear
+target/
+build/
+out/
+.gradle/
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.next/
+out/
+build/
+dist/
+
+# Build artifacts
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+target/
+build/
+dist/
+.next/
+out/
+
+# Service specific - only ignore data/upload directories, not source code
+results/
+uploads/
+temp_files/
+cache/
+attachments/
+user_uploads/
+profile_images/
+approval_docs/
+temp_users/
+# Allow assets/ and storage/ for source code
+# assets/
+# storage/
+
+# Python service lib/ directories (ignore only in Python services)
+backend/*/lib/
+!backend/api-gateway-bff/lib/
+
+# S3/Filebase cache
+.s3_cache/
+.filebase_cache/
+
+# Test reports
+test-output/
+reports/
+coverage/
+.pytest_cache/
+htmlcov/
+
+# Package managers - only ignore lock files in root, allow in services
+# package-lock.json - Commented out to allow tracking in services
+yarn.lock
+Pipfile.lock
+
+# Documentation build
+docs/_build/
+site/
+
+# Backup files
+*.orig
+*.rej
+*.orig.*
+*.rej.*
+
+# System files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Large files and executables
+*.exe
+*.msi
+*.dmg
+*.pkg
+*.deb
+*.rpm
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# Additional patterns from .cursorignore (except .env files)
+**/*.iml
+**/.mvn/
+**/.gradle/
+**/.cache/
+**/.nyc_output/
+document/**/*.pdf
+document/**/*.doc
+document/**/*.docx
+document/**/*.xls
+document/**/*.xlsx
+document/**/*.ppt
+document/**/*.pptx
+**/contract_uploads/

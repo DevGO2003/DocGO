@@ -1,0 +1,45 @@
+{
+  "name": "docgo_web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@headlessui/react": "^1.7.0",
+    "@heroicons/react": "^2.0.0",
+    "axios": "^1.6.0",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.0.0",
+    "date-fns": "^2.30.0",
+    "fill-range": "^7.1.1",
+    "next": "14.0.0",
+    "react": "^18",
+    "react-dom": "^18",
+    "react-hook-form": "^7.48.0",
+    "react-hot-toast": "^2.4.0",
+    "react-query": "^3.39.0",
+    "recharts": "^3.1.2",
+    "swr": "^2.2.0",
+    "tailwind-merge": "^2.0.0",
+    "zustand": "^4.4.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/forms": "^0.5.0",
+    "@tailwindcss/typography": "^0.5.0",
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "autoprefixer": "^10.4.0",
+    "eslint": "^8",
+    "eslint-config-next": "14.0.0",
+    "postcss": "^8.4.0",
+    "prettier": "^3.0.0",
+    "tailwindcss": "^3.3.0",
+    "typescript": "^5"
+  }
+}

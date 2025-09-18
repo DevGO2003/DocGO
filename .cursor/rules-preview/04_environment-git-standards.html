@@ -1,0 +1,347 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>04 - Environment & Git Standards (DocGO)</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light p-3">
+  <div class="container-xl py-5">
+    <header class="text-center mb-5">
+      <h1 class="display-6 fw-bold text-primary">04 - Environment & Git Standards</h1>
+      <p class="lead text-muted">Quản lý env, .gitignore, remote và workflow</p>
+    </header>
+
+    <section class="mb-4">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h2 class="h6 text-secondary fw-bold">Tóm tắt</h2>
+          <div class="table-responsive">
+            <table class="table table-striped table-hover align-middle">
+              <thead class="table-dark"><tr><th>Mục</th><th>Nội dung</th></tr></thead>
+              <tbody>
+                <tr><td>env.local</td><td>Mỗi service có file riêng; không commit secrets thật</td></tr>
+                <tr><td>.gitignore</td><td>Bắt buộc tại gốc service; ignore build, logs, IDE, uploads</td></tr>
+                <tr><td>Remote</td><td><code>origin</code> công khai; <code>private</code> chứa secrets</td></tr>
+                <tr><td>Workflow</td><td>Push origin trước, sync sang private sau</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="mb-4">
+      <div class="card shadow-sm"><div class="card-body">
+        <h2 class="h6 text-secondary fw-bold">Nội dung gốc (MDC)</h2>
+        <xmp>
+# Environment & Git Standards for DocGO
+
+## 📋 Environment File Management
+
+### 1. **File .env.local cho từng Microservice**
+
+Mỗi microservice đều có file `env.local` riêng để quản lý environment variables cho local development:
+
+#### **AI Processing Service** (`backend/ai-processing-service/env.local`)
+```bash
+# Service Configuration
+HOST=0.0.0.0
+PORT=8017
+PYTHONPATH=/app
+
+# Gemini AI Configuration
+GEMINI_API_KEY=your_gemini_api_key_here
+
+# Kafka Configuration
+KAFKA_BOOTSTRAP_SERVERS=localhost:9092
+KAFKA_FILE_EVENTS_TOPIC=file.events
+KAFKA_AI_EVENTS_TOPIC=ai.events
+```
+
+#### **Contract Management Service** (`backend/contract-management-service/env.local`)
+```bash
+# Database Configuration
+DATABASE_URL=jdbc:mariadb://localhost:3306/docgo_contract_service
+DATABASE_HOST=localhost
+DATABASE_PORT=3306
+DATABASE_USER=root
+DATABASE_PASSWORD=sapassword
+
+# Kafka Configuration
+KAFKA_BOOTSTRAP_SERVERS=localhost:9092
+KAFKA_CONSUMER_GROUP_ID=contract-service-group
+```
+
+#### **General File Management Service** (`backend/general-file-management-service/env.local`)
+```bash
+# Database Configuration
+DATABASE_URL=mysql+pymysql://root:password@localhost:3306/docgo_general_file_service
+DATABASE_HOST=localhost
+DATABASE_PORT=3306
+
+# Redis Configuration
+REDIS_HOST=localhost
+REDIS_PORT=6379
+
+# Elasticsearch Configuration
+ELASTICSEARCH_URL=http://localhost:9200
+```
+
+#### **User Management Service** (`backend/user-management-service/env.local`)
+```bash
+# Database Configuration
+DATABASE_URL=mysql+pymysql://root:sapassword@127.0.0.1:3306/docgo_user_management_service
+
+# S3 Configuration
+AWS_ACCESS_KEY_ID=your_access_key
+AWS_SECRET_ACCESS_KEY=your_secret_key
+AWS_REGION=ap-southeast-1
+```
+
+#### **API Gateway BFF** (`backend/api-gateway-bff/env.local`)
+```bash
+# Service URLs
+USER_MANAGEMENT_SERVICE_URL=http://localhost:8002
+AUTHENTICATION_SERVICE_URL=http://localhost:8001
+
+# Kafka Configuration
+KAFKA_BROKERS=localhost:9092
+KAFKA_CLIENT_ID=api-gateway-bff
+```
+
+#### **File Storage Asset Service** (`backend/file-storage-asset-service/env.local`)
+```bash
+# Database Configuration
+DATABASE_URL=mysql+pymysql://root:password@localhost:3306/docgo_file_storage
+
+# MinIO Configuration
+MINIO_ENDPOINT=localhost:9000
+MINIO_ACCESS_KEY=minioadmin
+MINIO_SECRET_KEY=minioadmin
+```
+
+#### **Authentication Identity Service** (`backend/authentication-identity-service/env.local`)
+```bash
+# Database Configuration
+DATABASE_URL=mysql+pymysql://root:sapassword@localhost:3306/docgo_auth_service
+
+# JWT Configuration
+JWT_SECRET=your-super-secret-jwt-key-here-change-in-production
+JWT_EXPIRES_IN=24h
+```
+
+### 2. **Cách sử dụng .env.local với Docker Compose**
+
+Khi muốn thay đổi environment trong `docker-compose.local.yml`, hãy:
+
+1. **Chỉnh sửa file `env.local` của service tương ứng**
+2. **Mapping đường dẫn trong docker-compose để sử dụng file đó**
+
+#### **Ví dụ mapping trong docker-compose.local.yml:**
+```yaml
+services:
+  ai-processing-service:
+    environment:
+      - HOST=${HOST:-0.0.0.0}
+      - PORT=${PORT:-8017}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - KAFKA_BOOTSTRAP_SERVERS=${KAFKA_BOOTSTRAP_SERVERS}
+    env_file:
+      - ./backend/ai-processing-service/env.local
+
+  contract-management-service:
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - DATABASE_HOST=${DATABASE_HOST}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
+    env_file:
+      - ./backend/contract-management-service/env.local
+
+  general-file-management-service:
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - REDIS_HOST=${REDIS_HOST}
+      - ELASTICSEARCH_URL=${ELASTICSEARCH_URL}
+    env_file:
+      - ./backend/general-file-management-service/env.local
+```
+
+### 3. **Quy tắc đặt tên và cấu trúc**
+
+#### **Naming Convention:**
+- File chính: `env_exmaple.txt` (template cho team)
+- File local: `env.local` (cho development)
+- File production: `.env` (không commit lên git)
+
+#### **Cấu trúc thư mục:**
+```
+backend/
+├── ai-processing-service/
+│   ├── env_exmaple.txt
+│   └── env.local
+├── contract-management-service/
+│   ├── env_exmaple.txt
+│   └── env.local
+├── general-file-management-service/
+│   ├── env_exmaple.txt
+│   └── env.local
+└── ...
+```
+
+### 4. **Workflow khi thay đổi Environment**
+
+1. **Không chỉnh sửa trực tiếp `docker-compose.local.yml`**
+2. **Chỉnh sửa file `env.local` của service tương ứng**
+3. **Docker Compose sẽ tự động load environment từ file đó**
+4. **Commit file `env.local` vào git (nếu cần)**
+5. **Không bao giờ commit file `.env` chứa secrets thật**
+
+### 5. **Lợi ích của cách tiếp cận này**
+
+✅ **Tập trung**: Mỗi service quản lý environment của riêng mình  
+✅ **Dễ bảo trì**: Không cần sửa nhiều file khi thay đổi config  
+✅ **An toàn**: Secrets được tách biệt khỏi docker-compose  
+✅ **Linh hoạt**: Mỗi developer có thể có config khác nhau  
+✅ **Version Control**: Có thể track thay đổi environment theo service  
+
+## Tệp môi trường (.env, .env.example)
+
+- **Mỗi microservice PHẢI kèm tệp `.env.example`** tại thư mục gốc của service.
+- `.env.example` liệt kê đầy đủ các biến môi trường tối thiểu để chạy local và kiểm thử; **KHÔNG chứa secrets thật**.
+- Trước khi chạy, developer tạo `.env` từ `.env.example`. Hướng dẫn chạy phải có bước:
+  - PowerShell: `Copy-Item .env.example .env -Force`
+- **Python (FastAPI)**: dùng `python-dotenv` để tự động nạp `.env` (đã có trong cấu hình hiện tại).
+- **Java (Spring Boot)**: `.env.example` đóng vai trò template biến môi trường; giá trị thực được truyền qua system env và/hoặc cấu hình `application.properties`. Ưu tiên cho phép env override properties theo chuẩn Spring.
+
+## Quy tắc .gitignore
+
+- **MỌI microservice PHẢI có file `.gitignore`** tại thư mục gốc của service.
+- **KHÔNG BAO GIỜ commit** các file sau vào Git:
+  - File môi trường chứa secrets: `.env`, `.env.local`, `.env.production`
+  - File build/compiled: `__pycache__/`, `*.pyc`, `*.pyo`, `*.pyd`, `target/`, `build/`, `dist/`, `.next/`, `node_modules/`
+  - File log: `*.log`, `logs/`, `*.out`
+  - File IDE/Editor: `.vscode/`, `.idea/`, `*.swp`, `*.swo`, `*~`
+  - File OS: `.DS_Store`, `Thumbs.db`, `desktop.ini`
+  - File tạm thời: `*.tmp`, `*.temp`, `*.bak`, `*.backup`
+  - File database: `*.db`, `*.sqlite`, `*.sqlite3`
+  - File upload/temp: `uploads/`, `temp/`, `tmp/`, `results/`
+
+### Quy tắc .gitignore theo loại service:
+
+**Python (FastAPI)**: 
+- `__pycache__/`, `*.pyc`, `*.pyo`, `*.pyd`
+- `venv/`, `env/`, `.venv/`, `.env/`
+- `*.log`, `logs/`
+- `.pytest_cache/`, `htmlcov/`, `.coverage`
+
+**Java (Spring Boot)**:
+- `target/`, `build/`, `out/`
+- `*.class`, `*.jar`, `*.war`
+- `.gradle/`, `gradle-app.setting`
+- `*.log`, `logs/`
+
+**Node.js/Next.js**:
+- `node_modules/`, `npm-debug.log*`, `yarn-debug.log*`, `yarn-error.log*`
+- `.next/`, `out/`, `build/`, `dist/`
+- `.env.local`, `.env.development.local`, `.env.test.local`, `.env.production.local`
+- `*.log`, `logs/`
+
+### Quy tắc bảo mật:
+- **KHÔNG BAO GIỜ commit** file `.env` chứa secrets thật
+- **LUÔN commit** file `.env.example` làm template
+- **KIỂM TRA** `.gitignore` trước mỗi commit để đảm bảo không có file nhạy cảm
+- **SỬ DỤNG** `.gitignore` global cho workspace nếu cần thiết
+
+## Quản lý Remote Repository
+
+- **Remote chính**: `origin` → `https://github.com/DevGO2003/DocGO` (public, không chứa secrets)
+- **Remote private**: `private` → `https://github.com/DevGO2003/DocGO-private` (chứa secrets, file nhạy cảm)
+- **Quy tắc sử dụng**:
+  - `origin`: Code nguồn, cấu hình cơ bản, tài liệu công khai
+  - `private`: API keys, database credentials, file nhạy cảm, logs, build artifacts
+
+**Cách thêm remote private**:
+```bash
+git remote add private https://github.com/DevGO2003/DocGO-private.git
+git remote -v  # Kiểm tra remotes
+```
+
+### Quy tắc đồng bộ hóa tự động:
+- **Khi push lên `origin`**: Tự động đồng bộ sang `private` để đảm bảo cả hai remote luôn có code mới nhất
+- **Khi push lên `private`**: Chỉ push secrets và file nhạy cảm, không đồng bộ ngược về `origin`
+
+### Quy trình push và đồng bộ hóa:
+
+#### **1. Push code công khai (khuyến nghị)**:
+```bash
+# Bước 1: Push lên origin
+git add .  # Code nguồn, không có secrets
+git commit -m "feat: thêm tính năng mới"
+git push origin main
+
+# Bước 2: Tự động đồng bộ sang private (đồng bộ code nguồn)
+git push private main
+```
+
+#### **2. Push code nhạy cảm**:
+```bash
+# Chỉ push file nhạy cảm lên private
+git add .env  # File chứa secrets
+git commit -m "feat: thêm cấu hình môi trường"
+git push private main  # KHÔNG push lên origin
+```
+
+#### **3. Đồng bộ hóa thủ công (nếu cần)**:
+```bash
+# Đồng bộ từ origin sang private (để lấy code mới nhất)
+git fetch origin
+git checkout main
+git pull origin main
+git push private main
+
+# Đồng bộ từ private sang origin (chỉ khi cần thiết)
+git fetch private
+git checkout main
+git pull private main
+git push origin main
+```
+
+### Quy tắc bảo mật khi đồng bộ hóa:
+- **KHÔNG BAO GIỜ** push file `.env` chứa secrets thật lên `origin`
+- **LUÔN** kiểm tra `.gitignore` trước khi push để đảm bảo không có file nhạy cảm
+- **Ưu tiên** push lên `origin` trước, sau đó đồng bộ sang `private`
+- **Kiểm tra** trạng thái remote trước khi push để tránh conflict
+
+### Script tự động hóa đồng bộ hóa:
+```bash
+# Script push và đồng bộ hóa tự động
+git_push_and_sync() {
+    local commit_message="$1"
+    local branch="${2:-main}"
+    
+    # Commit changes
+    git add .
+    git commit -m "$commit_message"
+    
+    # Push to origin
+    echo "Pushing to origin..."
+    git push origin "$branch"
+    
+    # Sync to private
+    echo "Syncing to private..."
+    git push private "$branch"
+    
+    echo "Push and sync completed successfully!"
+}
+
+# Sử dụng: git_push_and_sync "feat: thêm tính năng mới"
+```
+        </xmp>
+      </div></div>
+    </section>
+  </div>
+</body>
+</html>
+

@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>01 - API Standards (DocGO)</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light p-3">
+  <div class="container-xl py-5">
+    <header class="text-center mb-5">
+      <h1 class="display-6 fw-bold text-primary">01 - API Standards</h1>
+      <p class="lead text-muted">Chuẩn hóa URL, payload, response format và handler naming</p>
+    </header>
+
+    <section class="mb-4">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h2 class="h6 text-secondary fw-bold">Tóm tắt</h2>
+          <div class="table-responsive">
+            <table class="table table-striped table-hover align-middle">
+              <thead class="table-dark"><tr><th>Mục</th><th>Nội dung</th></tr></thead>
+              <tbody>
+                <tr><td>Base path</td><td><code>/api/v1/{service-name}/...</code></td></tr>
+                <tr><td>Resources</td><td>Plural, kebab-case (vd: <code>contracts</code>)</td></tr>
+                <tr><td>Response</td><td>Unified <code>RestResponse</code>, không dùng HTTP 204</td></tr>
+                <tr><td>Handlers</td><td>Java: <code>createContract</code>... | Python: <code>extract_api</code>...</td></tr>
+                <tr><td>Pagination</td><td><code>pageNumber</code>, <code>pageSize</code>, <code>sortBy</code>, ...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="mb-4">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h2 class="h6 text-secondary fw-bold">Nội dung gốc (MDC)</h2>
+          <xmp>
+---
+name: "Chuẩn hóa API cho DocGO"
+description: "Chuẩn hóa URL, payload, response format cho các microservices"
+alwaysApply: true
+---
+
+### Chuẩn hóa API cho DocGO (áp dụng cho ai-processing-service và contract-management-service)
+
+Mục tiêu: Đồng bộ cách đặt URL, payload, xử lý lỗi (handler), và viết tài liệu API. Quy tắc này dựa trên hiện trạng `contract-management-service` (Spring Boot + GlobalExceptionHandler + RestResponse) và `ai-processing-service` (FastAPI) và hướng tới đồng nhất giữa các service.
+
+## 1) Quy tắc URL
+- Base path: `/api/v1/{service-name}/...`
+- `service-name` dùng kebab-case trùng tên service trong code:
+  - `ai-processing-service`
+  - `contract-management-service`
+- Tài nguyên (resource) dùng số nhiều, kebab-case: `contracts`, `events`, `attachments`.
+- Hành động (sub-resource) dùng tiếp đầu ngữ theo REST; chỉ khi là hành động phi-CRUD rõ ràng thì dùng hậu tố dạng action:
+  - Chuẩn REST: `POST /contracts`, `GET /contracts`, `GET /contracts/{id}`, `PUT /contracts/{id}`, `DELETE /contracts/{id}`
+  - Sub-resource: `GET /contracts/{id}/events`, `GET /contracts/{id}/attachments`, `PUT /contracts/{id}/restore`
+  - Tác vụ AI chuyên biệt (file hoặc chuỗi):
+    - `POST /ai-processing-service/extract`
+    - `POST /ai-processing-service/summarize`
+- Query chuẩn phân trang, sắp xếp và lọc (giữ nguyên như trong controller):
+  - `pageNumber`, `pageSize`, `sortBy`, `sortDirection`, `searchTerm`, `includeDeleted`
+
+## 2) Tên hàm handler (Controller/Router)
+- Java (Spring): dùng động từ rõ ràng, hiện tại đơn và mô tả ngắn: `createContract`, `getAllContracts`, `getContract`, `updateContract`, `softDeleteContract`, `restoreContract`, `getContractEvents`, `getAttachments`.
+- Python (FastAPI): dùng snake_case tương đương: `extract_api`, `summarize_api`.
+- Tên biến path: dùng `{id}` cho định danh chính; sub-resource đặt sau `{id}`.
+
+## 3) Payload và Content-Type
+- CRUD JSON: `application/json` với body là DTO/entity tương ứng.
+- Upload file: `multipart/form-data` với trường `file` (FastAPI) hoặc `@RequestPart`/`MultipartFile` (Spring) nếu có.
+- AI summarize cho phép 2 dạng đầu vào (chỉ 1 trong 2):
+  - `multipart/form-data`: `file` (txt)
+  - `application/json`: `{ "text": "..." }`
+- Phân trang: dùng query params như mục 1.
+
+## 4) Chuẩn hóa Response Envelope (RestResponse)
+- Tất cả response nên bọc trong cấu trúc sau để đồng nhất giữa Java và Python:
+```
+{
+  "apiVersion": "v1",
+  "statusCode": 200,
+  "shortMessage": "Success | Not Found | Bad Request | Conflict | No Content | Internal Server Error",
+  "description": "Mô tả ngắn gọn kết quả",
+  "data": <object|null>,
+  "timestamp": <ISO-8601>,
+  "requestId": <uuid>,
+  "path": "/api/v1/..."
+}
+```
+- Java đã có `RestResponse<T>` và `GlobalExceptionHandler` sinh đúng schema. Python service cần trả về cùng định dạng (đã có trong router của AI service; tiếp tục duy trì).
+- HTTP status:
+  - 201 Created: tạo mới
+  - 200 OK: trả dữ liệu thành công (bao gồm cả trường hợp không có dữ liệu với statusCode 204)
+  - 400 Bad Request: dữ liệu không hợp lệ (validation)
+  - 404 Not Found: không tìm thấy tài nguyên
+  - 409 Conflict: xung đột nghiệp vụ
+  - 500 Internal Server Error: lỗi không lường trước
+
+**Lưu ý quan trọng về HTTP Status 204:**
+- KHÔNG BAO GIỜ trả về HTTP status 204 No Content
+- Thay vào đó, luôn trả về HTTP status 200 OK với `statusCode: 204` trong response body
+- Điều này đảm bảo tính nhất quán trong API response format và dễ dàng xử lý ở client
+- Ví dụ response khi không có dữ liệu:
+```json
+{
+  "apiVersion": "v1",
+  "statusCode": 204,
+  "shortMessage": "No Content",
+  "description": "Không có hợp đồng nào.",
+  "data": null,
+  "timestamp": "2024-01-01T00:00:00Z",
+  "requestId": "uuid-here",
+  "path": "/api/v1/contract-management-service/contracts"
+}
+```
+
+## 5) Ví dụ mô hình hóa từ hiện trạng
+- Tạo hợp đồng (Java):
+  - `POST /api/v1/contract-management-service/contracts`
+  - Body: `Contract` JSON (không gửi `id` khi tạo)
+  - 201 + `RestResponse<Contract>`
+
+- Danh sách hợp đồng (Java):
+  - `GET /api/v1/contract-management-service/contracts?pageNumber=0&pageSize=10&sortBy=...`
+  - 200 + `RestResponse<PaginatedResponse<Contract>>` hoặc 200 với `statusCode: 204` khi không có dữ liệu
+
+- Lấy chi tiết (Java):
+  - `GET /api/v1/contract-management-service/contracts/{id}` → 200 hoặc 404
+
+- Khôi phục (Java):
+  - `PUT /api/v1/contract-management-service/contracts/{id}/restore` → 200
+
+- AI Extract (Python):
+  - `POST /api/v1/ai-processing-service/extract`
+  - multipart: `file` (docx/pdf) + header `GEMINI_API_KEY` (tùy chọn)
+  - 200 + `RestResponse<string>` nội dung trích xuất
+
+- AI Summarize (Python):
+  - `POST /api/v1/ai-processing-service/summarize`
+  - multipart `file` (txt) hoặc JSON `{ "text": "..." }`
+  - 200 + `RestResponse<object|string>`; có làm sạch JSON trong handler
+
+## 6) Quy ước đặt tên mã nguồn
+- Controller class (Java): `*Controller` theo tài nguyên chính, ví dụ `ContractController`.
+- Service class (Java): `*Service` với nghiệp vụ: `ContractService`.
+- Router (Python): nhóm theo `tags` và prefix chung; tên hàm ngắn, rõ mục đích (`extract_api`, `summarize_api`).
+- Tên biến phản ánh ý nghĩa nghiệp vụ, tránh viết tắt.
+
+## 7) Thứ tự API trong Controller
+- **Luôn đặt API `getAll` (danh sách) ở trên API `getOne` (chi tiết)**
+- Thứ tự chuẩn trong Controller:
+  1. `@GetMapping` (getAll) - Lấy danh sách tất cả
+  2. `@GetMapping("/{id}")` (getOne) - Lấy chi tiết theo ID
+  3. `@PostMapping` (create) - Tạo mới
+  4. `@PutMapping("/{id}")` (update) - Cập nhật
+  5. `@DeleteMapping("/{id}")` (delete) - Xóa
+  6. Các API khác theo thứ tự logic nghiệp vụ
+
+- Ví dụ thứ tự đúng:
+```java
+@GetMapping                    // getAll - Luôn ở trên
+public ResponseEntity<...> getAllContracts(...) { ... }
+
+@GetMapping("/{id}")          // getOne - Luôn ở dưới getAll
+public ResponseEntity<...> getContract(@PathVariable String id) { ... }
+
+@PostMapping                  // create
+public ResponseEntity<...> createContract(...) { ... }
+```
+
+## 8) Bảo mật và versioning
+- Luôn đặt tiền tố `/api/v1/…`. Khi thay đổi lớn không tương thích, phát hành `/api/v2/…` song song.
+- Định nghĩa rõ header bảo mật (ví dụ JWT) ở tài liệu, ngay trong phần mô tả endpoint.
+
+---
+
+**Lưu ý**: Khi thêm API mới vào 2 service trên, hãy tuân thủ các quy tắc này để đảm bảo tính nhất quán, dễ đọc và dễ tích hợp.
+          </xmp>
+        </div>
+      </div>
+    </section>
+  </div>
+</body>
+</html>
+

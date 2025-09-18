@@ -1,0 +1,89 @@
+---
+description: "Tổng quan kiến trúc dự án DocGO với các quy tắc chuẩn hóa cho microservices, API, và development workflow"
+autoAttachments:
+  - "*.java"
+  - "*.py"
+  - "*.yml"
+  - "*.yaml"
+  - "*.md"
+  - "*.mdx"
+  - "*.env*"
+  - "docker-compose*.yml"
+  - "Dockerfile*"
+  - "pom.xml"
+  - "requirements.txt"
+  - "package.json"
+  - "*.gradle"
+  - "*.kt"
+  - "*.xml"
+  - "*.properties"
+  - "*.sql"
+  - "*.sh"
+  - "*.bat"
+  - "*.ps1"
+alwaysApply: true
+---
+
+# DocGO Project Architecture - Overview
+
+The DocGO project uses microservices architecture with standardized rules divided into separate files for easy management and maintenance.
+
+## 📋 List of Rule Files
+
+### 1. **API Standards** (`api-standards.mdc`)
+- API standardization rules for DocGO
+- URL rules, payload, response format
+- Handler function names and naming conventions
+- Implementation examples from current state
+- Security and versioning
+
+### 2. **Event & Exception Standards** (`event-exception-standards.mdc`)
+- Event Payload Standard standardization
+- Exception Handling rules
+- API documentation writing rules (Vietnamese)
+- Input/Output description standardization for APIs
+
+### 3. **Service Structure Standards** (`service-structure-standards.mdc`)
+- Service structure rules (Python FastAPI, Java Spring Boot)
+- Dependencies management and Maven/Gradle
+- Port mapping and documentation paths
+- Folder naming and package structure rules
+
+### 4. **Environment & Git Standards** (`environment-git-standards.mdc`)
+- Environment file management (.env, .env.example)
+- .gitignore rules by service type
+- Remote Repository management (origin + private)
+- Push and automatic synchronization workflow
+
+### 5. **Docker Development Standards** (`docker-development-standards.mdc`)
+- Docker Development Local rules
+- Standard Dockerfile structure
+- Docker Compose Development
+- Port and Networking rules
+
+## 🎯 Common Goals
+
+All these rules aim to:
+- **Standardize** URL, payload, error handling across services
+- **Standardize** response structure and event payload
+- **Ensure** consistency in API documentation writing
+- **Optimize** development and deployment workflow
+- **Secure** sensitive information and Git repository management
+
+## 📚 How to Use
+
+1. **When developing new APIs**: Refer to `api-standards.mdc` and `event-exception-standards.mdc`
+2. **When creating new services**: Refer to `service-structure-standards.mdc`
+3. **When configuring environment**: Refer to `environment-git-standards.mdc`
+4. **When working with Docker**: Refer to `docker-development-standards.mdc`
+
+## 🔄 Updating Rules
+
+When adding or modifying rules:
+1. Edit the corresponding rule file
+2. Update this file if there are structural changes
+3. Commit and push following the established Git workflow
+
+---
+
+**Note**: All these rules have `alwaysApply: true` to ensure they are automatically applied to every code file in the project.

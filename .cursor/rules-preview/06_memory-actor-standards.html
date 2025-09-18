@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>06 - Memory Actor Standards</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  </head>
+  <body class="bg-light p-3">
+    <div class="container-xl py-5">
+      <header class="text-center mb-5">
+        <h1 class="display-5 fw-bold text-primary">06 - Memory Actor Standards</h1>
+        <p class="lead text-muted">Chuẩn hóa actor mặc định và quy ước ghi audit/event cho toàn bộ microservices</p>
+      </header>
+
+      <div class="card shadow-sm mb-4">
+        <div class="card-body">
+          <blockquote class="blockquote mb-0">
+            <h2 class="h5 text-primary fw-bold">Chuẩn hóa Actor cho Audit/Event</h2>
+            <p class="mb-0">
+              Đây là tài liệu tiêu chuẩn hóa danh tính (actor) thực hiện các hành động trong hệ thống.
+              Việc tuân thủ giúp việc theo dõi, gỡ lỗi và phân tích dữ liệu trở nên dễ dàng và minh bạch hơn.
+            </p>
+          </blockquote>
+        </div>
+      </div>
+
+      <hr class="my-4">
+
+      <section class="mb-5">
+        <h2 class="h4 fw-bold text-secondary mb-3">Nguyên tắc cốt lõi</h2>
+        <ul class="list-group shadow-sm">
+          <li class="list-group-item"><strong>Actor</strong> là danh tính thực hiện hành động để ghi nhận vào audit log và event payload.</li>
+          <li class="list-group-item">Mặc định dùng <code>system</code> khi không xác định được người dùng.</li>
+          <li class="list-group-item">Phân loại rõ ràng bằng tiền tố: <code>scheduler:</code>, <code>service:</code>, <code>worker:</code>, <code>integration:</code>, <code>webhook:</code>, <code>retry:</code>, <code>import:</code>/<code>export:</code>, <code>backfill:</code>, <code>cli:</code>, <code>impersonation:</code>.</li>
+          <li class="list-group-item">Bắt buộc lưu kèm metadata: <code>userId</code> (nếu có), <code>correlationId</code>, <code>ip/client</code>.</li>
+        </ul>
+      </section>
+
+      <hr class="my-4">
+
+      <section class="mb-5">
+        <h2 class="h4 fw-bold text-secondary mb-3">Bảng quy ước Actor theo ngữ cảnh</h2>
+        <div class="table-responsive">
+          <table class="table table-striped table-hover align-middle">
+            <thead class="table-dark">
+              <tr>
+                <th scope="col">Ngữ cảnh</th>
+                <th scope="col">Ví dụ trigger</th>
+                <th scope="col">Actor</th>
+                <th scope="col">Lý do</th>
+                <th scope="col">Ghi chú</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Job nền theo lịch (cron)</td>
+                <td>APScheduler/Cron, batch ETL</td>
+                <td><code>scheduler</code></td>
+                <td>Phân biệt job định kỳ</td>
+                <td>Có thể ghi <code>scheduler:jobName</code></td>
+              </tr>
+              <tr>
+                <td>Job nền không theo lịch</td>
+                <td>Retry/compensation, worker hàng đợi</td>
+                <td><code>system</code></td>
+                <td>Không gắn với user</td>
+                <td>Dùng chung khi không có user</td>
+              </tr>
+              <tr>
+                <td>Webhook nội bộ giữa services</td>
+                <td>Event nội bộ, callback S2S</td>
+                <td><code>system</code></td>
+                <td>Hệ thống gọi hệ thống</td>
+                <td>Kèm <code>correlationId</code></td>
+              </tr>
+              <tr>
+                <td>Webhook bên thứ ba</td>
+                <td>Stripe, GitHub</td>
+                <td><code>anonymous</code></td>
+                <td>Nguồn công khai/không định danh</td>
+                <td>Log chữ ký: <code>X-Signature</code></td>
+              </tr>
+              <tr>
+                <td>Lỗi parse/thiếu token</td>
+                <td>Header thiếu/không hợp lệ</td>
+                <td><code>system</code></td>
+                <td>Không thể xác định user</td>
+                <td>Ghi lại lý do vào metadata</td>
+              </tr>
+              <tr>
+                <td>Truy cập công khai</td>
+                <td>GET /public/*</td>
+                <td><code>anonymous</code></td>
+                <td>Không yêu cầu đăng nhập</td>
+                <td>Không nên cho phép hành động ghi</td>
+              </tr>
+              <tr>
+                <td>Script vận hành thủ công</td>
+                <td>Admin chạy script</td>
+                <td><code>system</code></td>
+                <td>Không có session người dùng</td>
+                <td>Ghi thêm <code>operator</code> vào metadata</td>
+              </tr>
+              <tr>
+                <td>Seed/Bootstrap dữ liệu</td>
+                <td>Khởi tạo mặc định</td>
+                <td><code>system</code></td>
+                <td>Một lần khi khởi tạo</td>
+                <td>Ghi rõ giai đoạn khởi tạo</td>
+              </tr>
+              <tr>
+                <td>API Gateway BFF</td>
+                <td>Yêu cầu qua BFF</td>
+                <td><code>api-gateway</code></td>
+                <td>Phân biệt lối vào</td>
+                <td>Vẫn ghi <code>userId</code> thực trong metadata</td>
+              </tr>
+              <tr>
+                <td>Microservice nội bộ</td>
+                <td>Gọi trực tiếp từ service</td>
+                <td><code>service:<name></code></td>
+                <td>Rõ nguồn phát</td>
+                <td>Ví dụ: <code>service:ai-processing-service</code></td>
+              </tr>
+              <tr>
+                <td>Worker xử lý hàng đợi</td>
+                <td>Kafka/Redis queue</td>
+                <td><code>worker:<queue></code></td>
+                <td>Rõ kênh xử lý</td>
+                <td>Ví dụ: <code>worker:kafka-contracts</code></td>
+              </tr>
+              <tr>
+                <td>Migration DB</td>
+                <td>Flyway/Liquibase/Alembic</td>
+                <td><code>migration:<id></code></td>
+                <td>Theo dõi thay đổi schema</td>
+                <td>Ví dụ: <code>migration:2025-09-15-01</code></td>
+              </tr>
+              <tr>
+                <td>Bootstrap hệ thống</td>
+                <td>Khởi chạy ban đầu</td>
+                <td><code>bootstrap</code></td>
+                <td>Giai đoạn init</td>
+                <td>Phân biệt với seed</td>
+              </tr>
+              <tr>
+                <td>Tích hợp bên thứ ba</td>
+                <td>SDK/provider gọi</td>
+                <td><code>integration:<provider></code></td>
+                <td>Rõ nguồn tích hợp</td>
+                <td>Ví dụ: <code>integration:stripe</code></td>
+              </tr>
+              <tr>
+                <td>Webhook bên ngoài</td>
+                <td>Slack/GitHub</td>
+                <td><code>webhook:<provider></code></td>
+                <td>Phân loại nguồn</td>
+                <td>Ví dụ: <code>webhook:slack</code></td>
+              </tr>
+              <tr>
+                <td>Health check/đồng bộ</td>
+                <td>Probes/sync</td>
+                <td><code>health-check</code></td>
+                <td>Không can thiệp nghiệp vụ</td>
+                <td>Chỉ đọc/truy vấn</td>
+              </tr>
+              <tr>
+                <td>Retry tự động</td>
+                <td>Transient error</td>
+                <td><code>retry:<reason></code></td>
+                <td>Minh bạch nguyên nhân</td>
+                <td>Ví dụ: <code>retry:timeout</code></td>
+              </tr>
+              <tr>
+                <td>Backfill dữ liệu</td>
+                <td>Nạp dữ liệu quá khứ</td>
+                <td><code>backfill:<job></code></td>
+                <td>Phân biệt batch đặc thù</td>
+                <td>Ví dụ: <code>backfill:contracts-2024</code></td>
+              </tr>
+              <tr>
+                <td>Import/Export</td>
+                <td>Quy trình I/O dữ liệu</td>
+                <td><code>import:<job></code> / <code>export:<job></code></td>
+                <td>Rõ luồng dữ liệu</td>
+                <td>Ví dụ: <code>import:users-v1</code></td>
+              </tr>
+              <tr>
+                <td>CLI nội bộ</td>
+                <td>Chạy từ máy dev/ops</td>
+                <td><code>cli:<host|user></code></td>
+                <td>Truy vết nguồn CLI</td>
+                <td>Ví dụ: <code>cli:devbox01</code></td>
+              </tr>
+              <tr>
+                <td>Impersonation</td>
+                <td>Admin mạo danh user</td>
+                <td><code>impersonation:<adminId></code></td>
+                <td>Minh bạch trách nhiệm</td>
+                <td>Lưu <code>asUser:<userId></code> trong metadata</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <hr class="my-4">
+
+      <section class="mb-5">
+        <h2 class="h4 fw-bold text-secondary mb-3">Hướng dẫn áp dụng nhanh</h2>
+        <div class="row g-4">
+          <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+              <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Spring Boot (JPA)</h5>
+              </div>
+              <div class="card-body bg-light p-3 rounded">
+                <pre><code class="language-java">@Configuration
+@EnableJpaAuditing
+public class JpaAuditingConfig {
+  @Bean
+  public AuditorAware<String> auditorAware() {
+    return () -> Optional.ofNullable(CurrentUser.get())
+                         .or(() -> Optional.of("system"));
+  }
+}</code></pre>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+              <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">FastAPI</h5>
+              </div>
+              <div class="card-body bg-light p-3 rounded">
+                <pre><code class="language-python">def get_actor(request: Request) -> str:
+    return getattr(request.state, "user_id", None) or "system"</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <hr class="my-4">
+
+      <section class="mb-5">
+        <h2 class="h4 fw-bold text-secondary mb-3">Ghi chú triển khai</h2>
+        <ul class="list-group shadow-sm">
+          <li class="list-group-item">Ưu tiên dùng <code>system</code> khi không có user xác định; chỉ dùng <code>anonymous</code> cho truy cập công khai và <code>scheduler</code> cho cron định kỳ.</li>
+          <li class="list-group-item">Luôn đính kèm <code>correlationId</code> xuyên suốt các calls giữa microservices để dễ trace.</li>
+        </ul>
+      </section>
+
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>
