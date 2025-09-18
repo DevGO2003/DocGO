@@ -1,0 +1,64 @@
+---
+name: "Memory Actor Standards (DocGO)"
+description: "Chuẩn hóa actor mặc định và quy ước ghi audit/event cho toàn bộ microservices"
+alwaysApply: true
+---
+
+# Chuẩn hóa Actor cho Audit/Event
+
+## Nguyên tắc cốt lõi
+- Actor là danh tính thực hiện hành động để ghi nhận vào audit log và event payload.
+- Mặc định dùng `system` khi không xác định được người dùng.
+- Phân loại rõ ràng bằng tiền tố: `scheduler:`, `service:`, `worker:`, `integration:`, `webhook:`, `retry:`, `import:`/`export:`, `backfill:`, `cli:`, `impersonation:`.
+- Bắt buộc lưu kèm metadata: `userId` (nếu có), `correlationId`, `ip/client`.
+
+## Bảng quy ước Actor theo ngữ cảnh
+
+| Ngữ cảnh | Ví dụ trigger | Actor | Lý do | Ghi chú |
+|---|---|---|---|---|
+| Job nền theo lịch (cron) | APScheduler/Cron, batch ETL | `scheduler` | Phân biệt job định kỳ | Có thể ghi `scheduler:jobName` |
+| Job nền không theo lịch | Retry/compensation, worker hàng đợi | `system` | Không gắn với user | Dùng chung khi không có user |
+| Webhook nội bộ giữa services | Event nội bộ, callback S2S | `system` | Hệ thống gọi hệ thống | Kèm `correlationId` |
+| Webhook bên thứ ba | Stripe, GitHub | `anonymous` | Nguồn công khai/không định danh | Log chữ ký: `X-Signature` |
+| Lỗi parse/thiếu token | Header thiếu/không hợp lệ | `system` | Không thể xác định user | Ghi lại lý do vào metadata |
+| Truy cập công khai | GET /public/* | `anonymous` | Không yêu cầu đăng nhập | Không nên cho phép hành động ghi |
+| Script vận hành thủ công | Admin chạy script | `system` | Không có session người dùng | Ghi thêm `operator` vào metadata |
+| Seed/Bootstrap dữ liệu | Khởi tạo mặc định | `system` | Một lần khi khởi tạo | Ghi rõ giai đoạn khởi tạo |
+| API Gateway BFF | Yêu cầu qua BFF | `api-gateway` | Phân biệt lối vào | Vẫn ghi `userId` thực trong metadata |
+| Microservice nội bộ | Gọi trực tiếp từ service | `service:<name>` | Rõ nguồn phát | Ví dụ: `service:ai-processing-service` |
+| Worker xử lý hàng đợi | Kafka/Redis queue | `worker:<queue>` | Rõ kênh xử lý | Ví dụ: `worker:kafka-contracts` |
+| Migration DB | Flyway/Liquibase/Alembic | `migration:<id>` | Theo dõi thay đổi schema | Ví dụ: `migration:2025-09-15-01` |
+| Bootstrap hệ thống | Khởi chạy ban đầu | `bootstrap` | Giai đoạn init | Phân biệt với seed |
+| Tích hợp bên thứ ba | SDK/provider gọi | `integration:<provider>` | Rõ nguồn tích hợp | Ví dụ: `integration:stripe` |
+| Webhook bên ngoài | Slack/GitHub | `webhook:<provider>` | Phân loại nguồn | Ví dụ: `webhook:slack` |
+| Health check/đồng bộ | Probes/sync | `health-check` | Không can thiệp nghiệp vụ | Chỉ đọc/truy vấn |
+| Retry tự động | Transient error | `retry:<reason>` | Minh bạch nguyên nhân | Ví dụ: `retry:timeout` |
+| Backfill dữ liệu | Nạp dữ liệu quá khứ | `backfill:<job>` | Phân biệt batch đặc thù | Ví dụ: `backfill:contracts-2024` |
+| Import/Export | Quy trình I/O dữ liệu | `import:<job>` / `export:<job>` | Rõ luồng dữ liệu | Ví dụ: `import:users-v1` |
+| CLI nội bộ | Chạy từ máy dev/ops | `cli:<host|user>` | Truy vết nguồn CLI | Ví dụ: `cli:devbox01` |
+| Impersonation | Admin mạo danh user | `impersonation:<adminId>` | Minh bạch trách nhiệm | Lưu `asUser:<userId>` trong metadata |
+
+## Hướng dẫn áp dụng nhanh
+
+### Spring Boot (JPA)
+```java
+@Configuration
+@EnableJpaAuditing
+public class JpaAuditingConfig {
+  @Bean
+  public AuditorAware<String> auditorAware() {
+    return () -> Optional.ofNullable(CurrentUser.get())
+                         .or(() -> Optional.of("system"));
+  }
+}
+```
+
+### FastAPI
+```python
+def get_actor(request: Request) -> str:
+    return getattr(request.state, "user_id", None) or "system"
+```
+
+## Ghi chú triển khai
+- Ưu tiên dùng `system` khi không có user xác định; chỉ dùng `anonymous` cho truy cập công khai và `scheduler` cho cron định kỳ.
+- Luôn đính kèm `correlationId` xuyên suốt các calls giữa microservices để dễ trace.

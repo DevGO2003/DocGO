@@ -1,0 +1,97 @@
+{
+  "contract_summary": {
+    "title": "Hợp đồng Cung cấp Bản quyền Phần mềm Quản lý Liên thông Thuốc Cơ sở Bán buôn",
+    "parties": [
+      {
+        "name": "Công ty Cổ phần Phát triển Phần mềm Giải pháp Phân phối Dược và Nhà thuốc",
+        "role": "Bên cung cấp dịch vụ (Bên B)",
+        "representative": "Ông Nguyễn Văn Dũng, Giám đốc",
+        "tax_code": "0109889002",
+        "contact": "0983.456.455"
+      },
+      {
+        "name": null,
+        "role": "Bên sử dụng dịch vụ (Bên A)",
+        "representative": null,
+        "tax_code": null,
+        "contact": null
+      }
+    ],
+    "object": "Hợp đồng cung cấp bản quyền phần mềm quản lý liên thông thuốc cơ sở bán buôn PhanmemGDP.com.",
+    "effective_date": "Ngày ký hợp đồng năm 2024",
+    "term": "6 năm, tự động gia hạn các năm tiếp theo mà không phát sinh thêm chi phí cho đến khi hai bên thỏa thuận chấm dứt.",
+    "payment_details": {
+      "total_value": "4.000.000 VND (phí khởi tạo một lần) + 500.000 VND (phát sinh)",
+      "schedule": "Thanh toán 100% giá trị hợp đồng sau khi ký biên bản nghiệm thu.",
+      "currency": "VND"
+    },
+    "key_clauses": [
+      {
+        "name": "Nội dung hợp tác",
+        "description": "Bên B cung cấp phần mềm PhanmemGDP.com, Bên A đồng ý sử dụng và cho phép thu thập thông tin cá nhân để tạo tài khoản.",
+        "source": "Điều 1"
+      },
+      {
+        "name": "Tính năng chính",
+        "description": "Phần mềm có các tính năng chính như quản lý hàng hóa, nhà cung cấp, khách hàng, tạo báo cáo và kết nối liên thông với cơ sở dữ liệu Dược Quốc gia.",
+        "source": "Điều 2"
+      },
+      {
+        "name": "Quyền và Trách nhiệm",
+        "description": "Bên A được sử dụng hợp pháp phần mềm và chịu trách nhiệm về dữ liệu. Bên B chịu trách nhiệm bảo trì hệ thống, hỗ trợ kỹ thuật và bảo mật dữ liệu.",
+        "source": "Điều 5 & 6"
+      },
+      {
+        "name": "Thanh toán",
+        "description": "Bên A thanh toán 100% giá trị hợp đồng bằng tiền mặt hoặc chuyển khoản sau khi ký biên bản nghiệm thu.",
+        "source": "Điều 7"
+      },
+      {
+        "name": "Giải quyết tranh chấp",
+        "description": "Mọi tranh chấp sẽ được giải quyết thông qua thương lượng, nếu không thành công sẽ đưa ra Tòa án có thẩm quyền.",
+        "source": "Điều 10"
+      }
+    ],
+    "favorable_clauses": [
+      {
+        "clause_name": "Tự động gia hạn không phí",
+        "description": "Hợp đồng có hiệu lực 6 năm và sẽ tự động gia hạn các năm tiếp theo mà không phát sinh thêm chi phí gia hạn.",
+        "benefit_to": "Bên sử dụng dịch vụ (Bên A)"
+      },
+      {
+        "clause_name": "Nâng cấp miễn phí",
+        "description": "Việc nâng cấp các tính năng phần mềm theo yêu cầu pháp lý của Cục quản lý Dược là hoàn toàn miễn phí.",
+        "benefit_to": "Bên sử dụng dịch vụ (Bên A)"
+      },
+      {
+        "clause_name": "Miễn trách nhiệm hoàn tiền",
+        "description": "Bên B không phải chịu trách nhiệm hoàn tiền cho Bên A trong bất kỳ trường hợp chấm dứt hợp đồng nào, ngoại trừ trường hợp Bên B vi phạm trách nhiệm của mình.",
+        "benefit_to": "Bên cung cấp dịch vụ (Bên B)"
+      },
+      {
+        "clause_name": "Quyền công bố thông tin khách hàng",
+        "description": "Bên B có quyền công bố và sử dụng thông tin việc Bên A là khách hàng đang sử dụng bản quyền phần mềm của mình.",
+        "benefit_to": "Bên cung cấp dịch vụ (Bên B)"
+      }
+    ],
+    "unfavorable_clauses": [
+      {
+        "clause_name": "Tự động gia hạn",
+        "description": "Hợp đồng sẽ tự động gia hạn hàng năm mà không cần thông báo, điều này có thể khiến Bên A khó chấm dứt hợp đồng nếu không muốn tiếp tục sử dụng dịch vụ.",
+        "risk_to": "Bên sử dụng dịch vụ (Bên A)"
+      },
+      {
+        "clause_name": "Phí phát sinh không giới hạn",
+        "description": "Hợp đồng quy định Bên A phải trả thêm phí 500.000 đồng/năm cho mỗi 500 hóa đơn vượt quá hạn mức 7.000 hóa đơn, mà không có giới hạn tối đa cho khoản phí này.",
+        "risk_to": "Bên sử dụng dịch vụ (Bên A)"
+      },
+      {
+        "clause_name": "Miễn trách nhiệm hoàn tiền",
+        "description": "Bên B không phải hoàn trả số tiền đã thu trong bất kỳ trường hợp chấm dứt hợp đồng nào, trừ khi Bên B vi phạm các trách nhiệm được quy định.",
+        "risk_to": "Bên sử dụng dịch vụ (Bên A)"
+      }
+    ],
+    "termination_conditions": "Hợp đồng có thể bị chấm dứt trước thời hạn nếu các bên thỏa thuận, xảy ra sự kiện bất khả kháng, một trong các bên bị phá sản/giải thể, hoặc một bên vi phạm nghiêm trọng nghĩa vụ thanh toán."
+  }
+}
+

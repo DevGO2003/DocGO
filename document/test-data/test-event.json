@@ -1,0 +1,83 @@
+{
+  "eventVersion": "v1",
+  "eventType": "ContractSummaryPublished",
+  "eventId": "test-event-123",
+  "timestamp": "2025-09-01T08:35:00Z",
+  "source": "test-publisher",
+  "correlationId": "test-correlation-456",
+  "actor": {
+    "userId": "test-user",
+    "userRole": "admin",
+    "ip": "127.0.0.1"
+  },
+  "data": {
+    "contractNumber": "TEST-2025-001",
+    "status": "DRAFT",
+    "contractType": "Test Contract",
+    "title": "Test Contract Summary Published",
+    "tags": ["test", "demo"],
+    "parties": [
+      {
+        "name": "Test Company A",
+        "role": "Bên A",
+        "representative": "Nguyễn Văn Test",
+        "taxCode": "1234567890",
+        "contact": "test@example.com",
+        "address": "123 Test Street",
+        "businessLicense": "BL123456"
+      }
+    ],
+    "object": "Test contract object",
+    "effectiveDate": "2025-09-01",
+    "term": "12 tháng",
+    "paymentDetails": {
+      "totalValue": 1000000,
+      "schedule": "Thanh toán 50% trước, 50% sau",
+      "currency": "VND",
+      "paymentMethod": "Chuyển khoản"
+    },
+    "keyClauses": [
+      {
+        "name": "Test Key Clause",
+        "description": "This is a test key clause",
+        "source": "Test Source"
+      }
+    ],
+    "favorableClauses": [
+      {
+        "clauseName": "Test Favorable",
+        "description": "This is favorable to client",
+        "benefitTo": "Client"
+      }
+    ],
+    "unfavorableClauses": [
+      {
+        "clauseName": "Test Unfavorable",
+        "description": "This is unfavorable to client",
+        "riskTo": "Client"
+      }
+    ],
+    "reminders": [
+      {
+        "type": "Payment Reminder",
+        "date": "2025-09-15",
+        "content": "Remind payment"
+      }
+    ],
+    "terminationConditions": "Test termination conditions",
+    "riskAssessment": {
+      "riskLevel": "LOW",
+      "riskFactors": ["Low risk test"],
+      "mitigationMeasures": ["Test mitigation"]
+    },
+    "complianceStatus": {
+      "status": "COMPLIANT",
+      "issues": [],
+      "recommendations": []
+    }
+  },
+  "metadata": {
+    "serviceVersion": "1.0.0",
+    "region": "test"
+  }
+}

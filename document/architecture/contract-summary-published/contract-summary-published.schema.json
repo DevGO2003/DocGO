@@ -1,0 +1,69 @@
+{
+  "eventVersion": "v1",
+  "eventType": "ContractSummaryPublished",
+  "eventId": "<uuid>",
+  "timestamp": "<ISO-8601-UTC>",
+  "source": "contract-management-service",
+  "correlationId": "<uuid>",
+  "actor": {
+    "userId": "<string>",
+    "userRole": "<string>",
+    "ip": "<string>"
+  },
+  "data": {
+    "contractNumber": "string",
+    "status": "string",
+    "contractType": "string",
+    "title": "string",
+    "tags": ["string"],
+    "parties": [
+      {
+        "name": "string",
+        "role": "string",
+        "representative": "string",
+        "taxCode": "string",
+        "contact": "string",
+        "address": "string",
+        "businessLicense": "string"
+      }
+    ],
+    "object": "string",
+    "effectiveDate": "YYYY-MM-DD",
+    "term": "string",
+    "paymentDetails": {
+      "totalValue": 0,
+      "schedule": "string",
+      "currency": "string",
+      "paymentMethod": "string"
+    },
+    "keyClauses": [
+      { "name": "string", "description": "string", "source": "string" }
+    ],
+    "favorableClauses": [
+      { "clauseName": "string", "description": "string", "benefitTo": "string" }
+    ],
+    "unfavorableClauses": [
+      { "clauseName": "string", "description": "string", "riskTo": "string" }
+    ],
+    "reminders": [
+      { "type": "string", "date": "YYYY-MM-DD", "content": "string" }
+    ],
+    "terminationConditions": "string",
+    "riskAssessment": {
+      "riskLevel": "LOW|MEDIUM|HIGH",
+      "riskFactors": ["string"],
+      "mitigationMeasures": ["string"]
+    },
+    "complianceStatus": {
+      "status": "COMPLIANT|NON_COMPLIANT",
+      "issues": ["string"],
+      "recommendations": ["string"]
+    }
+  },
+  "metadata": {
+    "serviceVersion": "string",
+    "region": "string"
+  }
+}
+
+

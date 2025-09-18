@@ -1,0 +1,25 @@
+{
+  "mcpServers": {
+    "postgres": {
+      "command": "mcp-postgres",
+      "args": [
+        "--host", "localhost",
+        "--port", "5432",
+        "--database", "docgo",
+        "--user", "postgres",
+        "--password", "${POSTGRES_PASSWORD}"
+      ]
+    },
+    "mysql": {
+      "command": "mcp-mysql",
+      "args": [
+        "--host", "localhost",
+        "--port", "3306",
+        "--database", "docgo",
+        "--user", "root",
+        "--password", "${MYSQL_PASSWORD}"
+      ]
+    }
+  }
+}
+

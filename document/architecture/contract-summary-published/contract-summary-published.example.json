@@ -1,0 +1,99 @@
+{
+  "eventVersion": "v1",
+  "eventType": "ContractSummaryPublished",
+  "eventId": "8e1c2b07-6d1a-4d5e-a3a9-3b5a5d1b2c45",
+  "timestamp": "2025-09-01T07:08:01Z",
+  "source": "contract-management-service",
+  "correlationId": "a886e8ab-021f-45b8-9a5a-8fe2cbe01110",
+  "actor": {
+    "userId": "user-123",
+    "userRole": "contract-editor",
+    "ip": "203.0.113.10"
+  },
+  "data": {
+    "contractNumber": "CTR-2024-001",
+    "status": "ACTIVE",
+    "contractType": "Dịch vụ IT",
+    "title": "Hợp đồng cung cấp dịch vụ IT cho Công ty ABC",
+    "tags": ["IT", "Software Development", "Maintenance"],
+    "parties": [
+      {
+        "name": "Công ty TNHH ABC",
+        "role": "Bên A (Người mua)",
+        "representative": "Nguyễn Văn An",
+        "taxCode": "0101234567",
+        "contact": "an.nguyen@abc.com | 0901234567",
+        "address": "Số 123, Đường Lê Lợi, Hà Nội",
+        "businessLicense": "0123456789"
+      },
+      {
+        "name": "Công ty Cổ phần XYZ",
+        "role": "Bên B (Người bán)",
+        "representative": "Trần Thị Bình",
+        "taxCode": "0307654321",
+        "contact": "binh.tran@xyz.com | 0917654321",
+        "address": "Số 456, Đường Nguyễn Huệ, TP.HCM",
+        "businessLicense": "9876543210"
+      }
+    ],
+    "object": "Dịch vụ phát triển phần mềm và bảo trì hệ thống",
+    "effectiveDate": "2024-01-01",
+    "term": "12 tháng",
+    "paymentDetails": {
+      "totalValue": 500000000,
+      "schedule": "Thanh toán 30% khi ký hợp đồng, 40% khi hoàn thành 50% công việc, 30% khi nghiệm thu",
+      "currency": "VND",
+      "paymentMethod": "Chuyển khoản ngân hàng"
+    },
+    "keyClauses": [
+      {
+        "name": "Key Terms",
+        "description": "Thanh toán theo tiến độ, bảo hành 12 tháng, SLA 99.9%",
+        "source": "Contract"
+      }
+    ],
+    "favorableClauses": [
+      {
+        "clauseName": "Chiết khấu thanh toán sớm",
+        "description": "Bên A được hưởng chiết khấu 5% nếu thanh toán toàn bộ trong vòng 7 ngày.",
+        "benefitTo": "Client"
+      }
+    ],
+    "unfavorableClauses": [
+      {
+        "clauseName": "Phạt chậm tiến độ",
+        "description": "Phạt chậm tiến độ, giới hạn trách nhiệm",
+        "riskTo": "Client"
+      }
+    ],
+    "reminders": [
+      {
+        "type": "Thanh toán đợt 1",
+        "date": "2024-01-08",
+        "content": "Nhắc thanh toán 30% trước 7 ngày"
+      },
+      {
+        "type": "Gia hạn hợp đồng",
+        "date": "2024-12-02",
+        "content": "Nhắc gia hạn trước 30 ngày"
+      }
+    ],
+    "terminationConditions": "Chấm dứt khi vi phạm nghiêm trọng, không thanh toán đúng hạn, chất lượng không đạt yêu cầu",
+    "riskAssessment": {
+      "riskLevel": "LOW",
+      "riskFactors": ["Đối tác uy tín", "Có kinh nghiệm IT"],
+      "mitigationMeasures": ["Theo dõi SLA định kỳ"]
+    },
+    "complianceStatus": {
+      "status": "COMPLIANT",
+      "issues": [],
+      "recommendations": []
+    }
+  },
+  "metadata": {
+    "serviceVersion": "1.0.0",
+    "region": "ap-southeast-1"
+  }
+}
+
+

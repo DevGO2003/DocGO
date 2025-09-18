@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>00 - Project Architecture Overview (DocGO)</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light p-3">
+  <div class="container-xl py-5">
+    <header class="text-center mb-5">
+      <h1 class="display-5 fw-bold text-primary">00 - Project Architecture Overview</h1>
+      <p class="lead text-muted">Tổng quan kiến trúc và danh sách quy tắc áp dụng cho DocGO</p>
+    </header>
+
+    <section class="mb-4">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h2 class="h5 text-secondary fw-bold mb-3">Danh sách Rule Files</h2>
+          <div class="table-responsive">
+            <table class="table table-striped table-hover align-middle">
+              <thead class="table-dark">
+                <tr>
+                  <th scope="col">STT</th>
+                  <th scope="col">Tên</th>
+                  <th scope="col">Mô tả</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>01</td><td>API Standards</td><td>Chuẩn hóa URL, payload, response format, handler naming.</td></tr>
+                <tr><td>02</td><td>Event & Exception Standards</td><td>Chuẩn event payload, exception → RestResponse, tài liệu API.</td></tr>
+                <tr><td>03</td><td>Service Structure Standards</td><td>Cấu trúc dịch vụ cho FastAPI/Spring, naming, ports, docs.</td></tr>
+                <tr><td>04</td><td>Environment & Git Standards</td><td>Quản lý .env/.env.example, .gitignore, remote và workflow.</td></tr>
+                <tr><td>05</td><td>Docker Development Standards</td><td>Volume mounts, Dockerfile chuẩn, compose, port/networking.</td></tr>
+                <tr><td>06</td><td>Memory Actor Standards</td><td>Chuẩn hóa actor trong audit/event và metadata đi kèm.</td></tr>
+                <tr><td>07</td><td>Chat Utilities</td><td>Quy tắc tạo prompt nhanh và quản lý tiện ích chat.</td></tr>
+                <tr><td>08</td><td>No Auto MD Creation</td><td>Ngăn tạo file .md tự động, chỉ khi có yêu cầu rõ ràng.</td></tr>
+                <tr><td>09</td><td>Auto Ignore</td><td>Tự động thêm pattern vào .cursorignore (trừ env).</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="mb-4">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h2 class="h5 text-secondary fw-bold mb-3">Nội dung gốc (MDC)</h2>
+          <xmp>
+---
+description: "Tổng quan kiến trúc dự án DocGO với các quy tắc chuẩn hóa cho microservices, API, và development workflow"
+autoAttachments:
+  - "*.java"
+  - "*.py"
+  - "*.yml"
+  - "*.yaml"
+  - "*.md"
+  - "*.mdx"
+  - "*.env*"
+  - "docker-compose*.yml"
+  - "Dockerfile*"
+  - "pom.xml"
+  - "requirements.txt"
+  - "package.json"
+  - "*.gradle"
+  - "*.kt"
+  - "*.xml"
+  - "*.properties"
+  - "*.sql"
+  - "*.sh"
+  - "*.bat"
+  - "*.ps1"
+alwaysApply: true
+---
+
+# DocGO Project Architecture - Overview
+
+The DocGO project uses microservices architecture with standardized rules divided into separate files for easy management and maintenance.
+
+## 📋 List of Rule Files
+
+### 1. **API Standards** (`api-standards.mdc`)
+- API standardization rules for DocGO
+- URL rules, payload, response format
+- Handler function names and naming conventions
+- Implementation examples from current state
+- Security and versioning
+
+### 2. **Event & Exception Standards** (`event-exception-standards.mdc`)
+- Event Payload Standard standardization
+- Exception Handling rules
+- API documentation writing rules (Vietnamese)
+- Input/Output description standardization for APIs
+
+### 3. **Service Structure Standards** (`service-structure-standards.mdc`)
+- Service structure rules (Python FastAPI, Java Spring Boot)
+- Dependencies management and Maven/Gradle
+- Port mapping and documentation paths
+- Folder naming and package structure rules
+
+### 4. **Environment & Git Standards** (`environment-git-standards.mdc`)
+- Environment file management (.env, .env.example)
+- .gitignore rules by service type
+- Remote Repository management (origin + private)
+- Push and automatic synchronization workflow
+
+### 5. **Docker Development Standards** (`docker-development-standards.mdc`)
+- Docker Development Local rules
+- Standard Dockerfile structure
+- Docker Compose Development
+- Port and Networking rules
+
+## 🎯 Common Goals
+
+All these rules aim to:
+- **Standardize** URL, payload, error handling across services
+- **Standardize** response structure and event payload
+- **Ensure** consistency in API documentation writing
+- **Optimize** development and deployment workflow
+- **Secure** sensitive information and Git repository management
+
+## 📚 How to Use
+
+1. **When developing new APIs**: Refer to `api-standards.mdc` and `event-exception-standards.mdc`
+2. **When creating new services**: Refer to `service-structure-standards.mdc`
+3. **When configuring environment**: Refer to `environment-git-standards.mdc`
+4. **When working with Docker**: Refer to `docker-development-standards.mdc`
+
+## 🔄 Updating Rules
+
+When adding or modifying rules:
+1. Edit the corresponding rule file
+2. Update this file if there are structural changes
+3. Commit and push following the established Git workflow
+
+---
+
+**Note**: All these rules have `alwaysApply: true` to ensure they are automatically applied to every code file in the project.
+          </xmp>
+        </div>
+      </div>
+    </section>
+  </div>
+</body>
+</html>
+
+
