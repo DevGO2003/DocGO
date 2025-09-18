@@ -45,17 +45,18 @@ npm run dev
 
 ### Truy cập
 - **Trang chủ**: http://localhost:8000
+- **Docs**: http://localhost:8000/docs#/
 - **Health Check**: http://localhost:8000/api/health
-- **API Base**: http://localhost:8000/api/v1/
+- **API Base**: http://localhost:8000/api/
 
 ## 📚 Tài liệu chi tiết
 
 ## Mô tả
-API Gateway BFF (Backend for Frontend) sử dụng Next.js để kết nối và quản lý 4 microservices chính của DocGO:
-- `authentication-identity-service` (Spring Boot) - Port 8001
-- `contract-management-service` (Spring Boot) - Port 8002  
-- `ai-processing-service` (FastAPI) - Port 8003
-- `file-storage-service` (FastAPI) - Port 8004
+API Gateway BFF (Backend for Frontend) sử dụng Next.js để kết nối và quản lý 4 microservices chính của DocGO (theo compose host → container:8000):
+- `authentication-identity-service` → 8001 → 8000
+- `contract-management-service` → 8002 → 8000  
+- `ai-processing-service` → 8003 → 8000
+- `file-storage-service` → 8004 → 8000
 
 ## Yêu cầu hệ thống
 - Node.js 18.0.0 trở lên
@@ -84,17 +85,17 @@ Copy-Item env_example.txt .env -Force
 cp env_example.txt .env
 ```
 
-Chỉnh sửa file `.env` với các giá trị phù hợp:
+Chỉnh sửa file `.env` với các giá trị phù hợp (ưu tiên URL nội bộ compose):
 ```env
 # API Gateway Configuration
 PORT=8000
 NODE_ENV=development
 
 # Service URLs
-AUTH_SERVICE_URL=http://localhost:8001
-CONTRACT_SERVICE_URL=http://localhost:8002
-AI_SERVICE_URL=http://localhost:8003
-FILE_SERVICE_URL=http://localhost:8004
+AUTH_SERVICE_URL=http://authentication-identity-service:8000
+CONTRACT_SERVICE_URL=http://contract-management-service:8000
+AI_SERVICE_URL=http://ai-processing-service:8000
+FILE_SERVICE_URL=http://file-storage-service:8000
 
 # Kafka Configuration
 KAFKA_BROKERS=localhost:9092

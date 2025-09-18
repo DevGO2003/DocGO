@@ -104,8 +104,8 @@ mvn clean install
 mvn spring-boot:run
 ```
 
-Ứng dụng chạy tại: http://localhost:8003
-API Documentation: http://localhost:8003/docs
+Ứng dụng chạy tại (qua docker compose): http://localhost:8002
+API Documentation: http://localhost:8002/docs#/
 
 ## Contract Management Service - Hướng dẫn chạy
 
@@ -225,8 +225,7 @@ docker build -t docgo-contract-service:latest .
 
 ### 2. Chạy với docker-compose (khuyến nghị)
 ```bash
-# cd autofiles (đã loại bỏ)
-docker-compose -f docker-compose.local.yml up contract-management-service
+docker compose -f docker-compose.local.yml up contract-management-service
 ```
 
 ### 3. Chạy standalone
@@ -244,7 +243,7 @@ docker run -p 8003:8003 \
 
 ### Base URL
 ```
-http://localhost:8003/api/v1/contract-management-service
+http://localhost:8002/api/v1/contract-management-service
 ```
 
 ### Các endpoint chính

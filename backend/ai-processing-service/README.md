@@ -98,26 +98,26 @@ pip install -r requirements.txt
 # Copy file env từ thư mục env
 Copy-Item env/.env.example env/.env -Force
 # Chỉnh sửa file env/.env với các giá trị thực tế
-uvicorn main:app --reload --port 8017
+uvicorn main:app --reload --port 8000
 ```
 
 #### Run (Docker):
 ```bash
 cd backend/ai-processing-service
 docker build -t ai-processing-service .
-docker run -p 8017:8000 --env-file env/.env ai-processing-service
+docker run -p 8003:8000 --env-file env/.env ai-processing-service
 ```
 
 ### 4. Truy cập
-- **API Documentation**: http://localhost:8017/docs
-- **Health Check**: http://localhost:8017/health
-- **Root**: http://localhost:8017/ (tự động redirect sang /docs)
+- **API Documentation**: http://localhost:8003/docs#/ (qua compose)
+- **Health Check**: http://localhost:8003/health
+- **Root**: http://localhost:8003/
 
 ## 📚 API Documentation
 
 ### Extract API
 ```bash
-curl -X POST "http://localhost:8017/api/v1/ai-processing-service/extract" \
+curl -X POST "http://localhost:8003/api/v1/ai-processing-service/extract" \
   -H "Content-Type: multipart/form-data" \
   -F "file=@contract.docx" \
   -H "gemini_api_key: your_api_key"
@@ -126,7 +126,7 @@ curl -X POST "http://localhost:8017/api/v1/ai-processing-service/extract" \
 ### Summarize API
 ```bash
 # Với file TXT
-curl -X POST "http://localhost:8017/api/v1/ai-processing-service/summarize" \
+curl -X POST "http://localhost:8003/api/v1/ai-processing-service/summarize" \
   -H "Content-Type: multipart/form-data" \
   -F "file=@contract.txt"
 
@@ -186,7 +186,7 @@ ai-processing-service/
 ### Logs
 ```bash
 # Xem logs khi chạy với uvicorn
-uvicorn main:app --host 0.0.0.0 --port 8017 --reload --log-level debug
+uvicorn main:app --host 0.0.0.0 --port 8000 --reload --log-level debug
 ```
 
 ## Features:
@@ -207,7 +207,7 @@ uvicorn main:app --host 0.0.0.0 --port 8017 --reload --log-level debug
 - `GET /api/v1/ai-processing-service/batch/status/{job_id}` - Trạng thái batch job
 - `POST /api/v1/ai-processing-service/events/handle` - Xử lý events
 
-Docs: `http://localhost:8017/docs#/`
+Docs: `http://localhost:8003/docs#/`
 
 ## 🤝 Đóng góp
 

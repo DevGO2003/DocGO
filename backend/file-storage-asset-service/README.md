@@ -2,7 +2,7 @@
 
 Dịch vụ FastAPI quản lý upload/download file, cấp signed URL và metadata.
 
-Docs: http://localhost:8012/docs#/
+Docs: http://localhost:8004/docs#/
 
 ## How to run this microservice
 
@@ -67,10 +67,10 @@ Trước khi chạy service, bạn cần:
 python -m venv venv
 ./venv/Scripts/Activate.ps1
 pip install -r requirements.txt
-uvicorn main:app --reload --port 8012
+uvicorn main:app --reload --port 8000
 ```
 
-**Docs:** `http://localhost:8012/docs#/`
+**Docs:** `http://localhost:8004/docs#/`
 
 ## API Endpoints
 
@@ -184,5 +184,5 @@ GET /api/v1/file-storage-asset-service/files/s3/documents/contract.pdf?include_u
 - Nếu không có ClamAV, set `USE_CLAMD=false` trong file `.env`
 - Service sẽ tự động tạo thư mục `uploads/` và `temp/` nếu chưa tồn tại
 - Tất cả API đều trả về format `RestResponse` chuẩn hóa
-- Port chuẩn: 8012 (theo quy tắc DocGO)
+- Port qua compose: Host 8004 → Container 8000 (theo quy tắc DocGO)
 - Tích hợp đầy đủ MongoDB và Redis cho quản lý file nâng cao
