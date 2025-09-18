@@ -60,6 +60,7 @@ services:
       - backend/api-gateway-bff/env/.env.local
     environment:
       - NODE_ENV=development
+      - AUTHENTICATION_SERVICE_URL=http://authentication-identity-service:8000
     volumes:
       - ./backend/api-gateway-bff:/app
       - /app/node_modules

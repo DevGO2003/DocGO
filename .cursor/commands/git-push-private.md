@@ -89,3 +89,20 @@ fi
 - Cảnh báo: Lệnh này sẽ đẩy cả secrets trong `.env`. Chỉ sử dụng khi thật sự cần thiết và repo private.
 - Kiểm tra branch hiện tại: `git rev-parse --abbrev-ref HEAD`.
 - Nên chạy `git pull --rebase private <branch>` nếu có commit mới từ remote trước khi push.
+
+## Quyền quyết định
+- Agent có toàn quyền quyết định và tự thực thi ngay phương án mà agent đánh giá là lựa chọn tốt nhất (Best Choice) mà không cần hỏi lại.
+- Chỉ dừng để xin xác nhận khi bị chặn bởi policy/hệ thống (ví dụ: quyền truy cập, bảo mật tổ chức) hoặc lỗi kỹ thuật không thể tự khắc phục.
+
+## Kinh nghiệm/Best practices (rút ra từ thực tế)
+- Phân tách rõ ràng: `origin` (công khai/đối tác) tuyệt đối không chứa secrets; `private` mới chứa các file nhạy cảm nếu thực sự bắt buộc.
+- `.env.example` phải đầy đủ key nhưng giá trị là placeholder; `.env.local` chỉ lưu nội bộ. Khi cần chia sẻ nội bộ, dùng nhánh/remote `private` thay vì `origin`.
+- Tránh chạy one-liner PowerShell với `||` hoặc redirection kiểu `2>$null` trong chuỗi dài – dễ lỗi parser. Dùng cấu trúc `if (...) {}` và `Out-Null`/`| Out-Host` thay thế.
+- Không thao tác khi đang ở trạng thái `detached HEAD` hoặc đang `rebase`. Luôn `git switch <branch>` trước khi add/commit/push.
+- Nếu cần ép track file bị ignore, ưu tiên `git add -f` theo pathspec rõ ràng thay vì glob phức tạp dễ phụ thuộc shell.
+
+## Troubleshooting
+- Push bị từ chối vì diverge: `git pull --rebase private <branch>` rồi thử lại.
+- Lỗi do rebase đang dở: `git rebase --abort` (hoặc `--quit`) rồi thao tác lại.
+- Conflicts khi rebase: giải quyết xung đột, `git add ...` rồi `git rebase --continue`.
+- Cần đính kèm chỉ ở `private` nhưng giữ upstream về `origin`: sau khi push `private`, khôi phục upstream về `origin/<branch>` (đã được script xử lý ở bước 4).

@@ -65,3 +65,18 @@ git push origin "$branch"
 - Kiểm tra branch hiện tại với git-status
 - Sử dụng git-pull để sync trước khi push
 - Không force push trên main/master branch
+
+## Quyền quyết định
+- Agent có toàn quyền quyết định và tự thực thi ngay phương án mà agent đánh giá là lựa chọn tốt nhất (Best Choice) mà không cần hỏi lại.
+- Chỉ dừng để xin xác nhận khi bị policy/hệ thống chặn (quyền, bảo mật) hoặc gặp lỗi kỹ thuật không tự khắc phục.
+
+## Kinh nghiệm/Best practices (rút ra từ thực tế)
+- `origin` không nên chứa secrets. Chỉ push `.env.example` lên `origin`; các `.env`/`.env.local` giữ ở local hoặc chuyển qua `private` nếu thật sự cần.
+- Khi cần track file bị ignore (chỉ ở `private`), dùng `git add -f` với pathspec cụ thể thay vì glob mơ hồ.
+- Tránh thao tác trong trạng thái `detached HEAD` hoặc khi đang rebase. Luôn `git switch <branch>` trước khi push.
+- Trên PowerShell, tránh dùng toán tử `||` và redirection `2>$null` trong một chuỗi lệnh dài; tách lệnh hoặc dùng `if (...) {}` để ổn định hơn.
+
+## Troubleshooting
+- Push bị chặn bởi GitHub Push Protection (GH013): loại bỏ secrets khỏi commit (thay bằng placeholder), `git commit --amend` hoặc `git reset --soft` rồi commit lại; nếu đã nằm trong lịch sử, cân nhắc `git filter-repo` và rotate secret.
+- Nhánh local/remote diverge mạnh: `git pull --rebase origin <branch>` rồi push lại.
+- Rebase đang dở: `git rebase --abort` hoặc `--continue` sau khi xử lý conflict.

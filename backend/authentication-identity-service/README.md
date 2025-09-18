@@ -28,7 +28,7 @@ Copy-Item .env.example .env -Force
 ```
 mvn spring-boot:run
 ```
-The service runs at: `http://localhost:8001`
+The service runs at (compose host): `http://localhost:8001` (container port 8000)
 
 - Base API: `http://localhost:8001/api/v1/authentication-identity-service/...`
 - Swagger UI: `http://localhost:8001/docs#/`

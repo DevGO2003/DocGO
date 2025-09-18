@@ -6,22 +6,27 @@ DocGO là một hệ thống quản lý tài liệu thông minh với kiến tr�
 
 ## 🏗️ Kiến trúc Hệ thống
 
-### Microservices Architecture
-- **API Gateway BFF** (Port 8000) - Backend for Frontend
-- **Authentication Identity Service** (Port 8001) - Xác thực và ủy quyền
-- **User Management Service** (Port 8002) - Quản lý người dùng
-- **Contract Management Service** (Port 8003) - Quản lý hợp đồng
-- **AI Processing Service** (Port 8017) - Xử lý AI
-- **File Storage Asset Service** (Port 8012) - Lưu trữ file
+### Microservices Architecture (Local Compose)
 
-### Auto-Redirect Feature
-Tất cả các backend microservices đều có tính năng **tự động redirect** từ root path (`/`) sang `/docs` để cải thiện trải nghiệm developer:
+Bảng dịch vụ đang chạy theo `docker-compose.local.yml` (host port → container 8000):
 
-- `http://localhost:8001/` → `http://localhost:8001/docs`
-- `http://localhost:8002/` → `http://localhost:8002/docs`
-- `http://localhost:8003/` → `http://localhost:8003/docs`
-- `http://localhost:8012/` → `http://localhost:8012/docs`
-- `http://localhost:8017/` → `http://localhost:8017/docs`
+| Service | Host Port | Container | Docs/URL |
+|---|---|---|---|
+| API Gateway BFF | 8000 | 8000 | http://localhost:8000/docs#/ |
+| Web Next.js | 3000 | 3000 | http://localhost:3000 |
+| Authentication Identity Service | 8001 | 8000 | http://localhost:8001/docs#/ |
+| Contract Management Service | 8002 | 8000 | http://localhost:8002/docs#/ |
+| AI Processing Service | 8003 | 8000 | http://localhost:8003/docs#/ |
+| File Storage Service | 8004 | 8000 | http://localhost:8004/docs#/ |
+| MongoDB MCP Server | 8005 | 3000 | http://localhost:8005 |
+| Redis | 6379 | 6379 | redis://localhost:6379 |
+| Kafka (PLAINTEXT) | 9092 | 9092 | PLAINTEXT://localhost:9092 |
+
+Số lượng service ứng dụng: 6 (web-nextjs, api-gateway-bff, authentication-identity-service, contract-management-service, ai-processing-service, file-storage-service) + hạ tầng (Redis, Kafka, MCP).
+
+### Auto-Redirect & Docs
+- Các backend service đều phục vụ tài liệu tại `/docs#/` (SpringDoc/FastAPI).
+- Web Next.js (port 3000) không có `/docs`.
 
 ## 🛠️ Công nghệ sử dụng
 
@@ -53,16 +58,16 @@ cd DocGO
 
 # Chạy toàn bộ hệ thống
 # cd autofiles (đã loại bỏ thư mục này)
-docker-compose -f docker-compose.local.yml up -d
+docker compose -f docker-compose.local.yml up -d
 
 # Hoặc chạy từng service
-docker-compose -f docker-compose.local.yml up mariadb redis
-docker-compose -f docker-compose.local.yml up api-gateway-bff
-docker-compose -f docker-compose.local.yml up authentication-identity-service
-docker-compose -f docker-compose.local.yml up user-management-service
-docker-compose -f docker-compose.local.yml up contract-management-service
-docker-compose -f docker-compose.local.yml up ai-processing-service
-docker-compose -f docker-compose.local.yml up file-storage-asset-service
+docker compose -f docker-compose.local.yml up redis kafka
+docker compose -f docker-compose.local.yml up web-nextjs
+docker compose -f docker-compose.local.yml up api-gateway-bff
+docker compose -f docker-compose.local.yml up authentication-identity-service
+docker compose -f docker-compose.local.yml up contract-management-service
+docker compose -f docker-compose.local.yml up ai-processing-service
+docker compose -f docker-compose.local.yml up file-storage-service
 ```
 
 ### 2. Chạy từng service riêng lẻ
@@ -79,38 +84,30 @@ npm run dev
 ```bash
 cd backend/authentication-identity-service
 ./mvnw spring-boot:run
-# Truy cập: http://localhost:8001 (tự động redirect sang /docs)
-```
-
-#### User Management Service
-```bash
-cd backend/user-management-service
-pip install -r requirements.txt
-python main.py
-# Truy cập: http://localhost:8002 (tự động redirect sang /docs)
+# Truy cập: http://localhost:8001/docs#/
 ```
 
 #### Contract Management Service
 ```bash
 cd backend/contract-management-service
 ./mvnw spring-boot:run
-# Truy cập: http://localhost:8003 (tự động redirect sang /docs)
+# Truy cập: http://localhost:8002/docs#/
 ```
 
 #### AI Processing Service
 ```bash
 cd backend/ai-processing-service
 pip install -r requirements.txt
-python -m uvicorn main:app --host 0.0.0.0 --port 8017
-# Truy cập: http://localhost:8017 (tự động redirect sang /docs)
+python -m uvicorn main:app --host 0.0.0.0 --port 8000
+# Truy cập (qua compose): http://localhost:8003/docs#/
 ```
 
-#### File Storage Asset Service
+#### File Storage Service
 ```bash
 cd backend/file-storage-asset-service
 pip install -r requirements.txt
-python -m uvicorn main:app --host 0.0.0.0 --port 8012
-# Truy cập: http://localhost:8012 (tự động redirect sang /docs)
+python -m uvicorn main:app --host 0.0.0.0 --port 8000
+# Truy cập (qua compose): http://localhost:8004/docs#/
 ```
 
 ## 📚 API Documentation
@@ -139,13 +136,12 @@ Tất cả các microservices đều có API documentation tự động tại `/
 
 ### Test Individual Services
 ```bash
-# Test health endpoints
-curl http://localhost:8000/api/health
-curl http://localhost:8001/health
-curl http://localhost:8002/health
-curl http://localhost:8003/health
-curl http://localhost:8017/health
-curl http://localhost:8012/health
+# Test docs/health
+curl http://localhost:8000/docs
+curl http://localhost:8001/docs
+curl http://localhost:8002/docs
+curl http://localhost:8003/docs
+curl http://localhost:8004/docs
 ```
 
 ## 🔧 Cấu hình
@@ -163,7 +159,7 @@ SPRING_DATASOURCE_USERNAME=root
 SPRING_DATASOURCE_PASSWORD=your_password
 ```
 
-### Database Setup
+### Database Setup (nếu sử dụng MariaDB nội bộ riêng)
 ```sql
 -- Tạo database
 CREATE DATABASE docgo;
@@ -183,7 +179,6 @@ DocGO/
 ├── backend/                      # Backend microservices
 │   ├── api-gateway-bff/         # API Gateway (Next.js)
 │   ├── authentication-identity-service/  # Auth Service (Spring Boot)
-│   ├── user-management-service/ # User Management (FastAPI)
 │   ├── contract-management-service/      # Contract Management (Spring Boot)
 │   ├── ai-processing-service/   # AI Processing (FastAPI)
 │   └── file-storage-asset-service/       # File Storage (FastAPI)
@@ -213,3 +208,7 @@ Dự án này được phát hành dưới MIT License. Xem file `LICENSE` để
 ---
 
 **Lưu ý**: Đây là dự án đang phát triển. Một số tính năng có thể chưa hoàn thiện hoặc đang trong quá trình cải tiến.
+
+—
+
+Nhánh mặc định: `main`. Vui lòng tạo PR vào `main`.
