@@ -5,7 +5,8 @@
 ## Mô tả
 - Tự động và không yêu cầu xác nhận.
 - Xác định nhánh hiện tại; nếu không xác định được thì MẶC ĐỊNH dùng nhánh `main` (tạo mới nếu chưa có).
-- Push lên remote `private` cùng tên nhánh, sau đó khôi phục upstream về `origin/<branch>` để tiếp tục làm việc trên origin.
+- **ENV SYNC STRATEGY**: Push lên remote `private` cùng tên nhánh, sau đó tự động merge env files vào `private/main` để đồng bộ.
+- Khôi phục upstream về `origin/<branch>` để tiếp tục làm việc trên origin.
 - Đảm bảo các file env được force-add: `**/.env`, `**/.env.local`, `**/.env.example`.
 - Không thêm các file nhạy cảm khác như `.env` gốc, `.env.production` (đang bị ignore theo quy tắc Git của dự án).
 
@@ -36,7 +37,33 @@ $null = git commit -m "chore(env): force track env files (.env, .env.local, .env
 
 # 3) Push lên remote private cùng tên nhánh
 if (git push --set-upstream private $branch) {
-  # 4) Khôi phục upstream về origin/<branch>
+  # 4) Merge env files vào private/main để đồng bộ
+  Write-Host "🔄 Đồng bộ env files vào private/main..." -ForegroundColor Yellow
+  try {
+    # Lưu nhánh hiện tại
+    $currentBranch = $branch
+    
+    # Chuyển sang nhánh main trên private
+    git fetch private main 2>$null
+    git checkout -B temp-merge private/main 2>$null
+    
+    # Merge env files từ nhánh hiện tại (ưu tiên env files từ nhánh hiện tại)
+    git merge $currentBranch --no-edit -X ours --strategy-option=ours 2>$null
+    
+    # Push merge lên private/main
+    git push private temp-merge:main 2>$null
+    
+    # Xóa nhánh tạm và quay về nhánh gốc
+    git checkout $currentBranch 2>$null
+    git branch -D temp-merge 2>$null
+    
+    Write-Host "✅ Env files đã được đồng bộ vào private/main" -ForegroundColor Green
+  } catch {
+    Write-Host "⚠️  Lỗi khi đồng bộ env vào main: $($_.Exception.Message)" -ForegroundColor Yellow
+    Write-Host "💡 Có thể merge thủ công sau" -ForegroundColor Cyan
+  }
+  
+  # 5) Khôi phục upstream về origin/<branch>
   if ($prevUpstream) { git branch --set-upstream-to=$prevUpstream $branch 2>$null }
   else { git branch --set-upstream-to=origin/$branch $branch 2>$null }
 }
@@ -62,7 +89,22 @@ git commit -m "chore(env): force track env files (.env, .env.local, .env.example
 
 # 3) Push lên remote private cùng tên nhánh
 if git push --set-upstream private "$branch"; then
-  # 4) Khôi phục upstream về origin/<branch>
+  # 4) Merge env files vào private/main để đồng bộ
+  echo "🔄 Đồng bộ env files vào private/main..."
+  if current_branch="$branch" && \
+     git fetch private main >/dev/null 2>&1 && \
+     git checkout -B temp-merge private/main >/dev/null 2>&1 && \
+     git merge "$current_branch" --no-edit -X ours --strategy-option=ours >/dev/null 2>&1 && \
+     git push private temp-merge:main >/dev/null 2>&1 && \
+     git checkout "$current_branch" >/dev/null 2>&1 && \
+     git branch -D temp-merge >/dev/null 2>&1; then
+    echo "✅ Env files đã được đồng bộ vào private/main"
+  else
+    echo "⚠️  Lỗi khi đồng bộ env vào main"
+    echo "💡 Có thể merge thủ công sau"
+  fi
+  
+  # 5) Khôi phục upstream về origin/<branch>
   if [ -n "$prev_upstream" ]; then
     git branch --set-upstream-to="$prev_upstream" "$branch" >/dev/null 2>&1 || true
   else
@@ -86,8 +128,10 @@ fi
 - Chỉ dừng để xin xác nhận khi bị chặn bởi policy/hệ thống (ví dụ: quyền truy cập, bảo mật tổ chức) hoặc lỗi kỹ thuật không thể tự khắc phục.
 
 ## Kinh nghiệm/Best practices (rút ra từ thực tế)
+- **ENV SYNC STRATEGY**: Tự động merge env files vào `private/main` để đảm bảo đồng bộ giữa các nhánh.
 - Phân tách rõ ràng: `origin` (công khai/đối tác) tuyệt đối không chứa secrets; `private` mới chứa các file nhạy cảm nếu thực sự bắt buộc.
 - `.env.example` phải đầy đủ key nhưng giá trị là placeholder; `.env.local` chỉ lưu nội bộ. Khi cần chia sẻ nội bộ, dùng nhánh/remote `private` thay vì `origin`.
+- **Merge Strategy**: Sử dụng `-X ours` để ưu tiên env files từ nhánh hiện tại khi có conflict.
 - Tránh chạy one-liner PowerShell với `||` hoặc redirection kiểu `2>$null` trong chuỗi dài – dễ lỗi parser. Dùng cấu trúc `if (...) {}` và `Out-Null`/`| Out-Host` thay thế.
 - Không thao tác khi đang ở trạng thái `detached HEAD` hoặc đang `rebase`. Luôn `git switch <branch>` trước khi add/commit/push.
 - Nếu cần ép track file bị ignore, ưu tiên `git add -f` theo pathspec rõ ràng thay vì glob phức tạp dễ phụ thuộc shell.
