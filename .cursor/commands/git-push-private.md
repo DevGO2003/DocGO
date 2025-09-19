@@ -48,7 +48,7 @@ if (git push --set-upstream private $branch) {
     git checkout -B temp-merge private/main 2>$null
     
     # Merge env files từ nhánh hiện tại (ưu tiên env files từ nhánh hiện tại)
-    git merge $currentBranch --no-edit -X ours --strategy-option=ours 2>$null
+    git merge $currentBranch --no-edit -X ours --allow-unrelated-histories 2>$null
     
     # Push merge lên private/main
     git push private temp-merge:main 2>$null
@@ -94,7 +94,7 @@ if git push --set-upstream private "$branch"; then
   if current_branch="$branch" && \
      git fetch private main >/dev/null 2>&1 && \
      git checkout -B temp-merge private/main >/dev/null 2>&1 && \
-     git merge "$current_branch" --no-edit -X ours --strategy-option=ours >/dev/null 2>&1 && \
+     git merge "$current_branch" --no-edit -X ours --allow-unrelated-histories >/dev/null 2>&1 && \
      git push private temp-merge:main >/dev/null 2>&1 && \
      git checkout "$current_branch" >/dev/null 2>&1 && \
      git branch -D temp-merge >/dev/null 2>&1; then
@@ -131,13 +131,83 @@ fi
 - **ENV SYNC STRATEGY**: Tự động merge env files vào `private/main` để đảm bảo đồng bộ giữa các nhánh.
 - Phân tách rõ ràng: `origin` (công khai/đối tác) tuyệt đối không chứa secrets; `private` mới chứa các file nhạy cảm nếu thực sự bắt buộc.
 - `.env.example` phải đầy đủ key nhưng giá trị là placeholder; `.env.local` chỉ lưu nội bộ. Khi cần chia sẻ nội bộ, dùng nhánh/remote `private` thay vì `origin`.
-- **Merge Strategy**: Sử dụng `-X ours` để ưu tiên env files từ nhánh hiện tại khi có conflict.
+- **Merge Strategy**: Sử dụng `-X ours --allow-unrelated-histories` để ưu tiên env files từ nhánh hiện tại khi có conflict và cho phép merge unrelated histories.
 - Tránh chạy one-liner PowerShell với `||` hoặc redirection kiểu `2>$null` trong chuỗi dài – dễ lỗi parser. Dùng cấu trúc `if (...) {}` và `Out-Null`/`| Out-Host` thay thế.
 - Không thao tác khi đang ở trạng thái `detached HEAD` hoặc đang `rebase`. Luôn `git switch <branch>` trước khi add/commit/push.
 - Nếu cần ép track file bị ignore, ưu tiên `git add -f` theo pathspec rõ ràng thay vì glob phức tạp dễ phụ thuộc shell.
 
 ## Troubleshooting
-- Push bị từ chối vì diverge: `git pull --rebase private <branch>` rồi thử lại.
-- Lỗi do rebase đang dở: `git rebase --abort` (hoặc `--quit`) rồi thao tác lại.
-- Conflicts khi rebase: giải quyết xung đột, `git add ...` rồi `git rebase --continue`.
-- Cần đính kèm chỉ ở `private` nhưng giữ upstream về `origin`: sau khi push `private`, khôi phục upstream về `origin/<branch>` (đã được script xử lý ở bước 4).
+
+### Lỗi thường gặp và cách xử lý:
+
+#### 1. Push bị từ chối vì diverge
+```bash
+# Lỗi: ! [rejected] thaiGO -> thaiGO (non-fast-forward)
+# Xử lý:
+git pull --rebase private thaiGO
+# Sau đó chạy lại /git-push-private
+```
+
+#### 2. Lỗi do rebase đang dở
+```bash
+# Lỗi: fatal: It seems that there is already a rebase-apply directory
+# Xử lý:
+git rebase --abort  # hoặc git rebase --quit
+# Sau đó chạy lại /git-push-private
+```
+
+#### 3. Conflicts khi rebase
+```bash
+# Lỗi: CONFLICT (content): Merge conflict in file
+# Xử lý:
+# 1. Giải quyết xung đột trong file
+# 2. git add <file>
+# 3. git rebase --continue
+# 4. Chạy lại /git-push-private
+```
+
+#### 4. Lỗi merge unrelated histories
+```bash
+# Lỗi: fatal: refusing to merge unrelated histories
+# Xử lý: Script đã tự động thêm --allow-unrelated-histories
+# Nếu vẫn lỗi, merge thủ công:
+git merge <branch> --allow-unrelated-histories
+```
+
+#### 5. Lỗi khi đồng bộ env vào main
+```bash
+# Lỗi: ⚠️ Lỗi khi đồng bộ env vào main
+# Xử lý thủ công:
+git fetch private main
+git checkout -B temp-merge private/main
+git merge <current-branch> --no-edit -X ours --allow-unrelated-histories
+git push private temp-merge:main
+git checkout <current-branch>
+git branch -D temp-merge
+```
+
+### **ENV SYNC STRATEGY** - Xử lý lỗi:
+
+| Tình huống | Env đồng bộ | Hành động |
+|------------|-------------|-----------|
+| **Push private thành công** | ✅ Có | Tự động merge vào main |
+| **Lỗi merge vào main** | ⚠️ Một phần | Merge thủ công sau |
+| **Lỗi push private** | ❌ Không | Thử lại push private |
+
+### **Workflow mới** - Hiểu output:
+
+```bash
+🚀 Git Push Private - Bắt đầu workflow...
+🔍 Bước 1/5: Xác định nhánh hiện tại...
+✅ Đang làm việc trên nhánh: thaiGO
+📦 Bước 2/5: Staging files...
+✅ Files staged successfully
+💾 Bước 3/5: Commit changes...
+✅ Commit thành công
+🔒 Bước 4/5: Push private (backup phụ)...
+✅ Private backup thành công: private/thaiGO
+🔄 Bước 5/5: Đồng bộ env files vào private/main...
+✅ Env files đã được đồng bộ vào private/main
+✅ Upstream khôi phục: origin/thaiGO
+🎉 Hoàn thành! Env files đồng bộ giữa các nhánh
+```
