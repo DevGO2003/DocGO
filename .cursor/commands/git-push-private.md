@@ -657,7 +657,49 @@ if (git push --set-upstream origin $currentBranch) {
     
     Write-Host "🎉 AI-Powered Smart Merge hoàn thành!" -ForegroundColor Green
 } else {
-  Write-Host "❌ Lỗi khi push origin. Dừng workflow." -ForegroundColor Red
+  Write-Host "⚠️  Origin push bị chặn (Push Protection). Kích hoạt Auto-Remediation (rewrite history)..." -ForegroundColor Yellow
+
+  # 3.1) Đảm bảo có git-filter-repo
+  $gitFilterRepoOk = $false
+  try {
+    git filter-repo -h 1>$null 2>$null
+    if ($LASTEXITCODE -eq 0) { $gitFilterRepoOk = $true }
+  } catch { }
+
+  if (-not $gitFilterRepoOk) {
+    Write-Host "ℹ️  Cài đặt git-filter-repo qua pip..." -ForegroundColor Cyan
+    python -m pip install --upgrade pip 1>$null 2>$null
+    python -m pip install git-filter-repo 1>$null 2>$null
+    git filter-repo -h 1>$null 2>$null
+    if ($LASTEXITCODE -eq 0) { $gitFilterRepoOk = $true }
+  }
+
+  if (-not $gitFilterRepoOk) {
+    Write-Host "❌ Không thể cài đặt git-filter-repo. Dừng Auto-Remediation." -ForegroundColor Red
+    return
+  }
+
+  # 3.2) Loại bỏ file nhạy cảm khỏi TOÀN BỘ lịch sử (env runtime)
+  Write-Host "🧼 Đang làm sạch lịch sử Git: loại bỏ *.env và *.env.local dưới backend/frontend/*/env/ ..." -ForegroundColor Yellow
+  git filter-repo --force \
+    --path-glob 'backend/**/env/.env' \
+    --path-glob 'backend/**/env/.env.local' \
+    --path-glob 'frontend/**/env/.env' \
+    --path-glob 'frontend/**/env/.env.local' \
+    --invert-paths
+
+  if ($LASTEXITCODE -ne 0) {
+    Write-Host "❌ Lỗi khi chạy git-filter-repo. Dừng Auto-Remediation." -ForegroundColor Red
+    return
+  }
+
+  # 3.3) Force-push nhánh lên origin
+  Write-Host "🚀 Force-push lịch sử đã làm sạch lên origin/$currentBranch..." -ForegroundColor Yellow
+  if (git push origin $currentBranch --force-with-lease) {
+    Write-Host "✅ Đã làm sạch lịch sử và push lên origin thành công." -ForegroundColor Green
+  } else {
+    Write-Host "⚠️  Force-push vẫn bị chặn. Cần rotate/bỏ secret thủ công trên nhà cung cấp, rồi thử lại." -ForegroundColor Yellow
+  }
 }
 ```
 
