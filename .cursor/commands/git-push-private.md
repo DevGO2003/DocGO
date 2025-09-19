@@ -1,11 +1,11 @@
 # Git Push Private
 
-Đẩy nhánh hiện tại lên remote `private`, kèm TẤT CẢ file env theo yêu cầu: `.env`, `.env.local`, `.env.example` (force track kể cả khi bị .gitignore).
+Đẩy nhánh hiện tại lên `origin` trước, sau đó push lên `private/main` kèm TẤT CẢ file env theo yêu cầu: `.env`, `.env.local`, `.env.example` (force track kể cả khi bị .gitignore).
 
 ## Mô tả
 - Tự động và không yêu cầu xác nhận.
 - Xác định nhánh hiện tại; nếu không xác định được thì MẶC ĐỊNH dùng nhánh `main` (tạo mới nếu chưa có).
-- **ENV SYNC STRATEGY**: Push lên remote `private` cùng tên nhánh, sau đó tự động merge env files vào `private/main` để đồng bộ.
+- **BACKUP STRATEGY**: Push lên `origin/<branch>` trước để backup, sau đó push lên `private/main` với env files.
 - Khôi phục upstream về `origin/<branch>` để tiếp tục làm việc trên origin.
 - Đảm bảo các file env được force-add: `**/.env`, `**/.env.local`, `**/.env.example`.
 - Không thêm các file nhạy cảm khác như `.env` gốc, `.env.production` (đang bị ignore theo quy tắc Git của dự án).
@@ -28,44 +28,36 @@ if (-not $branch -or $branch -eq 'HEAD') {
 }
 $prevUpstream = (git rev-parse --abbrev-ref --symbolic-full-name '@{u}' 2>$null)
 
-# 2) Stage & Commit tự động
+# 2) Stage & Commit tự động (KHÔNG có env files)
 git add -A
-git add -f **/.env 2>$null
-git add -f **/.env.local 2>$null
-git add -f **/.env.example 2>$null
-$null = git commit -m "chore(env): force track env files (.env, .env.local, .env.example)" --no-verify 2>$null; if ($LASTEXITCODE -ne 0) { 'No changes to commit' | Out-Null }
+$null = git commit -m "chore: update code changes" --no-verify 2>$null; if ($LASTEXITCODE -ne 0) { 'No changes to commit' | Out-Null }
 
-# 3) Push lên remote private cùng tên nhánh
-if (git push --set-upstream private $branch) {
-  # 4) Merge env files vào private/main để đồng bộ
-  Write-Host "🔄 Đồng bộ env files vào private/main..." -ForegroundColor Yellow
-  try {
-    # Lưu nhánh hiện tại
-    $currentBranch = $branch
-    
-    # Chuyển sang nhánh main trên private
-    git fetch private main 2>$null
-    git checkout -B temp-merge private/main 2>$null
-    
-    # Merge env files từ nhánh hiện tại (ưu tiên env files từ nhánh hiện tại)
-    git merge $currentBranch --no-edit -X ours --allow-unrelated-histories 2>$null
-    
-    # Push merge lên private/main
-    git push private temp-merge:main 2>$null
-    
-    # Xóa nhánh tạm và quay về nhánh gốc
-    git checkout $currentBranch 2>$null
-    git branch -D temp-merge 2>$null
-    
-    Write-Host "✅ Env files đã được đồng bộ vào private/main" -ForegroundColor Green
-  } catch {
-    Write-Host "⚠️  Lỗi khi đồng bộ env vào main: $($_.Exception.Message)" -ForegroundColor Yellow
-    Write-Host "💡 Có thể merge thủ công sau" -ForegroundColor Cyan
+# 3) Push lên origin trước (backup chính)
+Write-Host "🔒 Bước 3/5: Push origin (backup chính)..." -ForegroundColor Yellow
+if (git push --set-upstream origin $branch) {
+  Write-Host "✅ Origin backup thành công: origin/$branch" -ForegroundColor Green
+  
+  # 4) Stage & Commit env files
+  Write-Host "📦 Bước 4/5: Staging env files..." -ForegroundColor Yellow
+  git add -f **/.env 2>$null
+  git add -f **/.env.local 2>$null
+  git add -f **/.env.example 2>$null
+  $null = git commit -m "chore(env): force track env files (.env, .env.local, .env.example)" --no-verify 2>$null; if ($LASTEXITCODE -ne 0) { 'No env changes to commit' | Out-Null }
+  
+  # 5) Push lên private/main
+  Write-Host "🔒 Bước 5/5: Push private/main (backup phụ với env)..." -ForegroundColor Yellow
+  if (git push private $branch:main) {
+    Write-Host "✅ Private backup thành công: private/main" -ForegroundColor Green
+  } else {
+    Write-Host "⚠️  Lỗi khi push private/main" -ForegroundColor Yellow
   }
   
-  # 5) Khôi phục upstream về origin/<branch>
+  # 6) Khôi phục upstream về origin/<branch>
   if ($prevUpstream) { git branch --set-upstream-to=$prevUpstream $branch 2>$null }
   else { git branch --set-upstream-to=origin/$branch $branch 2>$null }
+  Write-Host "✅ Upstream khôi phục: origin/$branch" -ForegroundColor Green
+} else {
+  Write-Host "❌ Lỗi khi push origin. Dừng workflow." -ForegroundColor Red
 }
 ```
 
@@ -80,36 +72,39 @@ if [ -z "$branch" ] || [ "$branch" = "HEAD" ]; then
 fi
 prev_upstream="$(git rev-parse --abbrev-ref --symbolic-full-name '@{u}' 2>/dev/null || true)"
 
-# 2) Stage & Commit tự động
+# 2) Stage & Commit tự động (KHÔNG có env files)
 git add -A
-git add -f **/.env 2>/dev/null || true
-git add -f **/.env.local 2>/dev/null || true
-git add -f **/.env.example 2>/dev/null || true
-git commit -m "chore(env): force track env files (.env, .env.local, .env.example)" --no-verify || true
+git commit -m "chore: update code changes" --no-verify || true
 
-# 3) Push lên remote private cùng tên nhánh
-if git push --set-upstream private "$branch"; then
-  # 4) Merge env files vào private/main để đồng bộ
-  echo "🔄 Đồng bộ env files vào private/main..."
-  if current_branch="$branch" && \
-     git fetch private main >/dev/null 2>&1 && \
-     git checkout -B temp-merge private/main >/dev/null 2>&1 && \
-     git merge "$current_branch" --no-edit -X ours --allow-unrelated-histories >/dev/null 2>&1 && \
-     git push private temp-merge:main >/dev/null 2>&1 && \
-     git checkout "$current_branch" >/dev/null 2>&1 && \
-     git branch -D temp-merge >/dev/null 2>&1; then
-    echo "✅ Env files đã được đồng bộ vào private/main"
+# 3) Push lên origin trước (backup chính)
+echo "🔒 Bước 3/5: Push origin (backup chính)..."
+if git push --set-upstream origin "$branch"; then
+  echo "✅ Origin backup thành công: origin/$branch"
+  
+  # 4) Stage & Commit env files
+  echo "📦 Bước 4/5: Staging env files..."
+  git add -f **/.env 2>/dev/null || true
+  git add -f **/.env.local 2>/dev/null || true
+  git add -f **/.env.example 2>/dev/null || true
+  git commit -m "chore(env): force track env files (.env, .env.local, .env.example)" --no-verify || true
+  
+  # 5) Push lên private/main
+  echo "🔒 Bước 5/5: Push private/main (backup phụ với env)..."
+  if git push private "$branch:main"; then
+    echo "✅ Private backup thành công: private/main"
   else
-    echo "⚠️  Lỗi khi đồng bộ env vào main"
-    echo "💡 Có thể merge thủ công sau"
+    echo "⚠️  Lỗi khi push private/main"
   fi
   
-  # 5) Khôi phục upstream về origin/<branch>
+  # 6) Khôi phục upstream về origin/<branch>
   if [ -n "$prev_upstream" ]; then
     git branch --set-upstream-to="$prev_upstream" "$branch" >/dev/null 2>&1 || true
   else
     git branch --set-upstream-to="origin/$branch" "$branch" >/dev/null 2>&1 || true
   fi
+  echo "✅ Upstream khôi phục: origin/$branch"
+else
+  echo "❌ Lỗi khi push origin. Dừng workflow."
 fi
 ```
 
@@ -128,10 +123,9 @@ fi
 - Chỉ dừng để xin xác nhận khi bị chặn bởi policy/hệ thống (ví dụ: quyền truy cập, bảo mật tổ chức) hoặc lỗi kỹ thuật không thể tự khắc phục.
 
 ## Kinh nghiệm/Best practices (rút ra từ thực tế)
-- **ENV SYNC STRATEGY**: Tự động merge env files vào `private/main` để đảm bảo đồng bộ giữa các nhánh.
+- **BACKUP STRATEGY**: Push lên `origin` trước để backup chính, sau đó push lên `private/main` với env files.
 - Phân tách rõ ràng: `origin` (công khai/đối tác) tuyệt đối không chứa secrets; `private` mới chứa các file nhạy cảm nếu thực sự bắt buộc.
 - `.env.example` phải đầy đủ key nhưng giá trị là placeholder; `.env.local` chỉ lưu nội bộ. Khi cần chia sẻ nội bộ, dùng nhánh/remote `private` thay vì `origin`.
-- **Merge Strategy**: Sử dụng `-X ours --allow-unrelated-histories` để ưu tiên env files từ nhánh hiện tại khi có conflict và cho phép merge unrelated histories.
 - Tránh chạy one-liner PowerShell với `||` hoặc redirection kiểu `2>$null` trong chuỗi dài – dễ lỗi parser. Dùng cấu trúc `if (...) {}` và `Out-Null`/`| Out-Host` thay thế.
 - Không thao tác khi đang ở trạng thái `detached HEAD` hoặc đang `rebase`. Luôn `git switch <branch>` trước khi add/commit/push.
 - Nếu cần ép track file bị ignore, ưu tiên `git add -f` theo pathspec rõ ràng thay vì glob phức tạp dễ phụ thuộc shell.
@@ -186,13 +180,13 @@ git checkout <current-branch>
 git branch -D temp-merge
 ```
 
-### **ENV SYNC STRATEGY** - Xử lý lỗi:
+### **BACKUP STRATEGY** - Xử lý lỗi:
 
-| Tình huống | Env đồng bộ | Hành động |
-|------------|-------------|-----------|
-| **Push private thành công** | ✅ Có | Tự động merge vào main |
-| **Lỗi merge vào main** | ⚠️ Một phần | Merge thủ công sau |
-| **Lỗi push private** | ❌ Không | Thử lại push private |
+| Tình huống | Origin backup | Private backup | Hành động |
+|------------|---------------|----------------|-----------|
+| **Push origin thành công** | ✅ Có | ❌ Chưa | Tiếp tục push private |
+| **Push origin lỗi** | ❌ Không | ❌ Không | Dừng workflow |
+| **Push private lỗi** | ✅ Có | ❌ Không | Có backup chính |
 
 ### **Workflow mới** - Hiểu output:
 
@@ -200,14 +194,14 @@ git branch -D temp-merge
 🚀 Git Push Private - Bắt đầu workflow...
 🔍 Bước 1/5: Xác định nhánh hiện tại...
 ✅ Đang làm việc trên nhánh: thaiGO
-📦 Bước 2/5: Staging files...
+📦 Bước 2/5: Staging files (không có env)...
 ✅ Files staged successfully
-💾 Bước 3/5: Commit changes...
-✅ Commit thành công
-🔒 Bước 4/5: Push private (backup phụ)...
-✅ Private backup thành công: private/thaiGO
-🔄 Bước 5/5: Đồng bộ env files vào private/main...
-✅ Env files đã được đồng bộ vào private/main
+🔒 Bước 3/5: Push origin (backup chính)...
+✅ Origin backup thành công: origin/thaiGO
+📦 Bước 4/5: Staging env files...
+✅ Env files staged successfully
+🔒 Bước 5/5: Push private/main (backup phụ với env)...
+✅ Private backup thành công: private/main
 ✅ Upstream khôi phục: origin/thaiGO
-🎉 Hoàn thành! Env files đồng bộ giữa các nhánh
+🎉 Hoàn thành! Backup 2 chiều thành công
 ```
