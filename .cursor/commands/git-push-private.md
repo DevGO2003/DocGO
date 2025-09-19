@@ -20,6 +20,7 @@ Vì tệp này viết theo Bash, khi chạy trên PowerShell hãy tuân thủ c�
 
 - Không dùng pipe sang `cat`. Tránh `... | cat`; nếu cần, dùng `| Out-String` hoặc bỏ pipe.
 - Không dùng toán tử `&&`. Chạy lệnh theo từng dòng riêng biệt.
+- Tuyệt đối KHÔNG dùng toán tử chuyển hướng `>` để ghi nội dung từ `git show`/`git cat-file` ra file ENV trong PowerShell, vì mặc định sẽ ghi dạng UTF-16LE. Khi cần đồng bộ file từ `private/<branch>`, hãy dùng lệnh Git để checkout/restore file trực tiếp (ví dụ: sử dụng `git restore -s private/<branch> -- <đường-dẫn-file>`), thay vì ghi file bằng chuyển hướng PowerShell.
 - Push sang remote `private` phải dùng refspec tường minh để KHÔNG tạo nhánh ngoài ý muốn:
   - Không tham số (đẩy vào `private/main`):
     - `git push private HEAD:main`
@@ -666,7 +667,7 @@ fi
 https://github.com/DevGO2003/DocGO-private/compare/main...thaiGO?expand=1
 ```
 
-Sau khi merge PR, nếu muốn đồng bộ env ngược về nhánh làm việc, đọc env trực tiếp từ `private/main` về local rồi KHÔNG commit lên origin.
+Sau khi merge PR, nếu muốn đồng bộ env ngược về nhánh làm việc, hãy dùng Git để khôi phục trực tiếp từ `private/main` (ví dụ: `git restore -s private/main -- <các-đường-dẫn-env>`), KHÔNG dùng chuyển hướng PowerShell (`>`) để ghi file, nhằm tránh lỗi mã hóa UTF-16LE. Không commit các thay đổi đó lên `origin`.
 
 ## Quyền quyết định
 - Agent có toàn quyền quyết định và tự thực thi ngay phương án mà agent đánh giá là lựa chọn tốt nhất (Best Choice) mà không cần hỏi lại.
@@ -761,6 +762,13 @@ git branch -D temp-merge
 # 2. Manual edit file nếu cần
 # 3. Commit và push: git add .env.local && git commit -m "fix: manual env merge"
 ```
+
+#### 8. File ENV bị hiển thị sai (mã hóa UTF-16/UTF-16LE) trên Windows/PowerShell
+Nguyên nhân thường gặp là dùng chuyển hướng PowerShell (`>`) khi ghi nội dung từ Git ra file, dẫn tới file được lưu ở định dạng UTF-16LE thay vì UTF-8.
+
+Cách xử lý khuyến nghị (không thay đổi nội dung trong Git):
+- Dùng lệnh Git để khôi phục file đúng bytes từ `private/main`: sử dụng `git restore -s private/main -- <đường-dẫn-file-env>`.
+- Tránh dùng `>` hoặc `Out-File` để ghi đè tệp ENV. Nếu bắt buộc thao tác thủ công, đảm bảo công cụ ghi với UTF-8 không BOM và không đổi EOL; tuy nhiên, cách an toàn nhất vẫn là `git restore`.
 
 ### **BACKUP STRATEGY** - Xử lý lỗi:
 
