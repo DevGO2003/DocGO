@@ -170,6 +170,66 @@ analyze_env_content() {
     echo "$conflict_count|$local_has_secrets|$remote_has_secrets|$local_has_database|$remote_has_database|$local_has_ports|$remote_has_ports"
 }
 
+# Function: Repo-aware helpers (discover services, canonical keys, allowlist)
+build_deprecation_map() {
+    cat << 'EOF'
+AUTH_SERVICE_URL=AUTHENTICATION_SERVICE_URL
+AI_SERVICE_URL=AI_PROCESSING_SERVICE_URL
+FILE_SERVICE_URL=FILE_STORAGE_SERVICE_URL
+CONTRACT_SERVICE_URL=CONTRACT_MANAGEMENT_SERVICE_URL
+EOF
+}
+
+canonicalize_key() {
+    local key="$1"
+    local mapped=$(build_deprecation_map | grep "^${key}=" | cut -d'=' -f2)
+    if [ -n "$mapped" ]; then
+        echo "$mapped"
+    else
+        echo "$key"
+    fi
+}
+
+discover_backend_services() {
+    # Output: one service name per line (kebab-case)
+    if [ -d backend ]; then
+        find backend -maxdepth 1 -mindepth 1 -type d -name "*-service" -printf "%f\n" 2>/dev/null || true
+    fi
+}
+
+discover_compose_services() {
+    # Best-effort parse docker-compose.local.yml service ids (kebab-case)
+    local compose="docker-compose.local.yml"
+    if [ -f "$compose" ]; then
+        # Extract service block ids by matching column start with two spaces and a token ending with ':'
+        awk '/^ {2,}[a-z0-9-]+:$/ { gsub(":","",$1); gsub(/^ +/,"",$1); print $1 }' "$compose" | sed -e '1,/$0/d' 2>/dev/null || true
+        # Fallback with grep (may include non-service keys, harmless)
+        grep -E "^[[:space:]]{2,}[a-z0-9-]+:\\s*$" "$compose" 2>/dev/null | sed -E 's/^\s+([^:]+):\s*$/\1/' || true
+    fi
+}
+
+to_upper_snake() {
+    echo "$1" | tr '[:lower:]' '[:upper:]' | tr '-' '_'
+}
+
+build_service_allowlist() {
+    # Output: canonical SERVICE_URL keys (UPPER_SNAKE)_SERVICE_URL separated by spaces
+    local services="$(discover_backend_services; discover_compose_services | sort -u)"
+    local allow=""
+    while IFS= read -r svc; do
+        [ -z "$svc" ] && continue
+        local key="$(to_upper_snake "$svc")_SERVICE_URL"
+        allow="$allow $key"
+    done <<< "$services"
+    echo "$allow"
+}
+
+# Function: Validate URL-like values
+is_valid_url() {
+    local v="$1"
+    echo "$v" | grep -qiE '^https?://[a-z0-9_.:-]+'
+}
+
 # Function: AI Decision Engine với Context Analysis
 resolve_env_conflict_advanced() {
     local key="$1"
@@ -229,6 +289,10 @@ invoke_smart_merge() {
     
     echo "🤖 AI-Powered Smart Merge for: $filename"
     
+    # Repo-aware discovery
+    local allowlist_keys="$(build_service_allowlist)"
+    local deprecations=$(build_deprecation_map)
+
     # Bước 1: AI Content Analysis
     local analysis=$(analyze_env_content "$local_file" "$remote_file" "$filename")
     
@@ -255,14 +319,30 @@ invoke_smart_merge() {
       done < <(find frontend -type f \( -name ".env" -o -name ".env.local" -o -name ".env.example" \))
     fi
     
-    # Get all unique keys
-    local all_keys=$(echo -e "$local_file\n$remote_file" | grep -E "^[A-Z_]+=" | cut -d'=' -f1 | sort -u)
+    # Get all unique keys (after canonicalization)
+    local all_keys=$(echo -e "$local_file\n$remote_file" | grep -E "^[A-Z_]+=" | cut -d'=' -f1 | while read -r k; do canonicalize_key "$k"; done | sort -u)
     
     # Bước 3: Merge với AI Decision
     while IFS= read -r key; do
         local local_line=$(echo "$local_file" | grep "^$key=" || true)
         local remote_line=$(echo "$remote_file" | grep "^$key=" || true)
         
+        # Canonicalize lines if deprecated key used
+        if [ -n "$local_line" ]; then
+            local lk=$(echo "$local_line" | cut -d'=' -f1)
+            local ck=$(canonicalize_key "$lk")
+            if [ "$ck" != "$lk" ]; then
+                local_line="$ck=$(echo "$local_line" | cut -d'=' -f2-)"
+            fi
+        fi
+        if [ -n "$remote_line" ]; then
+            local rk=$(echo "$remote_line" | cut -d'=' -f1)
+            local crk=$(canonicalize_key "$rk")
+            if [ "$crk" != "$rk" ]; then
+                remote_line="$crk=$(echo "$remote_line" | cut -d'=' -f2-)"
+            fi
+        fi
+
         if [ -n "$local_line" ] && [ -n "$remote_line" ]; then
             # Có conflict - dùng AI decision
             local local_value=$(echo "$local_line" | cut -d'=' -f2-)
@@ -282,7 +362,7 @@ invoke_smart_merge() {
         elif [ -n "$remote_line" ]; then
             keyName=$(echo "$remote_line" | cut -d'=' -f1)
             if echo "$keyName" | grep -q "_SERVICE_URL$"; then
-                if echo " $allowlist " | grep -q " $keyName "; then
+                if echo " $allowlist_keys " | grep -q " $keyName "; then
                     merged_content="$merged_content$remote_line\n"
                     merge_log="$merge_log KeepRemoteOnly:$keyName;"
                 else
@@ -294,6 +374,17 @@ invoke_smart_merge() {
             fi
         fi
     done <<< "$all_keys"
+
+    # Post-process: comment deprecated keys when canonical exists
+    # Build list of canonical keys we set
+    local canonical_keys=$(echo -e "$merged_content" | grep -E "^[A-Z_]+=" | cut -d'=' -f1 | sort -u)
+    while IFS='=' read -r old new; do
+        [ -z "$old" ] && continue
+        if echo " $canonical_keys " | grep -q " $new "; then
+            # comment deprecated occurrences
+            merged_content=$(echo -e "$merged_content" | awk -v o="$old" 'BEGIN{FS=OFS="\n"} {print} ' | sed -E "s/^(${old}=)/# DEPRECATED (use ${new}) \1/")
+        fi
+    done <<< "$deprecations"
     
     # Bước 4: Validation và Retry nếu cần
     local temp_file="$output_file.temp"
@@ -348,6 +439,21 @@ test_merged_env() {
         return 1
     fi
     
+    # Repo-aware checks for *_SERVICE_URL keys
+    local allowlist_keys="$(build_service_allowlist)"
+    while IFS= read -r line; do
+        local k=$(echo "$line" | cut -d'=' -f1)
+        local v=$(echo "$line" | cut -d'=' -f2-)
+        if echo "$k" | grep -q "_SERVICE_URL$"; then
+            if ! is_valid_url "$v"; then
+                echo "WARNING: $k has non-URL value: $v"
+            fi
+            if ! echo " $allowlist_keys " | grep -q " $k "; then
+                echo "WARNING: $k not recognized from repo services; consider removing or renaming"
+            fi
+        fi
+    done < <(echo "$content" | grep -E "^[A-Z_]+=http")
+
     # Check port validation
     local port=$(echo "$content" | grep "^SERVER_PORT=" | cut -d'=' -f2)
     if [ -n "$port" ] && ([ "$port" -lt 1000 ] || [ "$port" -gt 65535 ]); then
@@ -546,39 +652,13 @@ fi
 
 ### PowerShell-safe Quick Steps (khuyến nghị)
 
-Chạy lần lượt các lệnh sau trên PowerShell để đảm bảo trơn tru:
+Để chạy an toàn trên PowerShell mà không dùng script, hãy thực hiện tuần tự theo hướng dẫn bằng lời sau (không cần dán lệnh):
 
-1) Backup env (không quét `.git/` và `.git-backup/`):
+1) Tạo thư mục backup env theo timestamp dưới `.git-backup/env/` và sao chép tất cả các tệp `.env`, `.env.local`, `.env.example` vào đó; nhớ loại trừ thư mục `.git/` và `.git-backup/` khi quét.
 
-```powershell
-$ts = Get-Date -Format "yyyyMMdd_HHmmss"
-$bk = ".git-backup/env/$ts"; New-Item -ItemType Directory -Force -Path $bk | Out-Null
-Get-ChildItem -Recurse -File -Include ".env",".env.local",".env.example" -Exclude ".git",".git-backup" | ForEach-Object {
-  Copy-Item $_.FullName -Destination (Join-Path $bk $_.Name) -Force
-}
-```
+2) Stage toàn bộ thay đổi, sau đó bỏ stage mọi tệp env trước khi commit để đảm bảo push lên `origin` không chứa env. Commit với thông điệp “chore: update code changes (exclude env)” và đẩy lên `origin` nhánh hiện tại.
 
-2) Push code sạch lên origin (loại trừ env):
-
-```powershell
-git add -A
-$envFiles = @(Get-ChildItem -Recurse -File -Include ".env",".env.local",".env.example" 2>$null)
-if ($envFiles.Count -gt 0) { foreach ($f in $envFiles) { git restore --staged -- "$($f.FullName)" 2>$null } }
-git commit -m "chore: update code changes (exclude env)" --no-verify
-git push -u origin $(git branch --show-current)
-```
-
-3) Force-add env và đẩy lên private theo refspec tường minh (không tạo nhánh ngoài ý muốn):
-
-```powershell
-$envFiles = @(Get-ChildItem -Recurse -File -Include ".env",".env.local",".env.example" 2>$null)
-if ($envFiles.Count -gt 0) { foreach ($f in $envFiles) { git add -f -- "$($f.FullName)" } }
-git commit -m "chore(env): update env for private" --no-verify
-# Không tham số → main
-git push private HEAD:main
-# Có tham số (ví dụ dev) → bỏ comment dòng sau và sửa tên
-# git push private HEAD:dev
-```
+3) Force-add lại các tệp env, commit với thông điệp “chore(env): update env for private”, rồi đẩy lên remote `private` với refspec tường minh: không tham số thì đẩy vào `HEAD:main`; nếu muốn nhánh khác (ví dụ `dev`) thì đẩy vào `HEAD:dev`.
 
 4) Mở PR hợp nhất env về `private/main` (nếu đẩy vào `private/thaiGO`):
 
