@@ -29,6 +29,34 @@ $ErrorActionPreference = 'Stop'
 
 # ===== AI-POWERED SMART MERGE FUNCTIONS =====
 
+# Function: Xây dựng danh sách service hợp lệ từ repo (backend/*-service)
+function Get-ServiceAllowlist {
+    $services = @()
+    if (Test-Path "backend") {
+        Get-ChildItem -Path "backend" -Directory | Where-Object { $_.Name -like "*-service" } | ForEach-Object {
+            $name = $_.Name -replace "-", "_"
+            $key = ("{0}_SERVICE_URL" -f $name).ToUpper()
+            $services += $key
+        }
+    }
+    # Quét frontend env để bổ sung các *_SERVICE_URL hiện diện ở FE
+    if (Test-Path "frontend") {
+        $feEnvFiles = Get-ChildItem -Recurse -Force -File -Path frontend -Include ".env", ".env.local", ".env.example"
+        foreach ($f in $feEnvFiles) {
+            try {
+                $content = Get-Content $f.FullName -Raw
+                $lines = $content -split "`n" | Where-Object { $_ -match "^[A-Z0-9_]+=" }
+                foreach ($line in $lines) {
+                    $k = ($line -split "=")[0].Trim().ToUpper()
+                    if ($k -match "_SERVICE_URL$") { $services += $k }
+                }
+            } catch { }
+        }
+    }
+    # Bổ sung các khóa phổ biến khác nếu cần
+    return $services | Sort-Object -Unique
+}
+
 # Function: Tạo backup với metadata
 function New-SmartBackup {
     param($branch)
@@ -350,11 +378,34 @@ function Invoke-SmartMerge {
     $conflicts = Find-EnvConflicts $localFile $remoteFile $fileName
     $mergedContent = @()
     $mergeLog = @()
+    $serviceAllowlist = Get-ServiceAllowlist
     
     $allKeys = ($localFile -split "`n" | Where-Object { $_ -match "^[A-Z_]+=" } | ForEach-Object { $_.Split('=')[0] }) + 
                ($remoteFile -split "`n" | Where-Object { $_ -match "^[A-Z_]+=" } | ForEach-Object { $_.Split('=')[0] }) | 
                Sort-Object -Unique
     
+    # Heuristic: Nếu remote phong phú hơn đáng kể -> ưu tiên file remote toàn bộ
+    $localKeysCount = ($analysis.LocalKeys | Measure-Object).Count
+    $remoteKeysCount = ($analysis.RemoteKeys | Measure-Object).Count
+    if (($remoteKeysCount -ge ($localKeysCount + 5)) -or ($localKeysCount -le 1 -and $remoteKeysCount -ge 5)) {
+        Write-Host "🛠️  Remote has significantly more keys ($remoteKeysCount vs $localKeysCount). Using remote file wholesale." -ForegroundColor Cyan
+        $remoteFile | Out-File $outputFile -Encoding UTF8
+        # Centralized decision log
+        $decisionSummary = @{ 
+            timestamp = (Get-Date -Format "yyyy-MM-dd HH:mm:ss")
+            file = $fileName
+            strategy = "wholesale-remote"
+            localKeys = $localKeysCount
+            remoteKeys = $remoteKeysCount
+        }
+        $logDir = ".git-backup/env/merge-logs"
+        New-Item -ItemType Directory -Force -Path $logDir | Out-Null
+        $decisionSummary | ConvertTo-Json -Depth 5 | Out-File (Join-Path $logDir "$fileName.merge-log.json") -Encoding UTF8
+        $mergeLog | ConvertTo-Json -Depth 3 | Out-File "$outputFile.merge-log.json" -Encoding UTF8
+        Write-Host "✅ Smart merge completed: $outputFile" -ForegroundColor Green
+        return $mergeLog
+    }
+
     # Bước 3: Merge với AI Decision
     foreach ($key in $allKeys) {
         $localLine = ($localFile -split "`n") | Where-Object { $_ -match "^$key=" }
@@ -387,7 +438,20 @@ function Invoke-SmartMerge {
             $mergedContent += $localLine
         }
         elseif ($remoteLine) {
-            $mergedContent += $remoteLine
+            # Remote-only key: có thể là *_SERVICE_URL cần ngữ cảnh
+            $keyName = ($remoteLine -split "=")[0]
+            if ($keyName -match "_SERVICE_URL$") {
+                if ($serviceAllowlist -contains $keyName) {
+                    $mergedContent += $remoteLine
+                    $mergeLog += @{ Key = $keyName; Action = "KeepRemoteOnly"; Reason = "InAllowlist"; Confidence = 85 }
+                } else {
+                    # Hạ cấp thành comment để tinh gọn nhưng không mất thông tin
+                    $mergedContent += "#" + $remoteLine
+                    $mergeLog += @{ Key = $keyName; Action = "CommentRemoteOnly"; Reason = "NotInAllowlist"; Confidence = 80 }
+                }
+            } else {
+                $mergedContent += $remoteLine
+            }
         }
     }
     
@@ -440,6 +504,16 @@ function Invoke-SmartMerge {
     }
     
     Move-Item $tempFile $outputFile -Force
+    # Centralized decision log
+    $decisionSummary = @{ 
+        timestamp = (Get-Date -Format "yyyy-MM-dd HH:mm:ss")
+        file = $fileName
+        strategy = "per-key"
+        decisions = $mergeLog
+    }
+    $logDir = ".git-backup/env/merge-logs"
+    New-Item -ItemType Directory -Force -Path $logDir | Out-Null
+    $decisionSummary | ConvertTo-Json -Depth 5 | Out-File (Join-Path $logDir "$fileName.merge-log.json") -Encoding UTF8
     $mergeLog | ConvertTo-Json -Depth 3 | Out-File "$outputFile.merge-log.json" -Encoding UTF8
     
     Write-Host "✅ Smart merge completed: $outputFile" -ForegroundColor Green
@@ -541,7 +615,7 @@ if (git push --set-upstream origin $currentBranch) {
     # Fetch remote env files từ private target branch
     git fetch private $privateTargetBranch 2>$null
     
-    $envFiles = Get-ChildItem "**/.env*"
+    $envFiles = Get-ChildItem -Recurse -Force -File -Include ".env", ".env.local", ".env.example"
     $mergeSuccess = $true
     
     foreach ($envFile in $envFiles) {
@@ -601,7 +675,7 @@ if (git push --set-upstream origin $currentBranch) {
         git fetch private $privateTargetBranch 2>$null
         
         $mergeSuccess2 = $true
-        foreach ($envFile in $envFiles) {
+        foreach ($envFile in (Get-ChildItem -Recurse -Force -File -Include ".env", ".env.local", ".env.example")) {
             try {
                 $currentContent = Get-Content $envFile.FullName -Raw
                 $privateContent = git show "private/$privateTargetBranch`:$($envFile.FullName)" 2>$null
@@ -615,7 +689,7 @@ if (git push --set-upstream origin $currentBranch) {
                     if ($validation2.IsValid) {
                         Move-Item $tempFile $envFile.FullName -Force
                         Write-Host "✅ Bidirectional merged: $($envFile.Name)" -ForegroundColor Green
-                    } else {
+  } else {
                         Write-Host "❌ Validation failed for $($envFile.Name) in bidirectional merge" -ForegroundColor Red
                         $mergeSuccess2 = $false
                         break
@@ -640,13 +714,13 @@ if (git push --set-upstream origin $currentBranch) {
         
         # 9) Stage & Commit bidirectional merged env files
         Write-Host "📦 Bước 8/8: Staging bidirectional merged env files..." -ForegroundColor Yellow
-        git add -f **/.env 2>$null
-        git add -f **/.env.local 2>$null
-        git add -f **/.env.example 2>$null
+  git add -f **/.env 2>$null
+  git add -f **/.env.local 2>$null
+  git add -f **/.env.example 2>$null
         $null = git commit -m "chore(env): bidirectional sync from private/$privateTargetBranch" --no-verify 2>$null; if ($LASTEXITCODE -ne 0) { 'No env changes to commit' | Out-Null }
         
         Write-Host "✅ Bidirectional sync completed!" -ForegroundColor Green
-  } else {
+} else {
         Write-Host "⚠️  Lỗi khi push private/$privateTargetBranch" -ForegroundColor Yellow
     }
     
@@ -656,7 +730,7 @@ if (git push --set-upstream origin $currentBranch) {
     Write-Host "✅ Upstream khôi phục: origin/$currentBranch" -ForegroundColor Green
     
     Write-Host "🎉 AI-Powered Smart Merge hoàn thành!" -ForegroundColor Green
-} else {
+  } else {
   Write-Host "⚠️  Origin push bị chặn (Push Protection). Kích hoạt Auto-Remediation (rewrite history)..." -ForegroundColor Yellow
 
   # 3.1) Đảm bảo có git-filter-repo
@@ -697,7 +771,7 @@ if (git push --set-upstream origin $currentBranch) {
   Write-Host "🚀 Force-push lịch sử đã làm sạch lên origin/$currentBranch..." -ForegroundColor Yellow
   if (git push origin $currentBranch --force-with-lease) {
     Write-Host "✅ Đã làm sạch lịch sử và push lên origin thành công." -ForegroundColor Green
-  } else {
+} else {
     Write-Host "⚠️  Force-push vẫn bị chặn. Cần rotate/bỏ secret thủ công trên nhà cung cấp, rồi thử lại." -ForegroundColor Yellow
   }
 }
@@ -897,6 +971,24 @@ invoke_smart_merge() {
     local conflicts=$(find_env_conflicts "$local_file" "$remote_file" "$filename")
     local merged_content=""
     local merge_log=""
+    # Build allowlist from repo structure and FE envs
+    local allowlist=""
+    if [ -d backend ]; then
+      while IFS= read -r d; do
+        svc=$(basename "$d" | tr '-' '_')
+        allowlist="$allowlist $(echo "${svc}_SERVICE_URL" | tr '[:lower:]' '[:upper:]')"
+      done < <(find backend -maxdepth 1 -type d -name "*-service")
+    fi
+    if [ -d frontend ]; then
+      while IFS= read -r feenv; do
+        while IFS= read -r line; do
+          key=$(echo "$line" | grep -E "^[A-Z0-9_]+=" | cut -d'=' -f1 | tr '[:lower:]' '[:upper:]')
+          if echo "$key" | grep -q "_SERVICE_URL$"; then
+            allowlist="$allowlist $key"
+          fi
+        done < "$feenv"
+      done < <(find frontend -type f \( -name ".env" -o -name ".env.local" -o -name ".env.example" \))
+    fi
     
     # Get all unique keys
     local all_keys=$(echo -e "$local_file\n$remote_file" | grep -E "^[A-Z_]+=" | cut -d'=' -f1 | sort -u)
@@ -923,7 +1015,18 @@ invoke_smart_merge() {
         elif [ -n "$local_line" ]; then
             merged_content="$merged_content$local_line\n"
         elif [ -n "$remote_line" ]; then
-            merged_content="$merged_content$remote_line\n"
+            keyName=$(echo "$remote_line" | cut -d'=' -f1)
+            if echo "$keyName" | grep -q "_SERVICE_URL$"; then
+                if echo " $allowlist " | grep -q " $keyName "; then
+                    merged_content="$merged_content$remote_line\n"
+                    merge_log="$merge_log KeepRemoteOnly:$keyName;"
+                else
+                    merged_content="$merged_content#$remote_line\n"
+                    merge_log="$merge_log CommentRemoteOnly:$keyName;"
+                fi
+            else
+                merged_content="$merged_content$remote_line\n"
+            fi
         fi
     done <<< "$all_keys"
     
@@ -1132,16 +1235,16 @@ if git push --set-upstream origin "$current_branch"; then
         
         # 9) Stage & Commit bidirectional merged env files
         echo "📦 Bước 8/8: Staging bidirectional merged env files..."
-        git add -f **/.env 2>/dev/null || true
-        git add -f **/.env.local 2>/dev/null || true
-        git add -f **/.env.example 2>/dev/null || true
+  git add -f **/.env 2>/dev/null || true
+  git add -f **/.env.local 2>/dev/null || true
+  git add -f **/.env.example 2>/dev/null || true
         git commit -m "chore(env): bidirectional sync from private/$private_target_branch" --no-verify || true
-        
+  
         echo "✅ Bidirectional sync completed!"
-    else
+  else
         echo "⚠️  Lỗi khi push private/$private_target_branch"
-    fi
-    
+  fi
+  
     # 8) Khôi phục upstream về origin/<current-branch>
   if [ -n "$prev_upstream" ]; then
         git branch --set-upstream-to="$prev_upstream" "$current_branch" >/dev/null 2>&1 || true
