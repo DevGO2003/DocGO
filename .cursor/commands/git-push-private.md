@@ -1123,6 +1123,8 @@ fi
 - Cảnh báo: Lệnh này sẽ đẩy cả secrets trong `.env`. Chỉ sử dụng khi thật sự cần thiết và repo private.
 - Kiểm tra branch hiện tại: `git rev-parse --abbrev-ref HEAD`.
 - Nên chạy `git pull --rebase private <branch>` nếu có commit mới từ remote trước khi push.
+- Không tạo file script (.ps1/.sh) từ nội dung tài liệu để thực thi. Hãy chạy tuần tự từng dòng lệnh trực tiếp trong shell.
+- Không gộp nhiều lệnh PowerShell/Bash vào một dòng trừ khi thật sự cần thiết; tránh dùng chuỗi lệnh dài dễ gây lỗi cú pháp (đặc biệt trên PowerShell).
 
 ## Quyền quyết định
 - Agent có toàn quyền quyết định và tự thực thi ngay phương án mà agent đánh giá là lựa chọn tốt nhất (Best Choice) mà không cần hỏi lại.
