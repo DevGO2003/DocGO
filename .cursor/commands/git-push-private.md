@@ -14,6 +14,21 @@
 - Đảm bảo các file env được force-add với merge strategy: `**/.env`, `**/.env.local`, `**/.env.example`.
 - Không thêm các file nhạy cảm khác như `.env` gốc, `.env.production` (đang bị ignore theo quy tắc Git của dự án).
 
+## Lưu ý quan trọng cho PowerShell (Windows) – chạy trơn tru 100%
+
+Vì tệp này viết theo Bash, khi chạy trên PowerShell hãy tuân thủ các quy tắc sau để tránh gián đoạn:
+
+- Không dùng pipe sang `cat`. Tránh `... | cat`; nếu cần, dùng `| Out-String` hoặc bỏ pipe.
+- Không dùng toán tử `&&`. Chạy lệnh theo từng dòng riêng biệt.
+- Push sang remote `private` phải dùng refspec tường minh để KHÔNG tạo nhánh ngoài ý muốn:
+  - Không tham số (đẩy vào `private/main`):
+    - `git push private HEAD:main`
+  - Có tham số (ví dụ `dev`):
+    - `git push private HEAD:dev`
+- Trước khi backup/tìm `*.env*`, loại trừ thư mục `.git-backup/` và `.git/` khỏi phạm vi quét để không tự sao chép chính tệp backup.
+- Khi unstage env, chỉ gọi `git restore --staged` nếu có đường dẫn hợp lệ (tránh lỗi “you must specify path(s)”).
+- Khi cần hợp nhất vào `private/main` và gặp non-fast-forward, ưu tiên mở PR từ `private/<branch>` vào `private/main` thay vì push thẳng.
+
 ## Yêu cầu
 - Đã cấu hình remote tên `private` (ví dụ: `git remote add private <PRIVATE_GIT_URL>`).
 - Lưu ý QUAN TRỌNG: Hành động này force-add secrets (bao gồm `.env`). Hãy kiểm tra nội dung trước khi push.
@@ -46,7 +61,11 @@ new_smart_backup() {
 }
 EOF
     
-    find . -name "*.env*" -type f | while read -r file; do
+    # Loại trừ thư mục .git/ và .git-backup/ khi backup
+    find . \
+      -path "*/.git/*" -prune -o \
+      -path "*/.git-backup/*" -prune -o \
+      -type f -name "*.env*" -print | while read -r file; do
         local filename=$(basename "$file")
         cp "$file" "$backup_dir/$filename"
         echo "📦 Backed up: $filename"
@@ -400,7 +419,11 @@ if git push --set-upstream origin "$current_branch"; then
     git fetch private "$private_target_branch" 2>/dev/null || true
     
     merge_success=true
-    find . -name "*.env*" -type f | while read -r env_file; do
+    # Loại trừ .git/ và .git-backup/ khi quét env để merge
+    find . \
+      -path "*/.git/*" -prune -o \
+      -path "*/.git-backup/*" -prune -o \
+      -type f -name "*.env*" -print | while read -r env_file; do
         if [ "$merge_success" = "true" ]; then
             local_content=$(cat "$env_file")
             remote_content=$(git show "private/$private_target_branch:$env_file" 2>/dev/null || true)
@@ -449,7 +472,11 @@ if git push --set-upstream origin "$current_branch"; then
         git fetch private "$private_target_branch" 2>/dev/null || true
         
         merge_success2=true
-        find . -name "*.env*" -type f | while read -r env_file; do
+    # Loại trừ .git/ và .git-backup/ khi quét env để merge lần 2
+    find . \
+      -path "*/.git/*" -prune -o \
+      -path "*/.git-backup/*" -prune -o \
+      -type f -name "*.env*" -print | while read -r env_file; do
             if [ "$merge_success2" = "true" ]; then
                 current_content=$(cat "$env_file")
                 private_content=$(git show "private/$private_target_branch:$env_file" 2>/dev/null || true)
@@ -516,6 +543,50 @@ fi
 - Nên chạy `git pull --rebase private <branch>` nếu có commit mới từ remote trước khi push.
 - Không tạo file script (.ps1/.sh) từ nội dung tài liệu để thực thi. Hãy chạy tuần tự từng dòng lệnh trực tiếp trong shell.
 - Không gộp nhiều lệnh Bash vào một dòng trừ khi thật sự cần thiết.
+
+### PowerShell-safe Quick Steps (khuyến nghị)
+
+Chạy lần lượt các lệnh sau trên PowerShell để đảm bảo trơn tru:
+
+1) Backup env (không quét `.git/` và `.git-backup/`):
+
+```powershell
+$ts = Get-Date -Format "yyyyMMdd_HHmmss"
+$bk = ".git-backup/env/$ts"; New-Item -ItemType Directory -Force -Path $bk | Out-Null
+Get-ChildItem -Recurse -File -Include ".env",".env.local",".env.example" -Exclude ".git",".git-backup" | ForEach-Object {
+  Copy-Item $_.FullName -Destination (Join-Path $bk $_.Name) -Force
+}
+```
+
+2) Push code sạch lên origin (loại trừ env):
+
+```powershell
+git add -A
+$envFiles = @(Get-ChildItem -Recurse -File -Include ".env",".env.local",".env.example" 2>$null)
+if ($envFiles.Count -gt 0) { foreach ($f in $envFiles) { git restore --staged -- "$($f.FullName)" 2>$null } }
+git commit -m "chore: update code changes (exclude env)" --no-verify
+git push -u origin $(git branch --show-current)
+```
+
+3) Force-add env và đẩy lên private theo refspec tường minh (không tạo nhánh ngoài ý muốn):
+
+```powershell
+$envFiles = @(Get-ChildItem -Recurse -File -Include ".env",".env.local",".env.example" 2>$null)
+if ($envFiles.Count -gt 0) { foreach ($f in $envFiles) { git add -f -- "$($f.FullName)" } }
+git commit -m "chore(env): update env for private" --no-verify
+# Không tham số → main
+git push private HEAD:main
+# Có tham số (ví dụ dev) → bỏ comment dòng sau và sửa tên
+# git push private HEAD:dev
+```
+
+4) Mở PR hợp nhất env về `private/main` (nếu đẩy vào `private/thaiGO`):
+
+```text
+https://github.com/DevGO2003/DocGO-private/compare/main...thaiGO?expand=1
+```
+
+Sau khi merge PR, nếu muốn đồng bộ env ngược về nhánh làm việc, đọc env trực tiếp từ `private/main` về local rồi KHÔNG commit lên origin.
 
 ## Quyền quyết định
 - Agent có toàn quyền quyết định và tự thực thi ngay phương án mà agent đánh giá là lựa chọn tốt nhất (Best Choice) mà không cần hỏi lại.
