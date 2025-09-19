@@ -571,6 +571,9 @@ if git push --set-upstream origin "$current_branch"; then
     echo "🔒 Bước 6/8: Push private/$private_target_branch (backup phụ với env)..."
     if git push private "$current_branch:$private_target_branch"; then
         echo "✅ Private backup thành công: private/$private_target_branch"
+        # NEW: Cleanup local history so origin never sees env-only commit
+        echo "🧹 Dọn lịch sử: loại bỏ commit ENV vừa tạo (giữ lịch sử sạch cho origin)"
+        git reset --hard HEAD~1 || true
         
         # 8) Lần 2: Merge private/main → thaiGO (bidirectional sync)
         echo "🔄 Bước 7/8: Lần 2 - Merge private/$private_target_branch → $current_branch..."
@@ -619,6 +622,9 @@ if git push --set-upstream origin "$current_branch"; then
   git add -f **/.env.local 2>/dev/null || true
   git add -f **/.env.example 2>/dev/null || true
         git commit -m "chore(env): bidirectional sync from private/$private_target_branch" --no-verify || true
+        # NEW: Cleanup again after bidirectional env sync commit
+        echo "🧹 Dọn lịch sử: loại bỏ commit đồng bộ ENV (nhánh sạch khi push origin)"
+        git reset --hard HEAD~1 || true
   
         echo "✅ Bidirectional sync completed!"
   else
