@@ -7,8 +7,11 @@
 - **Có tham số**: ngoài `private/<current-branch>` còn push thêm vào `private/<param>`
 - **Env files**: được force-add tạm thời để push vào private nhưng không bị track ở origin
 - **Đồng bộ**: sau khi push, đồng bộ lại local từ `private/<current-branch>`
+<<<<<<< HEAD
 - **Tự động tạo script**: Luôn tạo file `script/git-push-private-safe.ps1` với logic an toàn
 - **PowerShell only**: Chỉ tạo script PowerShell, không tạo Bash script
+=======
+>>>>>>> c16f081cb784bd3ee745917f327f7cba4822dd47
 
 ## Luồng thực thi chi tiết
 
@@ -89,6 +92,7 @@ Dựa trên phân tích ngữ cảnh, thuật toán áp dụng các quy tắc ư
 
 ## Cách sử dụng
 
+<<<<<<< HEAD
 ### Sử dụng lệnh Cursor (Khuyến nghị)
 ```bash
 # Tự động tạo và chạy script PowerShell
@@ -143,6 +147,34 @@ Get-ChildItem $latestBackup.FullName -Recurse -Name ".env*" | ForEach-Object {
 ```
 
 ### Bash (Linux/Mac)
+=======
+```bash
+# Push vào private/<current-branch>
+./git-push-private.sh
+
+# Push vào private/<current-branch> và private/<param>
+./git-push-private.sh <param>
+```
+
+## Lưu ý quan trọng
+
+- Script này chỉ hoạt động trên Bash
+- Đảm bảo có quyền truy cập vào remote `private`
+- Các file `.env` sẽ được backup tự động trước khi xử lý
+- Smart Merge đảm bảo không mất dữ liệu quan trọng trong quá trình đồng bộ
+
+## ⚠️ Cảnh báo về file .env
+
+- **KHÔNG BAO GIỜ** sử dụng `git reset --hard` trong quá trình cleanup
+- **LUÔN SỬ DỤNG** `git reset --soft` để giữ file .env trong working directory
+- **BACKUP TỰ ĐỘNG** được tạo trước mỗi lần thực thi để khôi phục nếu cần
+- **KIỂM TRA** file .env sau khi thực thi script để đảm bảo không bị mất
+
+## 🔧 Khôi phục file .env nếu bị mất
+
+Nếu file .env bị mất do lỗi script, sử dụng lệnh sau để khôi phục:
+
+>>>>>>> c16f081cb784bd3ee745917f327f7cba4822dd47
 ```bash
 # Tìm backup mới nhất
 latest_backup=$(ls -t .git-backup/env/ | head -1)
@@ -155,6 +187,7 @@ find .git-backup/env/$latest_backup -name ".env*" | while read file; do
     echo "Restored: $target"
 done
 ```
+<<<<<<< HEAD
 
 ## 📝 Tự động tạo script PowerShell
 
@@ -192,3 +225,5 @@ script/
 - Sử dụng syntax PowerShell chuẩn, không có lỗi parser
 - Tự động kiểm tra và tạo thư mục `script/` nếu chưa có
 - Script có thể chạy lại nhiều lần mà không gây lỗi
+=======
+>>>>>>> c16f081cb784bd3ee745917f327f7cba4822dd47

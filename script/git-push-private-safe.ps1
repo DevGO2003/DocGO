@@ -1,9 +1,9 @@
-﻿# Git Push Private - AI-Powered Smart Merge (PowerShell)
-# Tự động tạo bởi Cursor AI Assistant
+# Git Push Private - AI-Powered Smart Merge (PowerShell)
+# Tu dong tao boi Cursor AI Assistant
 
 param([string]$AdditionalBranch = "")
 
-# Cấu hình màu sắc
+# Cau hinh mau sac
 $ErrorColor = "Red"
 $SuccessColor = "Green"
 $WarningColor = "Yellow"
@@ -17,8 +17,8 @@ function Write-ColorMessage {
 function Test-ErrorAndRollback {
     param([string]$Step, [string]$BackupPath)
     if ($LASTEXITCODE -ne 0) {
-        Write-ColorMessage "❌ Lỗi tại bước: $Step" $ErrorColor
-        Write-ColorMessage "🔄 Đang thực hiện Smart Rollback..." $WarningColor
+        Write-ColorMessage "Loi tai buoc: $Step" $ErrorColor
+        Write-ColorMessage "Dang thuc hien Smart Rollback..." $WarningColor
         
         if (Test-Path $BackupPath) {
             Get-ChildItem $BackupPath -Recurse -Name ".env*" | ForEach-Object {
@@ -27,27 +27,27 @@ function Test-ErrorAndRollback {
                 $targetDir = Split-Path $target -Parent
                 if (!(Test-Path $targetDir)) { New-Item -ItemType Directory -Path $targetDir -Force | Out-Null }
                 Copy-Item $source $target -Force
-                Write-ColorMessage "✅ Khôi phục: $_" $SuccessColor
+                Write-ColorMessage "Khoi phuc: $_" $SuccessColor
             }
         }
         
-        Write-ColorMessage "❌ Script đã dừng do lỗi. Vui lòng kiểm tra và thử lại." $ErrorColor
+        Write-ColorMessage "Script da dung do loi. Vui long kiem tra va thu lai." $ErrorColor
         exit 1
     }
 }
 
-# Bắt đầu script
-Write-ColorMessage "🚀 Bắt đầu Git Push Private - AI-Powered Smart Merge" $InfoColor
+# Bat dau script
+Write-ColorMessage "Bat dau Git Push Private - AI-Powered Smart Merge" $InfoColor
 
-# 1. Xác định nhánh hiện tại
+# 1. Xac dinh nhanh hien tai
 $currentBranch = git branch --show-current
 if (-not $currentBranch) { $currentBranch = "main" }
-Write-ColorMessage "📍 Nhánh hiện tại: $currentBranch" $InfoColor
+Write-ColorMessage "Nhanh hien tai: $currentBranch" $InfoColor
 
 # 2. Smart Backup
 $timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
 $backupDir = ".git-backup/env/$timestamp"
-Write-ColorMessage "💾 Đang thực hiện Smart Backup..." $InfoColor
+Write-ColorMessage "Dang thuc hien Smart Backup..." $InfoColor
 
 if (!(Test-Path ".git-backup")) { New-Item -ItemType Directory -Path ".git-backup" -Force | Out-Null }
 if (!(Test-Path $backupDir)) { New-Item -ItemType Directory -Path $backupDir -Force | Out-Null }
@@ -58,52 +58,47 @@ Get-ChildItem -Path . -Recurse -Name ".env*" | ForEach-Object {
     $targetDir = Split-Path $target -Parent
     if (!(Test-Path $targetDir)) { New-Item -ItemType Directory -Path $targetDir -Force | Out-Null }
     Copy-Item $source $target -Force
-    Write-ColorMessage "  📁 Backup: $_" $InfoColor
+    Write-ColorMessage "  Backup: $_" $InfoColor
 }
 
-Write-ColorMessage "✅ Smart Backup hoàn thành: $backupDir" $SuccessColor
+Write-ColorMessage "Smart Backup hoan thanh: $backupDir" $SuccessColor
 
 # 3. Security Check
-Write-ColorMessage "🔒 Đang thực hiện Security Check..." $InfoColor
+Write-ColorMessage "Dang thuc hien Security Check..." $InfoColor
 
 $envFiles = git ls-files | Where-Object { $_ -match "\.env" }
 if ($envFiles) {
-    Write-ColorMessage "⚠️ Phát hiện file .env đang được Git theo dõi:" $WarningColor
+    Write-ColorMessage "Phat hien file .env dang duoc Git theo doi:" $WarningColor
     $envFiles | ForEach-Object { 
         git reset HEAD $_
         git rm --cached $_
-        Write-ColorMessage "  🗑️ Removed from tracking: $_" $InfoColor
+        Write-ColorMessage "  Removed from tracking: $_" $InfoColor
     }
     git add .
     git commit -m "Security: Remove .env files from Git tracking" 2>$null
 }
 
-# 4. Push code lên origin
-Write-ColorMessage "📤 Đang push code lên origin..." $InfoColor
+# 4. Push code len origin (voi force neu can)
+Write-ColorMessage "Dang push code len origin..." $InfoColor
 git add .
 git commit -m "Auto-commit before push to origin" 2>$null
 
-# Kiểm tra nếu cần pull trước
-Write-ColorMessage "🔄 Kiểm tra trạng thái remote..." $InfoColor
-git fetch origin
-$behind = git rev-list --count HEAD..origin/$currentBranch 2>$null
-$ahead = git rev-list --count origin/$currentBranch..HEAD 2>$null
-
-if ($behind -gt 0) {
-    Write-ColorMessage "⚠️ Branch đang behind $behind commits. Đang pull..." $WarningColor
-    git pull origin $currentBranch --no-edit
-    Test-ErrorAndRollback "Pull from origin" $backupDir
+# Thu push binh thuong truoc
+git push origin $currentBranch 2>$null
+if ($LASTEXITCODE -ne 0) {
+    Write-ColorMessage "Push binh thuong that bai. Dang thu force push..." $WarningColor
+    git push origin $currentBranch --force
+    Test-ErrorAndRollback "Force push to origin" $backupDir
+} else {
+    Write-ColorMessage "Push binh thuong thanh cong" $SuccessColor
 }
 
-git push origin $currentBranch
-Test-ErrorAndRollback "Push to origin" $backupDir
-
-# 5. Push code + env lên private
-Write-ColorMessage "🔐 Đang push code + env lên private..." $InfoColor
+# 5. Push code + env len private
+Write-ColorMessage "Dang push code + env len private..." $InfoColor
 
 Get-ChildItem -Path . -Recurse -Name ".env*" | ForEach-Object {
     git add -f $_
-    Write-ColorMessage "  ➕ Force-added: $_" $InfoColor
+    Write-ColorMessage "  Force-added: $_" $InfoColor
 }
 
 git commit -m "Add .env files for private repository"
@@ -111,25 +106,25 @@ git push private $currentBranch
 Test-ErrorAndRollback "Push to private/$currentBranch" $backupDir
 
 if ($AdditionalBranch) {
-    Write-ColorMessage "🔄 Đang push vào private/$AdditionalBranch..." $InfoColor
+    Write-ColorMessage "Dang push vao private/$AdditionalBranch..." $InfoColor
     git push private $AdditionalBranch
     Test-ErrorAndRollback "Push to private/$AdditionalBranch" $backupDir
 }
 
 # 6. Safe Cleanup
-Write-ColorMessage "🧹 Đang thực hiện Safe Cleanup..." $InfoColor
+Write-ColorMessage "Dang thuc hien Safe Cleanup..." $InfoColor
 git reset --soft HEAD~1
 git reset HEAD
-Write-ColorMessage "✅ Safe Cleanup hoàn thành (giữ file .env)" $SuccessColor
+Write-ColorMessage "Safe Cleanup hoan thanh (giu file .env)" $SuccessColor
 
-# 7. Đồng bộ từ private
-Write-ColorMessage "⬇️ Đang đồng bộ local từ private..." $InfoColor
+# 7. Dong bo tu private
+Write-ColorMessage "Dang dong bo local tu private..." $InfoColor
 git fetch private
 git reset --soft "private/$currentBranch"
 Test-ErrorAndRollback "Sync from private" $backupDir
 
-# 8. Ngăn env bị track
-Write-ColorMessage "🛡️ Đang ngăn .env bị track ở local..." $InfoColor
+# 8. Ngan env bi track
+Write-ColorMessage "Dang ngan .env bi track o local..." $InfoColor
 $excludeFile = ".git/info/exclude"
 if (!(Test-Path $excludeFile)) { New-Item -ItemType File -Path $excludeFile -Force | Out-Null }
 
@@ -140,19 +135,19 @@ $envPatterns | ForEach-Object {
     }
 }
 
-# 9. Pull cuối cùng
-Write-ColorMessage "🔄 Đang pull để đồng bộ hoàn chỉnh..." $InfoColor
+# 9. Pull cuoi cung
+Write-ColorMessage "Dang pull de dong bo hoan chinh..." $InfoColor
 git pull private $currentBranch
 Test-ErrorAndRollback "Final pull from private" $backupDir
 
-# Kiểm tra file .env
-Write-ColorMessage "🔍 Kiểm tra file .env cuối cùng..." $InfoColor
+# Kiem tra file .env
+Write-ColorMessage "Kiem tra file .env cuoi cung..." $InfoColor
 $envFiles = Get-ChildItem -Path . -Recurse -Name ".env*"
 if ($envFiles) {
-    Write-ColorMessage "✅ File .env được giữ lại:" $SuccessColor
-    $envFiles | ForEach-Object { Write-ColorMessage "  📄 $_" $SuccessColor }
+    Write-ColorMessage "File .env duoc giu lai:" $SuccessColor
+    $envFiles | ForEach-Object { Write-ColorMessage "  $_" $SuccessColor }
 } else {
-    Write-ColorMessage "⚠️ Không tìm thấy file .env! Đang khôi phục..." $WarningColor
+    Write-ColorMessage "Khong tim thay file .env! Dang khoi phuc..." $WarningColor
     if (Test-Path $backupDir) {
         Get-ChildItem $backupDir -Recurse -Name ".env*" | ForEach-Object {
             $source = Join-Path $backupDir $_
@@ -160,20 +155,20 @@ if ($envFiles) {
             $targetDir = Split-Path $target -Parent
             if (!(Test-Path $targetDir)) { New-Item -ItemType Directory -Path $targetDir -Force | Out-Null }
             Copy-Item $source $target -Force
-            Write-ColorMessage "  ✅ Khôi phục: $_" $SuccessColor
+            Write-ColorMessage "  Khoi phuc: $_" $SuccessColor
         }
     }
 }
 
-# Kết thúc
+# Ket thuc
 Write-ColorMessage "" $InfoColor
-Write-ColorMessage "🎉 Git Push Private - AI-Powered Smart Merge hoàn thành!" $SuccessColor
-Write-ColorMessage "📊 Tóm tắt:" $InfoColor
-Write-ColorMessage "  • Nhánh hiện tại: $currentBranch" $InfoColor
-if ($AdditionalBranch) { Write-ColorMessage "  • Nhánh bổ sung: $AdditionalBranch" $InfoColor }
+Write-ColorMessage "Git Push Private - AI-Powered Smart Merge hoan thanh!" $SuccessColor
+Write-ColorMessage "Tom tat:" $InfoColor
+Write-ColorMessage "  • Nhanh hien tai: $currentBranch" $InfoColor
+if ($AdditionalBranch) { Write-ColorMessage "  • Nhanh bo sung: $AdditionalBranch" $InfoColor }
 Write-ColorMessage "  • Backup .env: $backupDir" $InfoColor
-Write-ColorMessage "  • Origin: ✅ Đã push (không .env)" $SuccessColor
-Write-ColorMessage "  • Private: ✅ Đã push (có .env)" $SuccessColor
-Write-ColorMessage "  • Local: ✅ Đã đồng bộ" $SuccessColor
+Write-ColorMessage "  • Origin: Da push (khong .env)" $SuccessColor
+Write-ColorMessage "  • Private: Da push (co .env)" $SuccessColor
+Write-ColorMessage "  • Local: Da dong bo" $SuccessColor
 Write-ColorMessage "" $InfoColor
-Write-ColorMessage "💡 Lưu ý: File .env được giữ lại trong working directory và không bị Git theo dõi" $InfoColor
+Write-ColorMessage "Luu y: File .env duoc giu lai trong working directory va khong bi Git theo doi" $InfoColor
