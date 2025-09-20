@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import jakarta.validation.constraints.Pattern;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 public class ContractCreateRequest {
@@ -91,4 +92,6 @@ public class ContractCreateRequest {
     private Boolean legalReviewRequired = false;
 
     private LocalDateTime reviewDeadline;
+    
+    private List<String> tags;
 }

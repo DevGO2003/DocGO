@@ -31,6 +31,7 @@ public class ReminderCreateRequest {
     @NotNull(message = "Ngày nhắc nhở không được để trống")
     private LocalDateTime reminderDate;
     
+    @Builder.Default
     private Boolean isRecurring = false;
     
     private String recurringPattern;

@@ -1,0 +1,16 @@
+{
+  "name": "google-cloud-mcp-server",
+  "version": "1.0.0",
+  "description": "Google Cloud MCP Server for DocGO",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node index.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "latest"
+  },
+  "keywords": ["mcp", "google-cloud", "docgo"],
+  "author": "DocGO Team",
+  "license": "MIT"
+}

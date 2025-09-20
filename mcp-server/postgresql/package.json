@@ -1,0 +1,16 @@
+{
+  "name": "postgresql-mcp-server",
+  "version": "1.0.0",
+  "description": "PostgreSQL MCP Server for DocGO",
+  "main": "index.js",
+  "scripts": {
+    "start": "postgresql-mcp-server",
+    "dev": "postgresql-mcp-server --debug"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/server-postgres": "latest"
+  },
+  "keywords": ["mcp", "postgresql", "database", "docgo"],
+  "author": "DocGO Team",
+  "license": "MIT"
+}

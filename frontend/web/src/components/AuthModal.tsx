@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, Mail, Lock, User, Building, Briefcase } from 'lucide-react';
 import { LoginCredentials, RegisterData } from '../types/user';
+import authService from '../services/authService';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -30,14 +31,35 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
   if (!isOpen) return null;
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    onLogin(loginData);
+    try {
+      await authService.login({
+        username: loginData.email,
+        password: loginData.password
+      });
+      onLogin(loginData);
+    } catch (error) {
+      console.error('Login failed:', error);
+      // Handle error (show toast, etc.)
+    }
   };
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    onRegister(registerData);
+    try {
+      await authService.register({
+        username: registerData.email,
+        email: registerData.email,
+        password: registerData.password,
+        firstName: registerData.name.split(' ')[0],
+        lastName: registerData.name.split(' ').slice(1).join(' ')
+      });
+      onRegister(registerData);
+    } catch (error) {
+      console.error('Registration failed:', error);
+      // Handle error (show toast, etc.)
+    }
   };
 
   return (

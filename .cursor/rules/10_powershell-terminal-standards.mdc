@@ -1,0 +1,290 @@
+# Chuẩn hóa PowerShell Terminal Commands
+
+## Mục tiêu
+- Chuẩn hóa việc sử dụng PowerShell commands trong Cursor AI agent
+- Tránh các lỗi cú pháp terminal thường gặp trên Windows
+- Đảm bảo tính nhất quán và ổn định khi chạy terminal commands
+
+## Quy tắc bắt buộc
+
+### 1. Sử dụng PowerShell Commands thay vì Unix Commands
+
+#### ❌ KHÔNG BAO GIỜ sử dụng:
+```bash
+# Unix commands - KHÔNG hoạt động trên Windows PowerShell
+ls -la
+cat file.txt
+grep pattern file.txt
+find . -name "*.js"
+chmod +x script.sh
+```
+
+#### ✅ LUÔN sử dụng:
+```powershell
+# PowerShell equivalents
+Get-ChildItem -Force
+Get-Content file.txt
+Select-String pattern file.txt
+Get-ChildItem -Recurse -Filter "*.js"
+icacls script.sh /grant Everyone:F
+```
+
+### 2. Xử lý Path và Spaces
+
+#### ❌ SAI - Không escape spaces:
+```powershell
+git add file with spaces.txt
+cd C:\path with spaces
+```
+
+#### ✅ ĐÚNG - Luôn quote paths có spaces:
+```powershell
+git add "file with spaces.txt"
+cd "C:\path with spaces"
+```
+
+### 3. Environment Variables
+
+#### ❌ SAI - Unix style:
+```powershell
+echo $HOME
+echo $PATH
+```
+
+#### ✅ ĐÚNG - PowerShell style:
+```powershell
+Write-Host $env:HOME
+Write-Host $env:PATH
+```
+
+### 4. Command Chaining
+
+#### ❌ SAI - Unix style:
+```powershell
+npm run build && npm start
+git add . && git commit -m "message"
+```
+
+#### ✅ ĐÚNG - PowerShell style:
+```powershell
+npm run build; npm start
+git add .; git commit -m "message"
+```
+
+### 5. Special Characters và Quotes
+
+#### ❌ SAI - Không escape quotes:
+```powershell
+git commit -m "fix: update code with "quotes""
+```
+
+#### ✅ ĐÚNG - Escape quotes:
+```powershell
+git commit -m "fix: update code with `"quotes`""
+```
+
+### 6. Path Separators
+
+#### ❌ SAI - Unix separators:
+```powershell
+cd /path/to/directory
+ls /usr/local/bin
+```
+
+#### ✅ ĐÚNG - Windows separators:
+```powershell
+cd C:\path\to\directory
+Get-ChildItem C:\Windows\System32
+```
+
+### 7. File Operations
+
+#### ❌ SAI - Unix commands:
+```powershell
+cat config.json
+head -n 10 file.txt
+tail -f log.txt
+```
+
+#### ✅ ĐÚNG - PowerShell commands:
+```powershell
+Get-Content config.json
+Get-Content file.txt -TotalCount 10
+Get-Content log.txt -Wait
+```
+
+### 8. Text Processing
+
+#### ❌ SAI - Unix grep:
+```powershell
+grep "error" log.txt
+grep -r "pattern" .
+```
+
+#### ✅ ĐÚNG - PowerShell Select-String:
+```powershell
+Select-String "error" log.txt
+Select-String "pattern" -Recurse .
+```
+
+### 9. Git Commands với Special Characters
+
+#### ❌ SAI - Không handle special chars:
+```powershell
+git log --grep="fix: bug (critical)"
+git add "file with (parentheses).txt"
+```
+
+#### ✅ ĐÚNG - Escape special characters:
+```powershell
+git log --grep="fix: bug `(critical`)"
+git add "file with `(parentheses`).txt"
+```
+
+### 10. Docker Commands
+
+#### ❌ SAI - Unix style với $(pwd):
+```powershell
+docker run -v $(pwd):/app -p 8000:8000 service
+```
+
+#### ✅ ĐÚNG - PowerShell style với ${PWD}:
+```powershell
+docker run -v ${PWD}:/app -p 8000:8000 service
+```
+
+## Quy tắc đặc biệt
+
+### PowerShell Execution Policy
+- Luôn kiểm tra execution policy trước khi chạy scripts
+- Sử dụng `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser` nếu cần
+
+### Long Commands
+- Sử dụng backtick ` để xuống dòng trong PowerShell
+- Ví dụ:
+```powershell
+git log --oneline --since="yesterday 00:00:00 +0700" `
+        --until="today 00:00:00 +0700" `
+        --stat --pretty=format:"%h - %an, %ad : %s"
+```
+
+### Error Handling
+- Luôn sử dụng `-ErrorAction SilentlyContinue` cho commands có thể fail
+- Ví dụ:
+```powershell
+Remove-Item "temp.txt" -ErrorAction SilentlyContinue
+```
+
+## Mapping Commands Chuẩn
+
+| Unix Command | PowerShell Equivalent | Ghi chú |
+|--------------|----------------------|---------|
+| `ls -la` | `Get-ChildItem -Force` | Hiển thị tất cả files kể cả hidden |
+| `cat file.txt` | `Get-Content file.txt` | Đọc nội dung file |
+| `grep pattern` | `Select-String pattern` | Tìm kiếm text |
+| `find . -name "*.js"` | `Get-ChildItem -Recurse -Filter "*.js"` | Tìm files theo pattern |
+| `head -n 10` | `Get-Content -TotalCount 10` | Lấy 10 dòng đầu |
+| `tail -f` | `Get-Content -Wait` | Theo dõi file real-time |
+| `chmod +x` | `icacls file /grant Everyone:F` | Cấp quyền execute |
+| `which command` | `Get-Command command` | Tìm đường dẫn command |
+| `ps aux` | `Get-Process` | Liệt kê processes |
+| `kill -9 PID` | `Stop-Process -Id PID -Force` | Dừng process |
+
+## Best Practices
+
+### 1. Luôn test commands trước khi chạy trong AI agent
+### 2. Sử dụng `-WhatIf` parameter khi có thể để preview
+### 3. Quote tất cả paths và strings có special characters
+### 4. Sử dụng `$env:VAR` cho environment variables
+### 5. Dùng `;` thay vì `&&` cho command chaining
+### 6. Escape quotes với backtick ` trong PowerShell
+### 7. Sử dụng `Get-ChildItem` thay vì `ls`
+### 8. Sử dụng `Select-String` thay vì `grep`
+### 9. Sử dụng `Get-Content` thay vì `cat`
+### 10. Luôn kiểm tra PowerShell execution policy
+
+## Quy tắc Command Execution
+
+### 11. HẠN CHẾ GỘP LỆNH - Chạy từng dòng lệnh riêng biệt
+
+#### ❌ TRÁNH - Gộp nhiều lệnh phức tạp:
+```powershell
+# KHÔNG nên - quá nhiều lệnh gộp chung
+git add .; git commit -m "fix"; git push; npm run build; npm start
+
+# KHÔNG nên - lệnh phức tạp với nhiều parameters
+Get-ChildItem -Recurse -Filter "*.js" | Select-String "error" | ForEach-Object { Write-Host $_.Line }
+```
+
+#### ✅ KHUYẾN KHÍCH - Chia nhỏ thành từng bước:
+```powershell
+# Bước 1: Add files
+git add .
+
+# Bước 2: Commit changes
+git commit -m "fix: resolve issues"
+
+# Bước 3: Push to remote
+git push
+
+# Bước 4: Build project
+npm run build
+
+# Bước 5: Start application
+npm start
+```
+
+### 12. Lợi ích của việc chạy từng dòng lệnh
+
+#### ✅ **Debug dễ dàng hơn:**
+- Xác định chính xác lệnh nào gây lỗi
+- Dễ dàng skip lệnh có vấn đề
+- Có thể chạy lại từ bước bị lỗi
+
+#### ✅ **Kiểm soát tốt hơn:**
+- Có thể dừng giữa chừng nếu cần
+- Kiểm tra kết quả từng bước
+- Điều chỉnh lệnh tiếp theo dựa trên kết quả
+
+#### ✅ **Ổn định hơn:**
+- Giảm thiểu lỗi parsing phức tạp
+- Tránh lỗi do special characters
+- Dễ handle error cho từng lệnh
+
+### 13. Khi nào được phép gộp lệnh
+
+#### ✅ **Chỉ gộp khi:**
+- Lệnh đơn giản, ít parameters
+- Đã test riêng từng lệnh
+- Có mối quan hệ logic rõ ràng
+- Không có special characters phức tạp
+
+#### ✅ **Ví dụ gộp lệnh AN TOÀN:**
+```powershell
+# OK - lệnh đơn giản
+git status; git log --oneline -5
+
+# OK - có mối quan hệ logic
+cd "C:\project"; Get-ChildItem
+
+# OK - đã test riêng
+npm install; npm run build
+```
+
+### 14. Quy tắc ưu tiên
+
+#### 🥇 **Ưu tiên 1: Chạy từng dòng lệnh riêng biệt**
+#### 🥈 **Ưu tiên 2: Gộp tối đa 2-3 lệnh đơn giản**
+#### 🥉 **Ưu tiên 3: Gộp nhiều lệnh (chỉ khi thực sự cần thiết)**
+
+## Lưu ý quan trọng
+
+- **Cursor AI agent chạy trên Windows PowerShell** - không phải Unix shell
+- **Tất cả terminal commands phải tuân thủ PowerShell syntax**
+- **Không sử dụng Unix commands** - sẽ gây lỗi
+- **Luôn quote paths có spaces** - tránh lỗi parsing
+- **Sử dụng Windows path separators** - `\` thay vì `/`
+
+---
+
+**Mục tiêu**: Đảm bảo 100% terminal commands chạy thành công trên Windows PowerShell environment của Cursor IDE.

@@ -1,18 +1,19 @@
 # Git Push Private - AI-Powered Smart Merge (Bash-only)
 
-Đẩy nhánh hiện tại lên `origin` trước, sau đó push lên `private/<branch>` kèm TẤT CẢ file env theo yêu cầu: `.env`, `.env.local`, `.env.example` với AI-Powered Smart Merge để tránh conflict.
+Đẩy nhánh hiện tại lên `origin` và `private` với 2 chế độ:
+- **Không tham số**: Chỉ push/pull đồng bộ đơn giản
+- **Có tham số**: Merge vào `private/<tham số>` và thay thế lịch sử commit
 
 ## Mô tả
 - Tự động và không yêu cầu xác nhận.
 - Xác định nhánh hiện tại; nếu không xác định được thì MẶC ĐỊNH dùng nhánh `main` (tạo mới nếu chưa có).
-- **AI-POWERED BACKUP STRATEGY**: Push lên `origin/<branch>` trước để backup (loại trừ mọi `.env*`), sau đó push lên `private/<branch>` với env files được merge thông minh.
-- **ADVANCED SMART MERGE**: Sử dụng AI để phân tích toàn bộ nội dung env files (lượt đi và lượt về), so sánh context và đưa ra quyết định merge thông minh với retry mechanism.
-- **DUAL-MERGE WORKFLOW**: 
-  1. **Lần 1**: `thaiGO` → `private/main` (merge từ nhánh hiện tại vào private)
-  2. **Lần 2**: `private/main` → `thaiGO` (merge ngược lại từ private vào nhánh hiện tại)
-- Khôi phục upstream về `origin/<branch>` để tiếp tục làm việc trên origin.
+- **TWO-MODE WORKFLOW**:
+  - **Mode 1 (Không tham số)**: Push + Pull đồng bộ đơn giản giữa origin và private
+  - **Mode 2 (Có tham số)**: AI-powered merge vào `private/<tham số>` và thay thế lịch sử commit
+- **AI-POWERED SMART MERGE**: Sử dụng AI để phân tích toàn bộ nội dung env files, so sánh context và đưa ra quyết định merge thông minh với retry mechanism.
+- **ENV FILE PROTECTION**: Đảm bảo file `.env` luôn tồn tại để code hoạt động bình thường.
+- **HISTORY REPLACEMENT**: Khi có tham số, thay thế hoàn toàn lịch sử commit và bỏ theo dõi upstream.
 - Đảm bảo các file env được force-add với merge strategy: `**/.env`, `**/.env.local`, `**/.env.example`.
-- Không thêm các file nhạy cảm khác như `.env` gốc, `.env.production` (đang bị ignore theo quy tắc Git của dự án).
 
 ## Lưu ý quan trọng cho PowerShell (Windows) – chạy trơn tru 100%
 
@@ -22,8 +23,8 @@ Vì tệp này viết theo Bash, khi chạy trên PowerShell hãy tuân thủ c�
 - Không dùng toán tử `&&`. Chạy lệnh theo từng dòng riêng biệt.
 - Tuyệt đối KHÔNG dùng toán tử chuyển hướng `>` để ghi nội dung từ `git show`/`git cat-file` ra file ENV trong PowerShell, vì mặc định sẽ ghi dạng UTF-16LE. Khi cần đồng bộ file từ `private/<branch>`, hãy dùng lệnh Git để checkout/restore file trực tiếp (ví dụ: sử dụng `git restore -s private/<branch> -- <đường-dẫn-file>`), thay vì ghi file bằng chuyển hướng PowerShell.
 - Push sang remote `private` phải dùng refspec tường minh để KHÔNG tạo nhánh ngoài ý muốn:
-  - Không tham số (đẩy vào `private/main`):
-    - `git push private HEAD:main`
+  - Không tham số (đẩy vào `private/<current-branch>`):
+    - `git push private HEAD:<current-branch>`
   - Có tham số (ví dụ `dev`):
     - `git push private HEAD:dev`
 - Trước khi backup/tìm `*.env*`, loại trừ thư mục `.git-backup/` và `.git/` khỏi phạm vi quét để không tự sao chép chính tệp backup.
@@ -293,7 +294,7 @@ invoke_smart_merge() {
     # Repo-aware discovery
     local allowlist_keys="$(build_service_allowlist)"
     local deprecations=$(build_deprecation_map)
-
+    
     # Bước 1: AI Content Analysis
     local analysis=$(analyze_env_content "$local_file" "$remote_file" "$filename")
     
@@ -343,7 +344,7 @@ invoke_smart_merge() {
                 remote_line="$crk=$(echo "$remote_line" | cut -d'=' -f2-)"
             fi
         fi
-
+        
         if [ -n "$local_line" ] && [ -n "$remote_line" ]; then
             # Có conflict - dùng AI decision
             local local_value=$(echo "$local_line" | cut -d'=' -f2-)
@@ -454,7 +455,7 @@ test_merged_env() {
             fi
         fi
     done < <(echo "$content" | grep -E "^[A-Z_]+=http")
-
+    
     # Check port validation
     local port=$(echo "$content" | grep "^SERVER_PORT=" | cut -d'=' -f2)
     if [ -n "$port" ] && ([ "$port" -lt 1000 ] || [ "$port" -gt 65535 ]); then
@@ -661,19 +662,25 @@ fi
 
 Để chạy an toàn trên PowerShell mà không dùng script, hãy thực hiện tuần tự theo hướng dẫn bằng lời sau (không cần dán lệnh):
 
+#### **Mode 1: Không tham số (Đồng bộ đơn giản)**
+1) Stage toàn bộ thay đổi, sau đó bỏ stage mọi tệp env trước khi commit để đảm bảo push lên `origin` không chứa env. Commit với thông điệp "chore: update code changes (exclude env)" và đẩy lên `origin` nhánh hiện tại.
+
+2) Đẩy lên `private` nhánh hiện tại: `git push private HEAD:<current-branch>`
+
+3) Pull để đồng bộ: `git pull origin <current-branch>` và `git pull private <current-branch>`
+
+#### **Mode 2: Có tham số (Merge + Replace)**
 1) Tạo thư mục backup env theo timestamp dưới `.git-backup/env/` và sao chép tất cả các tệp `.env`, `.env.local`, `.env.example` vào đó; nhớ loại trừ thư mục `.git/` và `.git-backup/` khi quét.
 
-2) Stage toàn bộ thay đổi, sau đó bỏ stage mọi tệp env trước khi commit để đảm bảo push lên `origin` không chứa env. Commit với thông điệp “chore: update code changes (exclude env)” và đẩy lên `origin` nhánh hiện tại.
+2) Stage toàn bộ thay đổi, sau đó bỏ stage mọi tệp env trước khi commit để đảm bảo push lên `origin` không chứa env. Commit với thông điệp "chore: update code changes (exclude env)" và đẩy lên `origin` nhánh hiện tại.
 
-3) Force-add lại các tệp env, commit với thông điệp “chore(env): update env for private”, rồi đẩy lên remote `private` với refspec tường minh: không tham số thì đẩy vào `HEAD:main`; nếu muốn nhánh khác (ví dụ `dev`) thì đẩy vào `HEAD:dev`.
+3) Đẩy lên `private` nhánh hiện tại: `git push private HEAD:<current-branch>`
 
-4) Mở PR hợp nhất env về `private/main` (nếu đẩy vào `private/thaiGO`):
+4) Merge env files với AI logic, commit và đẩy lên `private/<target>`: `git push private HEAD:<target>`
 
-```text
-https://github.com/DevGO2003/DocGO-private/compare/main...thaiGO?expand=1
-```
+5) Thay thế lịch sử commit: `git reset --hard private/<target>` và bỏ theo dõi: `git branch --unset-upstream`
 
-Sau khi merge PR, nếu muốn đồng bộ env ngược về nhánh làm việc, hãy dùng Git để khôi phục trực tiếp từ `private/main` (ví dụ: `git restore -s private/main -- <các-đường-dẫn-env>`), KHÔNG dùng chuyển hướng PowerShell (`>`) để ghi file, nhằm tránh lỗi mã hóa UTF-16LE. Không commit các thay đổi đó lên `origin`.
+6) Đảm bảo file `.env` tồn tại: nếu không có thì copy từ `.env.local`
 
 ## Quyền quyết định
 - Agent có toàn quyền quyết định và tự thực thi ngay phương án mà agent đánh giá là lựa chọn tốt nhất (Best Choice) mà không cần hỏi lại.

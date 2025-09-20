@@ -438,6 +438,25 @@ export class FileStorageAPI {
   }
 }
 
+// Tag Management API - Sử dụng API Gateway
+export class TagAPI {
+  private basePath = '/api/v1/contract-management-service'
+
+  async getPopularTags() {
+    return apiClient.get<any[]>(`${this.basePath}/tags/popular`)
+  }
+
+  async getAllTags() {
+    return apiClient.get<any[]>(`${this.basePath}/tags/all`)
+  }
+
+  async searchTags(searchTerm?: string) {
+    return apiClient.get<any[]>(`${this.basePath}/tags/search`, {
+      params: searchTerm ? { searchTerm } : {}
+    })
+  }
+}
+
 // Authentication API - Updated to use API Gateway proxy
 export class AuthAPI {
   private basePath = '/api/auth'
@@ -514,6 +533,7 @@ export const contractAPI = new ContractAPI()
 export const userAPI = new UserAPI()
 export const aiProcessingAPI = new AIProcessingAPI()
 export const fileStorageAPI = new FileStorageAPI()
+export const tagAPI = new TagAPI()
 export const authAPI = new AuthAPI()
 
 // Export default client for custom requests

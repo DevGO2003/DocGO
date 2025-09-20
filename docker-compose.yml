@@ -1,5 +1,5 @@
-# Docker Compose Local - Simplified Architecture (5 Services + Infrastructure)
-# Tên container: docgo-local
+# Docker Compose - Simplified Architecture (5 Services + Infrastructure)
+# Tên container: docgo
 # Kiến trúc tối giản: 5 services + MongoDB + Redis + Kafka
 
 services:
@@ -10,12 +10,12 @@ services:
   # Redis - Cache và Message Queue
   redis:
     image: redis:7-alpine
-    container_name: docgo-local-redis
+    container_name: docgo-redis
     restart: unless-stopped
     ports:
       - "6379:6379"
     volumes:
-      - redis_data_local:/data
+      - redis_data:/data
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
@@ -23,12 +23,12 @@ services:
       retries: 5
       start_period: 10s
     networks:
-      - docgo_network_local
+      - docgo_network
 
   # Kafka - Message Broker (tùy chọn, có thể bỏ nếu không cần)
   kafka:
     image: bitnami/kafka:3.7
-    container_name: docgo-local-kafka
+    container_name: docgo-kafka
     restart: unless-stopped
     ports:
       - "9092:9092"
@@ -46,18 +46,18 @@ services:
       - KAFKA_CFG_REPLICA_FETCH_MAX_BYTES=10485760  # 10MB
       - KAFKA_CFG_MAX_REQUEST_SIZE=10485760  # 10MB
     networks:
-      - docgo_network_local
+      - docgo_network
 
   # API Gateway BFF (Next.js) - Port 8000
   api-gateway-bff:
     image: node:18-alpine
-    container_name: docgo-local-api-gateway-bff
+    container_name: docgo-api-gateway-bff
     restart: unless-stopped
     working_dir: /app
     ports:
       - "8000:8000"
     env_file:
-      - backend/api-gateway-bff/env/.env.local
+      - backend/api-gateway-bff/env/.env
     environment:
       - NODE_ENV=development
       - AUTHENTICATION_SERVICE_URL=http://authentication-identity-service:8000
@@ -71,18 +71,18 @@ services:
       redis:
         condition: service_healthy
     networks:
-      - docgo_network_local
+      - docgo_network
 
   # Frontend Web (Next.js) - Development server on port 3000
   web-nextjs:
     image: node:18-alpine
-    container_name: docgo-local-web-nextjs
+    container_name: docgo-web-nextjs
     restart: unless-stopped
     working_dir: /app
     ports:
       - "3000:3000"
     env_file:
-      - frontend/web_nextjs/env/.env.local
+      - frontend/web_nextjs/env/.env
     environment:
       - NODE_ENV=development
       - CHOKIDAR_USEPOLLING=1
@@ -100,7 +100,7 @@ services:
     command: >
       sh -c "npm install --cache /root/.npm && npm run dev -- -p 3000 -H 0.0.0.0"
     networks:
-      - docgo_network_local
+      - docgo_network
 
   # Authentication & Identity Service (Spring Boot) - Port 8001
   authentication-identity-service:
@@ -108,13 +108,13 @@ services:
       context: backend/authentication-identity-service
       dockerfile: Dockerfile
       target: builder
-    container_name: docgo-local-authentication-identity-service
+    container_name: docgo-authentication-identity-service
     restart: unless-stopped
     working_dir: /app
     ports:
       - "8001:8000"
     env_file:
-      - backend/authentication-identity-service/env/.env.local
+      - backend/authentication-identity-service/env/.env
     environment:
       - SPRING_PROFILES_ACTIVE=dev
     volumes:
@@ -126,7 +126,7 @@ services:
       redis:
         condition: service_healthy
     networks:
-      - docgo_network_local
+      - docgo_network
 
   # Contract Management Service (Spring Boot) - Port 8002
   contract-management-service:
@@ -134,13 +134,13 @@ services:
       context: backend/contract-management-service
       dockerfile: Dockerfile
       target: builder
-    container_name: docgo-local-contract-management-service
+    container_name: docgo-contract-management-service
     restart: unless-stopped
     working_dir: /app
     ports:
       - "8002:8000"
     env_file:
-      - backend/contract-management-service/env/.env.local
+      - backend/contract-management-service/env/.env
     environment:
       - SPRING_PROFILES_ACTIVE=dev
       - MAVEN_OPTS=-Xmx2g -XX:+UseG1GC -XX:+UseStringDeduplication
@@ -153,23 +153,23 @@ services:
       redis:
         condition: service_healthy
     networks:
-      - docgo_network_local
+      - docgo_network
 
   # AI Processing + Notification Service (FastAPI) - Port 8003
   ai-processing-service:
     image: python:3.11-slim
-    container_name: docgo-local-ai-processing-service
+    container_name: docgo-ai-processing-service
     restart: unless-stopped
     working_dir: /app
     ports:
       - "8003:8000"
     env_file:
-      - backend/ai-processing-service/env/.env.local
+      - backend/ai-processing-service/env/.env
     environment:
       - ENVIRONMENT=development
     volumes:
       - ./backend/ai-processing-service:/app
-      - ai_processing_results_local:/app/results
+      - ai_processing_results:/app/results
       - pip_cache:/root/.cache/pip
     command: >
       sh -c "pip install -r requirements.txt && python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
@@ -177,24 +177,24 @@ services:
       redis:
         condition: service_healthy
     networks:
-      - docgo_network_local
+      - docgo_network
 
   # File Storage Service (FastAPI) - Port 8004
   file-storage-service:
     image: python:3.11-slim
-    container_name: docgo-local-file-storage-service
+    container_name: docgo-file-storage-service
     restart: unless-stopped
     working_dir: /app
     ports:
       - "8004:8000"
     env_file:
-      - backend/file-storage-asset-service/env/.env.local
+      - backend/file-storage-asset-service/env/.env
     environment:
       - ENVIRONMENT=development
     volumes:
       - ./backend/file-storage-asset-service:/app
-      - file_storage_uploads_local:/app/uploads
-      - file_storage_temp_local:/app/temp
+      - file_storage_uploads:/app/uploads
+      - file_storage_temp:/app/temp
       - pip_cache:/root/.cache/pip
     command: >
       sh -c "pip install -r requirements.txt && python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
@@ -202,12 +202,12 @@ services:
       redis:
         condition: service_healthy
     networks:
-      - docgo_network_local
+      - docgo_network
 
   # MongoDB MCP Server - Port 8005
   mongodb-mcp-server:
     image: node:22-alpine
-    container_name: docgo-local-mongodb-mcp-server
+    container_name: docgo-mongodb-mcp-server
     restart: unless-stopped
     working_dir: /app
     ports:
@@ -223,17 +223,125 @@ services:
     command: >
       sh -c "npm install -g mongodb-mcp-server@latest && mongodb-mcp-server"
     networks:
-      - docgo_network_local
+      - docgo_network
+
+  # Google Cloud MCP Server - Port 8006
+  google-cloud-mcp-server:
+    image: node:22-alpine
+    container_name: docgo-google-cloud-mcp-server
+    restart: unless-stopped
+    working_dir: /app
+    ports:
+      - "8006:3000"
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/credentials/service-account-key.json
+      - GOOGLE_CLOUD_PROJECT=docgoauthen
+      - GOOGLE_CLIENT_EMAIL=congty.devgo2003@gmail.com
+    volumes:
+      - ./mcp-server/google-cloud:/app
+      - ./credentials:/app/credentials
+      - npm_cache:/root/.npm
+    command: >
+      sh -c "npm install && npm start"
+    networks:
+      - docgo_network
+
+  # OAuth2 MCP Server - Port 8007
+  oauth2-mcp-server:
+    image: node:22-alpine
+    container_name: docgo-oauth2-mcp-server
+    restart: unless-stopped
+    working_dir: /app
+    ports:
+      - "8007:3000"
+    environment:
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - GOOGLE_REDIRECT_URI=${GOOGLE_REDIRECT_URI:-http://localhost:8001/login/oauth2/code/google}
+      - GOOGLE_CLIENT_EMAIL=${GOOGLE_CLIENT_EMAIL:-congty.devgo2003@gmail.com}
+      - GOOGLE_PROJECT_ID=${GOOGLE_PROJECT_ID:-docgoauthen}
+    volumes:
+      - ./mcp-server/oauth2:/app
+      - npm_cache:/root/.npm
+    command: >
+      sh -c "npm install -g @modelcontextprotocol/server-oauth2@latest && oauth2-mcp-server"
+    networks:
+      - docgo_network
+
+  # PostgreSQL MCP Server - Port 8008
+  postgresql-mcp-server:
+    image: node:22-alpine
+    container_name: docgo-postgresql-mcp-server
+    restart: unless-stopped
+    working_dir: /app
+    ports:
+      - "8008:3000"
+    environment:
+      - POSTGRES_CONNECTION_STRING=postgresql://docgo_user:docgo_password@postgres:5432/docgo_db
+      - POSTGRES_SSL_MODE=prefer
+    volumes:
+      - ./mcp-server/postgresql:/app
+      - npm_cache:/root/.npm
+    depends_on:
+      - postgres
+    networks:
+      - docgo_network
+
+  # Filesystem MCP Server - Port 8009
+  filesystem-mcp-server:
+    image: node:22-alpine
+    container_name: docgo-filesystem-mcp-server
+    restart: unless-stopped
+    working_dir: /app
+    ports:
+      - "8009:3000"
+    environment:
+      - ALLOWED_DIRECTORIES=/app/docgo
+      - MAX_FILE_SIZE=10485760
+    volumes:
+      - ./mcp-server/filesystem:/app
+      - ./:/app/docgo
+      - npm_cache:/root/.npm
+    command: >
+      sh -c "npm install -g @modelcontextprotocol/server-filesystem@latest && filesystem-mcp-server"
+    networks:
+      - docgo_network
+
+  # PostgreSQL Database - Port 5432
+  postgres:
+    image: postgres:15-alpine
+    container_name: docgo-postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=docgo_db
+      - POSTGRES_USER=docgo_user
+      - POSTGRES_PASSWORD=docgo_password
+      - POSTGRES_INITDB_ARGS=--encoding=UTF-8 --lc-collate=C --lc-ctype=C
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./mcp-server/postgresql/init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U docgo_user -d docgo_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - docgo_network
 
 volumes:
   # Data volumes
-  redis_data_local:
+  redis_data:
     driver: local
-  ai_processing_results_local:
+  ai_processing_results:
     driver: local
-  file_storage_uploads_local:
+  file_storage_uploads:
     driver: local
-  file_storage_temp_local:
+  file_storage_temp:
+    driver: local
+  postgres_data:
     driver: local
   
   # Cache volumes for faster builds
@@ -245,5 +353,5 @@ volumes:
     driver: local
 
 networks:
-  docgo_network_local:
+  docgo_network:
     driver: bridge

@@ -1,143 +1,72 @@
-# MongoDB MCP Server cho DocGO
+# DocGO MCP Servers
 
-## 📋 Tổng quan
+This directory contains Model Context Protocol (MCP) servers for the DocGO project.
 
-Thư mục này chứa MongoDB MCP Server để giao tiếp với MongoDB Atlas thông qua Model Context Protocol (MCP). Đây là giải pháp thay thế cho việc MongoDB Atlas không cung cấp MCP adapter chính thức.
+## Available MCP Servers
 
-## 🚀 Cài đặt
+### 1. MongoDB MCP Server (Port 8005)
+- **Purpose**: Database operations with MongoDB Atlas
+- **Connection**: `mongodb+srv://root:sapassword@devgo-docgo-cluster0.hsudzga.mongodb.net/`
+- **Features**: CRUD operations, query execution, schema management
 
-### Phương pháp 1: Docker (Khuyến nghị)
+### 2. Google Cloud MCP Server (Port 8006)
+- **Purpose**: Google Cloud Platform integration
+- **Account**: `congty.devgo2003@gmail.com`
+- **Project**: `docgoauthen`
+- **Features**: GCP APIs, BigQuery, Cloud Storage, OAuth2
 
-MCP Server đã được tích hợp vào Docker Compose local:
+### 3. OAuth2 MCP Server (Port 8007)
+- **Purpose**: OAuth2 authentication flows
+- **Provider**: Google OAuth2
+- **Client ID**: `183573622288-0tu123mj11i40sgr7i0l1jsuqppnolkn.apps.googleusercontent.com`
+- **Features**: Authentication, token management, user info
 
+### 4. PostgreSQL MCP Server (Port 8008)
+- **Purpose**: PostgreSQL database operations
+- **Database**: `docgo_db`
+- **User**: `docgo_user`
+- **Features**: SQL queries, schema management, data operations
+
+### 5. Filesystem MCP Server (Port 8009)
+- **Purpose**: Secure file system access
+- **Allowed Directory**: `/app/docgo` (DocGO project root)
+- **Features**: File read/write, directory listing, file operations
+
+## Configuration
+
+Each MCP server is configured in `docker-compose.local.yml` with:
+- Environment variables
+- Volume mounts
+- Network access
+- Health checks
+
+## Usage
+
+Start all MCP servers:
 ```bash
-# Chạy MCP Server cùng với các services khác
-docker-compose -f docker-compose.local.yml up mongodb-mcp-server
-
-# Hoặc chạy tất cả services
-docker-compose -f docker-compose.local.yml up
+docker-compose -f docker-compose.local.yml up -d
 ```
 
-MCP Server sẽ chạy tại: `http://localhost:8005`
-
-### Phương pháp 2: Cài đặt trực tiếp
-
+Check server status:
 ```bash
-# Cài đặt global
-npm install -g mongodb-mcp-server
-
-# Hoặc sử dụng npx (khuyến nghị)
-npx -y mongodb-mcp-server@latest
+docker-compose -f docker-compose.local.yml ps
 ```
 
-### 2. Cấu hình Cursor
-
-Copy nội dung file `cursor-mcp-config.json` vào file cấu hình MCP của Cursor:
-
-**Windows**: `%APPDATA%\Cursor\User\globalStorage\cursor.mcp\settings.json`
-**macOS**: `~/Library/Application Support/Cursor/User/globalStorage/cursor.mcp/settings.json`
-**Linux**: `~/.config/Cursor/User/globalStorage/cursor.mcp/settings.json`
-
-## ⚙️ Cấu hình
-
-### Connection String
-
-MongoDB MCP Server đã được cấu hình với connection string của DocGO:
-
-```
-mongodb+srv://root:sapassword@devgo-docgo-cluster0.hsudzga.mongodb.net/?retryWrites=true&w=majority&appName=devgo-docgo-cluster0
-```
-
-### Các tùy chọn cấu hình
-
-- `--readOnly`: Chế độ chỉ đọc (an toàn)
-- `--loggers mcp,disk`: Ghi log vào MCP client và file
-- `--indexCheck`: Kiểm tra index khi query
-
-## 🛠️ Các công cụ hỗ trợ
-
-### MongoDB Database Tools
-- `connect` - Kết nối đến MongoDB instance
-- `find` - Chạy query find trên collection
-- `aggregate` - Chạy aggregation pipeline
-- `count` - Đếm số documents trong collection
-- `list-databases` - Liệt kê tất cả databases
-- `list-collections` - Liệt kê tất cả collections
-- `collection-schema` - Mô tả schema của collection
-- `collection-storage-size` - Lấy kích thước collection (MB)
-- `db-stats` - Thống kê database
-
-### MongoDB Atlas Tools
-- `atlas-list-orgs` - Liệt kê organizations
-- `atlas-list-projects` - Liệt kê projects
-- `atlas-list-clusters` - Liệt kê clusters
-- `atlas-inspect-cluster` - Kiểm tra cluster cụ thể
-- `atlas-connect-cluster` - Kết nối đến Atlas cluster
-
-## 📄 Resources hỗ trợ
-
-- `config://config` - Cấu hình server
-- `debug://mongodb` - Thông tin debug kết nối MongoDB
-- `exported-data://{exportName}` - Dữ liệu đã export
-
-## 🔧 Sử dụng
-
-### 1. Khởi động MCP Server
-
+View server logs:
 ```bash
-# Sử dụng npx (khuyến nghị)
-npx -y mongodb-mcp-server@latest --readOnly
-
-# Hoặc với connection string
-npx -y mongodb-mcp-server@latest --readOnly --connectionString "mongodb+srv://root:sapassword@devgo-docgo-cluster0.hsudzga.mongodb.net/?retryWrites=true&w=majority&appName=devgo-docgo-cluster0"
+docker-compose -f docker-compose.local.yml logs [server-name]
 ```
 
-### 2. Sử dụng trong Cursor
+## Security Notes
 
-Sau khi cấu hình, bạn có thể sử dụng các lệnh MongoDB trực tiếp trong Cursor:
+- Google Cloud credentials are mounted from `./credentials/` directory
+- OAuth2 secrets are configured via environment variables
+- Filesystem access is restricted to DocGO project directory
+- Database connections use secure connection strings
 
-```
-# Liệt kê databases
-@MongoDB list-databases
+## Development
 
-# Liệt kê collections trong database
-@MongoDB list-collections --database docgo_contract_service
-
-# Tìm documents trong collection
-@MongoDB find --database docgo_contract_service --collection contracts --limit 10
-
-# Chạy aggregation
-@MongoDB aggregate --database docgo_contract_service --collection contracts --pipeline '[{"$group": {"_id": "$status", "count": {"$sum": 1}}}]'
-```
-
-## 🔒 Bảo mật
-
-- **Read-Only Mode**: Mặc định chạy ở chế độ chỉ đọc để đảm bảo an toàn
-- **Environment Variables**: Sử dụng biến môi trường cho thông tin nhạy cảm
-- **Connection String**: Được mã hóa trong cấu hình
-
-## 📚 Tài liệu tham khảo
-
-- [MongoDB MCP Server GitHub](https://github.com/mongodb-js/mongodb-mcp-server)
-- [MCP Documentation](https://modelcontextprotocol.io/)
-- [Cursor MCP Guide](https://docs.cursor.com/context/model-context-protocol)
-
-## 🐛 Troubleshooting
-
-### Lỗi kết nối
-1. Kiểm tra connection string có đúng không
-2. Kiểm tra network có thể truy cập MongoDB Atlas không
-3. Kiểm tra credentials có hợp lệ không
-
-### Lỗi cấu hình
-1. Kiểm tra file cấu hình MCP có đúng format JSON không
-2. Kiểm tra đường dẫn file cấu hình có đúng không
-3. Restart Cursor sau khi thay đổi cấu hình
-
-## 📞 Hỗ trợ
-
-Nếu gặp vấn đề, hãy kiểm tra:
-1. Logs của MCP Server
-2. Cấu hình connection string
-3. Quyền truy cập MongoDB Atlas
-4. Tài liệu chính thức của MongoDB MCP Server
+Each server has its own `package.json` for dependency management:
+- Install dependencies: `npm install`
+- Start server: `npm start`
+- Debug mode: `npm run dev`
