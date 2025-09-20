@@ -218,7 +218,7 @@ services:
       - MDB_MCP_TRANSPORT=${MDB_MCP_TRANSPORT:-stdio}
       - MDB_MCP_LOGGERS=${MDB_MCP_LOGGERS:-mcp,stderr}
     env_file:
-      - ./mcp-server/mongodb/.env
+      - ./mcp-server/mongodb/env/.env
     volumes:
       - ./mcp-server:/app
       - npm_cache:/root/.npm
@@ -240,7 +240,7 @@ services:
       - GOOGLE_CLOUD_PROJECT=${GOOGLE_CLOUD_PROJECT}
       - GOOGLE_CLIENT_EMAIL=${GOOGLE_CLIENT_EMAIL}
     env_file:
-      - ./mcp-server/google-cloud/.env
+      - ./mcp-server/google-cloud/env/.env
     volumes:
       - ./mcp-server/google-cloud:/app
       - ./credentials:/app/credentials
@@ -265,7 +265,7 @@ services:
       - GOOGLE_CLIENT_EMAIL=${GOOGLE_CLIENT_EMAIL}
       - GOOGLE_PROJECT_ID=${GOOGLE_PROJECT_ID}
     env_file:
-      - ./mcp-server/oauth2/.env
+      - ./mcp-server/oauth2/env/.env
     volumes:
       - ./mcp-server/oauth2:/app
       - npm_cache:/root/.npm
