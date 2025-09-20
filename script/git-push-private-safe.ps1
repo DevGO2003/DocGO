@@ -28,7 +28,7 @@ function Invoke-SmartBackup {
         Write-Info "Tạo thư mục backup: $BackupPath"
     }
     
-    $envFiles = Get-ChildItem -Path . -Name '.env*' -File -Recurse -ErrorAction SilentlyContinue | Where-Object { $_.FullName -notlike "*\.git-backup\*" }
+    $envFiles = Get-ChildItem -Path . -Filter '.env*' -File -Recurse -ErrorAction SilentlyContinue | Where-Object { $_.FullName -notlike "*\.git-backup\*" }
     if ($envFiles.Count -eq 0) { 
         Write-Warning "Không tìm thấy file .env nào để backup"
         return 
@@ -38,7 +38,7 @@ function Invoke-SmartBackup {
     foreach ($file in $envFiles) { Write-Host "  - $($file.FullName)" }
     
     foreach ($file in $envFiles) {
-        $relativeFilePath = $file.FullName.Substring($PWD.Path.Length + 1)
+        $relativeFilePath = $file.Name
         $backupFile = Join-Path $BackupPath $relativeFilePath
         $backupDir = Split-Path $backupFile -Parent
         if (!(Test-Path $backupDir)) { New-Item -ItemType Directory -Path $backupDir -Force | Out-Null }
@@ -102,7 +102,7 @@ function Push-ToPrivate {
     Write-Smart "Push code + env lên private..."
     $currentBranch = Get-CurrentBranch
     
-    $envFiles = Get-ChildItem -Path . -Name '.env*' -File -Recurse -ErrorAction SilentlyContinue | Where-Object { $_.FullName -notlike "*\.git-backup\*" }
+    $envFiles = Get-ChildItem -Path . -Filter '.env*' -File -Recurse -ErrorAction SilentlyContinue | Where-Object { $_.FullName -notlike "*\.git-backup\*" }
     if ($envFiles.Count -gt 0) {
         Write-Info "Force-add $($envFiles.Count) file .env:"
         foreach ($file in $envFiles) { 
@@ -121,7 +121,7 @@ function Push-ToPrivate {
     
     if ($ParamBranch) {
         Write-Info "Push lên private/$ParamBranch..."
-        git push private "$currentBranch:$ParamBranch"
+        git push private "${currentBranch}:${ParamBranch}"
         Write-Success "Push lên private/$ParamBranch thành công"
     }
 }
@@ -170,7 +170,7 @@ function Invoke-SmartRollback {
         Write-Info "Khôi phục từ backup: $BackupPath"
         $backupFiles = Get-ChildItem -Path $BackupPath -Recurse -File -ErrorAction SilentlyContinue
         foreach ($file in $backupFiles) {
-            $relativeFilePath = $file.FullName.Substring($BackupPath.Length + 1)
+            $relativeFilePath = $file.Name
             $targetFile = Join-Path $PWD.Path $relativeFilePath
             $targetDir = Split-Path $targetFile -Parent
             if (!(Test-Path $targetDir)) { New-Item -ItemType Directory -Path $targetDir -Force | Out-Null }
