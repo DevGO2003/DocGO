@@ -11,12 +11,13 @@
 # Exception: env/ directory should be tracked (contains .env.example)
 !**/env/
 
-# OAuth2 Secrets - untrack sensitive files
-mcp-server/oauth2/.env
-mcp-server/oauth2/.env.local
-mcp-server/oauth2/.env.production
-# But track the example file
-!mcp-server/oauth2/.env.example
+# Environment files in each module
+**/.env
+**/.env.local
+**/.env.production
+**/.env.staging
+# But track the example files
+!**/.env.example
 
 # Ignore sensitive environment files inside env/ directories
 **/env/.env
