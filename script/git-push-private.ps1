@@ -1,252 +1,232 @@
-$ErrorActionPreference = 'Stop'
+﻿# Git Push Private - AI-Powered Smart Merge (PowerShell)
+param([string]$ParamBranch = "")
 
-# ===== AI-POWERED SMART MERGE FUNCTIONS =====
+$ErrorActionPreference = "Stop"
 
-function New-SmartBackup {
-    param($branch)
-    $backupDir = ".git-backup/env/$(Get-Date -Format 'yyyyMMdd_HHmmss')"
-    New-Item -ItemType Directory -Path $backupDir -Force | Out-Null
-    $backupMetadata = @{
-        Timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-        Branch = $branch
-        Commit = git rev-parse HEAD
-        Files = @()
+function Write-Info { param([string]$Message) Write-Host "[INFO] $Message" -ForegroundColor Blue }
+function Write-Success { param([string]$Message) Write-Host "[SUCCESS] $Message" -ForegroundColor Green }
+function Write-Warning { param([string]$Message) Write-Host "[WARNING] $Message" -ForegroundColor Yellow }
+function Write-Error { param([string]$Message) Write-Host "[ERROR] $Message" -ForegroundColor Red }
+function Write-Smart { param([string]$Message) Write-Host "[SMART] $Message" -ForegroundColor Magenta }
+
+$BackupDir = ".git-backup\env"
+$Timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
+$BackupPath = Join-Path $BackupDir $Timestamp
+
+function Get-CurrentBranch {
+    try { 
+        $branch = git branch --show-current 2>$null
+        if ($branch) { return $branch.Trim() } 
+    } catch {}
+    return "main"
+}
+
+function Invoke-SmartBackup {
+    Write-Smart "🔄 Thực hiện Smart Backup..."
+    if (!(Test-Path $BackupPath)) { 
+        New-Item -ItemType Directory -Path $BackupPath -Force | Out-Null
+        Write-Info "Tạo thư mục backup: $BackupPath" 
     }
-    Get-ChildItem -Path . -Recurse -Include ".env*" -File | Where-Object { $_.FullName -notlike "*\.git-backup*" } | ForEach-Object {
-        $targetPath = Join-Path $backupDir $_.Name
-        Copy-Item $_.FullName $targetPath -Force
-        $backupMetadata.Files += @{
-            Name = $_.Name
-            Path = $_.FullName
-            LastModified = $_.LastWriteTime
-            Size = $_.Length
-            Content = Get-Content $_.FullName -Raw
+    $envFiles = Get-ChildItem -Path . -Name ".env*" -File -Recurse -ErrorAction SilentlyContinue | Where-Object { $_.FullName -notlike "*\.git-backup\*" }
+    if ($envFiles.Count -eq 0) { 
+        Write-Warning "Không tìm thấy file .env nào để backup"
+        return 
+    }
+    Write-Info "Tìm thấy $($envFiles.Count) file .env:"
+    foreach ($file in $envFiles) { Write-Host "  - $file" }
+    foreach ($file in $envFiles) {
+        $backupFile = Join-Path $BackupPath $file
+        $backupDir = Split-Path $backupFile -Parent
+        if (!(Test-Path $backupDir)) { New-Item -ItemType Directory -Path $backupDir -Force | Out-Null }
+        Copy-Item $file $backupFile -Force
+        Write-Success "Backup: $file -> $backupFile"
+    }
+    Write-Success "✅ Smart Backup hoàn thành"
+}
+
+function Invoke-SecurityCheck {
+    Write-Smart "🔒 Thực hiện Security Check..."
+    $trackedEnvFiles = git ls-files | Where-Object { $_ -match "\.env" }
+    if ($trackedEnvFiles.Count -eq 0) { 
+        Write-Info "Không có file .env nào đang được Git theo dõi"
+        return 
+    }
+    Write-Warning "Phát hiện $($trackedEnvFiles.Count) file .env đang được Git theo dõi:"
+    foreach ($file in $trackedEnvFiles) { Write-Host "  - $file" }
+    foreach ($file in $trackedEnvFiles) { 
+        git reset HEAD $file 2>$null
+        if (Test-Path $file) {
+            git rm --cached $file 2>$null
+            Write-Success "Đã bỏ theo dõi: $file" 
+        } else {
+            Write-Warning "File không tồn tại: $file"
         }
-        Write-Host ('Backed up: ' + $($_.Name)) -ForegroundColor Cyan
     }
-    $backupMetadata | ConvertTo-Json -Depth 4 | Out-File "$backupDir/metadata.json" -Encoding UTF8
-    return $backupDir
-}
+    if ($trackedEnvFiles.Count -gt 0) {
+        git add -A
+        $status = git diff --cached --quiet
+        if ($LASTEXITCODE -ne 0) {
+            $commitMessage = @"
+🧹 Security Check: Remove .env files from tracking
 
-function Get-ConflictType { param($key,$localValue,$remoteValue)
-    if ($key -match "MONGODB_URI|DATABASE_URL|DB_") { return "DatabaseConfig" }
-    elseif ($key -match "API_KEY|SECRET|TOKEN|PASSWORD") { return "SecurityConfig" }
-    elseif ($key -match "PORT|HOST|URL|SERVER_") { return "NetworkConfig" }
-    elseif ($key -match "DEBUG|ENABLE_|FEATURE_|FLAG_") { return "FeatureFlag" }
-    else { return "GeneralConfig" }
-}
-
-function Get-ConflictSeverity { param($key,$localValue,$remoteValue)
-    if ($key -match "API_KEY|SECRET|TOKEN|PASSWORD") { return "High" }
-    elseif ($key -match "MONGODB_URI|DATABASE_URL|DB_") { return "Medium" }
-    elseif ($key -match "PORT|HOST|URL|SERVER_") { return "Low" }
-    else { return "Low" }
-}
-
-function Analyze-EnvContent { param($localContent,$remoteContent,$fileName)
-    Write-Host ('AI Content Analysis for: ' + $fileName) -ForegroundColor Magenta
-    $analysis = @{
-        LocalKeys=@(); RemoteKeys=@(); CommonKeys=@(); UniqueLocalKeys=@(); UniqueRemoteKeys=@(); Conflicts=@(); ContentPatterns=@{}; Recommendations=@()
-    }
-    $localKeys = ($localContent -split "`n" | Where-Object { $_ -match "^[A-Z_]+=" } | ForEach-Object { $_.Split('=')[0] }) | Sort-Object -Unique
-    $remoteKeys = ($remoteContent -split "`n" | Where-Object { $_ -match "^[A-Z_]+=" } | ForEach-Object { $_.Split('=')[0] }) | Sort-Object -Unique
-    $analysis.LocalKeys=$localKeys; $analysis.RemoteKeys=$remoteKeys
-    $analysis.CommonKeys = $localKeys | Where-Object { $_ -in $remoteKeys }
-    $analysis.UniqueLocalKeys = $localKeys | Where-Object { $_ -notin $remoteKeys }
-    $analysis.UniqueRemoteKeys = $remoteKeys | Where-Object { $_ -notin $localKeys }
-    foreach($key in $analysis.CommonKeys){
-        $localValue = ($localContent -split "`n" | Where-Object { $_ -match "^$key=" }) -replace "^$key=",""
-        $remoteValue = ($remoteContent -split "`n" | Where-Object { $_ -match "^$key=" }) -replace "^$key=",""
-        if ($localValue -ne $remoteValue){
-            $analysis.Conflicts += @{ Key=$key; LocalValue=$localValue; RemoteValue=$remoteValue; ConflictType=(Get-ConflictType $key $localValue $remoteValue); Severity=(Get-ConflictSeverity $key $localValue $remoteValue) }
+- Removed $($trackedEnvFiles.Count) .env files from Git tracking
+- Ensures origin repository remains clean and secure
+- Files are still available locally but not tracked
+"@
+            git commit -m $commitMessage
+            Write-Success "✅ Tạo commit dọn dẹp Security Check"
         }
     }
-    $analysis.ContentPatterns = @{
-        LocalHasSecrets = [bool]($localContent -match "SECRET|PASSWORD|TOKEN|KEY")
-        RemoteHasSecrets = [bool]($remoteContent -match "SECRET|PASSWORD|TOKEN|KEY")
-        LocalHasDatabase = [bool]($localContent -match "MONGODB|DATABASE|DB_")
-        RemoteHasDatabase = [bool]($remoteContent -match "MONGODB|DATABASE|DB_")
-        LocalHasPorts = [bool]($localContent -match "PORT|HOST")
-        RemoteHasPorts = [bool]($remoteContent -match "PORT|HOST")
-    }
-    Write-Host ("  Analysis: $($analysis.Conflicts.Count) conflicts, $($analysis.UniqueLocalKeys.Count) local-only, $($analysis.UniqueRemoteKeys.Count) remote-only") -ForegroundColor Cyan
-    return $analysis
+    Write-Success "✅ Security Check hoàn thành"
 }
 
-function Resolve-EnvConflict-Advanced { param($conflict,$analysis,$context)
-    $decision = @{ Action=""; Reason=""; Value=""; Confidence=0; Context=@{} }
-    if ($conflict.Key -match "MONGODB_URI|DATABASE_URL|DB_"){
-        if ($analysis.ContentPatterns.LocalHasDatabase -and $analysis.ContentPatterns.RemoteHasDatabase){
-            $decision.Action="UseRemote"; $decision.Reason="Cả local và remote đều có database config, ưu tiên remote (đầy đủ hơn)"; $decision.Value=$conflict.RemoteValue; $decision.Confidence=95
-        } else { $decision.Action="UseRemote"; $decision.Reason="Database config từ remote thường đầy đủ và chính xác hơn"; $decision.Value=$conflict.RemoteValue; $decision.Confidence=90 }
-    } elseif ($conflict.Key -match "API_KEY|SECRET|TOKEN|PASSWORD"){
-        if ($analysis.ContentPatterns.LocalHasSecrets -and -not $analysis.ContentPatterns.RemoteHasSecrets){
-            $decision.Action="UseLocal"; $decision.Reason="Local có secrets, remote không có - ưu tiên local (bảo mật hơn)"; $decision.Value=$conflict.LocalValue; $decision.Confidence=98
-        } else { $decision.Action="UseLocal"; $decision.Reason="API keys local thường là production keys"; $decision.Value=$conflict.LocalValue; $decision.Confidence=95 }
-    } elseif ($conflict.Key -match "PORT|HOST|URL|SERVER_"){
-        if ($analysis.ContentPatterns.LocalHasPorts -and $analysis.ContentPatterns.RemoteHasPorts){
-            $decision.Action="UseLocal"; $decision.Reason="Cả local và remote đều có port config, ưu tiên local (môi trường hiện tại)"; $decision.Value=$conflict.LocalValue; $decision.Confidence=90
-        } else { $decision.Action="UseLocal"; $decision.Reason="Port/Host config phù hợp với môi trường hiện tại"; $decision.Value=$conflict.LocalValue; $decision.Confidence=85 }
-    } elseif ($conflict.Key -match "DEBUG|ENABLE_|FEATURE_|FLAG_"){
-        $decision.Action="MergeLogic"; $decision.Reason="Feature flags cần logic merge với context analysis"; $decision.Value = if ($conflict.LocalValue -eq "true" -or $conflict.RemoteValue -eq "true") { "true" } else { "false" }; $decision.Confidence=85
+function Push-ToOrigin {
+    Write-Smart "📤 Push code lên origin (không env files)..."
+    $currentBranch = Get-CurrentBranch
+    git add -A
+    $status = git diff --cached --quiet
+    if ($LASTEXITCODE -eq 0) { 
+        Write-Info "Không có thay đổi code nào để commit"
+        return 
+    }
+    $commitMessage = @"
+🚀 Code changes - Auto push to origin
+
+- Pushed by git-push-private.ps1
+- Excludes .env files for security
+- Branch: $currentBranch
+"@
+    git commit -m $commitMessage
+    git push origin $currentBranch
+    Write-Success "✅ Push code lên origin/$currentBranch thành công"
+}
+
+function Push-ToPrivate {
+    param([string]$ParamBranch)
+    Write-Smart "🔐 Push code + env lên private..."
+    $currentBranch = Get-CurrentBranch
+    $envFiles = Get-ChildItem -Path . -Name ".env*" -File -Recurse -ErrorAction SilentlyContinue
+    if ($envFiles.Count -gt 0) {
+        Write-Info "Force-add $($envFiles.Count) file .env:"
+        foreach ($file in $envFiles) { 
+            git add -f $file
+            Write-Host "  - $file" 
+        }
+        $commitMessage = @"
+🔐 Environment files - Private sync
+
+- Added $($envFiles.Count) .env files to private repository
+- Files: $($envFiles -join ' ')
+- Branch: $currentBranch
+"@
+        git commit -m $commitMessage
+        Write-Success "✅ Commit env files thành công"
+    }
+    Write-Info "Push lên private/$currentBranch..."
+    git push private $currentBranch
+    Write-Success "✅ Push lên private/$currentBranch thành công"
+    if ($ParamBranch) {
+        Write-Info "Push lên private/$ParamBranch..."
+        git push private "$currentBranch`:$ParamBranch"
+        Write-Success "✅ Push lên private/$ParamBranch thành công"
+    }
+}
+
+function Invoke-CleanupLocalHistory {
+    Write-Smart "🧹 Cleanup local history..."
+    git reset --hard HEAD~1
+    Write-Success "✅ Đã xóa commit env khỏi local history"
+}
+
+function Sync-FromPrivate {
+    Write-Smart "🔄 Đồng bộ từ private..."
+    $currentBranch = Get-CurrentBranch
+    git fetch private
+    Write-Info "Fetch từ private remote"
+    git reset --hard "private/$currentBranch"
+    Write-Success "✅ Đồng bộ với private/$currentBranch"
+}
+
+function Prevent-EnvTracking {
+    Write-Smart "🛡️ Ngăn env bị track ở local..."
+    $excludeFile = ".git\info\exclude"
+    $excludeContent = Get-Content $excludeFile -ErrorAction SilentlyContinue
+    if ($excludeContent -notmatch "\.env") {
+        Add-Content $excludeFile ""
+        Add-Content $excludeFile "# Prevent .env files from being tracked"
+        Add-Content $excludeFile ".env*"
+        Add-Content $excludeFile "*.env"
+        Write-Success "✅ Đã thêm .env patterns vào .git/info/exclude"
     } else {
-        $decision.Action="UseRemote"; $decision.Reason="Remote config được ưu tiên mặc định với context analysis"; $decision.Value=$conflict.RemoteValue; $decision.Confidence=70
+        Write-Info "Patterns .env đã tồn tại trong .git/info/exclude"
     }
-    $decision.Context = @{ Analysis=$analysis; ConflictSeverity=$conflict.Severity; Timestamp=(Get-Date -Format "yyyy-MM-dd HH:mm:ss") }
-    return $decision
 }
 
-function Test-MergedEnv { param($envFile)
-    $validation = @{ IsValid=$true; Errors=@(); Warnings=@(); Score=100 }
-    $content = Get-Content $envFile -Raw
-    $requiredKeys = @("SPRING_PROFILES_ACTIVE","SERVER_PORT")
-    foreach($key in $requiredKeys){ if ($content -notmatch "^$key=") { $validation.Errors += "Missing required key: $key"; $validation.IsValid = $false; $validation.Score -= 20 } }
-    if ($content -match "SERVER_PORT=(\d+)"){
-        $port = [int]$matches[1]
-        if ($port -lt 1000 -or $port -gt 65535){ $validation.Warnings += "Invalid port number: $port"; $validation.Score -= 10 }
-    }
-    return $validation
+function Invoke-FinalSync {
+    Write-Smart "🔄 Pull để đồng bộ hoàn chỉnh..."
+    $currentBranch = Get-CurrentBranch
+    git pull private $currentBranch
+    Write-Success "✅ Đồng bộ hoàn chỉnh với private/$currentBranch"
 }
 
-function Invoke-SmartMerge { param($localFile,$remoteFile,$outputFile,$fileName)
-    Write-Host ('AI-Powered Smart Merge for: ' + $fileName) -ForegroundColor Cyan
-    $analysis = Analyze-EnvContent $localFile $remoteFile $fileName
-    $mergedContent = @()
-    $allKeys = ($localFile -split "`n" | Where-Object { $_ -match "^[A-Z_]+=" } | ForEach-Object { $_.Split('=')[0] }) +
-               ($remoteFile -split "`n" | Where-Object { $_ -match "^[A-Z_]+=" } | ForEach-Object { $_.Split('=')[0] }) | Sort-Object -Unique
-    foreach($key in $allKeys){
-        $localLine = ($localFile -split "`n") | Where-Object { $_ -match "^$key=" }
-        $remoteLine = ($remoteFile -split "`n") | Where-Object { $_ -match "^$key=" }
-        if ($localLine -and $remoteLine){
-            $localValue = $localLine -replace "^$key=",""
-            $remoteValue = $remoteLine -replace "^$key=",""
-            if ($localValue -ne $remoteValue){
-                $conflict = @{ Key=$key; LocalValue=$localValue; RemoteValue=$remoteValue; Severity=(Get-ConflictSeverity $key $localValue $remoteValue) }
-                $decision = Resolve-EnvConflict-Advanced $conflict $analysis @{}
-                Write-Host ("  Decision for $($key): $($decision.Action) - $($decision.Reason) (Confidence: $($decision.Confidence)%)") -ForegroundColor Yellow
-                $mergedContent += "$key=$($decision.Value)"
-            } else { $mergedContent += $localLine }
-        } elseif ($localLine){ $mergedContent += $localLine }
-        elseif ($remoteLine){ $mergedContent += $remoteLine }
-    }
-    $tempFile = "$outputFile.temp"
-    $mergedContent | Out-File $tempFile -Encoding UTF8
-    $validation = Test-MergedEnv $tempFile
-    if (-not $validation.IsValid){
-        Write-Host 'Validation failed, retrying with fallback strategy...' -ForegroundColor Yellow
-        $mergedContent = @()
-        foreach($key in $allKeys){
-            $localLine = ($localFile -split "`n") | Where-Object { $_ -match "^$key=" }
-            $remoteLine = ($remoteFile -split "`n") | Where-Object { $_ -match "^$key=" }
-            if ($localLine){ $mergedContent += $localLine }
-            elseif ($remoteLine){ $mergedContent += $remoteLine }
+function Invoke-SmartRollback {
+    Write-Error "🔄 Kích hoạt Smart Rollback..."
+    if (Test-Path $BackupPath) {
+        Write-Info "Khôi phục từ backup: $BackupPath"
+        $backupFiles = Get-ChildItem -Path $BackupPath -Name ".env*" -File -Recurse -ErrorAction SilentlyContinue
+        foreach ($file in $backupFiles) {
+            $targetFile = ".\$file"
+            $targetDir = Split-Path $targetFile -Parent
+            if (!(Test-Path $targetDir)) { New-Item -ItemType Directory -Path $targetDir -Force | Out-Null }
+            Copy-Item (Join-Path $BackupPath $file) $targetFile -Force
+            Write-Success "Khôi phục: $targetFile"
         }
-        $mergedContent | Out-File $tempFile -Encoding UTF8
-        $validation = Test-MergedEnv $tempFile
-        if (-not $validation.IsValid){ Write-Host 'Retry failed, using original local content' -ForegroundColor Red; ($localFile) | Out-File $tempFile -Encoding UTF8 }
-        else { Write-Host 'Retry successful with fallback strategy' -ForegroundColor Green }
-    }
-    Move-Item $tempFile $outputFile -Force
-    Write-Host ('Smart merge completed: ' + $outputFile) -ForegroundColor Green
-}
-
-function Invoke-SmartRollback { param($backupDir,$reason)
-    Write-Host ('Smart Rollback initiated: ' + $reason) -ForegroundColor Yellow
-    Get-ChildItem $backupDir -Filter "*.env*" | ForEach-Object { Copy-Item $_.FullName $_.Name -Force; Write-Host ('  Restored: ' + $($_.Name)) -ForegroundColor Cyan }
-    Write-Host 'Smart Rollback completed' -ForegroundColor Green
-}
-
-# ===== MAIN WORKFLOW =====
-
-Write-Host 'Git Push Private - AI-Powered Smart Merge' -ForegroundColor Green
-
-$currentBranch = (git rev-parse --abbrev-ref HEAD 2>$null)
-if (-not $currentBranch -or $currentBranch -eq 'HEAD') { $currentBranch = 'main'; git checkout -B $currentBranch | Out-Null }
-
-$privateTargetBranch = $args[0]
-if (-not $privateTargetBranch) { $privateTargetBranch = 'main'; Write-Host 'No arg - using private/main' -ForegroundColor Cyan }
-else { Write-Host ("Using private/$privateTargetBranch as target") -ForegroundColor Cyan }
-
-$prevUpstream = (git rev-parse --abbrev-ref --symbolic-full-name '@{u}' 2>$null)
-
-Write-Host 'Step 1/6: Creating AI-Powered Backup...' -ForegroundColor Yellow
-$backupDir = New-SmartBackup $currentBranch
-
-Write-Host 'Step 2/6: Staging code changes...' -ForegroundColor Yellow
-git add -A
-# Unstage env files safely (enumerate staged list)
-$stagedFiles = (git diff --name-only --cached)
-if ($LASTEXITCODE -ne 0) { $stagedFiles = @() }
-$envPatterns = @(".env",".env.local",".env.example")
-foreach ($f in $stagedFiles) {
-    foreach ($p in $envPatterns) {
-        if ($f -like ("*" + $p)) { & git restore --staged -- "$f" | Out-Null }
+        Write-Success "✅ Smart Rollback hoàn thành"
+    } else {
+        Write-Error "Không tìm thấy backup để rollback"
     }
 }
-Write-Host 'Excluded env files from origin commit' -ForegroundColor Cyan
-$null = git commit -m "chore: update code changes (exclude env)" --no-verify 2>$null; if ($LASTEXITCODE -ne 0) { 'No changes to commit' | Out-Null }
 
-Write-Host 'Step 3/6: Push origin (primary backup)...' -ForegroundColor Yellow
-if (git push --set-upstream origin $currentBranch) {
-    Write-Host ("Origin backup ok: origin/$currentBranch") -ForegroundColor Green
-
-    Write-Host ("Step 4/8: Pass 1 - Merge $currentBranch -> private/$privateTargetBranch...") -ForegroundColor Yellow
-    git fetch private $privateTargetBranch 2>$null
-    $envFiles = Get-ChildItem -Path . -Recurse -Include ".env*" -File | Where-Object { $_.FullName -notlike "*\.git-backup*" }
-    $mergeSuccess = $true
-    foreach ($envFile in $envFiles) {
-        try {
-            $localContent = Get-Content $envFile.FullName -Raw
-            $remoteContent = git show "private/$privateTargetBranch`:$($envFile.FullName)" 2>$null
-            if ($remoteContent) {
-                $tempFile = "$($envFile.FullName).merged"
-                Invoke-SmartMerge $localContent $remoteContent $tempFile $envFile.Name
-                $validation = Test-MergedEnv $tempFile
-                if ($validation.IsValid) { Move-Item $tempFile $envFile.FullName -Force; Write-Host ("Merged: $($envFile.Name)") -ForegroundColor Green }
-                else { Write-Host ("Validation failed for $($envFile.Name)") -ForegroundColor Red; $mergeSuccess = $false; break }
-            } else { Write-Host ("No remote version for: $($envFile.Name)") -ForegroundColor Cyan }
-        } catch { Write-Host ("Error merging $($envFile.Name): $($_.Exception.Message)") -ForegroundColor Red; $mergeSuccess = $false; break }
+function Main {
+    param([string]$ParamBranch)
+    $currentBranch = Get-CurrentBranch
+    Write-Info "🚀 Bắt đầu Git Push Private - AI-Powered Smart Merge"
+    Write-Info "Current branch: $currentBranch"
+    if ($ParamBranch) { Write-Info "Parameter branch: $ParamBranch" }
+    
+    try {
+        Write-Success "✅ Bước 1: Xác định nhánh hiện tại ($currentBranch)"
+        Invoke-SmartBackup
+        Write-Success "✅ Bước 2: Smart Backup hoàn thành"
+        Invoke-SecurityCheck
+        Write-Success "✅ Bước 3: Security Check hoàn thành"
+        Push-ToOrigin
+        Write-Success "✅ Bước 4: Push code lên origin hoàn thành"
+        Push-ToPrivate $ParamBranch
+        Write-Success "✅ Bước 5: Push code + env lên private hoàn thành"
+        Invoke-CleanupLocalHistory
+        Write-Success "✅ Bước 6: Cleanup local history hoàn thành"
+        Sync-FromPrivate
+        Write-Success "✅ Bước 7: Đồng bộ từ private hoàn thành"
+        Prevent-EnvTracking
+        Write-Success "✅ Bước 8: Ngăn env bị track hoàn thành"
+        Invoke-FinalSync
+        Write-Success "✅ Bước 9: Đồng bộ hoàn chỉnh hoàn thành"
+        
+        Write-Success "🎉 Git Push Private hoàn thành thành công!"
+        Write-Info "📊 Tóm tắt:"
+        Write-Info "  - Backup: $BackupPath"
+        Write-Info "  - Origin: origin/$currentBranch"
+        Write-Info "  - Private: private/$currentBranch"
+        if ($ParamBranch) { Write-Info "  - Private param: private/$ParamBranch" }
+    } catch {
+        Write-Error "❌ Script bị lỗi: $($_.Exception.Message)"
+        Invoke-SmartRollback
+        throw
     }
-    if (-not $mergeSuccess) { Write-Host 'Rolling back due to merge failure...' -ForegroundColor Yellow; Invoke-SmartRollback $backupDir 'Merge validation failed'; Write-Host 'Workflow stopped due to merge failure' -ForegroundColor Red; exit 1 }
+}
 
-    Write-Host 'Step 5/8: Staging merged env files...' -ForegroundColor Yellow
-    # Stage merged env files individually
-    $envToAdd = Get-ChildItem -Path . -Recurse -Include ".env*" -File | Where-Object { $_.FullName -notlike "*\.git-backup*" }
-    foreach ($e in $envToAdd) { & git add -f -- "$($e.FullName)" | Out-Null }
-    $null = git commit -m "chore(env): AI-powered smart merge env files (.env, .env.local, .env.example)" --no-verify 2>$null; if ($LASTEXITCODE -ne 0) { 'No env changes to commit' | Out-Null }
+try { git rev-parse --git-dir | Out-Null } catch { Write-Error "Không phải là Git repository"; exit 1 }
+try { git remote get-url private | Out-Null } catch { Write-Error "Remote 'private' không tồn tại"; Write-Info "Hãy thêm remote private: git remote add private <url>"; exit 1 }
 
-    Write-Host ("Step 6/8: Push private/$privateTargetBranch (secondary backup incl. env)...") -ForegroundColor Yellow
-    if (git push private $currentBranch`:$privateTargetBranch) {
-        Write-Host ("Private backup ok: private/$privateTargetBranch") -ForegroundColor Green
-
-        Write-Host ("Step 7/8: Pass 2 - Merge private/$privateTargetBranch -> $currentBranch...") -ForegroundColor Yellow
-        git fetch private $privateTargetBranch 2>$null
-        $mergeSuccess2 = $true
-        foreach ($envFile in $envFiles) {
-            try {
-                $currentContent = Get-Content $envFile.FullName -Raw
-                $privateContent = git show "private/$privateTargetBranch`:$($envFile.FullName)" 2>$null
-                if ($privateContent) {
-                    $tempFile = "$($envFile.FullName).merged2"
-                    Invoke-SmartMerge $currentContent $privateContent $tempFile $envFile.Name
-                    $validation2 = Test-MergedEnv $tempFile
-                    if ($validation2.IsValid) { Move-Item $tempFile $envFile.FullName -Force; Write-Host ("Bidirectional merged: $($envFile.Name)") -ForegroundColor Green }
-                    else { Write-Host ("Validation failed for $($envFile.Name) in bidirectional merge") -ForegroundColor Red; $mergeSuccess2 = $false; break }
-                } else { Write-Host ("No private version for: $($envFile.Name)") -ForegroundColor Cyan }
-            } catch { Write-Host ("Error in bidirectional merge $($envFile.Name): $($_.Exception.Message)") -ForegroundColor Red; $mergeSuccess2 = $false; break }
-        }
-        if (-not $mergeSuccess2) { Write-Host 'Rolling back due to bidirectional merge failure...' -ForegroundColor Yellow; Invoke-SmartRollback $backupDir 'Bidirectional merge validation failed'; Write-Host 'Workflow stopped due to bidirectional merge failure' -ForegroundColor Red; exit 1 }
-
-        Write-Host 'Step 8/8: Staging bidirectional merged env files...' -ForegroundColor Yellow
-        $envToAdd2 = Get-ChildItem -Path . -Recurse -Include ".env*" -File | Where-Object { $_.FullName -notlike "*\.git-backup*" }
-        foreach ($e2 in $envToAdd2) { & git add -f -- "$($e2.FullName)" | Out-Null }
-        $null = git commit -m "chore(env): bidirectional sync from private/$privateTargetBranch" --no-verify 2>$null; if ($LASTEXITCODE -ne 0) { 'No env changes to commit' | Out-Null }
-        Write-Host 'Bidirectional sync completed!' -ForegroundColor Green
-    } else { Write-Host ("Warning: error when push private/$privateTargetBranch") -ForegroundColor Yellow }
-
-    if ($prevUpstream) { git branch --set-upstream-to=$prevUpstream $currentBranch 2>$null } else { git branch --set-upstream-to=origin/$currentBranch $currentBranch 2>$null }
-    Write-Host ("Upstream restored: origin/$currentBranch") -ForegroundColor Green
-    Write-Host 'AI-Powered Smart Merge completed!' -ForegroundColor Green
-} else { Write-Host 'Error pushing to origin. Stop workflow.' -ForegroundColor Red }
-
-
+Main $ParamBranch
