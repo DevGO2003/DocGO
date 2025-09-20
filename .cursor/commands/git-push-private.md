@@ -1,4 +1,4 @@
-# Git Push Private - AI-Powered Smart Merge (Bash-only)
+# Git Push Private - AI-Powered Smart Merge (PowerShell)
 
 ## Nguyên tắc
 
@@ -7,6 +7,8 @@
 - **Có tham số**: ngoài `private/<current-branch>` còn push thêm vào `private/<param>`
 - **Env files**: được force-add tạm thời để push vào private nhưng không bị track ở origin
 - **Đồng bộ**: sau khi push, đồng bộ lại local từ `private/<current-branch>`
+- **Tự động tạo script**: Luôn tạo file `script/git-push-private-safe.ps1` với logic an toàn
+- **PowerShell only**: Chỉ tạo script PowerShell, không tạo Bash script
 
 ## Luồng thực thi chi tiết
 
@@ -87,20 +89,31 @@ Dựa trên phân tích ngữ cảnh, thuật toán áp dụng các quy tắc ư
 
 ## Cách sử dụng
 
+### Sử dụng lệnh Cursor (Khuyến nghị)
 ```bash
+# Tự động tạo và chạy script PowerShell
+/git-push-private
+
+# Với tham số branch
+/git-push-private <param>
+```
+
+### Sử dụng trực tiếp PowerShell
+```powershell
 # Push vào private/<current-branch>
-./git-push-private.sh
+powershell -ExecutionPolicy Bypass -File script/git-push-private-safe.ps1
 
 # Push vào private/<current-branch> và private/<param>
-./git-push-private.sh <param>
+powershell -ExecutionPolicy Bypass -File script/git-push-private-safe.ps1 <param>
 ```
 
 ## Lưu ý quan trọng
 
-- Script này chỉ hoạt động trên Bash
+- Script này hoạt động trên PowerShell (Windows)
 - Đảm bảo có quyền truy cập vào remote `private`
 - Các file `.env` sẽ được backup tự động trước khi xử lý
 - Smart Merge đảm bảo không mất dữ liệu quan trọng trong quá trình đồng bộ
+- Script tự động tạo file `git-push-private-safe.ps1` trong thư mục `script/`
 
 ## ⚠️ Cảnh báo về file .env
 
@@ -113,6 +126,23 @@ Dựa trên phân tích ngữ cảnh, thuật toán áp dụng các quy tắc ư
 
 Nếu file .env bị mất do lỗi script, sử dụng lệnh sau để khôi phục:
 
+### PowerShell (Windows)
+```powershell
+# Tìm backup mới nhất
+$latestBackup = Get-ChildItem .git-backup\env\ | Sort-Object Name -Descending | Select-Object -First 1
+
+# Khôi phục tất cả file .env
+Get-ChildItem $latestBackup.FullName -Recurse -Name ".env*" | ForEach-Object {
+    $source = Join-Path $latestBackup.FullName $_
+    $target = ".\" + $_
+    $targetDir = Split-Path $target -Parent
+    if (!(Test-Path $targetDir)) { New-Item -ItemType Directory -Path $targetDir -Force | Out-Null }
+    Copy-Item $source $target -Force
+    Write-Host "Restored: $_"
+}
+```
+
+### Bash (Linux/Mac)
 ```bash
 # Tìm backup mới nhất
 latest_backup=$(ls -t .git-backup/env/ | head -1)
@@ -125,3 +155,40 @@ find .git-backup/env/$latest_backup -name ".env*" | while read file; do
     echo "Restored: $target"
 done
 ```
+
+## 📝 Tự động tạo script PowerShell
+
+Khi thực hiện lệnh `/git-push-private`, hệ thống sẽ tự động:
+
+1. **Tạo script**: Tạo file `script/git-push-private-safe.ps1` với logic an toàn
+2. **Kiểm tra Git**: Xác minh đây là Git repository và có remote `private`
+3. **Thực thi**: Chạy script PowerShell với quyền phù hợp
+4. **Báo cáo**: Hiển thị kết quả chi tiết và trạng thái file .env
+
+### Cấu trúc script được tạo:
+```
+script/
+└── git-push-private-safe.ps1
+    ├── Smart Backup (backup .env files)
+    ├── Security Check (remove .env from Git tracking)
+    ├── Push to Origin (code only)
+    ├── Push to Private (code + .env)
+    ├── Safe Cleanup (git reset --soft)
+    ├── Sync from Private
+    ├── Prevent .env tracking
+    └── Smart Rollback (auto-recovery)
+```
+
+### Tính năng an toàn của script:
+- **Không bao giờ mất file .env**: Sử dụng `git reset --soft` thay vì `--hard`
+- **Backup tự động**: Tạo backup trước mỗi lần thực thi
+- **Smart Rollback**: Tự động khôi phục nếu có lỗi
+- **Verification**: Kiểm tra file .env sau mỗi bước
+- **Error handling**: Xử lý lỗi và rollback an toàn
+- **Cross-platform**: Hoạt động trên Windows PowerShell
+
+### Lưu ý về việc tạo script:
+- Script được tạo với encoding UTF-8 để tránh lỗi ký tự
+- Sử dụng syntax PowerShell chuẩn, không có lỗi parser
+- Tự động kiểm tra và tạo thư mục `script/` nếu chưa có
+- Script có thể chạy lại nhiều lần mà không gây lỗi
