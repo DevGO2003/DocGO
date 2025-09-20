@@ -62,6 +62,10 @@ public class ContractController {
         Loại: List<String>
         Mô tả: Hướng sắp xếp (ASC/DESC).
         
+        📄 searchTerm (tùy chọn, query)
+        Loại: string
+        Mô tả: Từ khóa tìm kiếm trong tiêu đề, tóm tắt, số hợp đồng (mặc định: null).
+        
         📄 includeDeleted (tùy chọn, query)
         Loại: boolean
         Mô tả: Có bao gồm các bản ghi đã xóa hay không (mặc định: false).
@@ -107,6 +111,7 @@ public class ContractController {
             @RequestParam(defaultValue = "10") int pageSize,
             @RequestParam(required = false) String sortBy,
             @RequestParam(required = false) String sortDirection,
+            @RequestParam(required = false) String searchTerm,
             @RequestParam(defaultValue = "false") boolean includeDeleted) {
         
         // Convert single sortBy to List for service compatibility
@@ -114,13 +119,13 @@ public class ContractController {
         List<String> sortDirectionList = sortDirection != null ? List.of(sortDirection) : null;
         
         org.springframework.data.domain.Page<ContractResponseDto> contractsPage = 
-                contractService.getAllContractsWithNewFormat(pageNumber, pageSize, sortByList, sortDirectionList, includeDeleted);
+                contractService.getAllContractsWithNewFormat(pageNumber, pageSize, sortByList, sortDirectionList, searchTerm, includeDeleted);
         
         PaginatedResponse<ContractResponseDto> paginatedResponse = PaginatedResponse.<ContractResponseDto>builder()
                 .request(RequestInfo.builder()
                         .page(contractsPage.getNumber())
                         .size(contractsPage.getSize())
-                        .searchTerm(null)
+                        .searchTerm(searchTerm)
                         .sortBy(sortByList)
                         .sortDirection(sortDirectionList)
                         .build())
@@ -301,6 +306,7 @@ public class ContractController {
         contract.setComplianceStatus(request.getComplianceStatus());
         contract.setLegalReviewRequired(request.getLegalReviewRequired());
         contract.setReviewDeadline(request.getReviewDeadline());
+        contract.setTags(request.getTags());
         
         Contract created = contractService.createContract(contract);
         RestResponse<Contract> response = RestResponse.<Contract>builder()
@@ -692,7 +698,7 @@ public class ContractController {
             @RequestParam(defaultValue = "false") boolean includeDeleted) {
         
         org.springframework.data.domain.Page<ContractWithSummaryDto> contractsPage = 
-                contractService.getAllContractsWithSummary(pageNumber, pageSize, sortBy, sortDirection, includeDeleted);
+                contractService.getAllContractsWithSummary(pageNumber, pageSize, sortBy, sortDirection, null, includeDeleted);
         
         PaginatedResponse<ContractWithSummaryDto> paginatedResponse = PaginatedResponse.<ContractWithSummaryDto>builder()
                 .request(RequestInfo.builder()
@@ -865,7 +871,7 @@ public class ContractController {
             @RequestParam(defaultValue = "false") boolean includeDeleted) {
         
         org.springframework.data.domain.Page<ContractDetailDto> contractsPage = 
-                contractService.getAllContractsWithDetails(pageNumber, pageSize, sortBy, sortDirection, includeDeleted);
+                contractService.getAllContractsWithDetails(pageNumber, pageSize, sortBy, sortDirection, null, includeDeleted);
         
         PaginatedResponse<ContractDetailDto> paginatedResponse = PaginatedResponse.<ContractDetailDto>builder()
                 .request(RequestInfo.builder()

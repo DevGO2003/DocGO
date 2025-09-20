@@ -6,9 +6,9 @@ DocGO là một hệ thống quản lý tài liệu thông minh với kiến tr�
 
 ## 🏗️ Kiến trúc Hệ thống
 
-### Microservices Architecture (Local Compose)
+### Microservices Architecture
 
-Bảng dịch vụ đang chạy theo `docker-compose.local.yml` (host port → container 8000):
+Bảng dịch vụ đang chạy theo `docker-compose.yml` (host port → container 8000):
 
 | Service | Host Port | Container | Docs/URL |
 |---|---|---|---|

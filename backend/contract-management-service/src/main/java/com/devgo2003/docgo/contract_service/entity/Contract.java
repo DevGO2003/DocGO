@@ -6,6 +6,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 import org.springframework.data.mongodb.core.mapping.MongoId;
 import java.time.LocalDateTime;
+import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 import jakarta.validation.constraints.NotBlank;
@@ -133,7 +134,7 @@ public class Contract extends BaseEntity implements Persistable<String> {
     @Field("review_deadline")
     private LocalDateTime reviewDeadline;
     
-    private String tags;
+    private List<String> tags;
 
     public enum ContractStatus {
         DRAFT, PENDING, PENDING_APPROVAL, APPROVED, ACTIVE, COMPLETED, EXPIRED, TERMINATED, ARCHIVED, CANCELLED, SUSPENDED

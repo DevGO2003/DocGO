@@ -1,11 +1,9 @@
 package com.devgo2003.docgo.auth_service.security;
 
-import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.concurrent.ConcurrentHashMap;
 
-@Service
 public class MemoryTokenBlacklistService implements TokenBlacklist {
 
     private final ConcurrentHashMap<String, Instant> blacklistedTokens = new ConcurrentHashMap<>();

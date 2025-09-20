@@ -33,6 +33,12 @@ Khi người dùng gặp vấn đề, command này sẽ:
 - **Rủi ro và lợi ích** chi tiết
 - **Timeline thực hiện** và **dependencies**
 
+### 5. ⚠️ Rủi ro và cách xử lý
+- **Các lỗi có thể xảy ra** khi thực hiện Best Choice
+- **Tác động phụ** đến các file/component khác
+- **Cách sửa lỗi** cụ thể cho từng trường hợp
+- **Checklist kiểm tra** sau khi thực hiện
+
 ## Ví dụ sử dụng
 ```
 ask: Tại sao trang contracts không load được dữ liệu?
@@ -45,6 +51,7 @@ ask: Performance chậm khi load danh sách hợp đồng
 - 📍 **Xác định vị trí** vấn đề cụ thể
 - 💡 **Bảng so sánh** các phương án
 - ⭐ **Khuyến nghị** phương án tốt nhất
+- ⚠️ **Cảnh báo rủi ro** và cách xử lý
 - 🚫 **KHÔNG thay đổi** code hay database
 
 
@@ -61,7 +68,13 @@ Yêu cầu thực hiện:
 2) Xác định vị trí vấn đề (file, hàm, endpoint, tham số, controller/router).
 3) Đề xuất tối thiểu 3 phương án (bảng: Mô tả, Ưu/nhược, Độ khó, Thời gian, Chi phí).
 4) Chỉ ra Best Choice + lý do, rủi ro, và checklist các bước thực hiện.
-5) Tuyệt đối không thay đổi code/database. Nếu cần validate, chỉ đưa lệnh kiểm tra (không tự chạy).
+5) **CẢNH BÁO RỦI RO**: Liệt kê các lỗi có thể xảy ra khi thực hiện Best Choice:
+   - Lỗi import/export khi di chuyển file
+   - Lỗi dependency/classpath
+   - Lỗi configuration/endpoint
+   - Lỗi database migration
+   - Cách sửa từng loại lỗi cụ thể
+6) Tuyệt đối không thay đổi code/database. Nếu cần validate, chỉ đưa lệnh kiểm tra (không tự chạy).
 
 Đầu vào:
 <dán lỗi/triệu chứng/ngữ cảnh ở đây>
@@ -71,5 +84,6 @@ Yêu cầu thực hiện:
 - Vị trí lỗi (file/hàm/endpoint/dòng nếu xác định được)
 - Bảng phương án so sánh
 - Best Choice + checklist bước làm
+- **Cảnh báo rủi ro** + cách xử lý từng loại lỗi
 ```
 

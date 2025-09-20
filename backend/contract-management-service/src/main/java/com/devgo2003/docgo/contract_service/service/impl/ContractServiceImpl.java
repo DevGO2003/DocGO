@@ -393,7 +393,7 @@ public class ContractServiceImpl implements IContractService {
     /**
      * Lấy tất cả contracts cơ bản (không có summary) - giữ lại để tương thích
      */
-    public Page<Contract> getAllContractsBasic(int pageNumber, int pageSize, List<String> sortBy, List<String> sortDirection, boolean includeDeleted) {
+    public Page<Contract> getAllContractsBasic(int pageNumber, int pageSize, List<String> sortBy, List<String> sortDirection, String searchTerm, boolean includeDeleted) {
         List<Sort.Order> orders = new ArrayList<>();
         if (sortBy != null && !sortBy.isEmpty()) {
             for (int i = 0; i < sortBy.size(); i++) {
@@ -411,10 +411,19 @@ public class ContractServiceImpl implements IContractService {
         Sort sort = Sort.by(orders);
         Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
 
-        if (includeDeleted) {
-            return contractRepository.findAll(pageable);
+        // Thực hiện search nếu có searchTerm
+        if (searchTerm != null && !searchTerm.trim().isEmpty()) {
+            if (includeDeleted) {
+                return contractRepository.findBySearchTerm(searchTerm.trim(), pageable);
+            } else {
+                return contractRepository.findBySearchTermAndIsDeletedFalse(searchTerm.trim(), pageable);
+            }
         } else {
-            return contractRepository.findByIsDeletedFalse(pageable);
+            if (includeDeleted) {
+                return contractRepository.findAll(pageable);
+            } else {
+                return contractRepository.findByIsDeletedFalse(pageable);
+            }
         }
     }
 
@@ -422,8 +431,8 @@ public class ContractServiceImpl implements IContractService {
      * Lấy tất cả contracts với summary information (API chính)
      */
     @Override
-    public Page<ContractWithSummaryDto> getAllContractsWithSummary(int pageNumber, int pageSize, List<String> sortBy, List<String> sortDirection, boolean includeDeleted) {
-        Page<Contract> contractsPage = getAllContractsBasic(pageNumber, pageSize, sortBy, sortDirection, includeDeleted);
+    public Page<ContractWithSummaryDto> getAllContractsWithSummary(int pageNumber, int pageSize, List<String> sortBy, List<String> sortDirection, String searchTerm, boolean includeDeleted) {
+        Page<Contract> contractsPage = getAllContractsBasic(pageNumber, pageSize, sortBy, sortDirection, searchTerm, includeDeleted);
         
         List<ContractWithSummaryDto> contractsWithSummary = contractsPage.getContent().stream()
                 .map(this::convertToContractWithSummaryDto)
@@ -513,8 +522,8 @@ public class ContractServiceImpl implements IContractService {
      * Lấy tất cả contracts với thông tin chi tiết đầy đủ
      */
     @Override
-    public Page<ContractDetailDto> getAllContractsWithDetails(int pageNumber, int pageSize, List<String> sortBy, List<String> sortDirection, boolean includeDeleted) {
-        Page<Contract> contractsPage = getAllContractsBasic(pageNumber, pageSize, sortBy, sortDirection, includeDeleted);
+    public Page<ContractDetailDto> getAllContractsWithDetails(int pageNumber, int pageSize, List<String> sortBy, List<String> sortDirection, String searchTerm, boolean includeDeleted) {
+        Page<Contract> contractsPage = getAllContractsBasic(pageNumber, pageSize, sortBy, sortDirection, searchTerm, includeDeleted);
         
         List<ContractDetailDto> contractsWithDetails = contractsPage.getContent().stream()
                 .map(this::convertToContractDetailDto)
@@ -623,8 +632,8 @@ public class ContractServiceImpl implements IContractService {
     /**
      * Lấy tất cả contracts với response format mới nhất quán
      */
-    public Page<ContractResponseDto> getAllContractsWithNewFormat(int pageNumber, int pageSize, List<String> sortBy, List<String> sortDirection, boolean includeDeleted) {
-        Page<Contract> contractsPage = getAllContractsBasic(pageNumber, pageSize, sortBy, sortDirection, includeDeleted);
+    public Page<ContractResponseDto> getAllContractsWithNewFormat(int pageNumber, int pageSize, List<String> sortBy, List<String> sortDirection, String searchTerm, boolean includeDeleted) {
+        Page<Contract> contractsPage = getAllContractsBasic(pageNumber, pageSize, sortBy, sortDirection, searchTerm, includeDeleted);
         
         List<ContractResponseDto> contractsWithNewFormat = contractsPage.getContent().stream()
                 .map(contract -> {
@@ -644,11 +653,8 @@ public class ContractServiceImpl implements IContractService {
      * Map Contract entity sang ContractResponseDto theo cấu trúc mới
      */
     private ContractResponseDto mapContractToResponseDto(Contract contract, List<ContractParty> parties) {
-        // Parse tags từ string sang List
-        List<String> tags = new ArrayList<>();
-        if (contract.getTags() != null && !contract.getTags().trim().isEmpty()) {
-            tags = Arrays.asList(contract.getTags().split("\\s*,\\s*"));
-        }
+        // Lấy tags từ contract (đã là List<String>)
+        List<String> tags = contract.getTags() != null ? contract.getTags() : new ArrayList<>();
 
         // Map parties
         List<ContractPartyResponseDto> partyDtos = parties.stream()
@@ -872,8 +878,8 @@ public class ContractServiceImpl implements IContractService {
      * Lấy tất cả contracts với format mới theo cấu trúc response mới
      */
     @Override
-    public Page<ContractDetailResponseDto> getAllContractsWithDetailFormat(int pageNumber, int pageSize, List<String> sortBy, List<String> sortDirection, boolean includeDeleted) {
-        Page<Contract> contractsPage = getAllContractsBasic(pageNumber, pageSize, sortBy, sortDirection, includeDeleted);
+    public Page<ContractDetailResponseDto> getAllContractsWithDetailFormat(int pageNumber, int pageSize, List<String> sortBy, List<String> sortDirection, String searchTerm, boolean includeDeleted) {
+        Page<Contract> contractsPage = getAllContractsBasic(pageNumber, pageSize, sortBy, sortDirection, searchTerm, includeDeleted);
         
         List<ContractDetailResponseDto> contractsWithDetailFormat = contractsPage.getContent().stream()
                 .map(contract -> {
