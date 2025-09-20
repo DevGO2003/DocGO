@@ -42,12 +42,15 @@
 - **Lần 2**: Nếu có tham số, thực hiện tương tự để hợp nhất vào `private/<param>`
 
 #### 5.3. Cleanup local history
-- Sau khi push thành công, sử dụng `git reset --hard HEAD~1` để loại bỏ commit env vừa tạo
-- Giữ cho lịch sử cục bộ của bạn sạch sẽ
+- Sau khi push thành công, sử dụng `git reset --soft HEAD~1` để loại bỏ commit env vừa tạo
+- Sau đó sử dụng `git reset HEAD` để unstage các file .env
+- **QUAN TRỌNG**: Không sử dụng `git reset --hard` vì sẽ xóa file .env khỏi working directory
+- Giữ cho lịch sử cục bộ của bạn sạch sẽ mà không mất file .env
 
 ### 6. Đồng bộ lại local từ private
 - Fetch từ private
-- Thực hiện `git reset --hard private/<current-branch>` để đồng bộ hoàn toàn kho lưu trữ cục bộ với trạng thái mới nhất của private
+- Thực hiện `git reset --soft private/<current-branch>` để đồng bộ hoàn toàn kho lưu trữ cục bộ với trạng thái mới nhất của private
+- **QUAN TRỌNG**: Sử dụng `--soft` thay vì `--hard` để giữ file .env trong working directory
 
 ### 7. Ngăn env bị track ở local
 - Sử dụng `.git/info/exclude` để ngăn Git theo dõi các file `.env` vĩnh viễn trên kho lưu trữ cục bộ
@@ -98,3 +101,27 @@ Dựa trên phân tích ngữ cảnh, thuật toán áp dụng các quy tắc ư
 - Đảm bảo có quyền truy cập vào remote `private`
 - Các file `.env` sẽ được backup tự động trước khi xử lý
 - Smart Merge đảm bảo không mất dữ liệu quan trọng trong quá trình đồng bộ
+
+## ⚠️ Cảnh báo về file .env
+
+- **KHÔNG BAO GIỜ** sử dụng `git reset --hard` trong quá trình cleanup
+- **LUÔN SỬ DỤNG** `git reset --soft` để giữ file .env trong working directory
+- **BACKUP TỰ ĐỘNG** được tạo trước mỗi lần thực thi để khôi phục nếu cần
+- **KIỂM TRA** file .env sau khi thực thi script để đảm bảo không bị mất
+
+## 🔧 Khôi phục file .env nếu bị mất
+
+Nếu file .env bị mất do lỗi script, sử dụng lệnh sau để khôi phục:
+
+```bash
+# Tìm backup mới nhất
+latest_backup=$(ls -t .git-backup/env/ | head -1)
+
+# Khôi phục tất cả file .env
+find .git-backup/env/$latest_backup -name ".env*" | while read file; do
+    target=$(echo $file | sed "s|.git-backup/env/$latest_backup/||")
+    mkdir -p $(dirname "$target")
+    cp "$file" "$target"
+    echo "Restored: $target"
+done
+```
