@@ -1,922 +1,100 @@
 # Git Push Private - AI-Powered Smart Merge (Bash-only)
 
-Đẩy nhánh hiện tại lên `origin` và `private` với 2 chế độ:
-- **Không tham số**: Chỉ push/pull đồng bộ đơn giản
-- **Có tham số**: Merge vào `private/<tham số>` và thay thế lịch sử commit
+## Nguyên tắc
 
-## Mô tả
-- Tự động và không yêu cầu xác nhận.
-- Xác định nhánh hiện tại; nếu không xác định được thì MẶC ĐỊNH dùng nhánh `main` (tạo mới nếu chưa có).
-- **TWO-MODE WORKFLOW**:
-  - **Mode 1 (Không tham số)**: Push + Pull đồng bộ đơn giản giữa origin và private
-  - **Mode 2 (Có tham số)**: AI-powered merge vào `private/<tham số>` và thay thế lịch sử commit
-- **AI-POWERED SMART MERGE**: Sử dụng AI để phân tích toàn bộ nội dung env files, so sánh context và đưa ra quyết định merge thông minh với retry mechanism.
-- **ENV FILE PROTECTION**: Đảm bảo file `.env` luôn tồn tại để code hoạt động bình thường.
-- **HISTORY REPLACEMENT**: Khi có tham số, thay thế hoàn toàn lịch sử commit và bỏ theo dõi upstream.
-- Đảm bảo các file env được force-add với merge strategy: `**/.env`, `**/.env.local`, `**/.env.example`.
+- **Chỉ còn một chế độ Smart Merge**
+- **Không tham số**: push vào `private/<current-branch>`
+- **Có tham số**: ngoài `private/<current-branch>` còn push thêm vào `private/<param>`
+- **Env files**: được force-add tạm thời để push vào private nhưng không bị track ở origin
+- **Đồng bộ**: sau khi push, đồng bộ lại local từ `private/<current-branch>`
 
-## Lưu ý quan trọng cho PowerShell (Windows) – chạy trơn tru 100%
+## Luồng thực thi chi tiết
 
-Vì tệp này viết theo Bash, khi chạy trên PowerShell hãy tuân thủ các quy tắc sau để tránh gián đoạn:
+### 1. Xác định nhánh hiện tại
+- Nếu không có, mặc định là `main`
 
-- Không dùng pipe sang `cat`. Tránh `... | cat`; nếu cần, dùng `| Out-String` hoặc bỏ pipe.
-- Không dùng toán tử `&&`. Chạy lệnh theo từng dòng riêng biệt.
-- Tuyệt đối KHÔNG dùng toán tử chuyển hướng `>` để ghi nội dung từ `git show`/`git cat-file` ra file ENV trong PowerShell, vì mặc định sẽ ghi dạng UTF-16LE. Khi cần đồng bộ file từ `private/<branch>`, hãy dùng lệnh Git để checkout/restore file trực tiếp (ví dụ: sử dụng `git restore -s private/<branch> -- <đường-dẫn-file>`), thay vì ghi file bằng chuyển hướng PowerShell.
-- Push sang remote `private` phải dùng refspec tường minh để KHÔNG tạo nhánh ngoài ý muốn:
-  - Không tham số (đẩy vào `private/<current-branch>`):
-    - `git push private HEAD:<current-branch>`
-  - Có tham số (ví dụ `dev`):
-    - `git push private HEAD:dev`
-- Trước khi backup/tìm `*.env*`, loại trừ thư mục `.git-backup/` và `.git/` khỏi phạm vi quét để không tự sao chép chính tệp backup.
-- Khi unstage env, chỉ gọi `git restore --staged` nếu có đường dẫn hợp lệ (tránh lỗi “you must specify path(s)”).
-- Khi cần hợp nhất vào `private/main` và gặp non-fast-forward, ưu tiên mở PR từ `private/<branch>` vào `private/main` thay vì push thẳng.
+### 2. Backup env (Smart Backup)
+- Copy toàn bộ các file `.env` (bao gồm `.env.local`, `.env.example`,...) vào một thư mục được đặt tên theo thời gian trong `.git-backup/env/`
+- Thao tác này là một phần của thuật toán Smart Backup, giúp bạn có thể khôi phục lại trạng thái ban đầu nếu có lỗi xảy ra
 
-## Yêu cầu
-- Đã cấu hình remote tên `private` (ví dụ: `git remote add private <PRIVATE_GIT_URL>`).
-- Lưu ý QUAN TRỌNG: Hành động này force-add secrets (bao gồm `.env`). Hãy kiểm tra nội dung trước khi push.
+### 3. Kiểm tra env trong Git (Security Check)
+- Áp dụng thuật toán Security Check
+- Hệ thống sẽ tự động quét để xem có file `.env` nào đang bị Git theo dõi
+- Nếu có, nó sẽ:
+  - Unstage các file này khỏi index
+  - Xóa chúng khỏi tracking (`git rm --cached`)
+  - Tạo một commit dọn dẹp riêng trước khi push
+  - Đảm bảo kho lưu trữ công khai (origin) luôn sạch sẽ và an toàn
+
+### 4. Push code lên origin (không env)
+- Stage và commit toàn bộ các thay đổi code
+- Lúc này, các file `.env` đã được bỏ theo dõi nên sẽ không được đưa vào commit
+- Cuối cùng, push lên `origin/<current-branch>`
+
+### 5. Push code + env lên private
+
+#### 5.1. Force-add env files
+- Sử dụng lệnh `git add -f` để tạm thời force-add các file `.env` vào index
+- Tạo một commit riêng cho các file env này
+
+#### 5.2. Đồng bộ hóa hai chiều (Bidirectional Sync)
+- **Lần 1**: Thực thi thuật toán AI-Powered Smart Merge để hợp nhất các file `.env` từ kho lưu trữ cục bộ của bạn vào `private/<current-branch>`
+- **Lần 2**: Nếu có tham số, thực hiện tương tự để hợp nhất vào `private/<param>`
+
+#### 5.3. Cleanup local history
+- Sau khi push thành công, sử dụng `git reset --hard HEAD~1` để loại bỏ commit env vừa tạo
+- Giữ cho lịch sử cục bộ của bạn sạch sẽ
+
+### 6. Đồng bộ lại local từ private
+- Fetch từ private
+- Thực hiện `git reset --hard private/<current-branch>` để đồng bộ hoàn toàn kho lưu trữ cục bộ với trạng thái mới nhất của private
+
+### 7. Ngăn env bị track ở local
+- Sử dụng `.git/info/exclude` để ngăn Git theo dõi các file `.env` vĩnh viễn trên kho lưu trữ cục bộ
+- Đảm bảo chúng chỉ tồn tại trong working directory
+- Bạn cũng có thể thiết lập các pre-push hook để chặn bất kỳ nỗ lực nào nhằm push các file này lên origin
+
+### 8. Pull để đồng bộ hoàn chỉnh
+- Thực hiện `git pull private <current-branch>` để đảm bảo kho lưu trữ cục bộ của bạn có cùng một bản sao hoàn chỉnh với private
+- Bao gồm cả các file `.env` không bị theo dõi
+
+## Chi tiết về AI-Powered Smart Merge
+
+Trong bước 5, khi thực hiện hợp nhất các file `.env`, thuật toán AI-Powered Smart Merge sẽ diễn ra như sau:
+
+### Phân tích nội dung
+- So sánh nội dung của file `.env` cục bộ và từ xa
+- Xác định các khóa (key) có ở cả hai nơi, các khóa chỉ có ở cục bộ hoặc chỉ có ở từ xa
+- Đếm số lượng xung đột
+- Phân tích ngữ cảnh, như các khóa bí mật (API_KEY), cấu hình cơ sở dữ liệu (DATABASE_URL), hay cấu hình dịch vụ (_SERVICE_URL) để chuẩn bị cho việc ra quyết định
+
+### Động cơ ra quyết định
+Dựa trên phân tích ngữ cảnh, thuật toán áp dụng các quy tắc ưu tiên:
+
+- **Ưu tiên Remote cho Database**: Nếu khóa là `MONGODB_URI` hoặc `DATABASE_URL`, nó sẽ chọn giá trị từ xa
+- **Ưu tiên Local cho API Keys**: Nếu khóa là `API_KEY` hoặc `SECRET`, nó sẽ chọn giá trị cục bộ
+- **Ưu tiên Local cho Port/Host**: Các khóa như `SERVER_PORT` sẽ ưu tiên giá trị cục bộ để phù hợp với môi trường hiện tại
+- **Hợp nhất Logic**: Các khóa như `DEBUG` hoặc cờ tính năng sẽ được hợp nhất bằng logic (ví dụ: `true` nếu một trong hai giá trị là `true`)
+
+### Kiểm tra và Thử lại
+- Sau khi hợp nhất, thuật toán sẽ kiểm tra tính hợp lệ của file `.env` mới
+- Nếu kiểm tra thất bại (ví dụ: thiếu một khóa bắt buộc), thuật toán sẽ tự động thử lại với một chiến lược hợp nhất khác (như ưu tiên hoàn toàn cục bộ) trước khi quyết định thất bại
+- Kích hoạt Smart Rollback để khôi phục trạng thái ban đầu
+- Đảm bảo tính toàn vẹn của file
 
 ## Cách sử dụng
-- **Không tham số**: `/git-push-private` - Push lên `private/main`
-- **Có tham số**: `/git-push-private <branch-name>` - Push lên `private/<branch-name>`
-- Ví dụ: `/git-push-private dev` sẽ push lên `private/dev`
 
-## Lệnh thực thi (Bash) - AI-Powered
 ```bash
-#!/bin/bash
-set -e
+# Push vào private/<current-branch>
+./git-push-private.sh
 
-# ===== AI-POWERED SMART MERGE FUNCTIONS =====
-
-# Function: Tạo backup với metadata
-new_smart_backup() {
-    local branch="$1"
-    local backup_dir=".git-backup/env/$(date +%Y%m%d_%H%M%S)"
-    mkdir -p "$backup_dir"
-    
-    local metadata_file="$backup_dir/metadata.json"
-    cat > "$metadata_file" << EOF
-{
-  "timestamp": "$(date '+%Y-%m-%d %H:%M:%S')",
-  "branch": "$branch",
-  "commit": "$(git rev-parse HEAD)",
-  "files": []
-}
-EOF
-    
-    # Loại trừ thư mục .git/ và .git-backup/ khi backup
-    find . \
-      -path "*/.git/*" -prune -o \
-      -path "*/.git-backup/*" -prune -o \
-      -type f -name "*.env*" -print | while read -r file; do
-        local filename=$(basename "$file")
-        cp "$file" "$backup_dir/$filename"
-        echo "📦 Backed up: $filename"
-    done
-    
-    echo "$backup_dir"
-}
-
-# Function: Phân tích conflict patterns
-find_env_conflicts() {
-    local local_content="$1"
-    local remote_content="$2"
-    local filename="$3"
-    
-    # Extract keys from both contents
-    local local_keys=$(echo "$local_content" | grep -E "^[A-Z_]+=" | cut -d'=' -f1)
-    local remote_keys=$(echo "$remote_content" | grep -E "^[A-Z_]+=" | cut -d'=' -f1)
-    
-    # Find common keys
-    local common_keys=$(comm -12 <(echo "$local_keys" | sort) <(echo "$remote_keys" | sort))
-    
-    local conflicts=""
-    while IFS= read -r key; do
-        local local_value=$(echo "$local_content" | grep "^$key=" | cut -d'=' -f2-)
-        local remote_value=$(echo "$remote_content" | grep "^$key=" | cut -d'=' -f2-)
-        
-        if [ "$local_value" != "$remote_value" ]; then
-            conflicts="$conflicts$key|$local_value|$remote_value|$filename\n"
-        fi
-    done <<< "$common_keys"
-    
-    echo -e "$conflicts"
-}
-
-# Function: AI Decision Engine
-resolve_env_conflict() {
-    local key="$1"
-    local local_value="$2"
-    local remote_value="$3"
-    
-    # Rule 1: Database URLs - Ưu tiên remote
-    if echo "$key" | grep -qE "MONGODB_URI|DATABASE_URL|DB_"; then
-        echo "UseRemote|Database config từ remote thường đầy đủ và chính xác hơn|$remote_value|90"
-    # Rule 2: API Keys - Ưu tiên local
-    elif echo "$key" | grep -qE "API_KEY|SECRET|TOKEN|PASSWORD"; then
-        echo "UseLocal|API keys local thường là production keys|$local_value|95"
-    # Rule 3: Port/URL config - Ưu tiên local
-    elif echo "$key" | grep -qE "PORT|HOST|URL|SERVER_"; then
-        echo "UseLocal|Port/Host config phù hợp với môi trường hiện tại|$local_value|85"
-    # Rule 4: Feature flags - Merge logic
-    elif echo "$key" | grep -qE "DEBUG|ENABLE_|FEATURE_|FLAG_"; then
-        local merged_value="false"
-        if [ "$local_value" = "true" ] || [ "$remote_value" = "true" ]; then
-            merged_value="true"
-        fi
-        echo "MergeLogic|Feature flags cần logic merge|$merged_value|80"
-    # Rule 5: Timestamp-based fallback
-    else
-        echo "UseRemote|Remote config được ưu tiên mặc định|$remote_value|70"
-    fi
-}
-
-# Function: AI Content Analysis - Phân tích toàn bộ nội dung
-analyze_env_content() {
-    local local_content="$1"
-    local remote_content="$2"
-    local filename="$3"
-    
-    echo "🧠 AI Content Analysis for: $filename"
-    
-    # Phân tích keys
-    local local_keys=$(echo "$local_content" | grep -E "^[A-Z_]+=" | cut -d'=' -f1 | sort -u)
-    local remote_keys=$(echo "$remote_content" | grep -E "^[A-Z_]+=" | cut -d'=' -f1 | sort -u)
-    
-    # Tìm common keys
-    local common_keys=$(comm -12 <(echo "$local_keys" | sort) <(echo "$remote_keys" | sort))
-    local unique_local_keys=$(comm -23 <(echo "$local_keys" | sort) <(echo "$remote_keys" | sort))
-    local unique_remote_keys=$(comm -13 <(echo "$local_keys" | sort) <(echo "$remote_keys" | sort))
-    
-    # Đếm conflicts
-    local conflict_count=0
-    while IFS= read -r key; do
-        local local_value=$(echo "$local_content" | grep "^$key=" | cut -d'=' -f2-)
-        local remote_value=$(echo "$remote_content" | grep "^$key=" | cut -d'=' -f2-)
-        
-        if [ "$local_value" != "$remote_value" ]; then
-            conflict_count=$((conflict_count + 1))
-        fi
-    done <<< "$common_keys"
-    
-    # Phân tích patterns
-    local local_has_secrets=$(echo "$local_content" | grep -qE "SECRET|PASSWORD|TOKEN|KEY" && echo "true" || echo "false")
-    local remote_has_secrets=$(echo "$remote_content" | grep -qE "SECRET|PASSWORD|TOKEN|KEY" && echo "true" || echo "false")
-    local local_has_database=$(echo "$local_content" | grep -qE "MONGODB|DATABASE|DB_" && echo "true" || echo "false")
-    local remote_has_database=$(echo "$remote_content" | grep -qE "MONGODB|DATABASE|DB_" && echo "true" || echo "false")
-    local local_has_ports=$(echo "$local_content" | grep -qE "PORT|HOST" && echo "true" || echo "false")
-    local remote_has_ports=$(echo "$remote_content" | grep -qE "PORT|HOST" && echo "true" || echo "false")
-    
-    echo "  📊 Analysis: $conflict_count conflicts, $(echo "$unique_local_keys" | wc -l) local-only, $(echo "$unique_remote_keys" | wc -l) remote-only"
-    
-    # Trả về analysis data
-    echo "$conflict_count|$local_has_secrets|$remote_has_secrets|$local_has_database|$remote_has_database|$local_has_ports|$remote_has_ports"
-}
-
-# Function: Repo-aware helpers (discover services, canonical keys, allowlist)
-build_deprecation_map() {
-    cat << 'EOF'
-AUTH_SERVICE_URL=AUTHENTICATION_SERVICE_URL
-AI_SERVICE_URL=AI_PROCESSING_SERVICE_URL
-FILE_SERVICE_URL=FILE_STORAGE_SERVICE_URL
-CONTRACT_SERVICE_URL=CONTRACT_MANAGEMENT_SERVICE_URL
-EOF
-}
-
-canonicalize_key() {
-    local key="$1"
-    local mapped=$(build_deprecation_map | grep "^${key}=" | cut -d'=' -f2)
-    if [ -n "$mapped" ]; then
-        echo "$mapped"
-    else
-        echo "$key"
-    fi
-}
-
-discover_backend_services() {
-    # Output: one service name per line (kebab-case)
-    if [ -d backend ]; then
-        find backend -maxdepth 1 -mindepth 1 -type d -name "*-service" -printf "%f\n" 2>/dev/null || true
-    fi
-}
-
-discover_compose_services() {
-    # Best-effort parse docker-compose.local.yml service ids (kebab-case)
-    local compose="docker-compose.local.yml"
-    if [ -f "$compose" ]; then
-        # Extract service block ids by matching column start with two spaces and a token ending with ':'
-        awk '/^ {2,}[a-z0-9-]+:$/ { gsub(":","",$1); gsub(/^ +/,"",$1); print $1 }' "$compose" | sed -e '1,/$0/d' 2>/dev/null || true
-        # Fallback with grep (may include non-service keys, harmless)
-        grep -E "^[[:space:]]{2,}[a-z0-9-]+:\\s*$" "$compose" 2>/dev/null | sed -E 's/^\s+([^:]+):\s*$/\1/' || true
-    fi
-}
-
-to_upper_snake() {
-    echo "$1" | tr '[:lower:]' '[:upper:]' | tr '-' '_'
-}
-
-build_service_allowlist() {
-    # Output: canonical SERVICE_URL keys (UPPER_SNAKE)_SERVICE_URL separated by spaces
-    local services="$(discover_backend_services; discover_compose_services | sort -u)"
-    local allow=""
-    while IFS= read -r svc; do
-        [ -z "$svc" ] && continue
-        local key="$(to_upper_snake "$svc")_SERVICE_URL"
-        allow="$allow $key"
-    done <<< "$services"
-    echo "$allow"
-}
-
-# Function: Validate URL-like values
-is_valid_url() {
-    local v="$1"
-    echo "$v" | grep -qiE '^https?://[a-z0-9_.:-]+'
-}
-
-# Function: AI Decision Engine với Context Analysis
-resolve_env_conflict_advanced() {
-    local key="$1"
-    local local_value="$2"
-    local remote_value="$3"
-    local analysis="$4"
-    
-    # Parse analysis data
-    local conflict_count=$(echo "$analysis" | cut -d'|' -f1)
-    local local_has_secrets=$(echo "$analysis" | cut -d'|' -f2)
-    local remote_has_secrets=$(echo "$analysis" | cut -d'|' -f3)
-    local local_has_database=$(echo "$analysis" | cut -d'|' -f4)
-    local remote_has_database=$(echo "$analysis" | cut -d'|' -f5)
-    local local_has_ports=$(echo "$analysis" | cut -d'|' -f6)
-    local remote_has_ports=$(echo "$analysis" | cut -d'|' -f7)
-    
-    # Enhanced Rule 1: Database URLs - Phân tích context
-    if echo "$key" | grep -qE "MONGODB_URI|DATABASE_URL|DB_"; then
-        if [ "$local_has_database" = "true" ] && [ "$remote_has_database" = "true" ]; then
-            echo "UseRemote|Cả local và remote đều có database config, ưu tiên remote (đầy đủ hơn)|$remote_value|95"
-        else
-            echo "UseRemote|Database config từ remote thường đầy đủ và chính xác hơn|$remote_value|90"
-        fi
-    # Enhanced Rule 2: API Keys - Phân tích security context
-    elif echo "$key" | grep -qE "API_KEY|SECRET|TOKEN|PASSWORD"; then
-        if [ "$local_has_secrets" = "true" ] && [ "$remote_has_secrets" = "false" ]; then
-            echo "UseLocal|Local có secrets, remote không có - ưu tiên local (bảo mật hơn)|$local_value|98"
-        else
-            echo "UseLocal|API keys local thường là production keys|$local_value|95"
-        fi
-    # Enhanced Rule 3: Port/URL config - Phân tích environment context
-    elif echo "$key" | grep -qE "PORT|HOST|URL|SERVER_"; then
-        if [ "$local_has_ports" = "true" ] && [ "$remote_has_ports" = "true" ]; then
-            echo "UseLocal|Cả local và remote đều có port config, ưu tiên local (môi trường hiện tại)|$local_value|90"
-        else
-            echo "UseLocal|Port/Host config phù hợp với môi trường hiện tại|$local_value|85"
-        fi
-    # Enhanced Rule 4: Feature flags - Merge logic với context
-    elif echo "$key" | grep -qE "DEBUG|ENABLE_|FEATURE_|FLAG_"; then
-        local merged_value="false"
-        if [ "$local_value" = "true" ] || [ "$remote_value" = "true" ]; then
-            merged_value="true"
-        fi
-        echo "MergeLogic|Feature flags cần logic merge với context analysis|$merged_value|85"
-    # Enhanced Rule 5: Context-aware fallback
-    else
-        echo "UseRemote|Remote config được ưu tiên mặc định với context analysis|$remote_value|70"
-    fi
-}
-
-# Function: Smart Merge Execution với AI Analysis
-invoke_smart_merge() {
-    local local_file="$1"
-    local remote_file="$2"
-    local output_file="$3"
-    local filename="$4"
-    
-    echo "🤖 AI-Powered Smart Merge for: $filename"
-    
-    # Repo-aware discovery
-    local allowlist_keys="$(build_service_allowlist)"
-    local deprecations=$(build_deprecation_map)
-    
-    # Bước 1: AI Content Analysis
-    local analysis=$(analyze_env_content "$local_file" "$remote_file" "$filename")
-    
-    # Bước 2: Tìm conflicts
-    local conflicts=$(find_env_conflicts "$local_file" "$remote_file" "$filename")
-    local merged_content=""
-    local merge_log=""
-    # Build allowlist from repo structure and FE envs
-    local allowlist=""
-    if [ -d backend ]; then
-      while IFS= read -r d; do
-        svc=$(basename "$d" | tr '-' '_')
-        allowlist="$allowlist $(echo "${svc}_SERVICE_URL" | tr '[:lower:]' '[:upper:]')"
-      done < <(find backend -maxdepth 1 -type d -name "*-service")
-    fi
-    if [ -d frontend ]; then
-      while IFS= read -r feenv; do
-        while IFS= read -r line; do
-          key=$(echo "$line" | grep -E "^[A-Z0-9_]+=" | cut -d'=' -f1 | tr '[:lower:]' '[:upper:]')
-          if echo "$key" | grep -q "_SERVICE_URL$"; then
-            allowlist="$allowlist $key"
-          fi
-        done < "$feenv"
-      done < <(find frontend -type f \( -name ".env" -o -name ".env.local" -o -name ".env.example" \))
-    fi
-    
-    # Get all unique keys (after canonicalization)
-    local all_keys=$(echo -e "$local_file\n$remote_file" | grep -E "^[A-Z_]+=" | cut -d'=' -f1 | while read -r k; do canonicalize_key "$k"; done | sort -u)
-    
-    # Bước 3: Merge với AI Decision
-    while IFS= read -r key; do
-        local local_line=$(echo "$local_file" | grep "^$key=" || true)
-        local remote_line=$(echo "$remote_file" | grep "^$key=" || true)
-        
-        # Canonicalize lines if deprecated key used
-        if [ -n "$local_line" ]; then
-            local lk=$(echo "$local_line" | cut -d'=' -f1)
-            local ck=$(canonicalize_key "$lk")
-            if [ "$ck" != "$lk" ]; then
-                local_line="$ck=$(echo "$local_line" | cut -d'=' -f2-)"
-            fi
-        fi
-        if [ -n "$remote_line" ]; then
-            local rk=$(echo "$remote_line" | cut -d'=' -f1)
-            local crk=$(canonicalize_key "$rk")
-            if [ "$crk" != "$rk" ]; then
-                remote_line="$crk=$(echo "$remote_line" | cut -d'=' -f2-)"
-            fi
-        fi
-        
-        if [ -n "$local_line" ] && [ -n "$remote_line" ]; then
-            # Có conflict - dùng AI decision
-            local local_value=$(echo "$local_line" | cut -d'=' -f2-)
-            local remote_value=$(echo "$remote_line" | cut -d'=' -f2-)
-            
-            local decision=$(resolve_env_conflict_advanced "$key" "$local_value" "$remote_value" "$analysis")
-            local action=$(echo "$decision" | cut -d'|' -f1)
-            local reason=$(echo "$decision" | cut -d'|' -f2)
-            local chosen_value=$(echo "$decision" | cut -d'|' -f3)
-            local confidence=$(echo "$decision" | cut -d'|' -f4)
-            
-            echo "  🤖 $key: $action - $reason (Confidence: ${confidence}%)"
-            
-            merged_content="$merged_content$key=$chosen_value\n"
-        elif [ -n "$local_line" ]; then
-            merged_content="$merged_content$local_line\n"
-        elif [ -n "$remote_line" ]; then
-            keyName=$(echo "$remote_line" | cut -d'=' -f1)
-            if echo "$keyName" | grep -q "_SERVICE_URL$"; then
-                if echo " $allowlist_keys " | grep -q " $keyName "; then
-                    merged_content="$merged_content$remote_line\n"
-                    merge_log="$merge_log KeepRemoteOnly:$keyName;"
-                else
-                    merged_content="$merged_content#$remote_line\n"
-                    merge_log="$merge_log CommentRemoteOnly:$keyName;"
-                fi
-            else
-                merged_content="$merged_content$remote_line\n"
-            fi
-        fi
-    done <<< "$all_keys"
-
-    # Post-process: comment deprecated keys when canonical exists
-    # Build list of canonical keys we set
-    local canonical_keys=$(echo -e "$merged_content" | grep -E "^[A-Z_]+=" | cut -d'=' -f1 | sort -u)
-    while IFS='=' read -r old new; do
-        [ -z "$old" ] && continue
-        if echo " $canonical_keys " | grep -q " $new "; then
-            # comment deprecated occurrences
-            merged_content=$(echo -e "$merged_content" | awk -v o="$old" 'BEGIN{FS=OFS="\n"} {print} ' | sed -E "s/^(${old}=)/# DEPRECATED (use ${new}) \1/")
-        fi
-    done <<< "$deprecations"
-    
-    # Bước 4: Validation và Retry nếu cần
-    local temp_file="$output_file.temp"
-    echo -e "$merged_content" > "$temp_file"
-    
-    if test_merged_env "$temp_file"; then
-        mv "$temp_file" "$output_file"
-        echo "✅ Smart merge completed: $output_file"
-    else
-        echo "⚠️  Validation failed, retrying with fallback strategy..."
-        
-        # Retry với strategy khác - ưu tiên local
-        merged_content=""
-        while IFS= read -r key; do
-            local local_line=$(echo "$local_file" | grep "^$key=" || true)
-            local remote_line=$(echo "$remote_file" | grep "^$key=" || true)
-            
-            if [ -n "$local_line" ] && [ -n "$remote_line" ]; then
-                merged_content="$merged_content$local_line\n"
-            elif [ -n "$local_line" ]; then
-                merged_content="$merged_content$local_line\n"
-            elif [ -n "$remote_line" ]; then
-                merged_content="$merged_content$remote_line\n"
-            fi
-        done <<< "$all_keys"
-        
-        echo -e "$merged_content" > "$temp_file"
-        
-        if test_merged_env "$temp_file"; then
-            mv "$temp_file" "$output_file"
-            echo "✅ Retry successful with fallback strategy"
-        else
-            echo "❌ Retry failed, using original local content"
-            cp "$local_file" "$output_file"
-        fi
-    fi
-}
-
-# Function: Validation
-test_merged_env() {
-    local env_file="$1"
-    local content=$(cat "$env_file")
-    
-    # Check required keys
-    if ! echo "$content" | grep -q "^SPRING_PROFILES_ACTIVE="; then
-        echo "ERROR: Missing required key: SPRING_PROFILES_ACTIVE"
-        return 1
-    fi
-    
-    if ! echo "$content" | grep -q "^SERVER_PORT="; then
-        echo "ERROR: Missing required key: SERVER_PORT"
-        return 1
-    fi
-    
-    # Repo-aware checks for *_SERVICE_URL keys
-    local allowlist_keys="$(build_service_allowlist)"
-    while IFS= read -r line; do
-        local k=$(echo "$line" | cut -d'=' -f1)
-        local v=$(echo "$line" | cut -d'=' -f2-)
-        if echo "$k" | grep -q "_SERVICE_URL$"; then
-            if ! is_valid_url "$v"; then
-                echo "WARNING: $k has non-URL value: $v"
-            fi
-            if ! echo " $allowlist_keys " | grep -q " $k "; then
-                echo "WARNING: $k not recognized from repo services; consider removing or renaming"
-            fi
-        fi
-    done < <(echo "$content" | grep -E "^[A-Z_]+=http")
-    
-    # Check port validation
-    local port=$(echo "$content" | grep "^SERVER_PORT=" | cut -d'=' -f2)
-    if [ -n "$port" ] && ([ "$port" -lt 1000 ] || [ "$port" -gt 65535 ]); then
-        echo "WARNING: Invalid port number: $port"
-    fi
-    
-    return 0
-}
-
-# Function: Smart Rollback
-invoke_smart_rollback() {
-    local backup_dir="$1"
-    local reason="$2"
-    
-    echo "🔄 Smart Rollback initiated: $reason"
-    
-    find "$backup_dir" -name "*.env*" -type f | while read -r file; do
-        local filename=$(basename "$file")
-        cp "$file" "$filename"
-        echo "  ↻ Restored: $filename"
-    done
-    
-    echo "✅ Smart Rollback completed"
-}
-
-# ===== MAIN WORKFLOW =====
-
-# 1) Xác định nhánh làm việc và nhánh private đích
-current_branch="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || true)"
-if [ -z "$current_branch" ] || [ "$current_branch" = "HEAD" ]; then
-    current_branch="main"
-    git checkout -B "$current_branch"
-fi
-
-# Xác định nhánh private đích (từ tham số hoặc mặc định)
-private_target_branch="$1"
-if [ -z "$private_target_branch" ]; then
-    private_target_branch="main"
-    echo "ℹ️  Không có tham số - sử dụng private/main làm đích"
-else
-    echo "ℹ️  Sử dụng private/$private_target_branch làm đích"
-fi
-
-prev_upstream="$(git rev-parse --abbrev-ref --symbolic-full-name '@{u}' 2>/dev/null || true)"
-
-# 2) Tạo backup thông minh
-echo "🔒 Bước 1/6: Creating AI-Powered Backup..."
-backup_dir=$(new_smart_backup "$current_branch")
-
-# 3) Stage & Commit code (KHÔNG có env files)
-echo "📦 Bước 2/6: Staging code changes..."
-git add -A
-# Ensure no env files staged to origin
-git restore --staged **/.env 2>/dev/null || true
-git restore --staged **/.env.local 2>/dev/null || true
-git restore --staged **/.env.example 2>/dev/null || true
-echo "🔐 Đã loại trừ env khỏi commit đẩy lên origin"
-git commit -m "chore: update code changes (exclude env)" --no-verify || true
-
-# 4) Push lên origin trước (backup chính)
-echo "🔒 Bước 3/6: Push origin (backup chính)..."
-if git push --set-upstream origin "$current_branch"; then
-    echo "✅ Origin backup thành công: origin/$current_branch"
-    
-    # 5) Lần 1: Merge thaiGO → private/main
-    echo "🔄 Bước 4/8: Lần 1 - Merge $current_branch → private/$private_target_branch..."
-    
-    # Fetch remote env files từ private target branch
-    git fetch private "$private_target_branch" 2>/dev/null || true
-    
-    merge_success=true
-    # Loại trừ .git/ và .git-backup/ khi quét env để merge
-    find . \
-      -path "*/.git/*" -prune -o \
-      -path "*/.git-backup/*" -prune -o \
-      -type f -name "*.env*" -print | while read -r env_file; do
-        if [ "$merge_success" = "true" ]; then
-            local_content=$(cat "$env_file")
-            remote_content=$(git show "private/$private_target_branch:$env_file" 2>/dev/null || true)
-            
-            if [ -n "$remote_content" ]; then
-                temp_file="$env_file.merged"
-                invoke_smart_merge "$local_content" "$remote_content" "$temp_file" "$(basename "$env_file")"
-                
-                # Validate merged file
-                if test_merged_env "$temp_file"; then
-                    mv "$temp_file" "$env_file"
-                    echo "✅ Merged: $(basename "$env_file")"
-                else
-                    echo "❌ Validation failed for $(basename "$env_file")"
-                    merge_success=false
-                fi
-            else
-                echo "ℹ️  No remote version for: $(basename "$env_file")"
-            fi
-        fi
-    done
-    
-    if [ "$merge_success" = "false" ]; then
-        echo "🔄 Rolling back due to merge failure..."
-        invoke_smart_rollback "$backup_dir" "Merge validation failed"
-        echo "❌ Workflow stopped due to merge failure"
-        exit 1
-    fi
-    
-    # 6) Stage & Commit merged env files
-    echo "📦 Bước 5/8: Staging merged env files..."
-  git add -f **/.env 2>/dev/null || true
-  git add -f **/.env.local 2>/dev/null || true
-  git add -f **/.env.example 2>/dev/null || true
-    git commit -m "chore(env): AI-powered smart merge env files (.env, .env.local, .env.example)" --no-verify || true
-    
-    # 7) Push lên private target branch (backup phụ với env)
-    echo "🔒 Bước 6/8: Push private/$private_target_branch (backup phụ với env)..."
-    if git push private "$current_branch:$private_target_branch"; then
-        echo "✅ Private backup thành công: private/$private_target_branch"
-        # NEW: Cleanup local history so origin never sees env-only commit
-        echo "🧹 Dọn lịch sử: loại bỏ commit ENV vừa tạo (giữ lịch sử sạch cho origin)"
-        git reset --hard HEAD~1 || true
-        
-        # 8) Lần 2: Merge private/main → thaiGO (bidirectional sync)
-        echo "🔄 Bước 7/8: Lần 2 - Merge private/$private_target_branch → $current_branch..."
-        
-        # Fetch lại private để có latest changes
-        git fetch private "$private_target_branch" 2>/dev/null || true
-        
-        merge_success2=true
-    # Loại trừ .git/ và .git-backup/ khi quét env để merge lần 2
-    find . \
-      -path "*/.git/*" -prune -o \
-      -path "*/.git-backup/*" -prune -o \
-      -type f -name "*.env*" -print | while read -r env_file; do
-            if [ "$merge_success2" = "true" ]; then
-                current_content=$(cat "$env_file")
-                private_content=$(git show "private/$private_target_branch:$env_file" 2>/dev/null || true)
-                
-                if [ -n "$private_content" ]; then
-                    temp_file="$env_file.merged2"
-                    invoke_smart_merge "$current_content" "$private_content" "$temp_file" "$(basename "$env_file")"
-                    
-                    # Validate merged file
-                    if test_merged_env "$temp_file"; then
-                        mv "$temp_file" "$env_file"
-                        echo "✅ Bidirectional merged: $(basename "$env_file")"
-                    else
-                        echo "❌ Validation failed for $(basename "$env_file") in bidirectional merge"
-                        merge_success2=false
-                    fi
-                else
-                    echo "ℹ️  No private version for: $(basename "$env_file")"
-                fi
-            fi
-        done
-        
-        if [ "$merge_success2" = "false" ]; then
-            echo "🔄 Rolling back due to bidirectional merge failure..."
-            invoke_smart_rollback "$backup_dir" "Bidirectional merge validation failed"
-            echo "❌ Workflow stopped due to bidirectional merge failure"
-            exit 1
-        fi
-        
-        # 9) Stage & Commit bidirectional merged env files
-        echo "📦 Bước 8/8: Staging bidirectional merged env files..."
-  git add -f **/.env 2>/dev/null || true
-  git add -f **/.env.local 2>/dev/null || true
-  git add -f **/.env.example 2>/dev/null || true
-        git commit -m "chore(env): bidirectional sync from private/$private_target_branch" --no-verify || true
-        # NEW: Cleanup again after bidirectional env sync commit
-        echo "🧹 Dọn lịch sử: loại bỏ commit đồng bộ ENV (nhánh sạch khi push origin)"
-        git reset --hard HEAD~1 || true
-  
-        echo "✅ Bidirectional sync completed!"
-  else
-        echo "⚠️  Lỗi khi push private/$private_target_branch"
-  fi
-  
-    # 8) Khôi phục upstream về origin/<current-branch>
-  if [ -n "$prev_upstream" ]; then
-        git branch --set-upstream-to="$prev_upstream" "$current_branch" >/dev/null 2>&1 || true
-  else
-        git branch --set-upstream-to="origin/$current_branch" "$current_branch" >/dev/null 2>&1 || true
-  fi
-    echo "✅ Upstream khôi phục: origin/$current_branch"
-    
-    echo "🎉 AI-Powered Smart Merge hoàn thành!"
-else
-  echo "❌ Lỗi khi push origin. Dừng workflow."
-fi
+# Push vào private/<current-branch> và private/<param>
+./git-push-private.sh <param>
 ```
 
-## Tùy chọn khác
-- Đặt remote `private`: `git remote add private <PRIVATE_GIT_URL>`
-- Đổi remote url: `git remote set-url private <NEW_PRIVATE_GIT_URL>`
-- Force push (cẩn thận): `git push --force-with-lease`
+## Lưu ý quan trọng
 
-## Lưu ý
-- Cảnh báo: Lệnh này sẽ đẩy cả secrets trong `.env`. Chỉ sử dụng khi thật sự cần thiết và repo private.
-- Kiểm tra branch hiện tại: `git rev-parse --abbrev-ref HEAD`.
-- Nên chạy `git pull --rebase private <branch>` nếu có commit mới từ remote trước khi push.
-- Không tạo file script (.ps1/.sh) từ nội dung tài liệu để thực thi. Hãy chạy tuần tự từng dòng lệnh trực tiếp trong shell.
-- Không gộp nhiều lệnh Bash vào một dòng trừ khi thật sự cần thiết.
-
-### PowerShell-safe Quick Steps (khuyến nghị)
-
-Để chạy an toàn trên PowerShell mà không dùng script, hãy thực hiện tuần tự theo hướng dẫn bằng lời sau (không cần dán lệnh):
-
-#### **Mode 1: Không tham số (Đồng bộ đơn giản)**
-1) Stage toàn bộ thay đổi, sau đó bỏ stage mọi tệp env trước khi commit để đảm bảo push lên `origin` không chứa env. Commit với thông điệp "chore: update code changes (exclude env)" và đẩy lên `origin` nhánh hiện tại.
-
-2) Đẩy lên `private` nhánh hiện tại: `git push private HEAD:<current-branch>`
-
-3) Pull để đồng bộ: `git pull origin <current-branch>` và `git pull private <current-branch>`
-
-#### **Mode 2: Có tham số (Merge + Replace)**
-1) Tạo thư mục backup env theo timestamp dưới `.git-backup/env/` và sao chép tất cả các tệp `.env`, `.env.local`, `.env.example` vào đó; nhớ loại trừ thư mục `.git/` và `.git-backup/` khi quét.
-
-2) Stage toàn bộ thay đổi, sau đó bỏ stage mọi tệp env trước khi commit để đảm bảo push lên `origin` không chứa env. Commit với thông điệp "chore: update code changes (exclude env)" và đẩy lên `origin` nhánh hiện tại.
-
-3) Đẩy lên `private` nhánh hiện tại: `git push private HEAD:<current-branch>`
-
-4) Merge env files với AI logic, commit và đẩy lên `private/<target>`: `git push private HEAD:<target>`
-
-5) Thay thế lịch sử commit: `git reset --hard private/<target>` và bỏ theo dõi: `git branch --unset-upstream`
-
-6) Đảm bảo file `.env` tồn tại: nếu không có thì copy từ `.env.local`
-
-## Quyền quyết định
-- Agent có toàn quyền quyết định và tự thực thi ngay phương án mà agent đánh giá là lựa chọn tốt nhất (Best Choice) mà không cần hỏi lại.
-- Chỉ dừng để xin xác nhận khi bị chặn bởi policy/hệ thống (ví dụ: quyền truy cập, bảo mật tổ chức) hoặc lỗi kỹ thuật không thể tự khắc phục.
-
-## Kinh nghiệm/Best practices (rút ra từ thực tế)
-- **AI-POWERED BACKUP STRATEGY**: Push lên `origin` trước để backup chính, sau đó push lên `private/<branch>` với env files được merge thông minh.
-- **ADVANCED SMART MERGE RULES**: 
-  - **Context-Aware Analysis**: AI phân tích toàn bộ nội dung để hiểu context
-  - **Database URLs**: Ưu tiên remote khi cả local và remote đều có database config
-  - **API Keys**: Ưu tiên local khi local có secrets mà remote không có
-  - **Port/Host config**: Ưu tiên local khi cả local và remote đều có port config
-  - **Feature flags**: Merge logic với context analysis (OR operation)
-  - **Fallback Strategy**: Retry với strategy khác nếu validation thất bại
-- **DUAL-MERGE WORKFLOW**: 
-  - **Lần 1**: `thaiGO` → `private/main` (merge từ nhánh hiện tại vào private)
-  - **Lần 2**: `private/main` → `thaiGO` (merge ngược lại từ private vào nhánh hiện tại)
-  - **Bidirectional Sync**: Đảm bảo đồng bộ 2 chiều giữa nhánh làm việc và private
-  - **Validation Layer**: Kiểm tra tính hợp lệ trước khi apply cho cả 2 lần merge
-  - **Smart Rollback**: Tự động rollback nếu validation thất bại ở bất kỳ lần merge nào
-- Phân tách rõ ràng: `origin` (công khai/đối tác) tuyệt đối không chứa secrets; `private` mới chứa các file nhạy cảm nếu thực sự bắt buộc.
-- `.env.example` phải đầy đủ key nhưng giá trị là placeholder; `.env.local` chỉ lưu nội bộ. Khi cần chia sẻ nội bộ, dùng nhánh/remote `private` thay vì `origin`.
-- **AI DECISION LOGGING**: Tất cả quyết định merge được log với context analysis để học hỏi và cải thiện thuật toán.
-- **CONFLICT SEVERITY**: Phân loại conflicts theo mức độ nghiêm trọng (High/Medium/Low)
-- **RETRY MECHANISM**: Tự động retry với fallback strategy nếu merge không tối ưu
-- Tránh chạy one-liner phức tạp dễ lỗi parser; dùng lệnh rõ ràng, tuần tự.
-
-## Troubleshooting
-
-### Lỗi thường gặp và cách xử lý:
-
-#### 1. Push bị từ chối vì diverge
-```bash
-# Lỗi: ! [rejected] thaiGO -> thaiGO (non-fast-forward)
-# Xử lý:
-git pull --rebase private thaiGO
-# Sau đó chạy lại /git-push-private
-```
-
-#### 2. Lỗi do rebase đang dở
-```bash
-# Lỗi: fatal: It seems that there is already a rebase-apply directory
-# Xử lý:
-git rebase --abort  # hoặc git rebase --quit
-# Sau đó chạy lại /git-push-private
-```
-
-#### 3. Conflicts khi rebase
-```bash
-# Lỗi: CONFLICT (content): Merge conflict in file
-# Xử lý:
-# 1. Giải quyết xung đột trong file
-# 2. git add <file>
-# 3. git rebase --continue
-# 4. Chạy lại /git-push-private
-```
-
-#### 4. Lỗi merge unrelated histories
-```bash
-# Lỗi: fatal: refusing to merge unrelated histories
-# Xử lý: Script đã tự động thêm --allow-unrelated-histories
-# Nếu vẫn lỗi, merge thủ công:
-git merge <branch> --allow-unrelated-histories
-```
-
-#### 5. Lỗi khi đồng bộ env vào private/main
-```bash
-# Lỗi: ⚠️ Lỗi khi đồng bộ env vào private/main
-# Xử lý thủ công:
-git fetch private main
-git checkout -B temp-merge private/main
-git merge <current-branch> --no-edit -X ours --allow-unrelated-histories
-git push private temp-merge:main
-git checkout <current-branch>
-git branch -D temp-merge
-```
-
-#### 6. AI Merge validation thất bại
-```bash
-# Lỗi: ❌ Validation failed for .env.local
-# Xử lý:
-# 1. Kiểm tra backup: ls -la .git-backup/env/
-# 2. Restore từ backup: cp .git-backup/env/latest/.env.local .env.local
-# 3. Chạy lại workflow: /git-push-private
-```
-
-#### 7. Conflict resolution không mong muốn
-```bash
-# Lỗi: AI decision không phù hợp với mong muốn
-# Xử lý:
-# 1. Kiểm tra merge log: cat .env.local.merge-log.json
-# 2. Manual edit file nếu cần
-# 3. Commit và push: git add .env.local && git commit -m "fix: manual env merge"
-```
-
-#### 8. File ENV bị hiển thị sai (mã hóa UTF-16/UTF-16LE) trên Windows/PowerShell
-Nguyên nhân thường gặp là dùng chuyển hướng PowerShell (`>`) khi ghi nội dung từ Git ra file, dẫn tới file được lưu ở định dạng UTF-16LE thay vì UTF-8.
-
-Cách xử lý khuyến nghị (không thay đổi nội dung trong Git):
-- Dùng lệnh Git để khôi phục file đúng bytes từ `private/main`: sử dụng `git restore -s private/main -- <đường-dẫn-file-env>`.
-- Tránh dùng `>` hoặc `Out-File` để ghi đè tệp ENV. Nếu bắt buộc thao tác thủ công, đảm bảo công cụ ghi với UTF-8 không BOM và không đổi EOL; tuy nhiên, cách an toàn nhất vẫn là `git restore`.
-
-### **BACKUP STRATEGY** - Xử lý lỗi:
-
-| Tình huống | Origin backup | Private backup | Hành động |
-|------------|---------------|----------------|-----------|
-| **Push origin thành công** | ✅ Có | ❌ Chưa | Tiếp tục push private |
-| **Push origin lỗi** | ❌ Không | ❌ Không | Dừng workflow |
-| **Push private lỗi** | ✅ Có | ❌ Không | Có backup chính |
-
-### **AI-Powered Workflow** - Hiểu output:
-
-#### **Không có tham số** (`/git-push-private`):
-```bash
-🚀 Git Push Private - AI-Powered Smart Merge
-ℹ️  Không có tham số - sử dụng private/main làm đích
-🔒 Bước 1/8: Creating AI-Powered Backup...
-📦 Backed up: .env.local
-📦 Backed up: .env.example
-📦 Bước 2/8: Staging code changes...
-✅ Files staged successfully
-🔒 Bước 3/8: Push origin (backup chính)...
-✅ Origin backup thành công: origin/thaiGO
-🔄 Bước 4/8: Lần 1 - Merge thaiGO → private/main...
-🧠 AI Content Analysis for: .env.local
-  📊 Analysis: 3 conflicts, 2 local-only, 1 remote-only
-🤖 AI-Powered Smart Merge for: .env.local
-  🤖 MONGODB_URI: UseRemote - Cả local và remote đều có database config, ưu tiên remote (đầy đủ hơn) (Confidence: 95%)
-  🤖 API_KEY: UseLocal - Local có secrets, remote không có - ưu tiên local (bảo mật hơn) (Confidence: 98%)
-  🤖 SERVER_PORT: UseLocal - Cả local và remote đều có port config, ưu tiên local (môi trường hiện tại) (Confidence: 90%)
-✅ Smart merge completed: .env.local.merged
-✅ Merged: .env.local
-ℹ️  No remote version for: .env.example
-📦 Bước 5/8: Staging merged env files...
-✅ Env files staged successfully
-🔒 Bước 6/8: Push private/main (backup phụ với env)...
-✅ Private backup thành công: private/main
-🔄 Bước 7/8: Lần 2 - Merge private/main → thaiGO...
-🧠 AI Content Analysis for: .env.local
-  📊 Analysis: 2 conflicts, 1 local-only, 0 remote-only
-🤖 AI-Powered Smart Merge for: .env.local
-  🤖 MONGODB_URI: UseRemote - Database config từ remote thường đầy đủ và chính xác hơn (Confidence: 90%)
-  🤖 API_KEY: UseLocal - API keys local thường là production keys (Confidence: 95%)
-✅ Smart merge completed: .env.local.merged2
-✅ Bidirectional merged: .env.local
-📦 Bước 8/8: Staging bidirectional merged env files...
-✅ Bidirectional sync completed!
-✅ Upstream khôi phục: origin/thaiGO
-🎉 AI-Powered Smart Merge hoàn thành!
-```
-
-#### **Có tham số** (`/git-push-private dev`):
-```bash
-🚀 Git Push Private - AI-Powered Smart Merge
-ℹ️  Sử dụng private/dev làm đích
-🔒 Bước 1/8: Creating AI-Powered Backup...
-📦 Backed up: .env.local
-📦 Backed up: .env.example
-📦 Bước 2/8: Staging code changes...
-✅ Files staged successfully
-🔒 Bước 3/8: Push origin (backup chính)...
-✅ Origin backup thành công: origin/thaiGO
-🔄 Bước 4/8: Lần 1 - Merge thaiGO → private/dev...
-🧠 AI Content Analysis for: .env.local
-  📊 Analysis: 3 conflicts, 2 local-only, 1 remote-only
-🤖 AI-Powered Smart Merge for: .env.local
-  🤖 MONGODB_URI: UseRemote - Cả local và remote đều có database config, ưu tiên remote (đầy đủ hơn) (Confidence: 95%)
-  🤖 API_KEY: UseLocal - Local có secrets, remote không có - ưu tiên local (bảo mật hơn) (Confidence: 98%)
-  🤖 SERVER_PORT: UseLocal - Cả local và remote đều có port config, ưu tiên local (môi trường hiện tại) (Confidence: 90%)
-✅ Smart merge completed: .env.local.merged
-✅ Merged: .env.local
-ℹ️  No remote version for: .env.example
-📦 Bước 5/8: Staging merged env files...
-✅ Env files staged successfully
-🔒 Bước 6/8: Push private/dev (backup phụ với env)...
-✅ Private backup thành công: private/dev
-🔄 Bước 7/8: Lần 2 - Merge private/dev → thaiGO...
-🧠 AI Content Analysis for: .env.local
-  📊 Analysis: 2 conflicts, 1 local-only, 0 remote-only
-🤖 AI-Powered Smart Merge for: .env.local
-  🤖 MONGODB_URI: UseRemote - Database config từ remote thường đầy đủ và chính xác hơn (Confidence: 90%)
-  🤖 API_KEY: UseLocal - API keys local thường là production keys (Confidence: 95%)
-✅ Smart merge completed: .env.local.merged2
-✅ Bidirectional merged: .env.local
-📦 Bước 8/8: Staging bidirectional merged env files...
-✅ Bidirectional sync completed!
-✅ Upstream khôi phục: origin/thaiGO
-🎉 AI-Powered Smart Merge hoàn thành!
-```
-
-### **Workflow Comparison** - So sánh có/không tham số:
-
-| Tham số | Origin Backup | Private Backup | Merge 1 | Merge 2 | Use Case |
-|---------|---------------|----------------|---------|---------|----------|
-| **Không có** | `origin/<current-branch>` | `private/main` | `thaiGO` → `private/main` | `private/main` → `thaiGO` | Bidirectional sync với main |
-| **Có tham số** | `origin/<current-branch>` | `private/<param>` | `thaiGO` → `private/<param>` | `private/<param>` → `thaiGO` | Bidirectional sync với nhánh cụ thể |
-
-### **Ví dụ sử dụng:**
-
-| Lệnh | Kết quả | Mục đích |
-|------|---------|----------|
-| `/git-push-private` | Push lên `private/main` | Backup chính với env files |
-| `/git-push-private dev` | Push lên `private/dev` | Backup vào nhánh dev |
-| `/git-push-private staging` | Push lên `private/staging` | Backup vào nhánh staging |
-| `/git-push-private feature-auth` | Push lên `private/feature-auth` | Backup vào nhánh feature |
-
-### **AI Decision Logging** - Theo dõi quyết định:
-
-```json
-{
-  "timestamp": "2024-01-01 12:00:00",
-  "key": "MONGODB_URI",
-  "action": "UseRemote",
-  "reason": "Cả local và remote đều có database config, ưu tiên remote (đầy đủ hơn)",
-  "confidence": 95,
-  "localValue": "mongodb://localhost:27017",
-  "remoteValue": "mongodb+srv://user:pass@cluster.mongodb.net/db",
-  "chosenValue": "mongodb+srv://user:pass@cluster.mongodb.net/db",
-  "context": {
-    "analysis": {
-      "conflicts": 3,
-      "localOnly": 2,
-      "remoteOnly": 1,
-      "contentPatterns": {
-        "localHasSecrets": true,
-        "remoteHasSecrets": false,
-        "localHasDatabase": true,
-        "remoteHasDatabase": true,
-        "localHasPorts": true,
-        "remoteHasPorts": true
-      }
-    },
-    "conflictSeverity": "Medium",
-    "timestamp": "2024-01-01 12:00:00"
-  }
-}
-```
-
-
+- Script này chỉ hoạt động trên Bash
+- Đảm bảo có quyền truy cập vào remote `private`
+- Các file `.env` sẽ được backup tự động trước khi xử lý
+- Smart Merge đảm bảo không mất dữ liệu quan trọng trong quá trình đồng bộ
