@@ -82,6 +82,19 @@ if ($envFiles) {
 Write-ColorMessage "📤 Đang push code lên origin..." $InfoColor
 git add .
 git commit -m "Auto-commit before push to origin" 2>$null
+
+# Kiểm tra nếu cần pull trước
+Write-ColorMessage "🔄 Kiểm tra trạng thái remote..." $InfoColor
+git fetch origin
+$behind = git rev-list --count HEAD..origin/$currentBranch 2>$null
+$ahead = git rev-list --count origin/$currentBranch..HEAD 2>$null
+
+if ($behind -gt 0) {
+    Write-ColorMessage "⚠️ Branch đang behind $behind commits. Đang pull..." $WarningColor
+    git pull origin $currentBranch --no-edit
+    Test-ErrorAndRollback "Pull from origin" $backupDir
+}
+
 git push origin $currentBranch
 Test-ErrorAndRollback "Push to origin" $backupDir
 
