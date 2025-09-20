@@ -1,0 +1,16 @@
+{
+  "name": "filesystem-mcp-server",
+  "version": "1.0.0",
+  "description": "Filesystem MCP Server for DocGO",
+  "main": "index.js",
+  "scripts": {
+    "start": "filesystem-mcp-server",
+    "dev": "filesystem-mcp-server --debug"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/server-filesystem": "latest"
+  },
+  "keywords": ["mcp", "filesystem", "file-access", "docgo"],
+  "author": "DocGO Team",
+  "license": "MIT"
+}

@@ -38,7 +38,9 @@ public class CommentCreateRequest {
     
     private String attachments;
     
+    @Builder.Default
     private Boolean isPrivate = false;
     
+    @Builder.Default
     private Boolean isPinned = false;
 }

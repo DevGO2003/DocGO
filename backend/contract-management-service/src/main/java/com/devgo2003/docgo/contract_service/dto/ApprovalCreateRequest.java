@@ -38,6 +38,7 @@ public class ApprovalCreateRequest {
     
     private Integer approvalOrder;
     
+    @Builder.Default
     private Boolean isRequired = true;
     
     private String comments;

@@ -4,6 +4,7 @@ import com.devgo2003.docgo.contract_service.entity.Contract;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -18,6 +19,28 @@ public interface ContractRepository extends MongoRepository<Contract, String> {
     List<Contract> findByStatusAndIsDeletedFalse(Contract.ContractStatus status);
     
     Optional<Contract> findBySystemId(String systemId);
+    
+    // Search methods
+    @Query("{ $or: [ " +
+           "{ 'title': { $regex: ?0, $options: 'i' } }, " +
+           "{ 'summary': { $regex: ?0, $options: 'i' } }, " +
+           "{ 'contractNumber': { $regex: ?0, $options: 'i' } }, " +
+           "{ 'partiesJson': { $regex: ?0, $options: 'i' } }, " +
+           "{ 'keyTerms': { $regex: ?0, $options: 'i' } } " +
+           "] }")
+    Page<Contract> findBySearchTerm(String searchTerm, Pageable pageable);
+    
+    @Query("{ $and: [ " +
+           "{ 'isDeleted': false }, " +
+           "{ $or: [ " +
+           "{ 'title': { $regex: ?0, $options: 'i' } }, " +
+           "{ 'summary': { $regex: ?0, $options: 'i' } }, " +
+           "{ 'contractNumber': { $regex: ?0, $options: 'i' } }, " +
+           "{ 'partiesJson': { $regex: ?0, $options: 'i' } }, " +
+           "{ 'keyTerms': { $regex: ?0, $options: 'i' } } " +
+           "] } " +
+           "] }")
+    Page<Contract> findBySearchTermAndIsDeletedFalse(String searchTerm, Pageable pageable);
     
     // Validation methods
     boolean existsByContractNumber(String contractNumber);

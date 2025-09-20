@@ -3,8 +3,9 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { DashboardLayout } from '@/components/layout'
-import { MagnifyingGlassIcon, TagIcon } from '@heroicons/react/24/outline'
+import { MagnifyingGlassIcon } from '@heroicons/react/24/outline'
 import { contractAPI } from '@/lib/api'
+import TagFilter from '@/components/TagFilter'
 
 type ContractItem = {
   id: number
@@ -34,7 +35,7 @@ const STATUS_OPTIONS = [
   { label: 'Đã lưu trữ', value: 'ARCHIVED' },
 ] as const
 const TYPES = ['ALL','Dịch vụ','Mua bán','Hợp tác','Lao động','Bảo mật','Khác'] as const
-const TAGS = ['ưu_tiên','gấp','gia_hạn','cao_giá','đối_tác_mới','rủi_ro']
+// Removed static TAGS array - now using dynamic tags from API
 
 export default function ContractsPage() {
   const [items, setItems] = useState<ContractItem[]>([])
@@ -261,20 +262,11 @@ export default function ContractsPage() {
           </div>
 
           {/* Tags */}
-          <div className="mt-4 flex flex-wrap gap-2">
-            {TAGS.map(t => {
-              const active = selectedTags.includes(t)
-              return (
-                <button
-                  key={t}
-                  onClick={() => toggleTag(t)}
-                  className={`inline-flex items-center gap-1 rounded-full border px-3 py-1 text-sm transition ${active ? 'bg-indigo-50 text-indigo-700 border-indigo-200' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'}`}
-                >
-                  <TagIcon className="h-4 w-4" />
-                  {t}
-                </button>
-              )
-            })}
+          <div className="mt-4">
+            <TagFilter
+              selectedTags={selectedTags}
+              onTagToggle={toggleTag}
+            />
           </div>
         </div>
 
@@ -355,7 +347,9 @@ export default function ContractsPage() {
                     <div className="mt-3 flex flex-wrap gap-2 ml-6">
                       <span className="text-xs px-2 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">{c.contractType}</span>
                       {c.tags?.slice(0,3).map(t => (
-                        <span key={t} className="text-xs px-2 py-1 rounded-full bg-gray-50 text-gray-700 border border-gray-200">#{t}</span>
+                        <span key={t} className="text-xs px-2 py-1 rounded-full bg-gray-50 text-gray-700 border border-gray-200">
+                          #{t.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                        </span>
                       ))}
                     </div>
                     <div className="mt-4 text-sm text-gray-500 space-y-1 ml-6">
@@ -408,7 +402,9 @@ export default function ContractsPage() {
                             <p className="text-sm text-gray-500 line-clamp-1">{c.description || 'Không có mô tả'}</p>
                             <div className="flex flex-wrap gap-1 mt-1">
                               {c.tags?.slice(0,2).map(t => (
-                                <span key={t} className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">#{t}</span>
+                                <span key={t} className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">
+                                  #{t.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                                </span>
                               ))}
                             </div>
                           </div>

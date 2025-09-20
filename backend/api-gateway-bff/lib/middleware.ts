@@ -48,10 +48,11 @@ export function authMiddleware(request: NextRequest): NextResponse | null {
     const decoded = verify(token, process.env.JWT_SECRET || 'fallback-secret');
     
     // Add user info to request headers for downstream services
-    request.headers.set('x-user-id', (decoded as any).id);
-    request.headers.set('x-user-role', (decoded as any).role);
+    request.headers.set('x-user-id', (decoded as any).userId || (decoded as any).id);
+    request.headers.set('x-user-role', (decoded as any).roles || (decoded as any).role);
+    request.headers.set('x-username', (decoded as any).sub);
     
-    logger.info(`🔐 User authenticated: ${(decoded as any).id}`);
+    logger.info(`🔐 User authenticated: ${(decoded as any).userId || (decoded as any).id}`);
     return null;
   } catch (error) {
     logger.warn('🚫 Invalid token provided');
