@@ -92,19 +92,19 @@ export default function TestAuthPage() {
                 <div className="grid grid-cols-3 gap-4 text-center">
                   <div>
                     <div className="text-2xl font-bold text-gray-900">
-                      {testResults.summary?.total || 0}
+                      {testResults.summary.total}
                     </div>
                     <div className="text-sm text-gray-600">Total Tests</div>
                   </div>
                   <div>
                     <div className="text-2xl font-bold text-green-600">
-                      {testResults.summary?.passed || 0}
+                      {testResults.summary.passed}
                     </div>
                     <div className="text-sm text-gray-600">Passed</div>
                   </div>
                   <div>
                     <div className="text-2xl font-bold text-red-600">
-                      {testResults.summary?.failed || 0}
+                      {testResults.summary.failed}
                     </div>
                     <div className="text-sm text-gray-600">Failed</div>
                   </div>
@@ -116,26 +116,26 @@ export default function TestAuthPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
-                  {getStatusIcon(testResults.connectivity?.success || false)}
+                  {getStatusIcon(testResults.connectivity.success)}
                   <span>Backend Connectivity</span>
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                  <p className={getStatusColor(testResults.connectivity?.success || false)}>
-                    {testResults.connectivity?.message || 'No message'}
+                  <p className={getStatusColor(testResults.connectivity.success)}>
+                    {testResults.connectivity.message}
                   </p>
-                  {testResults.connectivity?.data && (
+                  {testResults.connectivity.data && (
                     <div className="mt-2 p-3 bg-gray-50 rounded-md">
                       <pre className="text-xs text-gray-600 overflow-auto">
-                        {JSON.stringify(testResults.connectivity?.data, null, 2)}
+                        {JSON.stringify(testResults.connectivity.data, null, 2)}
                       </pre>
                     </div>
                   )}
-                  {testResults.connectivity?.error && (
+                  {testResults.connectivity.error && (
                     <div className="mt-2 p-3 bg-red-50 rounded-md">
                       <pre className="text-xs text-red-600 overflow-auto">
-                        {JSON.stringify(testResults.connectivity?.error, null, 2)}
+                        {JSON.stringify(testResults.connectivity.error, null, 2)}
                       </pre>
                     </div>
                   )}
@@ -147,26 +147,26 @@ export default function TestAuthPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
-                  {getStatusIcon(testResults.oauthStatus?.success || false)}
+                  {getStatusIcon(testResults.oauthStatus.success)}
                   <span>OAuth Status</span>
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                  <p className={getStatusColor(testResults.oauthStatus?.success || false)}>
-                    {testResults.oauthStatus?.message || 'No message'}
+                  <p className={getStatusColor(testResults.oauthStatus.success)}>
+                    {testResults.oauthStatus.message}
                   </p>
-                  {testResults.oauthStatus?.data && (
+                  {testResults.oauthStatus.data && (
                     <div className="mt-2 p-3 bg-gray-50 rounded-md">
                       <pre className="text-xs text-gray-600 overflow-auto">
-                        {JSON.stringify(testResults.oauthStatus?.data, null, 2)}
+                        {JSON.stringify(testResults.oauthStatus.data, null, 2)}
                       </pre>
                     </div>
                   )}
-                  {testResults.oauthStatus?.error && (
+                  {testResults.oauthStatus.error && (
                     <div className="mt-2 p-3 bg-red-50 rounded-md">
                       <pre className="text-xs text-red-600 overflow-auto">
-                        {JSON.stringify(testResults.oauthStatus?.error, null, 2)}
+                        {JSON.stringify(testResults.oauthStatus.error, null, 2)}
                       </pre>
                     </div>
                   )}

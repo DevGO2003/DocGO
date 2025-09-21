@@ -111,7 +111,7 @@ services:
     networks:
       - docgo_network
 
-  # Authentication & Identity Service (Spring Boot) - Port 8002
+  # Authentication & Identity Service (Spring Boot) - Port 8001
   authentication-identity-service:
     build:
       context: backend/authentication-identity-service
@@ -121,7 +121,7 @@ services:
     restart: unless-stopped
     working_dir: /app
     ports:
-      - "8002:8000"
+      - "8001:8000"
     env_file:
       - backend/authentication-identity-service/env/.env
     environment:
@@ -144,7 +144,7 @@ services:
     networks:
       - docgo_network
 
-  # Contract Management Service (Spring Boot) - Port 8003
+  # Contract Management Service (Spring Boot) - Port 8002
   contract-management-service:
     build:
       context: backend/contract-management-service
@@ -154,13 +154,13 @@ services:
     restart: unless-stopped
     working_dir: /app
     ports:
-      - "8003:8000"
+      - "8002:8000"
     env_file:
       - backend/contract-management-service/env/.env
     environment:
       - SPRING_PROFILES_ACTIVE=dev
       - MAVEN_OPTS=-Xmx2g -XX:+UseG1GC -XX:+UseStringDeduplication
-      - MONGODB_ATLAS_URI=mongodb://root:password@mongodb:27017/docgo_contract_service?authSource=admin
+      - MONGODB_ATLAS_URI=mongodb+srv://root:sapassword@devgo-docgo-cluster0.hsudzga.mongodb.net/docgo_contract_service?retryWrites=true&w=majority&appName=devgo-docgo-cluster0
       - SPRING_DEVTOOLS_RESTART_ENABLED=true
       - SPRING_DEVTOOLS_LIVERELOAD_ENABLED=true
     volumes:
@@ -173,8 +173,6 @@ services:
     command: >
       sh -c "chmod +x ./mvnw && ./mvnw --no-transfer-progress -T 2C -o -DskipTests clean spring-boot:run -Dspring-boot.run.jvmArguments='-Dserver.port=8000 -Dspring.devtools.restart.enabled=true -Dmaven.compiler.fork=true'"
     depends_on:
-      mongodb:
-        condition: service_healthy
       redis:
         condition: service_healthy
     networks:

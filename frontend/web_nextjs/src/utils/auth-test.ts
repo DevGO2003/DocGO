@@ -58,15 +58,15 @@ export class AuthIntegrationTester {
       const response = await authAPI.login(credentials)
       
       // Check if response has expected structure
-      if (response.data?.data && 'accessToken' in response.data.data && 'user' in response.data.data) {
+      if (response.data?.data?.accessToken && response.data?.data?.user) {
         return {
           success: true,
           message: 'Login endpoint test passed',
           data: {
-            hasToken: !!(response.data.data as any).accessToken,
-            hasUser: !!(response.data.data as any).user,
-            userRole: (response.data.data as any).user.role,
-            userStatus: (response.data.data as any).user.status
+            hasToken: !!response.data.data.accessToken,
+            hasUser: !!response.data.data.user,
+            userRole: response.data.data.user.role,
+            userStatus: response.data.data.user.status
           }
         }
       } else {
@@ -119,10 +119,10 @@ export class AuthIntegrationTester {
           success: true,
           message: 'Profile endpoint test passed',
           data: {
-            userId: (response.data.data as any).id,
-            username: (response.data.data as any).username,
-            email: (response.data.data as any).email,
-            role: (response.data.data as any).role
+            userId: response.data.data.id,
+            username: response.data.data.username,
+            email: response.data.data.email,
+            role: response.data.data.role
           }
         }
       } else {
