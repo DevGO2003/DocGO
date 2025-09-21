@@ -1,393 +1,404 @@
 # Git Push Private - AI-Powered Smart Merge (PowerShell)
-# Tac gia: DocGO Development Team
-# Phien ban: 2.0.0
-# Mo ta: Script an toan de push code va env files len private repository voi Smart Merge
+# Tu dong tao boi Cursor AI Assistant
+# Phien ban: 1.0.0
 
 param(
     [string]$AdditionalBranch = ""
 )
-
-# Cau hinh mau sac va logging
-$ErrorActionPreference = "Stop"
-$Host.UI.RawUI.ForegroundColor = "White"
 
 function Write-ColorOutput {
     param(
         [string]$Message,
         [string]$Color = "White"
     )
-    $originalColor = $Host.UI.RawUI.ForegroundColor
-    $Host.UI.RawUI.ForegroundColor = $Color
-    Write-Host $Message
-    $Host.UI.RawUI.ForegroundColor = $originalColor
+    Write-Host $Message -ForegroundColor $Color
 }
 
-function Write-Step {
-    param([string]$Step, [string]$Message)
-    Write-ColorOutput "`n[STEP] $Step - $Message" "Cyan"
-}
-
-function Write-Success {
-    param([string]$Message)
-    Write-ColorOutput "[SUCCESS] $Message" "Green"
-}
-
-function Write-Warning {
-    param([string]$Message)
-    Write-ColorOutput "[WARNING] $Message" "Yellow"
-}
-
-function Write-Error {
-    param([string]$Message)
-    Write-ColorOutput "[ERROR] $Message" "Red"
-}
-
-function Write-Info {
-    param([string]$Message)
-    Write-ColorOutput "[INFO] $Message" "Blue"
-}
-
-# Kiem tra Git repository
 function Test-GitRepository {
-    Write-Step "INIT" "Kiem tra Git repository..."
-    
-    if (-not (Test-Path ".git")) {
-        throw "Khong phai Git repository. Vui long chay script trong thu muc Git."
+    Write-ColorOutput "Kiem tra Git repository..." "Cyan"
+    if (!(Test-Path ".git")) {
+        Write-ColorOutput "Khong phai Git repository!" "Red"
+        exit 1
     }
-    
-    # Kiem tra remote private
-    $remotes = git remote -v
-    $hasPrivate = $false
-    foreach ($line in $remotes) {
-        if ($line -match "private\s+") {
-            $hasPrivate = $true
-            break
-        }
-    }
-    if (-not $hasPrivate) {
-        throw "Khong tim thay remote 'private'. Vui long them remote private truoc."
-    }
-    
-    Write-Success "Git repository hop le"
+    Write-ColorOutput "Day la Git repository hop le" "Green"
 }
 
-# Lay ten branch hien tai
+function Test-PrivateRemote {
+    Write-ColorOutput "Kiem tra remote 'private'..." "Cyan"
+    $privateRemote = git remote get-url private 2>$null
+    if ($LASTEXITCODE -ne 0) {
+        Write-ColorOutput "Remote 'private' chua duoc cau hinh!" "Red"
+        Write-ColorOutput "Chay: git remote add private <private-repo-url>" "Yellow"
+        exit 1
+    }
+    Write-ColorOutput "Remote 'private': $privateRemote" "Green"
+}
+
 function Get-CurrentBranch {
+    Write-ColorOutput "Xac dinh nhanh hien tai..." "Cyan"
     $currentBranch = git branch --show-current
-    if (-not $currentBranch) {
+    if ([string]::IsNullOrEmpty($currentBranch)) {
         $currentBranch = "main"
-        Write-Warning "Khong xac dinh duoc branch, su dung 'main'"
+        Write-ColorOutput "Khong xac dinh duoc nhanh, su dung mac dinh: main" "Yellow"
+    } else {
+        Write-ColorOutput "Nhanh hien tai: $currentBranch" "Green"
     }
     return $currentBranch
 }
 
-# Smart Backup - Backup tat ca file .env
 function Backup-EnvFiles {
-    Write-Step "BACKUP" "Tao backup file .env..."
+    Write-ColorOutput "Thuc hien Smart Backup cho file .env..." "Cyan"
     
     $timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
-    $backupDir = ".git-backup\env\$timestamp"
+    $backupDir = ".git-backup/env/$timestamp"
     
-    # Tao thu muc backup
-    if (-not (Test-Path ".git-backup")) {
-        New-Item -ItemType Directory -Path ".git-backup" -Force | Out-Null
-    }
-    if (-not (Test-Path ".git-backup\env")) {
-        New-Item -ItemType Directory -Path ".git-backup\env" -Force | Out-Null
+    if (!(Test-Path ".git-backup/env")) {
+        New-Item -ItemType Directory -Path ".git-backup/env" -Force | Out-Null
     }
     New-Item -ItemType Directory -Path $backupDir -Force | Out-Null
     
-    # Tim va backup tat ca file .env
-    $envFiles = Get-ChildItem -Path . -Recurse -Name ".env*" -File | Where-Object { $_ -notlike "*\node_modules\*" -and $_ -notlike "*\venv\*" -and $_ -notlike "*\target\*" }
-    
-    if ($envFiles.Count -eq 0) {
-        Write-Warning "Khong tim thay file .env nao"
-        return $backupDir
-    }
+    $envFiles = Get-ChildItem -Path . -Name ".env*" -Recurse -Force
+    $backupCount = 0
     
     foreach ($envFile in $envFiles) {
         $sourcePath = $envFile
         $targetPath = Join-Path $backupDir $envFile
-        $targetDir = Split-Path $targetPath -Parent
         
-        if (-not (Test-Path $targetDir)) {
+        $targetDir = Split-Path $targetPath -Parent
+        if (!(Test-Path $targetDir)) {
             New-Item -ItemType Directory -Path $targetDir -Force | Out-Null
         }
         
         Copy-Item $sourcePath $targetPath -Force
-        Write-Info "Backup: $envFile"
+        $backupCount++
+        Write-ColorOutput "  Backed up: $envFile" "Cyan"
     }
     
-    Write-Success "Backup hoan tat tai: $backupDir"
+    Write-ColorOutput "Smart Backup hoan thanh: $backupCount file .env da duoc backup vao $backupDir" "Green"
     return $backupDir
 }
 
-# Security Check - Loai bo .env khoi Git tracking
-function Remove-EnvFromGit {
-    Write-Step "SECURITY" "Loai bo .env khoi Git tracking..."
+function Remove-EnvFromGitTracking {
+    Write-ColorOutput "Thuc hien Security Check - Loai bo .env khoi Git tracking..." "Cyan"
     
-    # Tim file .env dang duoc track
     $trackedEnvFiles = git ls-files | Where-Object { $_ -like ".env*" }
     
     if ($trackedEnvFiles.Count -gt 0) {
-        Write-Warning "Phat hien file .env dang duoc Git track:"
+        Write-ColorOutput "Phat hien $($trackedEnvFiles.Count) file .env dang duoc Git theo doi:" "Yellow"
         foreach ($file in $trackedEnvFiles) {
-            Write-Info "  - $file"
+            Write-ColorOutput "  $file" "Yellow"
         }
         
-        # Unstage va remove khoi tracking
         foreach ($file in $trackedEnvFiles) {
-            git reset HEAD -- $file
-            git rm --cached $file
-            Write-Info "Removed from tracking: $file"
+            git reset HEAD $file 2>$null
+            git rm --cached $file 2>$null
+            Write-ColorOutput "  Removed from tracking: $file" "Green"
         }
         
-        # Commit cleanup neu co thay doi
-        if ((git status --porcelain | Where-Object { $_ -like "D  .env*" }).Count -gt 0) {
+        $changes = git status --porcelain
+        if ($changes) {
             git add -A
-            git commit -m "chore: remove .env files from Git tracking (security)"
-            Write-Success "Commit cleanup hoan tat"
+            git commit -m "Security: Remove .env files from Git tracking"
+            Write-ColorOutput "Da tao commit don dep .env files" "Green"
         }
     } else {
-        Write-Success "Khong co file .env nao dang duoc track"
+        Write-ColorOutput "Khong co file .env nao dang duoc Git theo doi" "Green"
     }
 }
 
-# Push code len origin (khong co .env)
 function Push-ToOrigin {
-    param([string]$Branch)
+    param([string]$branch)
     
-    Write-Step "ORIGIN" "Push code len origin/$Branch..."
+    Write-ColorOutput "Push code len origin/$branch..." "Cyan"
     
-    # Stage tat ca thay doi (tru .env)
     git add -A
+    $commitMessage = "Auto-commit: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"
+    git commit -m $commitMessage
     
-    # Kiem tra co thay doi khong
-    $status = git status --porcelain
-    if (-not $status) {
-        Write-Info "Khong co thay doi de commit"
-        return
+    git push origin $branch
+    if ($LASTEXITCODE -eq 0) {
+        Write-ColorOutput "Push thanh cong len origin/$branch" "Green"
+    } else {
+        Write-ColorOutput "Loi khi push len origin/$branch" "Red"
+        exit 1
     }
-    
-    # Commit
-    git commit -m "feat: update code (auto-commit by git-push-private)"
-    
-    # Push len origin
-    git push origin $Branch
-    Write-Success "Push len origin/$Branch hoan tat"
 }
 
-# Push code + env len private
-function Push-ToPrivate {
+function Invoke-AIPoweredSmartMerge {
     param(
-        [string]$Branch,
-        [string]$BackupDir
+        [string]$localEnvPath,
+        [string]$remoteEnvPath
     )
     
-    Write-Step "PRIVATE" "Push code + env len private/$Branch..."
+    Write-ColorOutput "Thuc hien AI-Powered Smart Merge..." "Cyan"
     
-    # Force-add .env files (exclude backup directories and only current .env files)
-    $envFiles = Get-ChildItem -Path . -Recurse -Name ".env*" -File | Where-Object { 
-        $_ -notlike "*\node_modules\*" -and 
-        $_ -notlike "*\venv\*" -and 
-        $_ -notlike "*\target\*" -and 
-        $_ -notlike "*\.git-backup\*" -and
-        $_ -notlike "*\backup\*" -and
-        $_ -notlike "*\20250920_*" -and
-        $_ -notlike "*\20250921_*"
-    }
-    
-    if ($envFiles.Count -gt 0) {
-        foreach ($envFile in $envFiles) {
-            git add -f $envFile
-            Write-Info "Force-added: $envFile"
-        }
-        
-        # Commit .env files
-        git commit -m "feat: add .env files (private only)"
-        Write-Success "Commit .env files hoan tat"
-    }
-    
-    # Push len private
-    git push private $Branch
-    Write-Success "Push len private/$Branch hoan tat"
-}
-
-# Safe Cleanup - Xoa commit .env khoi local history
-function Safe-Cleanup {
-    Write-Step "CLEANUP" "Don dep local history (an toan)..."
-    
-    # Soft reset de giu file .env trong working directory
-    git reset --soft HEAD~1
-    git reset HEAD
-    Write-Success "Cleanup hoan tat - file .env duoc giu lai"
-}
-
-# Sync tu private
-function Sync-FromPrivate {
-    param([string]$Branch)
-    
-    Write-Step "SYNC" "Dong bo tu private/$Branch..."
-    
-    # Fetch tu private
-    git fetch private
-    
-    # Soft reset de dong bo voi private
-    git reset --soft "private/$Branch"
-    Write-Success "Dong bo tu private/$Branch hoan tat"
-}
-
-# Ngan .env bi track o local
-function Prevent-EnvTracking {
-    Write-Step "PREVENT" "Ngan .env bi track o local..."
-    
-    $excludeFile = ".git\info\exclude"
-    $excludeContent = @"
-# Prevent .env files from being tracked
-.env
-.env.*
-**/.env
-**/.env.*
-"@
-    
-    if (-not (Test-Path $excludeFile)) {
-        New-Item -ItemType File -Path $excludeFile -Force | Out-Null
-    }
-    
-    $currentContent = Get-Content $excludeFile -Raw
-    if ($currentContent -notmatch "\.env") {
-        Add-Content -Path $excludeFile -Value $excludeContent
-        Write-Success "Da them .env vao .git/info/exclude"
-    } else {
-        Write-Info ".env da duoc exclude"
-    }
-}
-
-# Smart Rollback - Khoi phuc tu backup neu co loi
-function Smart-Rollback {
-    param([string]$BackupDir)
-    
-    Write-Error "Co loi xay ra, thuc hien Smart Rollback..."
-    
-    if (Test-Path $BackupDir) {
-        Write-Info "Khoi phuc file .env tu backup..."
-        $envFiles = Get-ChildItem -Path $BackupDir -Recurse -Name ".env*" -File
-        
-        foreach ($envFile in $envFiles) {
-            $sourcePath = Join-Path $BackupDir $envFile
-            $targetPath = $envFile
-            $targetDir = Split-Path $targetPath -Parent
-            
-            if (-not (Test-Path $targetDir)) {
-                New-Item -ItemType Directory -Path $targetDir -Force | Out-Null
-            }
-            
-            Copy-Item $sourcePath $targetPath -Force
-            Write-Info "Restored: $envFile"
-        }
-        Write-Success "Smart Rollback hoan tat"
-    } else {
-        Write-Warning "Khong tim thay backup de rollback"
-    }
-}
-
-# Verification - Kiem tra file .env sau moi buoc
-function Verify-EnvFiles {
-    Write-Step "VERIFY" "Kiem tra file .env..."
-    
-    $envFiles = Get-ChildItem -Path . -Recurse -Name ".env*" -File | Where-Object { $_ -notlike "*\node_modules\*" -and $_ -notlike "*\venv\*" -and $_ -notlike "*\target\*" }
-    
-    if ($envFiles.Count -eq 0) {
-        Write-Warning "Khong tim thay file .env nao"
+    if (!(Test-Path $localEnvPath)) {
+        Write-ColorOutput "File .env local khong ton tai, su dung remote" "Yellow"
         return $false
     }
     
-    foreach ($envFile in $envFiles) {
-        if (Test-Path $envFile) {
-            $size = (Get-Item $envFile).Length
-            Write-Success "OK $envFile ($size bytes)"
-        } else {
-            Write-Error "FAIL $envFile khong ton tai"
-            return $false
+    if (!(Test-Path $remoteEnvPath)) {
+        Write-ColorOutput "File .env remote khong ton tai, su dung local" "Yellow"
+        Copy-Item $localEnvPath $remoteEnvPath -Force
+        return $true
+    }
+    
+    $localContent = Get-Content $localEnvPath -Raw
+    $remoteContent = Get-Content $remoteEnvPath -Raw
+    
+    $localLines = $localContent -split "`n" | Where-Object { $_.Trim() -ne "" -and !$_.StartsWith("#") }
+    $remoteLines = $remoteContent -split "`n" | Where-Object { $_.Trim() -ne "" -and !$_.StartsWith("#") }
+    
+    $mergedLines = @{}
+    $conflictCount = 0
+    
+    foreach ($line in $remoteLines) {
+        if ($line -match "^([^=]+)=(.*)$") {
+            $key = $matches[1].Trim()
+            $value = $matches[2].Trim()
+            $mergedLines[$key] = @{
+                Value = $value
+                Source = "remote"
+            }
         }
     }
     
+    foreach ($line in $localLines) {
+        if ($line -match "^([^=]+)=(.*)$") {
+            $key = $matches[1].Trim()
+            $value = $matches[2].Trim()
+            
+            if ($mergedLines.ContainsKey($key)) {
+                $conflictCount++
+                $remoteValue = $mergedLines[$key].Value
+                
+                $decision = "local"
+                
+                if ($key -match "DATABASE_URL|MONGODB_URI|DB_") {
+                    $decision = "remote"
+                }
+                elseif ($key -match "API_KEY|SECRET|TOKEN") {
+                    $decision = "local"
+                }
+                elseif ($key -match "PORT|HOST|SERVER_") {
+                    $decision = "local"
+                }
+                elseif ($key -match "DEBUG|ENABLE_|DISABLE_") {
+                    if ($value -eq "true" -or $remoteValue -eq "true") {
+                        $value = "true"
+                        $decision = "merged"
+                    } else {
+                        $decision = "remote"
+                    }
+                }
+                
+                switch ($decision) {
+                    "local" { 
+                        $mergedLines[$key].Value = $value
+                        $mergedLines[$key].Source = "local"
+                    }
+                    "remote" { 
+                    }
+                    "merged" {
+                        $mergedLines[$key].Value = $value
+                        $mergedLines[$key].Source = "merged"
+                    }
+                }
+                
+                Write-ColorOutput "  Conflict resolved for $key : $($mergedLines[$key].Source)" "Cyan"
+            } else {
+                $mergedLines[$key] = @{
+                    Value = $value
+                    Source = "local"
+                }
+            }
+        }
+    }
+    
+    $mergedContent = @()
+    $mergedContent += "# AI-Powered Smart Merge - Generated on $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"
+    $mergedContent += ""
+    
+    foreach ($key in ($mergedLines.Keys | Sort-Object)) {
+        $item = $mergedLines[$key]
+        $mergedContent += "$key=$($item.Value)  # Source: $($item.Source)"
+    }
+    
+    $mergedContent -join "`n" | Out-File -FilePath $remoteEnvPath -Encoding UTF8
+    
+    Write-ColorOutput "Smart Merge hoan thanh: $conflictCount conflicts resolved" "Green"
     return $true
 }
 
-# Main execution
+function Push-ToPrivate {
+    param(
+        [string]$branch,
+        [string]$backupDir
+    )
+    
+    Write-ColorOutput "Push code + .env len private/$branch..." "Cyan"
+    
+    $envFiles = Get-ChildItem -Path . -Name ".env*" -Recurse -Force
+    foreach ($envFile in $envFiles) {
+        git add -f $envFile
+        Write-ColorOutput "  Force-added: $envFile" "Cyan"
+    }
+    
+    git commit -m "Add .env files to private repository"
+    
+    git fetch private
+    
+    $privateBranchExists = git show-ref --verify --quiet "refs/remotes/private/$branch"
+    if ($LASTEXITCODE -eq 0) {
+        Write-ColorOutput "Nhanh private/$branch da ton tai, thuc hien Smart Merge..." "Cyan"
+        
+        $originalBranch = git branch --show-current
+        git checkout -b "temp-private-$branch" "private/$branch"
+        
+        foreach ($envFile in $envFiles) {
+            $localPath = $envFile
+            $remotePath = $envFile
+            Invoke-AIPoweredSmartMerge -localEnvPath $localPath -remoteEnvPath $remotePath
+        }
+        
+        git add -A
+        git commit -m "AI-Powered Smart Merge: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"
+        
+        git checkout $originalBranch
+        git branch -D "temp-private-$branch"
+    }
+    
+    git push private $branch
+    if ($LASTEXITCODE -eq 0) {
+        Write-ColorOutput "Push thanh cong len private/$branch" "Green"
+    } else {
+        Write-ColorOutput "Loi khi push len private/$branch" "Red"
+        exit 1
+    }
+}
+
+function Cleanup-LocalHistory {
+    Write-ColorOutput "Thuc hien Safe Cleanup..." "Cyan"
+    
+    git reset --soft HEAD~1
+    git reset HEAD
+    
+    Write-ColorOutput "Safe Cleanup hoan thanh - File .env van con trong working directory" "Green"
+}
+
+function Sync-FromPrivate {
+    param([string]$branch)
+    
+    Write-ColorOutput "Dong bo tu private/$branch..." "Cyan"
+    
+    git fetch private
+    git reset --soft "private/$branch"
+    
+    Write-ColorOutput "Dong bo tu private/$branch hoan thanh" "Green"
+}
+
+function Prevent-EnvTracking {
+    Write-ColorOutput "Ngan .env bi track o local..." "Cyan"
+    
+    $excludeFile = ".git/info/exclude"
+    $envPatterns = @(
+        "# Prevent .env files from being tracked",
+        ".env*",
+        "**/.env*"
+    )
+    
+    foreach ($pattern in $envPatterns) {
+        $content = Get-Content $excludeFile -ErrorAction SilentlyContinue
+        if ($content -notcontains $pattern) {
+            Add-Content $excludeFile $pattern
+            Write-ColorOutput "  Added to exclude: $pattern" "Cyan"
+        }
+    }
+    
+    Write-ColorOutput "Da ngan .env files bi track o local" "Green"
+}
+
+function Invoke-SmartRollback {
+    param([string]$backupDir)
+    
+    Write-ColorOutput "Thuc hien Smart Rollback..." "Cyan"
+    
+    if (Test-Path $backupDir) {
+        $envFiles = Get-ChildItem -Path $backupDir -Name ".env*" -Recurse
+        foreach ($envFile in $envFiles) {
+            $sourcePath = Join-Path $backupDir $envFile
+            $targetPath = $envFile
+            Copy-Item $sourcePath $targetPath -Force
+            Write-ColorOutput "  Restored: $envFile" "Cyan"
+        }
+        Write-ColorOutput "Smart Rollback hoan thanh" "Green"
+    } else {
+        Write-ColorOutput "Khong tim thay backup directory" "Yellow"
+    }
+}
+
+function Verify-EnvFiles {
+    Write-ColorOutput "Kiem tra file .env sau khi thuc thi..." "Cyan"
+    
+    $envFiles = Get-ChildItem -Path . -Name ".env*" -Recurse -Force
+    if ($envFiles.Count -gt 0) {
+        Write-ColorOutput "Tim thay $($envFiles.Count) file .env:" "Green"
+        foreach ($file in $envFiles) {
+            Write-ColorOutput "  $file" "Cyan"
+        }
+    } else {
+        Write-ColorOutput "Khong tim thay file .env nao!" "Yellow"
+        return $false
+    }
+    return $true
+}
+
+# MAIN EXECUTION
 try {
-    Write-ColorOutput "`nGit Push Private - AI-Powered Smart Merge" "Magenta"
-    Write-ColorOutput "=========================================" "Magenta"
+    Write-ColorOutput "Bat dau Git Push Private - AI-Powered Smart Merge" "Cyan"
+    Write-ColorOutput "=================================================" "Cyan"
     
-    # 1. Kiem tra Git repository
     Test-GitRepository
-    
-    # 2. Lay ten branch hien tai
+    Test-PrivateRemote
     $currentBranch = Get-CurrentBranch
-    Write-Info "Branch hien tai: $currentBranch"
-    
-    # 3. Backup .env files
     $backupDir = Backup-EnvFiles
+    Remove-EnvFromGitTracking
+    Push-ToOrigin -branch $currentBranch
+    Push-ToPrivate -branch $currentBranch -backupDir $backupDir
     
-    # 4. Security Check
-    Remove-EnvFromGit
+    if (![string]::IsNullOrEmpty($AdditionalBranch)) {
+        Write-ColorOutput "Push them vao private/$AdditionalBranch..." "Cyan"
+        Push-ToPrivate -branch $AdditionalBranch -backupDir $backupDir
+    }
     
-    # 5. Push code len origin
-    Push-ToOrigin -Branch $currentBranch
-    
-    # 6. Push code + env len private
-    Push-ToPrivate -Branch $currentBranch -BackupDir $backupDir
-    
-    # 7. Safe Cleanup
-    Safe-Cleanup
-    
-    # 8. Sync tu private
-    Sync-FromPrivate -Branch $currentBranch
-    
-    # 9. Ngan .env tracking
+    Cleanup-LocalHistory
+    Sync-FromPrivate -branch $currentBranch
     Prevent-EnvTracking
     
-    # 10. Verification
-    if (-not (Verify-EnvFiles)) {
-        throw "File .env bi mat sau qua trinh xu ly"
+    if (!(Verify-EnvFiles)) {
+        Write-ColorOutput "File .env bi mat, thuc hien Smart Rollback..." "Yellow"
+        Invoke-SmartRollback -backupDir $backupDir
     }
     
-    # 11. Xu ly additional branch neu co
-    if ($AdditionalBranch -and $AdditionalBranch -ne $currentBranch) {
-        Write-Step "ADDITIONAL" "Push vao private/$AdditionalBranch..."
-        Push-ToPrivate -Branch $AdditionalBranch -BackupDir $backupDir
-        Write-Success "Push vao private/$AdditionalBranch hoan tat"
+    Write-ColorOutput "=================================================" "Cyan"
+    Write-ColorOutput "Git Push Private hoan thanh thanh cong!" "Green"
+    Write-ColorOutput "Ket qua:" "Cyan"
+    Write-ColorOutput "  Nhanh hien tai: $currentBranch" "Cyan"
+    Write-ColorOutput "  Da push len: origin/$currentBranch (code only)" "Cyan"
+    Write-ColorOutput "  Da push len: private/$currentBranch (code + .env)" "Cyan"
+    if (![string]::IsNullOrEmpty($AdditionalBranch)) {
+        Write-ColorOutput "  Da push len: private/$AdditionalBranch (code + .env)" "Cyan"
     }
-    
-    Write-ColorOutput "`nHOAN TAT!" "Green"
-    Write-ColorOutput "=========" "Green"
-    Write-Success "Code da duoc push len origin/$currentBranch"
-    Write-Success "Code + .env da duoc push len private/$currentBranch"
-    if ($AdditionalBranch) {
-        Write-Success "Code + .env da duoc push len private/$AdditionalBranch"
-    }
-    Write-Success "File .env duoc giu lai trong working directory"
-    Write-Success "Local repository da duoc dong bo voi private"
-    
-    # Hien thi trang thai cuoi
-    Write-ColorOutput "`nTrang thai cuoi:" "Cyan"
-    git status --short
+    Write-ColorOutput "  Backup .env: $backupDir" "Cyan"
+    Write-ColorOutput "  File .env duoc bao ve khoi Git tracking" "Cyan"
     
 } catch {
-    Write-Error "Loi: $($_.Exception.Message)"
+    Write-ColorOutput "Loi xay ra: $($_.Exception.Message)" "Red"
+    Write-ColorOutput "Thuc hien Smart Rollback..." "Yellow"
     
-    # Smart Rollback
     if ($backupDir) {
-        Smart-Rollback -BackupDir $backupDir
+        Invoke-SmartRollback -backupDir $backupDir
     }
-    
-    Write-ColorOutput "`nHuong dan khoi phuc:" "Yellow"
-    Write-ColorOutput "Neu file .env bi mat, chay lenh sau de khoi phuc:" "Yellow"
-    Write-ColorOutput "`$latestBackup = Get-ChildItem .git-backup\env\ | Sort-Object Name -Descending | Select-Object -First 1" "Gray"
-    Write-ColorOutput "Get-ChildItem `$latestBackup.FullName -Recurse -Name '.env*' | ForEach-Object { Copy-Item (Join-Path `$latestBackup.FullName `$_) .\`$_ -Force }" "Gray"
     
     exit 1
 }
-
-Write-ColorOutput "`nScript hoan tat thanh cong!" "Green"
