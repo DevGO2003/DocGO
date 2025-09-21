@@ -79,13 +79,13 @@ export class ApiRetry {
       const response = await authAPI.refreshToken(refreshToken)
       const refreshData = response.data?.data
 
-      if (refreshData?.accessToken) {
+      if (refreshData && 'accessToken' in refreshData && refreshData.accessToken) {
         // Update stored tokens
         const newTokenData = {
-          accessToken: refreshData.accessToken,
-          refreshToken: refreshData.refreshToken || refreshToken,
-          expiresAt: Date.now() + (refreshData.expiresIn * 1000),
-          tokenType: refreshData.tokenType || 'Bearer'
+          accessToken: refreshData.accessToken as string,
+          refreshToken: (refreshData as any).refreshToken || refreshToken,
+          expiresAt: Date.now() + ((refreshData as any).expiresIn * 1000),
+          tokenType: (refreshData as any).tokenType || 'Bearer'
         }
 
         TokenManager.storeTokens(newTokenData)

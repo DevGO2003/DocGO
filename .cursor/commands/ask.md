@@ -9,25 +9,28 @@ Khi người dùng gặp vấn đề, command này sẽ:
 
 ## Quy trình thực hiện
 
-### 1. 🔍 Điều tra nguyên nhân
-- Phân tích lỗi từ logs, console, network
-- **Đọc Docker logs** để xác định lỗi container
-- Xác định file/function gây ra vấn đề
-- Tìm hiểu context và dependencies
+### 1. 🔍 Điều tra nguyên nhân (BẮT BUỘC)
+- **Đọc Docker logs chi tiết** để xác định lỗi container
+- **Phân tích error messages** và stack traces
+- **Kiểm tra network requests** và responses
+- **Xác định file/function** gây ra vấn đề
+- **Tìm hiểu context** và dependencies
+- **KHÔNG đưa ra phương án** cho đến khi điều tra xong
 
 ### 2. 📍 Xác định vị trí vấn đề
 - File cụ thể gây lỗi
 - Dòng code có vấn đề
 - Component/Service liên quan
+- **Xác nhận nguyên nhân** trước khi đề xuất fix
 
-### 3. 💡 Đề xuất phương án (Format bảng)
+### 3. 💡 Đề xuất phương án (CHỈ SAU KHI ĐIỀU TRA XONG)
 
 | Phương án | Mô tả | ✅ Ưu điểm | ⚠️ Nhược điểm | 🎯 Độ khó | ⏱️ Thời gian | 💰 Chi phí |
 |-----------|-------|------------|---------------|-----------|-------------|-----------|
-| **Phương án 1** | Sửa trực tiếp | ✅ Nhanh chóng<br/>✅ Ít thay đổi | ⚠️ Có thể gây side effect<br/>⚠️ Không giải quyết gốc rễ | 🟢 Dễ | 🟢 < 1h | 🟢 Thấp |
-| **Phương án 2** | Refactor code | ✅ Code sạch hơn<br/>✅ Dễ maintain | ⚠️ Cần test kỹ<br/>⚠️ Có thể break existing | 🟡 Trung bình | 🟡 2-4h | 🟡 Trung bình |
-| **Phương án 3** | Thay đổi architecture | ✅ Giải quyết triệt để<br/>✅ Scalable | ⚠️ Thay đổi lớn<br/>⚠️ Cần migration | 🔴 Khó | 🔴 > 1 ngày | 🔴 Cao |
-| **Phương án 4** | Workaround tạm thời | ✅ Giải quyết ngay<br/>✅ Không ảnh hưởng code | ⚠️ Không bền vững<br/>⚠️ Cần fix sau | 🟢 Dễ | 🟢 < 30 phút | 🟢 Thấp |
+| **Phương án 1** | Sửa trực tiếp | ✅ Nhanh chóng ✅ Ít thay đổi | ⚠️ Có thể gây side effect ⚠️ Không giải quyết gốc rễ | 🟢 Dễ | 🟢 < 1h | 🟢 Thấp |
+| **Phương án 2** | Refactor code | ✅ Code sạch hơn ✅ Dễ maintain | ⚠️ Cần test kỹ ⚠️ Có thể break existing | 🟡 Trung bình | 🟡 2-4h | 🟡 Trung bình |
+| **Phương án 3** | Thay đổi architecture | ✅ Giải quyết triệt để ✅ Scalable | ⚠️ Thay đổi lớn ⚠️ Cần migration | 🔴 Khó | 🔴 > 1 ngày | 🔴 Cao |
+| **Phương án 4** | Workaround tạm thời | ✅ Giải quyết ngay ✅ Không ảnh hưởng code | ⚠️ Không bền vững ⚠️ Cần fix sau | 🟢 Dễ | 🟢 < 30 phút | 🟢 Thấp |
 
 ### 4. ⭐ Best Choice
 - **Phương án được khuyến nghị** với lý do cụ thể
@@ -163,6 +166,29 @@ docker volume inspect <volume-name>
 ```
 
 
+## ⚠️ QUAN TRỌNG: Quy tắc điều tra trước khi đưa ra phương án
+
+### 1. **BẮT BUỘC điều tra kỹ**:
+- Đọc Docker logs chi tiết
+- Phân tích error messages và stack traces
+- Kiểm tra network requests/responses
+- Xác định file/function gây lỗi
+- **KHÔNG đưa ra phương án** cho đến khi điều tra xong
+
+### 2. **Tránh đưa ra phương án sai**:
+- **Ví dụ sai**: "createdAt đã có trong VALID_SORT_BY_PROPERTIES" → thực tế lỗi 500 do enum
+- **Ví dụ sai**: "API Gateway proxy thành công" → thực tế có lỗi trong service
+- **Ví dụ sai**: "Không có error logs" → thực tế có logs nhưng không đọc kỹ
+
+### 3. **Quy trình điều tra chuẩn**:
+```
+1. Đọc Docker logs chi tiết
+2. Phân tích error messages
+3. Kiểm tra network requests
+4. Xác định nguyên nhân gốc rễ
+5. CHỈ SAU ĐÓ mới đưa ra phương án
+```
+
 ## Prompt mẫu cho AI Agent Chat
 ```text
 Bạn là trợ lý kỹ thuật. Nhiệm vụ: CHỈ PHÂN TÍCH, KHÔNG sửa code hay DB.
@@ -172,16 +198,26 @@ Bối cảnh:
 - Chuẩn phản hồi: Ngắn gọn, có bảng phương án, đề xuất Best Choice.
 
 Yêu cầu thực hiện:
-1) Điều tra nguyên nhân (triệu chứng, log, network, cấu hình liên quan).
+1) **BẮT BUỘC điều tra kỹ** trước khi đưa ra phương án:
+   - Đọc Docker logs chi tiết
+   - Phân tích error messages và stack traces
+   - Kiểm tra network requests/responses
+   - Xác định file/function gây lỗi
+   - **KHÔNG đưa ra phương án** cho đến khi điều tra xong
+
 2) **Đọc Docker logs** nếu vấn đề liên quan đến container:
    - `docker logs <container-name>` để xem logs chi tiết
    - `docker logs --tail 50 <container-name>` để xem 50 dòng cuối
    - `docker logs --since 1h <container-name>` để xem logs 1 giờ qua
    - Phân tích error messages, stack traces, và warning
    - Kiểm tra exit codes và restart patterns
+
 3) Xác định vị trí vấn đề (file, hàm, endpoint, tham số, controller/router).
-4) Đề xuất tối thiểu 3 phương án (bảng: Mô tả, Ưu/nhược, Độ khó, Thời gian, Chi phí).
+
+4) **CHỈ SAU KHI ĐIỀU TRA XONG** mới đề xuất tối thiểu 3 phương án (bảng: Mô tả, Ưu/nhược, Độ khó, Thời gian, Chi phí).
+
 5) Chỉ ra Best Choice + lý do, rủi ro, và checklist các bước thực hiện.
+
 6) **CẢNH BÁO RỦI RO**: Liệt kê các lỗi có thể xảy ra khi thực hiện Best Choice:
    - Lỗi import/export khi di chuyển file
    - Lỗi dependency/classpath
@@ -189,16 +225,17 @@ Yêu cầu thực hiện:
    - Lỗi database migration
    - Lỗi Docker container (port conflict, volume mount, environment variables)
    - Cách sửa từng loại lỗi cụ thể
+
 7) Tuyệt đối không thay đổi code/database. Nếu cần validate, chỉ đưa lệnh kiểm tra (không tự chạy).
 
 Đầu vào:
 <dán lỗi/triệu chứng/ngữ cảnh ở đây>
 
 Đầu ra bắt buộc:
-- Phân tích ngắn gọn nguyên nhân gốc rễ
+- **Điều tra chi tiết** nguyên nhân gốc rễ
 - **Docker logs analysis** (nếu có container liên quan)
 - Vị trí lỗi (file/hàm/endpoint/dòng nếu xác định được)
-- Bảng phương án so sánh
+- **CHỈ SAU KHI ĐIỀU TRA XONG** mới có bảng phương án so sánh
 - Best Choice + checklist bước làm
 - **Cảnh báo rủi ro** + cách xử lý từng loại lỗi
 ```

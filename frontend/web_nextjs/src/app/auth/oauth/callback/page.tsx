@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
+import { UserRole, UserStatus } from '@/types/auth'
 import { AuthLayout } from '@/components/layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
@@ -74,8 +75,8 @@ export default function OAuthCallbackPage() {
                 username: username,
                 email: username,
                 name: username,
-                role: 'USER' as const,
-                status: 'ACTIVE' as const
+                role: 'USER' as UserRole,
+                status: 'ACTIVE' as UserStatus
               }
               localStorage.setItem('user_data', JSON.stringify(userData))
               

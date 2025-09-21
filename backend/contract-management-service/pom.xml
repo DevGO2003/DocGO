@@ -127,6 +127,40 @@
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<configuration>
 					<jvmArguments>-Dfile.encoding=UTF-8</jvmArguments>
+					<fork>true</fork>
+					<executable>true</executable>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>repackage</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<!-- Maven Compiler Plugin with thread-safe configuration -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.14.0</version>
+				<configuration>
+					<source>17</source>
+					<target>17</target>
+					<encoding>UTF-8</encoding>
+					<fork>true</fork>
+					<meminitial>128m</meminitial>
+					<maxmem>1024m</maxmem>
+				</configuration>
+			</plugin>
+			<!-- Maven Surefire Plugin for thread-safe testing -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>3.2.5</version>
+				<configuration>
+					<forkCount>1</forkCount>
+					<reuseForks>true</reuseForks>
+					<threadCount>1</threadCount>
 				</configuration>
 			</plugin>
 		</plugins>

@@ -5,6 +5,7 @@ import com.devgo2003.docgo.auth_service.entity.SessionStatus;
 import com.devgo2003.docgo.auth_service.repository.SessionMongoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -23,6 +24,12 @@ public class SessionService {
     
     private final SessionMongoRepository sessionRepository;
     
+    @Value("${security.jwt.access-ttl-seconds:3600}")
+    private long accessTokenTtlSeconds;
+    
+    @Value("${security.jwt.refresh-ttl-seconds:2592000}")
+    private long refreshTokenTtlSeconds;
+    
     public SessionMongo createSession(String userId, String deviceInfo, String ipAddress, String userAgent) {
         log.info("Creating new session for user: {}", userId);
         
@@ -37,7 +44,7 @@ public class SessionService {
                 .ipAddress(ipAddress)
                 .userAgent(userAgent)
                 .status(SessionStatus.ACTIVE)
-                .expiresAt(LocalDateTime.now().plusHours(24)) // 24 hours
+                .expiresAt(LocalDateTime.now().plusSeconds(refreshTokenTtlSeconds)) // 30 days
                 .lastActivity(LocalDateTime.now())
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())

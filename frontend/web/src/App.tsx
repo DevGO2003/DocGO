@@ -27,13 +27,33 @@ import { TimeFilteredAnalytics } from './components/TimeFilteredAnalytics';
 
 
 function App() {
-  // Authentication state
+  // Authentication state - MOCK ADMIN FOR DEVELOPMENT
   const [authState, setAuthState] = useState<AuthState>({
-    isAuthenticated: false,
-    user: null,
-    token: null
+    isAuthenticated: true,
+    user: {
+      id: '1',
+      email: 'admin@company.com',
+      name: 'Quản trị viên',
+      role: 'admin',
+      department: 'IT',
+      position: 'System Administrator',
+      isActive: true,
+      isApproved: true,
+      createdAt: '2024-01-01',
+      approvalLevel: 4,
+      maxContractValue: 999999999999,
+      permissions: {
+        canUpload: true,
+        canApprove: true,
+        canManageUsers: true,
+        canViewAnalytics: true,
+        canSign: true,
+        canApproveUsers: true
+      }
+    },
+    token: 'mock-admin-token'
   });
-  const [showAuthModal, setShowAuthModal] = useState(true);
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   const [showEditor, setShowEditor] = useState(false);
 
@@ -479,6 +499,17 @@ function handleTagChange(selectedOptions) {
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [filterTags, setFilterTags] = useState<string[]>([]);
   const [fullTextSearch, setFullTextSearch] = useState('');
+
+  // Search functions
+  const handleSearch = () => {
+    // Search logic will be handled by the filtered contracts
+    console.log('Searching for:', searchTerm);
+  };
+
+  const handleFullTextSearch = () => {
+    // Full text search logic will be handled by the filtered contracts
+    console.log('Full text searching for:', fullTextSearch);
+  };
 
   // Authentication functions
   const handleLogin = (credentials: LoginCredentials) => {
@@ -1150,8 +1181,17 @@ function handleTagChange(selectedOptions) {
               placeholder="Tìm kiếm hợp đồng..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              onKeyDown={(e) => { if (e.key === 'Enter') handleSearch() }}
+              className="pl-10 pr-24 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
+            <button
+              onClick={handleSearch}
+              className="absolute right-1 top-1/2 -translate-y-1/2 px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 shadow-sm hover:shadow-md flex items-center gap-2"
+              type="button"
+            >
+              <Search className="w-4 h-4" />
+              Tìm kiếm
+            </button>
           </div>
           <div className="relative">
             <Search className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
@@ -1160,8 +1200,17 @@ function handleTagChange(selectedOptions) {
               placeholder="Tìm kiếm toàn văn..."
               value={fullTextSearch}
               onChange={(e) => setFullTextSearch(e.target.value)}
-              className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              onKeyDown={(e) => { if (e.key === 'Enter') handleFullTextSearch() }}
+              className="pl-10 pr-24 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
+            <button
+              onClick={handleFullTextSearch}
+              className="absolute right-1 top-1/2 -translate-y-1/2 px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 shadow-sm hover:shadow-md flex items-center gap-2"
+              type="button"
+            >
+              <Search className="w-4 h-4" />
+              Tìm kiếm
+            </button>
           </div>
           <select
             value={filterStatus}
