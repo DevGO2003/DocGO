@@ -3,11 +3,6 @@
 # Kiến trúc tối giản: 5 services + MongoDB Atlas + Redis + Kafka
 
 services:
-  # MongoDB Atlas - Database chính (Cloud)
-  # Tất cả services kết nối trực tiếp với MongoDB Atlas
-  # Connection: mongodb+srv://root:sapassword@devgo-docgo-cluster0.hsudzga.mongodb.net/?retryWrites=true&w=majority&appName=devgo-docgo-cluster0
-  # Databases: docgo_auth_service, docgo_contract_service, docgo_ai_service, docgo_file_service
-
   # Redis - Cache và Message Queue
   redis:
     image: redis:7-alpine
@@ -132,6 +127,8 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=dev
       - MONGODB_ATLAS_URI=mongodb+srv://root:sapassword@devgo-docgo-cluster0.hsudzga.mongodb.net/docgo_auth_service?retryWrites=true&w=majority&appName=devgo-docgo-cluster0
+      - SPRING_DEVTOOLS_RESTART_ENABLED=true
+      - SPRING_DEVTOOLS_LIVERELOAD_ENABLED=true
     volumes:
       - ./backend/authentication-identity-service:/app
       - maven_cache:/root/.m2
@@ -140,7 +137,7 @@ services:
     mem_limit: 1.5g
     mem_reservation: 512m
     command: >
-      sh -c "chmod +x ./mvnw && ./mvnw -DskipTests clean spring-boot:run -Dspring-boot.run.jvmArguments='-Dserver.port=8000'"
+      sh -c "chmod +x ./mvnw && ./mvnw -DskipTests clean spring-boot:run -Dspring-boot.run.jvmArguments='-Dserver.port=8000 -Dspring.devtools.restart.enabled=true'"
     depends_on:
       redis:
         condition: service_healthy
@@ -163,7 +160,9 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=dev
       - MAVEN_OPTS=-Xmx2g -XX:+UseG1GC -XX:+UseStringDeduplication
-      - MONGODB_ATLAS_URI=mongodb+srv://root:sapassword@devgo-docgo-cluster0.hsudzga.mongodb.net/docgo_contract_service?retryWrites=true&w=majority&appName=devgo-docgo-cluster0
+      - MONGODB_ATLAS_URI=mongodb://root:password@mongodb:27017/docgo_contract_service?authSource=admin
+      - SPRING_DEVTOOLS_RESTART_ENABLED=true
+      - SPRING_DEVTOOLS_LIVERELOAD_ENABLED=true
     volumes:
       - ./backend/contract-management-service:/app
       - maven_cache:/root/.m2
@@ -172,8 +171,10 @@ services:
     mem_limit: 2g
     mem_reservation: 1g
     command: >
-      sh -c "chmod +x ./mvnw && ./mvnw --no-transfer-progress -T 1C -o -DskipTests clean spring-boot:run -Dspring-boot.run.jvmArguments='-Dserver.port=8000'"
+      sh -c "chmod +x ./mvnw && ./mvnw --no-transfer-progress -T 2C -o -DskipTests clean spring-boot:run -Dspring-boot.run.jvmArguments='-Dserver.port=8000 -Dspring.devtools.restart.enabled=true -Dmaven.compiler.fork=true'"
     depends_on:
+      mongodb:
+        condition: service_healthy
       redis:
         condition: service_healthy
     networks:
@@ -238,37 +239,15 @@ services:
     networks:
       - docgo_network
 
-  # Google Cloud MCP Server - Port 8006
-  google-cloud-mcp-server:
-    image: node:22-alpine
-    container_name: docgo-google-cloud-mcp-server
-    restart: unless-stopped
-    working_dir: /app
-    ports:
-      - "8006:3000"
-    environment:
-      - GOOGLE_APPLICATION_CREDENTIALS=${GOOGLE_APPLICATION_CREDENTIALS}
-      - GOOGLE_CLOUD_PROJECT=${GOOGLE_CLOUD_PROJECT}
-      - GOOGLE_CLIENT_EMAIL=${GOOGLE_CLIENT_EMAIL}
-    env_file:
-      - ./mcp-server/google-cloud/env/.env
-    volumes:
-      - ./mcp-server/google-cloud:/app
-      - ./credentials:/app/credentials
-      - npm_cache:/root/.npm
-    # CPU và Memory limits cho Google Cloud MCP Server
-    cpus: 0.5
-    mem_limit: 512m
-    mem_reservation: 256m
-    command: >
-      sh -c "npm install && npm start"
-    networks:
-      - docgo_network
 
 
 
 volumes:
   # Data volumes
+  mongodb_data:
+    driver: local
+  mongodb_config:
+    driver: local
   redis_data:
     driver: local
   ai_processing_results:

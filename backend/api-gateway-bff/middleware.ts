@@ -20,7 +20,9 @@ const publicRoutes = [
   '/api/health',
   '/api/docs',
   '/api/swagger.json',
-  '/api/oauth2/test'
+  '/api/oauth2/test',
+  // DEVELOPMENT: Bypass auth for all API routes
+  '/api'
 ]
 
 function isPublicAuthPath(pathname: string): boolean {

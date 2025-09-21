@@ -38,7 +38,7 @@ public class ContractCreateRequest {
     @Size(max = 5000, message = "Tóm tắt không được vượt quá 5000 ký tự")
     private String summary;
 
-    @Size(max = 100, message = "Loại hợp đồng không được vượt quá 100 ký tự")
+    @NotBlank(message = "Loại hợp đồng không được để trống")
     private String contractType;
 
     @Pattern(regexp = "^(LOW|MEDIUM|HIGH|CRITICAL)$", message = "Mức độ rủi ro phải là LOW, MEDIUM, HIGH hoặc CRITICAL")

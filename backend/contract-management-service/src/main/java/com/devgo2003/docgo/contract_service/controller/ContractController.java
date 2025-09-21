@@ -268,7 +268,7 @@ public class ContractController {
             content = @Content(
                 schema = @Schema(implementation = ContractCreateRequest.class),
                 examples = @ExampleObject(
-                    value = "{\n  \"contractNumber\": \"HD-2024-001\",\n  \"title\": \"Hợp đồng cung cấp dịch vụ\",\n  \"status\": \"DraFT\",\n  \"partiesJson\": \"[{\\\"name\\\": \\\"Công ty A\\\", \\\"role\\\": \\\"Client\\\"}]\",\n  \"startDate\": \"2024-01-01\",\n  \"endDate\": \"2024-12-31\",\n  \"systemId\": \"SYS-001\"\n}"
+                    value = "{\n  \"contractNumber\": \"HD-2024-001\",\n  \"title\": \"Hợp đồng cung cấp dịch vụ\",\n  \"status\": \"DRAFT\",\n  \"contractType\": \"SERVICE_AGREEMENT\",\n  \"partiesJson\": \"[{\\\"name\\\": \\\"Công ty A\\\", \\\"role\\\": \\\"Client\\\"}]\",\n  \"startDate\": \"2024-01-01T00:00:00\",\n  \"endDate\": \"2024-12-31T23:59:59\",\n  \"systemId\": \"SYS-001\"\n}"
                 )
             )
         )
@@ -289,11 +289,8 @@ public class ContractController {
         contract.setEndDate(request.getEndDate());
         contract.setSystemId(request.getSystemId());
         contract.setSummary(request.getSummary());
-        try {
-            contract.setContractType(ContractType.fromValue(request.getContractType()));
-        } catch (Exception e) {
-            contract.setContractType(ContractType.GENERAL);
-        }
+        // ContractType validation is now handled by @Pattern annotation in DTO
+        contract.setContractType(ContractType.fromValue(request.getContractType()));
         contract.setRiskLevel(request.getRiskLevel());
         contract.setKeyTerms(request.getKeyTerms());
         contract.setFavorableClauses(request.getFavorableClauses());

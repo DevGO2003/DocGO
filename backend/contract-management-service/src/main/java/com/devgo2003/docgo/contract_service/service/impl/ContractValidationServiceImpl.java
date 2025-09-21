@@ -5,6 +5,7 @@ import com.devgo2003.docgo.contract_service.dto.ContractPartyDto;
 import com.devgo2003.docgo.contract_service.dto.ContractValidationResult;
 import com.devgo2003.docgo.contract_service.service.IContractValidationService;
 import com.devgo2003.docgo.contract_service.entity.Contract;
+import com.devgo2003.docgo.contract_service.enums.ContractType;
 import com.devgo2003.docgo.contract_service.common.exception.InvalidInputException;
 import com.devgo2003.docgo.contract_service.common.exception.ConflictException;
 import com.devgo2003.docgo.contract_service.repository.ContractRepository;
@@ -190,16 +191,14 @@ public class ContractValidationServiceImpl implements IContractValidationService
     }
     
     /**
-     * Validate contract type
+     * Validate contract type using enum values
      */
     private void validateContractType(String contractType) {
-        List<String> validTypes = List.of(
-            "SERVICE", "PURCHASE", "SALES", "PARTNERSHIP", "EMPLOYMENT", 
-            "LICENSING", "FRANCHISE", "JOINT_VENTURE", "OTHER"
-        );
-        
-        if (!validTypes.contains(contractType.toUpperCase())) {
-            throw new InvalidInputException("Invalid contract type. Valid types: " + String.join(", ", validTypes));
+        try {
+            // Try to parse using the enhanced fromValue method that supports both value and displayName
+            ContractType.fromValue(contractType);
+        } catch (IllegalArgumentException e) {
+            throw new InvalidInputException("Invalid contract type: " + e.getMessage());
         }
     }
     

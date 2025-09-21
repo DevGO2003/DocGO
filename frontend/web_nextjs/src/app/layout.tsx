@@ -5,6 +5,7 @@ import { Toaster } from 'react-hot-toast'
 import { AuthProvider } from '@/hooks/useAuth'
 import { LoadingProvider } from '@/components/LoadingProvider'
 import { PageTransition } from '@/components/PageTransition'
+import { I18nProvider } from '@/components/I18nProvider'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -63,37 +64,39 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
       </head>
       <body className={inter.className} suppressHydrationWarning>
-        <LoadingProvider>
-          <AuthProvider>
-            <PageTransition>
-              {children}
-            </PageTransition>
-            <Toaster 
-              position="top-right"
-              toastOptions={{
-                duration: 4000,
-                style: {
-                  background: '#363636',
-                  color: '#fff',
-                },
-                success: {
-                  duration: 3000,
-                  iconTheme: {
-                    primary: '#10b981',
-                    secondary: '#fff',
+        <I18nProvider>
+          <LoadingProvider>
+            <AuthProvider>
+              <PageTransition>
+                {children}
+              </PageTransition>
+              <Toaster 
+                position="top-right"
+                toastOptions={{
+                  duration: 4000,
+                  style: {
+                    background: '#363636',
+                    color: '#fff',
                   },
-                },
-                error: {
-                  duration: 5000,
-                  iconTheme: {
-                    primary: '#ef4444',
-                    secondary: '#fff',
+                  success: {
+                    duration: 3000,
+                    iconTheme: {
+                      primary: '#10b981',
+                      secondary: '#fff',
+                    },
                   },
-                },
-              }}
-            />
-          </AuthProvider>
-        </LoadingProvider>
+                  error: {
+                    duration: 5000,
+                    iconTheme: {
+                      primary: '#ef4444',
+                      secondary: '#fff',
+                    },
+                  },
+                }}
+              />
+            </AuthProvider>
+          </LoadingProvider>
+        </I18nProvider>
       </body>
     </html>
   )
