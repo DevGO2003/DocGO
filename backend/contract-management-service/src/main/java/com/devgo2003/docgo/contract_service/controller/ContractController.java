@@ -7,6 +7,8 @@ import com.devgo2003.docgo.contract_service.common.response.RestResponse;
 import com.devgo2003.docgo.contract_service.entity.Contract;
 import com.devgo2003.docgo.contract_service.entity.ContractAttachment;
 import com.devgo2003.docgo.contract_service.entity.ContractEvent;
+import com.devgo2003.docgo.contract_service.enums.ContractStatus;
+import com.devgo2003.docgo.contract_service.enums.ContractType;
 import com.devgo2003.docgo.contract_service.dto.ContractWithSummaryDto;
 import com.devgo2003.docgo.contract_service.dto.ContractDetailDto;
 import com.devgo2003.docgo.contract_service.dto.ContractResponseDto;
@@ -281,13 +283,17 @@ public class ContractController {
         Contract contract = new Contract();
         contract.setContractNumber(request.getContractNumber());
         contract.setTitle(request.getTitle());
-        contract.setStatus(Contract.ContractStatus.valueOf(request.getStatus()));
+        contract.setStatus(ContractStatus.valueOf(request.getStatus()));
         contract.setPartiesJson(request.getPartiesJson());
         contract.setStartDate(request.getStartDate());
         contract.setEndDate(request.getEndDate());
         contract.setSystemId(request.getSystemId());
         contract.setSummary(request.getSummary());
-        contract.setContractType(request.getContractType());
+        try {
+            contract.setContractType(ContractType.fromValue(request.getContractType()));
+        } catch (Exception e) {
+            contract.setContractType(ContractType.GENERAL);
+        }
         contract.setRiskLevel(request.getRiskLevel());
         contract.setKeyTerms(request.getKeyTerms());
         contract.setFavorableClauses(request.getFavorableClauses());

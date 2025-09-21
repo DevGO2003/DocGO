@@ -1,6 +1,8 @@
 package com.devgo2003.docgo.contract_service.service.impl;
 
 import com.devgo2003.docgo.contract_service.entity.Contract;
+import com.devgo2003.docgo.contract_service.enums.ContractStatus;
+import com.devgo2003.docgo.contract_service.enums.ContractType;
 import com.devgo2003.docgo.contract_service.entity.ContractAttachment;
 import com.devgo2003.docgo.contract_service.service.IContractKafkaService;
 import com.devgo2003.docgo.contract_service.service.IContractService;
@@ -142,9 +144,9 @@ public class ContractKafkaServiceImpl implements IContractKafkaService {
             // Tạo hợp đồng mới trong database
             Contract contract = Contract.createNew();
             contract.setTitle((String) contractSummary.get("title"));
-            contract.setStatus(Contract.ContractStatus.DRAFT);
+            contract.setStatus(ContractStatus.DRAFT);
             contract.setSummary(summary);
-            contract.setContractType("AUTO_GENERATED");
+            contract.setContractType(ContractType.OTHER);
             contract.setAiProcessed(true);
             contract.setProcessingStatus(Contract.ProcessingStatus.COMPLETED);
             contract.setSystemId(fileId);
@@ -189,17 +191,22 @@ public class ContractKafkaServiceImpl implements IContractKafkaService {
 
             // Map status từ event, fallback về DRAFT nếu không có hoặc không hợp lệ
             String eventStatus = (String) data.get("status");
-            Contract.ContractStatus contractStatus = Contract.ContractStatus.DRAFT; // Default
+            ContractStatus contractStatus = ContractStatus.DRAFT; // Default
             if (eventStatus != null) {
                 try {
-                    contractStatus = Contract.ContractStatus.valueOf(eventStatus.toUpperCase());
+                    contractStatus = ContractStatus.fromValue(eventStatus.toUpperCase());
                 } catch (IllegalArgumentException e) {
                     logger.warn("⚠️ [SUMMARY_PUBLISHED_INVALID_STATUS] Status '{}' không hợp lệ, fallback về DRAFT.", eventStatus);
                 }
             }
             contract.setStatus(contractStatus);
             contract.setSummary("SUMMARY_PUBLISHED");
-            contract.setContractType((String) data.getOrDefault("contractType", "AUTO_GENERATED"));
+            String contractTypeStr = (String) data.getOrDefault("contractType", "OTHER");
+            try {
+                contract.setContractType(ContractType.fromValue(contractTypeStr));
+            } catch (Exception e) {
+                contract.setContractType(ContractType.OTHER);
+            }
             contract.setAiProcessed(true);
             contract.setProcessingStatus(Contract.ProcessingStatus.COMPLETED);
 
@@ -212,7 +219,7 @@ public class ContractKafkaServiceImpl implements IContractKafkaService {
                     if (t != null) tagStrings.add(String.valueOf(t));
                 }
                 if (!tagStrings.isEmpty()) {
-                    contract.setTags(String.join(", ", tagStrings));
+                    contract.setTags(tagStrings);
                 }
             }
 

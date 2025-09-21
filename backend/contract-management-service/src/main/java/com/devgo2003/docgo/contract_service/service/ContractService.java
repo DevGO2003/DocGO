@@ -1,6 +1,7 @@
 package com.devgo2003.docgo.contract_service.service;
 
 import com.devgo2003.docgo.contract_service.entity.Contract;
+import com.devgo2003.docgo.contract_service.enums.ContractStatus;
 import com.devgo2003.docgo.contract_service.entity.ContractAttachment;
 import com.devgo2003.docgo.contract_service.entity.ContractEvent;
 import com.devgo2003.docgo.contract_service.repository.ContractRepository;
@@ -61,7 +62,7 @@ public class ContractService {
     @Transactional
     public Contract createContract(Contract contract) {
         contract.setContractNumber("CONTRACT-" + System.currentTimeMillis());
-        contract.setStatus(Contract.ContractStatus.DRAFT);
+        contract.setStatus(ContractStatus.DRAFT);
 
         Contract savedContract = contractRepository.save(contract);
 
@@ -112,7 +113,7 @@ public class ContractService {
 
     public List<Contract> getContractsByStatus(String status) {
         try {
-            Contract.ContractStatus contractStatus = Contract.ContractStatus.valueOf(status.toUpperCase());
+            ContractStatus contractStatus = ContractStatus.valueOf(status.toUpperCase());
             return contractRepository.findByStatusAndIsDeletedFalse(contractStatus);
         } catch (IllegalArgumentException e) {
             throw new InvalidInputException("Trạng thái hợp đồng không hợp lệ: " + status);
@@ -157,7 +158,7 @@ public class ContractService {
         }
 
         contract.markAsDeleted("system");
-        contract.setStatus(Contract.ContractStatus.EXPIRED);
+        contract.setStatus(ContractStatus.EXPIRED);
         contractRepository.save(contract);
 
         ContractEvent event = new ContractEvent();
@@ -180,7 +181,7 @@ public class ContractService {
         }
 
         contract.restore();
-        contract.setStatus(Contract.ContractStatus.DRAFT);
+        contract.setStatus(ContractStatus.DRAFT);
         contractRepository.save(contract);
 
         ContractEvent event = new ContractEvent();

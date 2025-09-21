@@ -3,6 +3,7 @@ package com.devgo2003.docgo.contract_service.validation;
 import com.devgo2003.docgo.contract_service.dto.ContractCreateRequest;
 import com.devgo2003.docgo.contract_service.dto.ContractValidationResult;
 import com.devgo2003.docgo.contract_service.entity.Contract;
+import com.devgo2003.docgo.contract_service.enums.ContractStatus;
 import com.devgo2003.docgo.contract_service.service.IContractValidationService;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
@@ -116,7 +117,7 @@ public class ContractValidationTest {
         Contract contract = Contract.createNew();
         contract.setContractNumber("TEST-001");
         contract.setTitle("Test Contract");
-        contract.setStatus(Contract.ContractStatus.DRAFT);
+        contract.setStatus(ContractStatus.DRAFT);
         contract.setStartDate(LocalDateTime.now().plusDays(1));
 
         // When
@@ -133,7 +134,7 @@ public class ContractValidationTest {
         Contract contract = Contract.createNew();
         contract.setContractNumber("TEST-001");
         contract.setTitle("Test Contract");
-        contract.setStatus(Contract.ContractStatus.DRAFT);
+        contract.setStatus(ContractStatus.DRAFT);
         contract.setStartDate(LocalDateTime.now().plusDays(10));
         contract.setEndDate(LocalDateTime.now().plusDays(5)); // End before start
 
@@ -154,7 +155,7 @@ public class ContractValidationTest {
         Contract contract = Contract.createNew();
         contract.setContractNumber("TEST-001");
         contract.setTitle("Test Contract");
-        contract.setStatus(Contract.ContractStatus.DRAFT);
+        contract.setStatus(ContractStatus.DRAFT);
         contract.setStartDate(LocalDateTime.now().minusDays(1)); // Past date
 
         // When
@@ -174,7 +175,7 @@ public class ContractValidationTest {
         Contract contract = Contract.createNew();
         contract.setContractNumber("TEST-001");
         contract.setTitle("Test Contract");
-        contract.setStatus(Contract.ContractStatus.DRAFT);
+        contract.setStatus(ContractStatus.DRAFT);
         contract.setStartDate(LocalDateTime.now().plusDays(1));
         contract.setTotalValue("2000000"); // High value
         contract.setRiskLevel("LOW"); // Low risk

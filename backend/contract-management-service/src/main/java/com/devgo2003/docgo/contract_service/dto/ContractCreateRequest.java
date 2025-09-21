@@ -21,7 +21,7 @@ public class ContractCreateRequest {
     private String title;
 
     @NotBlank(message = "Trạng thái hợp đồng không được để trống")
-    @Pattern(regexp = "^(DRAFT|PENDING|PENDING_APPROVAL|ACTIVE|EXPIRED|ARCHIVED)$", message = "Trạng thái hợp đồng không hợp lệ")
+    @Pattern(regexp = "^(DRAFT|PENDING_REVIEW|PENDING_REVIEW|ACTIVE|EXPIRED|ARCHIVED)$", message = "Trạng thái hợp đồng không hợp lệ")
     private String status;
 
     @Size(max = 10000, message = "Thông tin các bên không được vượt quá 10000 ký tự")

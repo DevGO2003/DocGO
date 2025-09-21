@@ -60,13 +60,13 @@ public class ReportService {
         
         // Thống kê approval
         long totalApprovals = approvalRepository.countByContractIdAndIsDeletedFalse(contractId);
-        long pendingApprovals = approvalRepository.countByContractIdAndStatusAndIsDeletedFalse(contractId, Approval.ApprovalStatus.PENDING);
+        long pendingApprovals = approvalRepository.countByContractIdAndStatusAndIsDeletedFalse(contractId, Approval.ApprovalStatus.PENDING_REVIEW);
         long approvedApprovals = approvalRepository.countByContractIdAndStatusAndIsDeletedFalse(contractId, Approval.ApprovalStatus.APPROVED);
         long rejectedApprovals = approvalRepository.countByContractIdAndStatusAndIsDeletedFalse(contractId, Approval.ApprovalStatus.REJECTED);
         
         Map<String, Object> approvalStats = new HashMap<>();
         approvalStats.put("total", totalApprovals);
-        approvalStats.put("pending", pendingApprovals);
+        approvalStats.put("PENDING_REVIEW", pendingApprovals);
         approvalStats.put("approved", approvedApprovals);
         approvalStats.put("rejected", rejectedApprovals);
         report.put("approvalStats", approvalStats);
@@ -105,7 +105,7 @@ public class ReportService {
         
         Map<String, Object> signatureStats = new HashMap<>();
         signatureStats.put("total", totalSignatures);
-        signatureStats.put("pending", pendingSignatures);
+        signatureStats.put("PENDING_REVIEW", pendingSignatures);
         signatureStats.put("signed", signedSignatures);
         signatureStats.put("declined", declinedSignatures);
         signatureStats.put("expired", expiredSignatures);
@@ -123,7 +123,7 @@ public class ReportService {
         
         Map<String, Object> reminderStats = new HashMap<>();
         reminderStats.put("total", totalReminders);
-        reminderStats.put("pending", pendingReminders);
+        reminderStats.put("PENDING_REVIEW", pendingReminders);
         reminderStats.put("sent", sentReminders);
         reminderStats.put("completed", completedReminders);
         reminderStats.put("cancelled", cancelledReminders);
@@ -174,7 +174,7 @@ public class ReportService {
         
         // Thống kê theo status
         Map<String, Long> statusStats = new HashMap<>();
-        statusStats.put("PENDING", approvalRepository.countByContractIdAndStatusAndIsDeletedFalse(contractId, Approval.ApprovalStatus.PENDING));
+        statusStats.put("PENDING_REVIEW", approvalRepository.countByContractIdAndStatusAndIsDeletedFalse(contractId, Approval.ApprovalStatus.PENDING_REVIEW));
         statusStats.put("APPROVED", approvalRepository.countByContractIdAndStatusAndIsDeletedFalse(contractId, Approval.ApprovalStatus.APPROVED));
         statusStats.put("REJECTED", approvalRepository.countByContractIdAndStatusAndIsDeletedFalse(contractId, Approval.ApprovalStatus.REJECTED));
         statusStats.put("CANCELLED", approvalRepository.countByContractIdAndStatusAndIsDeletedFalse(contractId, Approval.ApprovalStatus.CANCELLED));
@@ -183,10 +183,10 @@ public class ReportService {
         
         // Thống kê theo priority
         Map<String, Long> priorityStats = new HashMap<>();
-        priorityStats.put("LOW", approvalRepository.countByContractIdAndStatusAndIsDeletedFalse(contractId, Approval.ApprovalStatus.PENDING));
-        priorityStats.put("MEDIUM", approvalRepository.countByContractIdAndStatusAndIsDeletedFalse(contractId, Approval.ApprovalStatus.PENDING));
-        priorityStats.put("HIGH", approvalRepository.countByContractIdAndStatusAndIsDeletedFalse(contractId, Approval.ApprovalStatus.PENDING));
-        priorityStats.put("URGENT", approvalRepository.countByContractIdAndStatusAndIsDeletedFalse(contractId, Approval.ApprovalStatus.PENDING));
+        priorityStats.put("LOW", approvalRepository.countByContractIdAndStatusAndIsDeletedFalse(contractId, Approval.ApprovalStatus.PENDING_REVIEW));
+        priorityStats.put("MEDIUM", approvalRepository.countByContractIdAndStatusAndIsDeletedFalse(contractId, Approval.ApprovalStatus.PENDING_REVIEW));
+        priorityStats.put("HIGH", approvalRepository.countByContractIdAndStatusAndIsDeletedFalse(contractId, Approval.ApprovalStatus.PENDING_REVIEW));
+        priorityStats.put("URGENT", approvalRepository.countByContractIdAndStatusAndIsDeletedFalse(contractId, Approval.ApprovalStatus.PENDING_REVIEW));
         report.put("priorityStats", priorityStats);
         
         // Thống kê theo approver role
@@ -320,7 +320,7 @@ public class ReportService {
         
         // Thống kê theo status
         Map<String, Long> statusStats = new HashMap<>();
-        statusStats.put("PENDING", eSignatureRepository.countByContractIdAndStatusAndIsDeletedFalse(contractId, ESignature.SignatureStatus.PENDING));
+        statusStats.put("PENDING_REVIEW", eSignatureRepository.countByContractIdAndStatusAndIsDeletedFalse(contractId, ESignature.SignatureStatus.PENDING_REVIEW));
         statusStats.put("SIGNED", eSignatureRepository.countByContractIdAndStatusAndIsDeletedFalse(contractId, ESignature.SignatureStatus.SIGNED));
         statusStats.put("DECLINED", eSignatureRepository.countByContractIdAndStatusAndIsDeletedFalse(contractId, ESignature.SignatureStatus.DECLINED));
         statusStats.put("EXPIRED", eSignatureRepository.countByContractIdAndStatusAndIsDeletedFalse(contractId, ESignature.SignatureStatus.EXPIRED));
@@ -373,7 +373,7 @@ public class ReportService {
         
         // Thống kê theo status
         Map<String, Long> statusStats = new HashMap<>();
-        statusStats.put("PENDING", reminderRepository.countByContractIdAndStatusAndIsDeletedFalse(contractId, Reminder.ReminderStatus.PENDING));
+        statusStats.put("PENDING_REVIEW", reminderRepository.countByContractIdAndStatusAndIsDeletedFalse(contractId, Reminder.ReminderStatus.PENDING_REVIEW));
         statusStats.put("SENT", reminderRepository.countByContractIdAndStatusAndIsDeletedFalse(contractId, Reminder.ReminderStatus.SENT));
         statusStats.put("ACKNOWLEDGED", reminderRepository.countByContractIdAndStatusAndIsDeletedFalse(contractId, Reminder.ReminderStatus.ACKNOWLEDGED));
         statusStats.put("COMPLETED", reminderRepository.countByContractIdAndStatusAndIsDeletedFalse(contractId, Reminder.ReminderStatus.COMPLETED));

@@ -31,7 +31,7 @@ public class TagServiceImpl implements ITagService {
         AggregationResults<Map<String, Object>> results = mongoTemplate.aggregate(
             aggregation, 
             "contracts", 
-            Map.class
+            (Class<Map<String, Object>>) (Class<?>) Map.class
         );
 
         List<TagDto> popularTags = new ArrayList<>();
@@ -65,7 +65,7 @@ public class TagServiceImpl implements ITagService {
         AggregationResults<Map<String, Object>> results = mongoTemplate.aggregate(
             aggregation, 
             "contracts", 
-            Map.class
+            (Class<Map<String, Object>>) (Class<?>) Map.class
         );
 
         List<TagDto> allTags = new ArrayList<>();
@@ -104,7 +104,7 @@ public class TagServiceImpl implements ITagService {
         AggregationResults<Map<String, Object>> results = mongoTemplate.aggregate(
             aggregation, 
             "contracts", 
-            Map.class
+            (Class<Map<String, Object>>) (Class<?>) Map.class
         );
 
         List<TagDto> searchResults = new ArrayList<>();

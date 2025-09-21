@@ -79,7 +79,12 @@ public enum ContractType {
     AMENDMENT_AGREEMENT("AMENDMENT_AGREEMENT", "Phụ lục hợp đồng", "Phụ lục sửa đổi hợp đồng"),
     TERMINATION_AGREEMENT("TERMINATION_AGREEMENT", "Thỏa thuận chấm dứt", "Thỏa thuận chấm dứt hợp đồng"),
     RENEWAL_AGREEMENT("RENEWAL_AGREEMENT", "Thỏa thuận gia hạn", "Thỏa thuận gia hạn hợp đồng"),
-    ASSIGNMENT_AGREEMENT("ASSIGNMENT_AGREEMENT", "Thỏa thuận chuyển nhượng", "Thỏa thuận chuyển nhượng quyền lợi");
+    ASSIGNMENT_AGREEMENT("ASSIGNMENT_AGREEMENT", "Thỏa thuận chuyển nhượng", "Thỏa thuận chuyển nhượng quyền lợi"),
+    
+    // GENERAL TYPES
+    OTHER("OTHER", "Khác", "Loại hợp đồng khác"),
+    GENERAL("GENERAL", "Chung", "Hợp đồng chung"),
+    NDA("NDA", "Thỏa thuận bảo mật", "Non-Disclosure Agreement");
     
     private final String value;
     private final String displayName;
@@ -194,3 +199,4 @@ public enum ContractType {
                 .toArray(ContractType[]::new);
     }
 }
+

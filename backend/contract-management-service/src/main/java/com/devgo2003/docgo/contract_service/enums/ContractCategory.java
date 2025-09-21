@@ -243,3 +243,4 @@ public enum ContractCategory {
                 .toArray(String[]::new);
     }
 }
+
