@@ -13,16 +13,13 @@ import java.util.Properties;
 @Configuration
 @PropertySources({
     @PropertySource(value = "classpath:application.properties"),
-    @PropertySource(value = "file:env/.env.local", ignoreResourceNotFound = true),
     @PropertySource(value = "file:env/.env", ignoreResourceNotFound = true)
 })
 public class EnvConfig {
 
     @PostConstruct
     public void loadEnvFiles() {
-        // Load .env.local first (highest priority)
-        loadEnvFile("env/.env.local");
-        // Then load .env
+        // Load .env file
         loadEnvFile("env/.env");
     }
 

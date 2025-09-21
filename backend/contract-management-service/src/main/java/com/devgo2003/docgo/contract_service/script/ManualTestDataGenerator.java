@@ -110,7 +110,7 @@ public class ManualTestDataGenerator {
         contract1.setRiskAssessment("Rủi ro thấp do đối tác uy tín, có kinh nghiệm trong lĩnh vực IT");
         contract1.setComplianceStatus("COMPLIANT");
         contract1.setLegalReviewRequired(false);
-        contract1.setTags("IT, Software Development, Maintenance");
+        contract1.setTags(Arrays.asList("IT", "Software Development", "Maintenance"));
         contract1.setCreatedBy("system");
         contract1.setUpdatedBy("system");
         contract1.setCreatedAt(now.minusDays(30));
@@ -145,7 +145,7 @@ public class ManualTestDataGenerator {
         contract2.setRiskAssessment("Rủi ro trung bình do thị trường bất động sản biến động");
         contract2.setComplianceStatus("PENDING_REVIEW");
         contract2.setLegalReviewRequired(true);
-        contract2.setTags("Real Estate, Office Rental, Landmark");
+        contract2.setTags(Arrays.asList("Real Estate", "Office Rental", "Landmark"));
         contract2.setCreatedBy("system");
         contract2.setUpdatedBy("system");
         contract2.setCreatedAt(now.minusDays(15));

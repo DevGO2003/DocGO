@@ -190,7 +190,7 @@ $RECYCLE.BIN/
 
 # Additional patterns from .cursorignore (except .env files)
 **/*.iml
-**/.mvn/
+# **/.mvn/ - Commented out to preserve Maven wrapper files
 **/.gradle/
 **/.cache/
 **/.nyc_output/

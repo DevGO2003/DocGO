@@ -1,6 +1,7 @@
 package com.devgo2003.docgo.contract_service.repository;
 
 import com.devgo2003.docgo.contract_service.entity.Contract;
+import com.devgo2003.docgo.contract_service.enums.ContractStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
@@ -16,7 +17,7 @@ public interface ContractRepository extends MongoRepository<Contract, String> {
 
     Page<Contract> findByIsDeletedFalse(Pageable pageable);
 
-    List<Contract> findByStatusAndIsDeletedFalse(Contract.ContractStatus status);
+    List<Contract> findByStatusAndIsDeletedFalse(ContractStatus status);
     
     Optional<Contract> findBySystemId(String systemId);
     

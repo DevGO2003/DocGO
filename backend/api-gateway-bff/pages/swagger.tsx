@@ -6,7 +6,21 @@ import { useRouter } from 'next/router';
 // Dynamic import để tránh SSR issues với Swagger UI
 const SwaggerUI = dynamic(() => import('swagger-ui-react'), {
   ssr: false,
-  loading: () => <div>Loading Swagger UI...</div>
+  loading: () => (
+    <div className="flex items-center justify-center p-12 bg-white rounded-lg shadow-sm border">
+      <div className="text-center">
+        <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full mb-4 shadow-lg animate-pulse">
+          <span className="text-2xl">📚</span>
+        </div>
+        <h3 className="text-xl font-semibold text-gray-800 mb-2">Đang tải Swagger UI...</h3>
+        <p className="text-gray-600 mb-4">Vui lòng chờ trong giây lát</p>
+        <div className="flex items-center justify-center space-x-2">
+          <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+          <span className="text-gray-500 text-sm">Đang khởi tạo...</span>
+        </div>
+      </div>
+    </div>
+  )
 });
 
 // Import Swagger CSS cho phiên bản mới
@@ -97,12 +111,14 @@ export default function SwaggerPage() {
   const [selectedService, setSelectedService] = useState<string>('API Gateway BFF');
   const [spec, setSpec] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isLoadingSpec, setIsLoadingSpec] = useState<boolean>(false);
 
   // Hàm xử lý click vào service card
   const handleServiceClick = (serviceName: string) => {
     setSelectedService(serviceName);
     setError(null);
     setSpec(null);
+    setIsLoadingSpec(true);
     
     const serviceInfo = serviceConnectionMapping[serviceName as keyof typeof serviceConnectionMapping];
     if (serviceInfo) {
@@ -167,13 +183,20 @@ export default function SwaggerPage() {
       return;
     }
 
+    setIsLoadingSpec(true);
     fetch(specUrl)
       .then(async r => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         return r.json();
       })
-      .then(json => setSpec(json))
-      .catch(e => setError(`Không tải được spec từ ${selectedService}: ${e.message}`));
+      .then(json => {
+        setSpec(json);
+        setIsLoadingSpec(false);
+      })
+      .catch(e => {
+        setError(`Không tải được spec từ ${selectedService}: ${e.message}`);
+        setIsLoadingSpec(false);
+      });
   }, [selectedService, serviceConnectionMapping]);
 
   return (
@@ -253,25 +276,41 @@ export default function SwaggerPage() {
 
           {/* Swagger UI */}
           <div className="swagger-ui-container">
-        <SwaggerUI 
-          spec={spec || { openapi: '3.0.3', info: { title: 'Loading...', version: '1.0.0' } }}
-          docExpansion="list"
-          defaultModelsExpandDepth={2}
-          defaultModelExpandDepth={2}
-          displayOperationId={false}
-          displayRequestDuration={true}
-          filter={true}
-          showExtensions={true}
-          showCommonExtensions={true}
-          tryItOutEnabled={true}
-          requestInterceptor={(request: any) => {
-            return request;
-          }}
-          responseInterceptor={(response: any) => {
-            console.log('Swagger Response:', response);
-            return response;
-          }}
-        />
+            {isLoadingSpec ? (
+              <div className="flex items-center justify-center p-12 bg-white rounded-lg shadow-sm border">
+                <div className="text-center">
+                  <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full mb-4 shadow-lg animate-pulse">
+                    <span className="text-2xl">📚</span>
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-800 mb-2">Đang tải API spec...</h3>
+                  <p className="text-gray-600 mb-4">Đang lấy thông tin từ {selectedService}</p>
+                  <div className="flex items-center justify-center space-x-2">
+                    <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                    <span className="text-gray-500 text-sm">Đang xử lý...</span>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <SwaggerUI 
+                spec={spec || { openapi: '3.0.3', info: { title: 'Loading...', version: '1.0.0' } }}
+                docExpansion="list"
+                defaultModelsExpandDepth={2}
+                defaultModelExpandDepth={2}
+                displayOperationId={false}
+                displayRequestDuration={true}
+                filter={true}
+                showExtensions={true}
+                showCommonExtensions={true}
+                tryItOutEnabled={true}
+                requestInterceptor={(request: any) => {
+                  return request;
+                }}
+                responseInterceptor={(response: any) => {
+                  console.log('Swagger Response:', response);
+                  return response;
+                }}
+              />
+            )}
           </div>
         </div>
       </div>
