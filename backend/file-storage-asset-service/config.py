@@ -10,17 +10,12 @@ import motor.motor_asyncio
 import redis.asyncio as redis
 
 
-# Load .env files in priority order: .env.local > .env > default lookup
+# Load .env file
 _service_dir = Path(__file__).resolve().parent
-_env_local = _service_dir / "env" / ".env.local"
 _env_file = _service_dir / "env" / ".env"
 
-# Load .env.local first (highest priority)
-if _env_local.exists():
-	load_dotenv(dotenv_path=_env_local, override=False)
-	print(f"✅ Loaded .env.local from {_env_local}")
-# Then load .env if exists
-elif _env_file.exists():
+# Load .env if exists
+if _env_file.exists():
 	load_dotenv(dotenv_path=_env_file, override=False)
 	print(f"✅ Loaded .env from {_env_file}")
 # Finally fallback to default lookup (CWD)
