@@ -186,8 +186,14 @@ function Push-ToPrivate {
     
     Write-Step "PRIVATE" "Push code + env len private/$Branch..."
     
-    # Force-add .env files
-    $envFiles = Get-ChildItem -Path . -Recurse -Name ".env*" -File | Where-Object { $_ -notlike "*\node_modules\*" -and $_ -notlike "*\venv\*" -and $_ -notlike "*\target\*" }
+    # Force-add .env files (exclude backup directories)
+    $envFiles = Get-ChildItem -Path . -Recurse -Name ".env*" -File | Where-Object { 
+        $_ -notlike "*\node_modules\*" -and 
+        $_ -notlike "*\venv\*" -and 
+        $_ -notlike "*\target\*" -and 
+        $_ -notlike "*\.git-backup\*" -and
+        $_ -notlike "*\backup\*"
+    }
     
     if ($envFiles.Count -gt 0) {
         foreach ($envFile in $envFiles) {
