@@ -1,11 +1,12 @@
 # Docker Compose - Simplified Architecture (5 Services + Infrastructure)
 # Tên container: docgo
-# Kiến trúc tối giản: 5 services + MongoDB + Redis + Kafka
+# Kiến trúc tối giản: 5 services + MongoDB Atlas + Redis + Kafka
 
 services:
   # MongoDB Atlas - Database chính (Cloud)
-  # Sử dụng MongoDB Atlas thay vì MongoDB local
+  # Tất cả services kết nối trực tiếp với MongoDB Atlas
   # Connection: mongodb+srv://root:sapassword@devgo-docgo-cluster0.hsudzga.mongodb.net/?retryWrites=true&w=majority&appName=devgo-docgo-cluster0
+  # Databases: docgo_auth_service, docgo_contract_service, docgo_ai_service, docgo_file_service
 
   # Redis - Cache và Message Queue
   redis:
@@ -97,6 +98,19 @@ services:
       - /app/node_modules
       - /app/.next
       - npm_cache:/root/.npm
+    # CPU và Memory limits để tránh quá tải
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'      # Giới hạn tối đa 2 CPU cores
+          memory: 2G       # Giới hạn tối đa 2GB RAM
+        reservations:
+          cpus: '0.5'      # Đảm bảo tối thiểu 0.5 CPU core
+          memory: 512M     # Đảm bảo tối thiểu 512MB RAM
+    # Alternative: Sử dụng cpus và mem_limit (cho Docker Compose v2)
+    cpus: 2.0
+    mem_limit: 2g
+    mem_reservation: 512m
     command: >
       sh -c "npm install --cache /root/.npm && npm run dev -- -p 3000 -H 0.0.0.0"
     networks:
@@ -117,9 +131,14 @@ services:
       - backend/authentication-identity-service/env/.env
     environment:
       - SPRING_PROFILES_ACTIVE=dev
+      - MONGODB_ATLAS_URI=mongodb+srv://root:sapassword@devgo-docgo-cluster0.hsudzga.mongodb.net/docgo_auth_service?retryWrites=true&w=majority&appName=devgo-docgo-cluster0
     volumes:
       - ./backend/authentication-identity-service:/app
       - maven_cache:/root/.m2
+    # CPU và Memory limits cho Spring Boot service
+    cpus: 1.5
+    mem_limit: 1.5g
+    mem_reservation: 512m
     command: >
       sh -c "chmod +x ./mvnw && ./mvnw -DskipTests clean spring-boot:run -Dspring-boot.run.jvmArguments='-Dserver.port=8000'"
     depends_on:
@@ -144,9 +163,14 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=dev
       - MAVEN_OPTS=-Xmx2g -XX:+UseG1GC -XX:+UseStringDeduplication
+      - MONGODB_ATLAS_URI=mongodb+srv://root:sapassword@devgo-docgo-cluster0.hsudzga.mongodb.net/docgo_contract_service?retryWrites=true&w=majority&appName=devgo-docgo-cluster0
     volumes:
       - ./backend/contract-management-service:/app
       - maven_cache:/root/.m2
+    # CPU và Memory limits cho Contract Management Service
+    cpus: 2.0
+    mem_limit: 2g
+    mem_reservation: 1g
     command: >
       sh -c "chmod +x ./mvnw && ./mvnw --no-transfer-progress -T 1C -o -DskipTests clean spring-boot:run -Dspring-boot.run.jvmArguments='-Dserver.port=8000'"
     depends_on:
@@ -167,10 +191,15 @@ services:
       - backend/ai-processing-service/env/.env
     environment:
       - ENVIRONMENT=development
+      - MONGODB_ATLAS_URI=mongodb+srv://root:sapassword@devgo-docgo-cluster0.hsudzga.mongodb.net/docgo_ai_service?retryWrites=true&w=majority&appName=devgo-docgo-cluster0
     volumes:
       - ./backend/ai-processing-service:/app
       - ai_processing_results:/app/results
       - pip_cache:/root/.cache/pip
+    # CPU và Memory limits cho AI Processing Service (có thể CPU intensive)
+    cpus: 3.0
+    mem_limit: 3g
+    mem_reservation: 1g
     command: >
       sh -c "pip install -r requirements.txt && python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
     depends_on:
@@ -191,11 +220,16 @@ services:
       - backend/file-storage-asset-service/env/.env
     environment:
       - ENVIRONMENT=development
+      - MONGODB_ATLAS_URI=mongodb+srv://root:sapassword@devgo-docgo-cluster0.hsudzga.mongodb.net/docgo_file_service?retryWrites=true&w=majority&appName=devgo-docgo-cluster0
     volumes:
       - ./backend/file-storage-asset-service:/app
       - file_storage_uploads:/app/uploads
       - file_storage_temp:/app/temp
       - pip_cache:/root/.cache/pip
+    # CPU và Memory limits cho File Storage Service
+    cpus: 1.0
+    mem_limit: 1g
+    mem_reservation: 512m
     command: >
       sh -c "pip install -r requirements.txt && python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
     depends_on:
@@ -204,37 +238,14 @@ services:
     networks:
       - docgo_network
 
-  # MongoDB MCP Server - Port 8006
-  mongodb-mcp-server:
-    image: node:22-alpine
-    container_name: docgo-mongodb-mcp-server
-    restart: unless-stopped
-    working_dir: /app
-    ports:
-      - "8006:3000"
-    environment:
-      - MDB_MCP_CONNECTION_STRING=${MDB_MCP_CONNECTION_STRING}
-      - MDB_MCP_READ_ONLY=${MDB_MCP_READ_ONLY:-false}
-      - MDB_MCP_TRANSPORT=${MDB_MCP_TRANSPORT:-stdio}
-      - MDB_MCP_LOGGERS=${MDB_MCP_LOGGERS:-mcp,stderr}
-    env_file:
-      - ./mcp-server/mongodb/env/.env
-    volumes:
-      - ./mcp-server:/app
-      - npm_cache:/root/.npm
-    command: >
-      sh -c "npm install -g mongodb-mcp-server@latest && mongodb-mcp-server"
-    networks:
-      - docgo_network
-
-  # Google Cloud MCP Server - Port 8007
+  # Google Cloud MCP Server - Port 8006
   google-cloud-mcp-server:
     image: node:22-alpine
     container_name: docgo-google-cloud-mcp-server
     restart: unless-stopped
     working_dir: /app
     ports:
-      - "8007:3000"
+      - "8006:3000"
     environment:
       - GOOGLE_APPLICATION_CREDENTIALS=${GOOGLE_APPLICATION_CREDENTIALS}
       - GOOGLE_CLOUD_PROJECT=${GOOGLE_CLOUD_PROJECT}
@@ -245,6 +256,10 @@ services:
       - ./mcp-server/google-cloud:/app
       - ./credentials:/app/credentials
       - npm_cache:/root/.npm
+    # CPU và Memory limits cho Google Cloud MCP Server
+    cpus: 0.5
+    mem_limit: 512m
+    mem_reservation: 256m
     command: >
       sh -c "npm install && npm start"
     networks:

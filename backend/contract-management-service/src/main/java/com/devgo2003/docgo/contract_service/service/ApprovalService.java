@@ -77,7 +77,7 @@ public class ApprovalService {
     }
 
     /**
-     * Lấy approval đang pending theo contract ID
+     * Lấy approval đang PENDING_REVIEW theo contract ID
      */
     public List<Approval> getPendingApprovalsByContractId(String contractId) {
         return approvalRepository.findPendingApprovalsByContractId(contractId);
@@ -136,7 +136,7 @@ public class ApprovalService {
      * Lấy approval theo priority
      */
     public List<Approval> getApprovalsByPriority(Approval.ApprovalPriority priority) {
-        return approvalRepository.findByPriorityAndStatusAndIsDeletedFalse(priority, Approval.ApprovalStatus.PENDING);
+        return approvalRepository.findByPriorityAndStatusAndIsDeletedFalse(priority, Approval.ApprovalStatus.PENDING_REVIEW);
     }
 
     /**
@@ -359,7 +359,7 @@ public class ApprovalService {
     }
 
     /**
-     * Kiểm tra xem có approval nào đang pending cho contract không
+     * Kiểm tra xem có approval nào đang PENDING_REVIEW cho contract không
      */
     public boolean hasPendingApprovals(String contractId) {
         return approvalRepository.existsByContractIdAndStatusPending(contractId);

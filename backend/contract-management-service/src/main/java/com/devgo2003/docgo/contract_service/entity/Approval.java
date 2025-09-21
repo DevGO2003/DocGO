@@ -72,7 +72,7 @@ public class Approval extends BaseEntity {
 
     // Enums
     public enum ApprovalStatus {
-        PENDING, APPROVED, REJECTED, CANCELLED, EXPIRED
+        PENDING_REVIEW, APPROVED, REJECTED, CANCELLED, EXPIRED
     }
 
     public enum ApprovalPriority {
@@ -93,7 +93,7 @@ public class Approval extends BaseEntity {
         this.approverEmail = approverEmail;
         this.approverRole = approverRole;
         this.priority = priority;
-        this.status = ApprovalStatus.PENDING;
+        this.status = ApprovalStatus.PENDING_REVIEW;
         this.isRequired = true;
         this.reminderCount = 0;
     }
@@ -261,7 +261,7 @@ public class Approval extends BaseEntity {
     }
 
     public boolean isExpired() {
-        return dueDate != null && LocalDateTime.now().isAfter(dueDate) && status == ApprovalStatus.PENDING;
+        return dueDate != null && LocalDateTime.now().isAfter(dueDate) && status == ApprovalStatus.PENDING_REVIEW;
     }
 
     public void markAsExpired() {

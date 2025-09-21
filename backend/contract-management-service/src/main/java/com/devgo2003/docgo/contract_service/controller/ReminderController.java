@@ -33,7 +33,7 @@ public class ReminderController {
     @GetMapping
     @Operation(
         summary = "Lấy danh sách nhắc nhở (hợp nhất)",
-        description = "Hỗ trợ lọc qua query: contractId, status (PENDING|SENT|COMPLETED|CANCELLED|FAILED|ESCALATED), type, priority, scheduledFrom, scheduledTo, dueFrom, dueTo; aggregate=count|exists. Phân trang/sắp xếp: pageNumber, pageSize, sortBy(createdAt|scheduledAt), sortDirection."
+        description = "Hỗ trợ lọc qua query: contractId, status (PENDING_REVIEW|SENT|COMPLETED|CANCELLED|FAILED|ESCALATED), type, priority, scheduledFrom, scheduledTo, dueFrom, dueTo; aggregate=count|exists. Phân trang/sắp xếp: pageNumber, pageSize, sortBy(createdAt|scheduledAt), sortDirection."
     )
     public ResponseEntity<RestResponse<?>> getAllReminders(
             @RequestParam(defaultValue = "0") int pageNumber,
@@ -103,7 +103,7 @@ public class ReminderController {
 
         // List mode
         List<Reminder> reminders;
-        if (contractId != null && status == Reminder.ReminderStatus.PENDING) {
+        if (contractId != null && status == Reminder.ReminderStatus.PENDING_REVIEW) {
             reminders = reminderService.getPendingRemindersByContractId(contractId);
         } else if (contractId != null && status == Reminder.ReminderStatus.SENT) {
             reminders = reminderService.getSentRemindersByContractId(contractId);
@@ -321,7 +321,7 @@ public class ReminderController {
 
     // Duplicate method removed: getReminderById - already exists as getReminder above
 
-    // Deprecated nested pending endpoint removed. Use GET /reminders?contractId=...&status=PENDING
+    // Deprecated nested PENDING_REVIEW endpoint removed. Use GET /reminders?contractId=...&status=PENDING_REVIEW
 
     // Deprecated nested completed endpoint removed. Use GET /reminders?contractId=...&status=COMPLETED
 

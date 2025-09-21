@@ -198,3 +198,4 @@ export const useSearch = (options: UseSearchOptions = {}): UseSearchReturn => {
 };
 
 export default useSearch;
+

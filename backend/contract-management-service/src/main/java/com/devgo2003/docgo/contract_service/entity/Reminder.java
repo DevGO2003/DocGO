@@ -140,7 +140,7 @@ public class Reminder extends BaseEntity {
     }
 
     public enum ReminderStatus {
-        PENDING, SENT, ACKNOWLEDGED, COMPLETED, CANCELLED, FAILED, ESCALATED
+        PENDING_REVIEW, SENT, ACKNOWLEDGED, COMPLETED, CANCELLED, FAILED, ESCALATED
     }
 
     public enum RecurrencePattern {
@@ -160,7 +160,7 @@ public class Reminder extends BaseEntity {
         this.description = description;
         this.reminderType = reminderType;
         this.scheduledAt = scheduledAt;
-        this.status = ReminderStatus.PENDING;
+        this.status = ReminderStatus.PENDING_REVIEW;
         this.priority = ReminderPriority.MEDIUM;
         this.recurrencePattern = RecurrencePattern.NONE;
         this.isEscalated = false;
@@ -508,12 +508,12 @@ public class Reminder extends BaseEntity {
 
     public boolean isOverdue() {
         return dueDate != null && LocalDateTime.now().isAfter(dueDate) && 
-               (status == ReminderStatus.PENDING || status == ReminderStatus.SENT);
+               (status == ReminderStatus.PENDING_REVIEW || status == ReminderStatus.SENT);
     }
 
     public boolean canSend() {
         return sentCount < maxSendAttempts && 
-               (status == ReminderStatus.PENDING || status == ReminderStatus.FAILED);
+               (status == ReminderStatus.PENDING_REVIEW || status == ReminderStatus.FAILED);
     }
 
     public boolean isRecurring() {
@@ -531,7 +531,7 @@ public class Reminder extends BaseEntity {
     }
 
     public void resetForRecurrence() {
-        this.status = ReminderStatus.PENDING;
+        this.status = ReminderStatus.PENDING_REVIEW;
         this.sentCount = 0;
         this.isEscalated = false;
         this.escalationLevel = 0;

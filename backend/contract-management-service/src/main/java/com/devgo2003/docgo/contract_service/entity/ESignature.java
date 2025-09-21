@@ -134,7 +134,7 @@ public class ESignature extends BaseEntity {
     }
 
     public enum SignatureStatus {
-        PENDING, SIGNED, DECLINED, EXPIRED, CANCELLED, VERIFIED, FAILED_VERIFICATION
+        PENDING_REVIEW, SIGNED, DECLINED, EXPIRED, CANCELLED, VERIFIED, FAILED_VERIFICATION
     }
 
     public enum VerificationMethod {
@@ -155,7 +155,7 @@ public class ESignature extends BaseEntity {
         this.signerEmail = signerEmail;
         this.signerRole = signerRole;
         this.signatureType = signatureType;
-        this.status = SignatureStatus.PENDING;
+        this.status = SignatureStatus.PENDING_REVIEW;
         this.isRequired = true;
         this.verificationAttempts = 0;
         this.reminderSentCount = 0;
@@ -495,7 +495,7 @@ public class ESignature extends BaseEntity {
     }
 
     public boolean isExpired() {
-        return expiresAt != null && LocalDateTime.now().isAfter(expiresAt) && status == SignatureStatus.PENDING;
+        return expiresAt != null && LocalDateTime.now().isAfter(expiresAt) && status == SignatureStatus.PENDING_REVIEW;
     }
 
     public boolean canVerify() {

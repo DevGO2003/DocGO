@@ -136,3 +136,4 @@ export const isRTL = (code?: string) => {
 };
 
 export default i18n;
+

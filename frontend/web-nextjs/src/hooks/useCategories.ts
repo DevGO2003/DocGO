@@ -356,3 +356,4 @@ export const useCategories = (options: UseCategoriesOptions = {}): UseCategories
 };
 
 export default useCategories;
+

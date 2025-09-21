@@ -33,7 +33,7 @@ public class ApprovalController {
     @GetMapping
     @Operation(
         summary = "Lấy danh sách phê duyệt (hợp nhất)",
-        description = "Lọc: contractId, approverId, approverEmail, approverRole, status(PENDING|APPROVED|REJECTED|EXPIRED), priority, order, dueFrom/To. Sắp xếp: sortBy(createdAt|dueDate|order). Tổng hợp: aggregate=count|exists."
+        description = "Lọc: contractId, approverId, approverEmail, approverRole, status(PENDING_REVIEW|APPROVED|REJECTED|EXPIRED), priority, order, dueFrom/To. Sắp xếp: sortBy(createdAt|dueDate|order). Tổng hợp: aggregate=count|exists."
     )
     public ResponseEntity<RestResponse<?>> getAllApprovals(
             @RequestParam(defaultValue = "0") int pageNumber,
@@ -84,7 +84,7 @@ public class ApprovalController {
             }
             if ("exists".equals(agg)) {
                 boolean exists = false;
-                if (contractId != null && status == Approval.ApprovalStatus.PENDING) {
+                if (contractId != null && status == Approval.ApprovalStatus.PENDING_REVIEW) {
                     exists = approvalService.hasPendingApprovals(contractId);
                 } else if (contractId != null && status == Approval.ApprovalStatus.APPROVED) {
                     exists = approvalService.hasApprovedApprovals(contractId);
@@ -113,7 +113,7 @@ public class ApprovalController {
 
         // List mode
         List<Approval> approvals;
-        if (contractId != null && status == Approval.ApprovalStatus.PENDING) {
+        if (contractId != null && status == Approval.ApprovalStatus.PENDING_REVIEW) {
             approvals = approvalService.getPendingApprovalsByContractId(contractId);
         } else if (contractId != null && status == Approval.ApprovalStatus.APPROVED) {
             approvals = approvalService.getApprovedApprovalsByContractId(contractId);
@@ -219,7 +219,7 @@ public class ApprovalController {
             @RequestParam(required = false) Approval.ApprovalStatus status,
             @RequestParam(required = false) String approverRole) {
         boolean exists = false;
-        if (contractId != null && status == Approval.ApprovalStatus.PENDING) {
+        if (contractId != null && status == Approval.ApprovalStatus.PENDING_REVIEW) {
             exists = approvalService.hasPendingApprovals(contractId);
         } else if (contractId != null && status == Approval.ApprovalStatus.APPROVED) {
             exists = approvalService.hasApprovedApprovals(contractId);
@@ -342,7 +342,7 @@ public class ApprovalController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    // Removed deprecated nested pending endpoint. Use GET /approvals?contractId=...&status=PENDING
+    // Removed deprecated nested PENDING_REVIEW endpoint. Use GET /approvals?contractId=...&status=PENDING_REVIEW
 
     // Removed deprecated nested approved endpoint. Use GET /approvals?contractId=...&status=APPROVED
 
@@ -753,7 +753,7 @@ public class ApprovalController {
 
     // Deprecated nested count route removed: dùng GET /approvals?approverId=...&status=...&aggregate=count
 
-    // Deprecated nested exists route removed: dùng GET /approvals?contractId=...&status=PENDING&aggregate=exists
+    // Deprecated nested exists route removed: dùng GET /approvals?contractId=...&status=PENDING_REVIEW&aggregate=exists
 
     // Deprecated nested exists route removed: dùng GET /approvals?contractId=...&status=APPROVED&aggregate=exists
 
