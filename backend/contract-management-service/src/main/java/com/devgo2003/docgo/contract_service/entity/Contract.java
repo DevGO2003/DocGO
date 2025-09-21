@@ -1,5 +1,8 @@
 package com.devgo2003.docgo.contract_service.entity;
 
+import com.devgo2003.docgo.contract_service.enums.ContractCategory;
+import com.devgo2003.docgo.contract_service.enums.ContractStatus;
+import com.devgo2003.docgo.contract_service.enums.ContractType;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.domain.Persistable;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -56,8 +59,8 @@ public class Contract extends BaseEntity implements Persistable<String> {
     private String summary;
 
     @Field("contract_type")
-    @Size(max = 100, message = "Loại hợp đồng không được vượt quá 100 ký tự")
-    private String contractType;
+    @NotNull(message = "Loại hợp đồng không được để trống")
+    private ContractType contractType;
 
     @Field("risk_level")
     @Pattern(regexp = "^(LOW|MEDIUM|HIGH|CRITICAL)$", message = "Mức độ rủi ro phải là LOW, MEDIUM, HIGH hoặc CRITICAL")
@@ -135,10 +138,19 @@ public class Contract extends BaseEntity implements Persistable<String> {
     private LocalDateTime reviewDeadline;
     
     private List<String> tags;
+    
+    // Category fields
+    @Field("primary_category")
+    @NotNull(message = "Danh mục chính không được để trống")
+    private ContractCategory primaryCategory;
+    
+    @Field("secondary_categories")
+    private List<ContractCategory> secondaryCategories;
+    
+    @Field("category_tags")
+    private List<String> categoryTags;
 
-    public enum ContractStatus {
-        DRAFT, PENDING, PENDING_APPROVAL, APPROVED, ACTIVE, COMPLETED, EXPIRED, TERMINATED, ARCHIVED, CANCELLED, SUSPENDED
-    }
+    // Remove old enum - now using the new ContractStatus enum
 
     public enum ProcessingStatus {
         PENDING, PROCESSING, COMPLETED, FAILED

@@ -26,3 +26,8 @@ docker compose -f docker-compose.yml logs -f <service-name>
 - Kiểm tra trạng thái trước khi chạy `/start` hoặc `/docker-logs`
 - Sử dụng `/docker-down` để dừng tất cả services
 - Sử dụng `/docker-logs` để xem logs chi tiết
+
+
+
+
+

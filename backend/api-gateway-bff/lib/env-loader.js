@@ -3,17 +3,10 @@ const path = require('path');
 
 /**
  * Load environment variables from env directory
- * Priority: .env.local > .env > default
+ * Priority: .env > default
  */
 function loadEnvFiles() {
   const envDir = path.join(__dirname, '..', 'env');
-  
-  // Load .env.local first (highest priority)
-  const envLocalPath = path.join(envDir, '.env.local');
-  if (fs.existsSync(envLocalPath)) {
-    loadEnvFile(envLocalPath);
-    console.log('✅ Loaded .env.local from', envLocalPath);
-  }
   
   // Then load .env
   const envPath = path.join(envDir, '.env');

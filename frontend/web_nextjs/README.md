@@ -98,12 +98,12 @@ npm install
 ```
 
 ### 2. Cấu hình môi trường
-Tạo file `.env.local` từ `env.example`:
+Tạo file `.env` từ `env.example`:
 ```bash
-cp env.example .env.local
+cp env.example .env
 ```
 
-Cấu hình trong `.env.local`:
+Cấu hình trong `.env`:
 ```env
 # API Configuration
 NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
