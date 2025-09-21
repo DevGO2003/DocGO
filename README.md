@@ -14,15 +14,15 @@ Bảng dịch vụ đang chạy theo `docker-compose.yml` (host port → contain
 |---|---|---|---|
 | API Gateway BFF | 8000 | 8000 | http://localhost:8000/docs#/ |
 | Web Next.js | 3000 | 3000 | http://localhost:3000 |
-| Authentication Identity Service | 8001 | 8000 | http://localhost:8001/docs#/ |
-| Contract Management Service | 8002 | 8000 | http://localhost:8002/docs#/ |
-| AI Processing Service | 8003 | 8000 | http://localhost:8003/docs#/ |
-| File Storage Service | 8004 | 8000 | http://localhost:8004/docs#/ |
-| MongoDB MCP Server | 8005 | 3000 | http://localhost:8005 |
+| Authentication Identity Service | 8002 | 8000 | http://localhost:8002/docs#/ |
+| Contract Management Service | 8003 | 8000 | http://localhost:8003/docs#/ |
+| AI Processing Service | 8004 | 8000 | http://localhost:8004/docs#/ |
+| File Storage Service | 8005 | 8000 | http://localhost:8005/docs#/ |
+| Google Cloud MCP Server | 8006 | 3000 | http://localhost:8006 |
 | Redis | 6379 | 6379 | redis://localhost:6379 |
 | Kafka (PLAINTEXT) | 9092 | 9092 | PLAINTEXT://localhost:9092 |
 
-Số lượng service ứng dụng: 6 (web-nextjs, api-gateway-bff, authentication-identity-service, contract-management-service, ai-processing-service, file-storage-service) + hạ tầng (Redis, Kafka, MCP).
+Số lượng service ứng dụng: 6 (web-nextjs, api-gateway-bff, authentication-identity-service, contract-management-service, ai-processing-service, file-storage-service) + hạ tầng (Redis, Kafka, Google Cloud MCP) + MongoDB Atlas (Cloud).
 
 ### Auto-Redirect & Docs
 - Các backend service đều phục vụ tài liệu tại `/docs#/` (SpringDoc/FastAPI).
@@ -36,7 +36,7 @@ Số lượng service ứng dụng: 6 (web-nextjs, api-gateway-bff, authenticati
 - **Next.js** (TypeScript) - API Gateway BFF
 
 ### Database
-- **MariaDB** - Database chính
+- **MongoDB Atlas** - Database chính (Cloud)
 - **Redis** - Cache và session management
 
 ### AI & ML
@@ -115,11 +115,10 @@ python -m uvicorn main:app --host 0.0.0.0 --port 8000
 Tất cả các microservices đều có API documentation tự động tại `/docs`:
 
 - **API Gateway BFF**: http://localhost:8000/docs
-- **Authentication Service**: http://localhost:8001/docs
-- **User Management Service**: http://localhost:8002/docs
+- **Authentication Service**: http://localhost:8002/docs
 - **Contract Management Service**: http://localhost:8003/docs
-- **AI Processing Service**: http://localhost:8017/docs
-- **File Storage Service**: http://localhost:8012/docs
+- **AI Processing Service**: http://localhost:8004/docs
+- **File Storage Service**: http://localhost:8005/docs
 
 ## 🧪 Testing
 
@@ -138,10 +137,10 @@ Tất cả các microservices đều có API documentation tự động tại `/
 ```bash
 # Test docs/health
 curl http://localhost:8000/docs
-curl http://localhost:8001/docs
 curl http://localhost:8002/docs
 curl http://localhost:8003/docs
 curl http://localhost:8004/docs
+curl http://localhost:8005/docs
 ```
 
 ## 🔧 Cấu hình
@@ -153,22 +152,21 @@ Mỗi service có file `.env.example` riêng. Copy và cấu hình theo môi tr�
 # Copy environment template
 cp backend/[service-name]/env_example.txt backend/[service-name]/.env
 
-# Cấu hình database
-SPRING_DATASOURCE_URL=jdbc:mariadb://localhost:3306/docgo
-SPRING_DATASOURCE_USERNAME=root
-SPRING_DATASOURCE_PASSWORD=your_password
+# Cấu hình database (MongoDB Atlas)
+MONGODB_ATLAS_URI=mongodb+srv://root:sapassword@devgo-docgo-cluster0.hsudzga.mongodb.net/
 ```
 
-### Database Setup (nếu sử dụng MariaDB nội bộ riêng)
-```sql
--- Tạo database
-CREATE DATABASE docgo;
-CREATE DATABASE docgo_contract_service;
-CREATE DATABASE docgo_user_management_service;
+### Database Setup (MongoDB Atlas)
+```bash
+# Tất cả services đã được cấu hình để kết nối trực tiếp với MongoDB Atlas
+# Connection string: mongodb+srv://root:sapassword@devgo-docgo-cluster0.hsudzga.mongodb.net/
+# Databases được tạo tự động:
+# - docgo_auth_service (Authentication Identity Service)
+# - docgo_contract_service (Contract Management Service)  
+# - docgo_ai_service (AI Processing Service)
+# - docgo_file_service (File Storage Service)
 
--- Import schema (nếu có)
-mysql -u root -p docgo < database/init_user_db.sql
-mysql -u root -p docgo_contract_service < backend/contract-management-service/database/init_contract_service.sql
+# Không cần cài đặt database local, tất cả đều sử dụng MongoDB Atlas
 ```
 
 ## 📁 Cấu trúc Project

@@ -42,9 +42,9 @@ public interface ApprovalRepository extends MongoRepository<Approval, String> {
     List<Approval> findByContractIdAndPriorityAndIsDeletedFalse(String contractId, Approval.ApprovalPriority priority);
 
     /**
-     * Tìm approval đang pending theo contract ID
+     * Tìm approval đang PENDING_REVIEW theo contract ID
      */
-    @Query("{ 'contractId': ?0, 'status': 'PENDING', 'isDeleted': false }")
+    @Query("{ 'contractId': ?0, 'status': 'PENDING_REVIEW', 'isDeleted': false }")
     List<Approval> findPendingApprovalsByContractId(String contractId);
 
     /**
@@ -92,13 +92,13 @@ public interface ApprovalRepository extends MongoRepository<Approval, String> {
     /**
      * Tìm approval sắp hết hạn
      */
-    @Query("{ 'dueDate': { $lte: ?0 }, 'status': 'PENDING', 'isDeleted': false }")
+    @Query("{ 'dueDate': { $lte: ?0 }, 'status': 'PENDING_REVIEW', 'isDeleted': false }")
     List<Approval> findExpiringApprovals(LocalDateTime dueDate);
 
     /**
      * Tìm approval đã hết hạn
      */
-    @Query("{ 'dueDate': { $lt: ?0 }, 'status': 'PENDING', 'isDeleted': false }")
+    @Query("{ 'dueDate': { $lt: ?0 }, 'status': 'PENDING_REVIEW', 'isDeleted': false }")
     List<Approval> findExpiredApprovals(LocalDateTime currentTime);
 
     /**
@@ -176,7 +176,7 @@ public interface ApprovalRepository extends MongoRepository<Approval, String> {
     /**
      * Tìm approval có reminder count lớn hơn giá trị cho trước
      */
-    @Query("{ 'reminderCount': { $gt: ?0 }, 'status': 'PENDING', 'isDeleted': false }")
+    @Query("{ 'reminderCount': { $gt: ?0 }, 'status': 'PENDING_REVIEW', 'isDeleted': false }")
     List<Approval> findApprovalsWithHighReminderCount(Integer reminderCount);
 
     /**
@@ -190,9 +190,9 @@ public interface ApprovalRepository extends MongoRepository<Approval, String> {
     List<Approval> findByContractIdAndApproverRoleAndStatusAndIsDeletedFalse(String contractId, String approverRole, Approval.ApprovalStatus status);
 
     /**
-     * Kiểm tra xem có approval nào đang pending cho contract không
+     * Kiểm tra xem có approval nào đang PENDING_REVIEW cho contract không
      */
-    @Query("{ 'contractId': ?0, 'status': 'PENDING', 'isDeleted': false }")
+    @Query("{ 'contractId': ?0, 'status': 'PENDING_REVIEW', 'isDeleted': false }")
     boolean existsByContractIdAndStatusPending(String contractId);
 
     /**
@@ -228,7 +228,7 @@ public interface ApprovalRepository extends MongoRepository<Approval, String> {
     /**
      * Tìm approval theo contract ID và due date sắp tới
      */
-    @Query("{ 'contractId': ?0, 'dueDate': { $lte: ?1 }, 'status': 'PENDING', 'isDeleted': false }")
+    @Query("{ 'contractId': ?0, 'dueDate': { $lte: ?1 }, 'status': 'PENDING_REVIEW', 'isDeleted': false }")
     List<Approval> findUpcomingDueApprovalsByContractId(String contractId, LocalDateTime dueDate);
 
     /**
@@ -240,6 +240,6 @@ public interface ApprovalRepository extends MongoRepository<Approval, String> {
     /**
      * Tìm approval theo contract ID và chưa được notify
      */
-    @Query("{ 'contractId': ?0, 'notifiedAt': { $exists: false }, 'status': 'PENDING', 'isDeleted': false }")
+    @Query("{ 'contractId': ?0, 'notifiedAt': { $exists: false }, 'status': 'PENDING_REVIEW', 'isDeleted': false }")
     List<Approval> findUnnotifiedApprovalsByContractId(String contractId);
 }

@@ -226,3 +226,4 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({
 };
 
 export default GlobalSearch;
+

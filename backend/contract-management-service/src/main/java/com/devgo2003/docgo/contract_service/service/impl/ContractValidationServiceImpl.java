@@ -259,16 +259,16 @@ public class ContractValidationServiceImpl implements IContractValidationService
         
         // Define valid status transitions
         if ("DRAFT".equals(currentStatus)) {
-            if (!List.of("PENDING", "DRAFT").contains(newStatus)) {
-                throw new InvalidInputException("Draft contracts can only transition to PENDING or remain DRAFT");
+            if (!List.of("PENDING_REVIEW", "DRAFT").contains(newStatus)) {
+                throw new InvalidInputException("Draft contracts can only transition to PENDING_REVIEW or remain DRAFT");
             }
-        } else if ("PENDING".equals(currentStatus)) {
-            if (!List.of("PENDING_APPROVAL", "PENDING").contains(newStatus)) {
-                throw new InvalidInputException("Pending contracts can only transition to PENDING_APPROVAL or remain PENDING");
+        } else if ("PENDING_REVIEW".equals(currentStatus)) {
+            if (!List.of("PENDING_REVIEW", "PENDING_REVIEW").contains(newStatus)) {
+                throw new InvalidInputException("PENDING_REVIEW contracts can only transition to PENDING_REVIEW or remain PENDING_REVIEW");
             }
-        } else if ("PENDING_APPROVAL".equals(currentStatus)) {
-            if (!List.of("ACTIVE", "PENDING_APPROVAL").contains(newStatus)) {
-                throw new InvalidInputException("Pending approval contracts can only transition to ACTIVE or remain PENDING_APPROVAL");
+        } else if ("PENDING_REVIEW".equals(currentStatus)) {
+            if (!List.of("ACTIVE", "PENDING_REVIEW").contains(newStatus)) {
+                throw new InvalidInputException("PENDING_REVIEW approval contracts can only transition to ACTIVE or remain PENDING_REVIEW");
             }
         } else if ("ACTIVE".equals(currentStatus)) {
             if (!List.of("EXPIRED", "ARCHIVED", "ACTIVE").contains(newStatus)) {

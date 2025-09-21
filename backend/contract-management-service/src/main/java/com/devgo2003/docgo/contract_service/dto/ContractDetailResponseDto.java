@@ -72,7 +72,7 @@ public class ContractDetailResponseDto {
                 .contractNumber(contract.getContractNumber())
                 .title(contract.getTitle())
                 .status(contract.getStatus().name())
-                .contractType(contract.getContractType())
+                .contractType(contract.getContractType().getValue())
                 .riskLevel(contract.getRiskLevel())
                 .keyTerms(new ArrayList<>())
                 .favorableClauses(new ArrayList<>())

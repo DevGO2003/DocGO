@@ -19,7 +19,7 @@ public interface ReminderRepository extends MongoRepository<Reminder, String> {
     
     List<Reminder> findByCreatedByAndIsDeletedFalse(String createdBy);
     
-    @Query("{ 'contractId': ?0, 'status': 'PENDING', 'isDeleted': false }")
+    @Query("{ 'contractId': ?0, 'status': 'PENDING_REVIEW', 'isDeleted': false }")
     List<Reminder> findPendingRemindersByContractId(String contractId);
     
     @Query("{ 'contractId': ?0, 'status': 'SENT', 'isDeleted': false }")
@@ -63,13 +63,13 @@ public interface ReminderRepository extends MongoRepository<Reminder, String> {
     @Query("{ 'contractId': ?0, 'isDeleted': false }")
     List<Reminder> findByContractIdOrderByCreatedAtDesc(String contractId);
     
-    @Query("{ 'scheduledAt': { $lte: ?0 }, 'status': 'PENDING', 'isDeleted': false }")
+    @Query("{ 'scheduledAt': { $lte: ?0 }, 'status': 'PENDING_REVIEW', 'isDeleted': false }")
     List<Reminder> findDueReminders(LocalDateTime currentTime);
     
-    @Query("{ 'scheduledAt': { $lte: ?0 }, 'status': 'PENDING', 'isDeleted': false }")
+    @Query("{ 'scheduledAt': { $lte: ?0 }, 'status': 'PENDING_REVIEW', 'isDeleted': false }")
     List<Reminder> findOverdueReminders(LocalDateTime currentTime);
     
-    @Query("{ 'dueDate': { $lte: ?0 }, 'status': { $in: ['PENDING', 'SENT'] }, 'isDeleted': false }")
+    @Query("{ 'dueDate': { $lte: ?0 }, 'status': { $in: ['PENDING_REVIEW', 'SENT'] }, 'isDeleted': false }")
     List<Reminder> findOverdueRemindersByDueDate(LocalDateTime currentTime);
     
     @Query("{ 'scheduledAt': { $gte: ?0, $lte: ?1 }, 'isDeleted': false }")
@@ -110,7 +110,7 @@ public interface ReminderRepository extends MongoRepository<Reminder, String> {
     
     long countByCreatedByAndIsDeletedFalse(String createdBy);
     
-    @Query("{ 'contractId': ?0, 'status': 'PENDING', 'isDeleted': false }")
+    @Query("{ 'contractId': ?0, 'status': 'PENDING_REVIEW', 'isDeleted': false }")
     long countPendingRemindersByContractId(String contractId);
     
     @Query("{ 'contractId': ?0, 'status': 'SENT', 'isDeleted': false }")
@@ -150,7 +150,7 @@ public interface ReminderRepository extends MongoRepository<Reminder, String> {
     
     boolean existsByContractIdAndIsDeletedFalse(String contractId);
     
-    @Query("{ 'contractId': ?0, 'status': 'PENDING', 'isDeleted': false }")
+    @Query("{ 'contractId': ?0, 'status': 'PENDING_REVIEW', 'isDeleted': false }")
     boolean existsPendingRemindersByContractId(String contractId);
     
     @Query("{ 'contractId': ?0, 'status': 'SENT', 'isDeleted': false }")

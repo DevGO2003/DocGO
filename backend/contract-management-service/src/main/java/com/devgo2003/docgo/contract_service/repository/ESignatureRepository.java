@@ -23,7 +23,7 @@ public interface ESignatureRepository extends MongoRepository<ESignature, String
     
     List<ESignature> findByVerificationMethodAndIsDeletedFalse(ESignature.VerificationMethod verificationMethod);
     
-    @Query("{ 'contractId': ?0, 'status': 'PENDING', 'isDeleted': false }")
+    @Query("{ 'contractId': ?0, 'status': 'PENDING_REVIEW', 'isDeleted': false }")
     List<ESignature> findPendingSignaturesByContractId(String contractId);
     
     @Query("{ 'contractId': ?0, 'status': 'SIGNED', 'isDeleted': false }")
@@ -68,16 +68,16 @@ public interface ESignatureRepository extends MongoRepository<ESignature, String
     @Query("{ 'signedAt': { $gte: ?0, $lte: ?1 }, 'status': 'SIGNED', 'isDeleted': false }")
     List<ESignature> findBySignedAtBetween(LocalDateTime startDate, LocalDateTime endDate);
     
-    @Query("{ 'expiresAt': { $lte: ?0 }, 'status': 'PENDING', 'isDeleted': false }")
+    @Query("{ 'expiresAt': { $lte: ?0 }, 'status': 'PENDING_REVIEW', 'isDeleted': false }")
     List<ESignature> findExpiredSignatures(LocalDateTime currentTime);
     
-    @Query("{ 'expiresAt': { $lte: ?0 }, 'status': 'PENDING', 'isDeleted': false }")
+    @Query("{ 'expiresAt': { $lte: ?0 }, 'status': 'PENDING_REVIEW', 'isDeleted': false }")
     List<ESignature> findExpiringSignatures(LocalDateTime dueDate);
     
     @Query("{ 'verificationAttempts': { $gte: ?0 }, 'isDeleted': false }")
     List<ESignature> findSignaturesWithHighVerificationAttempts(Integer maxAttempts);
     
-    @Query("{ 'reminderSentCount': { $gt: ?0 }, 'status': 'PENDING', 'isDeleted': false }")
+    @Query("{ 'reminderSentCount': { $gt: ?0 }, 'status': 'PENDING_REVIEW', 'isDeleted': false }")
     List<ESignature> findSignaturesWithReminders(Integer reminderCount);
     
     @Query("{ 'contractId': ?0, 'certificateIssuer': ?1, 'isDeleted': false }")
@@ -95,7 +95,7 @@ public interface ESignatureRepository extends MongoRepository<ESignature, String
     @Query("{ 'contractId': ?0, 'verificationCode': ?1, 'isDeleted': false }")
     List<ESignature> findByContractIdAndVerificationCode(String contractId, String verificationCode);
     
-    @Query("{ 'contractId': ?0, 'status': 'PENDING', 'isRequired': true, 'isDeleted': false }")
+    @Query("{ 'contractId': ?0, 'status': 'PENDING_REVIEW', 'isRequired': true, 'isDeleted': false }")
     List<ESignature> findPendingRequiredSignaturesByContractId(String contractId);
     
     @Query("{ 'contractId': ?0, 'status': 'SIGNED', 'isRequired': true, 'isDeleted': false }")
@@ -110,7 +110,7 @@ public interface ESignatureRepository extends MongoRepository<ESignature, String
     @Query("{ 'contractId': ?0, 'status': 'VERIFIED', 'isRequired': true, 'isDeleted': false }")
     List<ESignature> findVerifiedRequiredSignaturesByContractId(String contractId);
     
-    @Query("{ 'contractId': ?0, 'status': 'PENDING', 'isRequired': false, 'isDeleted': false }")
+    @Query("{ 'contractId': ?0, 'status': 'PENDING_REVIEW', 'isRequired': false, 'isDeleted': false }")
     List<ESignature> findPendingOptionalSignaturesByContractId(String contractId);
     
     @Query("{ 'contractId': ?0, 'status': 'SIGNED', 'isRequired': false, 'isDeleted': false }")
@@ -131,7 +131,7 @@ public interface ESignatureRepository extends MongoRepository<ESignature, String
     
     long countBySignerIdAndIsDeletedFalse(String signerId);
     
-    @Query("{ 'contractId': ?0, 'status': 'PENDING', 'isDeleted': false }")
+    @Query("{ 'contractId': ?0, 'status': 'PENDING_REVIEW', 'isDeleted': false }")
     long countPendingSignaturesByContractId(String contractId);
     
     @Query("{ 'contractId': ?0, 'status': 'SIGNED', 'isDeleted': false }")
@@ -170,7 +170,7 @@ public interface ESignatureRepository extends MongoRepository<ESignature, String
     
     boolean existsByContractIdAndIsDeletedFalse(String contractId);
     
-    @Query("{ 'contractId': ?0, 'status': 'PENDING', 'isDeleted': false }")
+    @Query("{ 'contractId': ?0, 'status': 'PENDING_REVIEW', 'isDeleted': false }")
     boolean existsPendingSignaturesByContractId(String contractId);
     
     @Query("{ 'contractId': ?0, 'status': 'SIGNED', 'isDeleted': false }")

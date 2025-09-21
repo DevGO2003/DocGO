@@ -249,3 +249,4 @@ class SearchService {
 // Export singleton instance
 export const searchService = new SearchService();
 export default searchService;
+

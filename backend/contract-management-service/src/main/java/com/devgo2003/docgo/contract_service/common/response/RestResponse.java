@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.ZonedDateTime;
+import java.util.UUID;
 
 @Data
 @Builder
@@ -22,4 +23,28 @@ public class RestResponse<T> {
     private ZonedDateTime timestamp;
     private String requestId;
     private String path;
+    
+    public static <T> RestResponse<T> success(T data) {
+        return RestResponse.<T>builder()
+                .apiVersion("v1")
+                .statusCode(200)
+                .shortMessage("Success")
+                .description("Operation completed successfully")
+                .data(data)
+                .timestamp(ZonedDateTime.now())
+                .requestId(UUID.randomUUID().toString())
+                .build();
+    }
+    
+    public static <T> RestResponse<T> success(T data, String description) {
+        return RestResponse.<T>builder()
+                .apiVersion("v1")
+                .statusCode(200)
+                .shortMessage("Success")
+                .description(description)
+                .data(data)
+                .timestamp(ZonedDateTime.now())
+                .requestId(UUID.randomUUID().toString())
+                .build();
+    }
 }

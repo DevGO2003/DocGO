@@ -3,6 +3,8 @@ package com.devgo2003.docgo.contract_service.service.impl;
 import com.devgo2003.docgo.contract_service.dto.AiEventDto;
 import com.devgo2003.docgo.contract_service.service.IAiEventProcessingService;
 import com.devgo2003.docgo.contract_service.entity.Contract;
+import com.devgo2003.docgo.contract_service.enums.ContractStatus;
+import com.devgo2003.docgo.contract_service.enums.ContractType;
 import com.devgo2003.docgo.contract_service.entity.ContractParty;
 import com.devgo2003.docgo.contract_service.entity.ContractSummary;
 import com.devgo2003.docgo.contract_service.repository.ContractRepository;
@@ -77,11 +79,11 @@ public class AiEventProcessingServiceImpl implements IAiEventProcessingService {
         // Cập nhật thông tin cơ bản
         if (contract.getId() == null) {
             contract.setContractNumber("CONTRACT-" + System.currentTimeMillis());
-            contract.setStatus(Contract.ContractStatus.DRAFT);
+            contract.setStatus(ContractStatus.DRAFT);
         }
         
         contract.setTitle(summary.getTitle());
-        contract.setTags(objectMapper.writeValueAsString(summary.getTag()));
+        contract.setTags(summary.getTag());
         contract.setContractType(extractContractType(summary.getTag()));
         contract.setContractObject(summary.getObject());
         contract.setEffectiveDate(summary.getEffectiveDate());
@@ -158,21 +160,21 @@ public class AiEventProcessingServiceImpl implements IAiEventProcessingService {
         summaryRepository.save(contractSummary);
     }
 
-    private String extractContractType(List<String> tags) {
+    private ContractType extractContractType(List<String> tags) {
         if (tags == null || tags.isEmpty()) {
-            return "GENERAL";
+            return ContractType.GENERAL;
         }
         
         // Logic để extract contract type từ tags
         for (String tag : tags) {
-            if (tag.contains("service")) return "SERVICE_AGREEMENT";
-            if (tag.contains("purchase")) return "PURCHASE_AGREEMENT";
-            if (tag.contains("employment")) return "EMPLOYMENT_CONTRACT";
-            if (tag.contains("lease")) return "LEASE_AGREEMENT";
-            if (tag.contains("nda")) return "NDA";
+            if (tag.contains("service")) return ContractType.SERVICE_AGREEMENT;
+            if (tag.contains("purchase")) return ContractType.PURCHASE_AGREEMENT;
+            if (tag.contains("employment")) return ContractType.EMPLOYMENT_CONTRACT;
+            if (tag.contains("lease")) return ContractType.LEASE_AGREEMENT;
+            if (tag.contains("nda")) return ContractType.NDA;
         }
         
-        return "GENERAL";
+        return ContractType.GENERAL;
     }
 
     private String combineClauses(AiEventDto.ContractSummaryDto summary) throws JsonProcessingException {

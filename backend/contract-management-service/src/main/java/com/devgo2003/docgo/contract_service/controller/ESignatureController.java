@@ -35,7 +35,7 @@ public class ESignatureController {
     @GetMapping
     @Operation(
         summary = "Lấy danh sách e-signature (hợp nhất)",
-        description = "Hỗ trợ lọc: contractId, signerId, signerEmail, status(PENDING|SIGNED|DECLINED|EXPIRED|VERIFIED), type, verificationMethod, required(true/false). Khoảng thời gian: signedFrom/signedTo. Sắp xếp: sortBy(signedAt|createdAt). Tổng hợp: aggregate=count|exists."
+        description = "Hỗ trợ lọc: contractId, signerId, signerEmail, status(PENDING_REVIEW|SIGNED|DECLINED|EXPIRED|VERIFIED), type, verificationMethod, required(true/false). Khoảng thời gian: signedFrom/signedTo. Sắp xếp: sortBy(signedAt|createdAt). Tổng hợp: aggregate=count|exists."
     )
     public ResponseEntity<RestResponse<?>> getAllESignatures(
             @RequestParam(defaultValue = "0") int pageNumber,
@@ -117,7 +117,7 @@ public class ESignatureController {
             eSignatures = eSignatureService.getESignaturesBySignatureType(type);
         } else if (verificationMethod != null) {
             eSignatures = eSignatureService.getESignaturesByVerificationMethod(verificationMethod);
-        } else if (contractId != null && status == ESignature.SignatureStatus.PENDING) {
+        } else if (contractId != null && status == ESignature.SignatureStatus.PENDING_REVIEW) {
             eSignatures = eSignatureService.getPendingSignaturesByContractId(contractId);
         } else if (contractId != null && status == ESignature.SignatureStatus.SIGNED) {
             eSignatures = eSignatureService.getSignedSignaturesByContractId(contractId);
@@ -280,7 +280,7 @@ public class ESignatureController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    // Deprecated nested status route removed: dùng GET /esignatures?contractId=...&status=PENDING
+    // Deprecated nested status route removed: dùng GET /esignatures?contractId=...&status=PENDING_REVIEW
 
     // Deprecated nested status route removed: dùng GET /esignatures?contractId=...&status=SIGNED
 
@@ -984,8 +984,8 @@ public class ESignatureController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @GetMapping("/contracts/{contractId}/esignatures/count-pending")
-    @Operation(summary = "(Deprecated) Đếm e-signature pending", description = "Dùng GET /esignatures?contractId=...&status=PENDING&aggregate=count", deprecated = true)
+    @GetMapping("/contracts/{contractId}/esignatures/count-PENDING_REVIEW")
+    @Operation(summary = "(Deprecated) Đếm e-signature PENDING_REVIEW", description = "Dùng GET /esignatures?contractId=...&status=PENDING_REVIEW&aggregate=count", deprecated = true)
     public ResponseEntity<RestResponse<Long>> countPendingSignaturesByContractId(@PathVariable String contractId) {
         long count = eSignatureService.countPendingSignaturesByContractId(contractId);
         
@@ -993,7 +993,7 @@ public class ESignatureController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Đếm số e-signature pending thành công.")
+            .description("Đếm số e-signature PENDING_REVIEW thành công.")
             .data(count)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1212,8 +1212,8 @@ public class ESignatureController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @GetMapping("/contracts/{contractId}/esignatures/exists-pending")
-    @Operation(summary = "Kiểm tra có e-signature pending", description = "Kiểm tra contract có e-signature pending không")
+    @GetMapping("/contracts/{contractId}/esignatures/exists-PENDING_REVIEW")
+    @Operation(summary = "Kiểm tra có e-signature PENDING_REVIEW", description = "Kiểm tra contract có e-signature PENDING_REVIEW không")
     public ResponseEntity<RestResponse<Boolean>> existsPendingSignaturesByContractId(@PathVariable String contractId) {
         boolean exists = eSignatureService.existsPendingSignaturesByContractId(contractId);
         
@@ -1221,7 +1221,7 @@ public class ESignatureController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Kiểm tra có e-signature pending thành công.")
+            .description("Kiểm tra có e-signature PENDING_REVIEW thành công.")
             .data(exists)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
