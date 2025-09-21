@@ -11,6 +11,7 @@ Khi người dùng gặp vấn đề, command này sẽ:
 
 ### 1. 🔍 Điều tra nguyên nhân
 - Phân tích lỗi từ logs, console, network
+- **Đọc Docker logs** để xác định lỗi container
 - Xác định file/function gây ra vấn đề
 - Tìm hiểu context và dependencies
 
@@ -39,20 +40,127 @@ Khi người dùng gặp vấn đề, command này sẽ:
 - **Cách sửa lỗi** cụ thể cho từng trường hợp
 - **Checklist kiểm tra** sau khi thực hiện
 
+### 6. 🐳 Docker Troubleshooting (Bổ sung)
+Khi vấn đề liên quan đến Docker containers:
+
+#### 6.1. Kiểm tra trạng thái container
+```bash
+# Xem tất cả containers
+docker ps -a
+
+# Xem containers đang chạy
+docker ps
+
+# Kiểm tra trạng thái cụ thể
+docker inspect <container-name>
+```
+
+#### 6.2. Đọc logs chi tiết
+```bash
+# Logs đầy đủ
+docker logs <container-name>
+
+# 50 dòng cuối cùng
+docker logs --tail 50 <container-name>
+
+# Logs từ 1 giờ trước
+docker logs --since 1h <container-name>
+
+# Logs real-time
+docker logs -f <container-name>
+
+# Logs với timestamp
+docker logs -t <container-name>
+```
+
+#### 6.3. Phân tích lỗi phổ biến
+- **Container không khởi động**: Kiểm tra port conflict, volume mount, environment variables
+- **Container restart liên tục**: Phân tích exit code và error messages
+- **Network issues**: Kiểm tra Docker network và port mapping
+- **Volume mount issues**: Kiểm tra quyền truy cập và đường dẫn
+- **Environment variables**: Kiểm tra .env files và docker-compose.yml
+
+#### 6.4. Debug commands
+```bash
+# Vào trong container đang chạy
+docker exec -it <container-name> /bin/bash
+
+# Xem resource usage
+docker stats <container-name>
+
+# Kiểm tra network
+docker network ls
+docker network inspect <network-name>
+
+# Kiểm tra volumes
+docker volume ls
+docker volume inspect <volume-name>
+```
+
 ## Ví dụ sử dụng
 ```
 ask: Tại sao trang contracts không load được dữ liệu?
 ask: Lỗi 500 Internal Server Error khi gọi API
 ask: Performance chậm khi load danh sách hợp đồng
+ask: Container docgo-ai-processing-service không khởi động được
+ask: Docker service bị restart liên tục
 ```
 
 ## Kết quả mong đợi
 - 📊 **Phân tích chi tiết** nguyên nhân
+- 🐳 **Docker logs analysis** (nếu có container liên quan)
 - 📍 **Xác định vị trí** vấn đề cụ thể
 - 💡 **Bảng so sánh** các phương án
 - ⭐ **Khuyến nghị** phương án tốt nhất
 - ⚠️ **Cảnh báo rủi ro** và cách xử lý
 - 🚫 **KHÔNG thay đổi** code hay database
+
+## 🔧 Docker Commands Reference
+Khi sử dụng `/ask` với Docker issues, có thể tham khảo các lệnh sau:
+
+### Kiểm tra trạng thái
+```bash
+# Xem tất cả containers
+docker ps -a
+
+# Xem containers đang chạy
+docker ps
+
+# Kiểm tra trạng thái cụ thể
+docker inspect <container-name>
+```
+
+### Đọc logs
+```bash
+# Logs đầy đủ
+docker logs <container-name>
+
+# 50 dòng cuối cùng
+docker logs --tail 50 <container-name>
+
+# Logs từ 1 giờ trước
+docker logs --since 1h <container-name>
+
+# Logs real-time
+docker logs -f <container-name>
+```
+
+### Debug và troubleshoot
+```bash
+# Vào trong container
+docker exec -it <container-name> /bin/bash
+
+# Xem resource usage
+docker stats <container-name>
+
+# Kiểm tra network
+docker network ls
+docker network inspect <network-name>
+
+# Kiểm tra volumes
+docker volume ls
+docker volume inspect <volume-name>
+```
 
 
 ## Prompt mẫu cho AI Agent Chat
@@ -65,22 +173,30 @@ Bối cảnh:
 
 Yêu cầu thực hiện:
 1) Điều tra nguyên nhân (triệu chứng, log, network, cấu hình liên quan).
-2) Xác định vị trí vấn đề (file, hàm, endpoint, tham số, controller/router).
-3) Đề xuất tối thiểu 3 phương án (bảng: Mô tả, Ưu/nhược, Độ khó, Thời gian, Chi phí).
-4) Chỉ ra Best Choice + lý do, rủi ro, và checklist các bước thực hiện.
-5) **CẢNH BÁO RỦI RO**: Liệt kê các lỗi có thể xảy ra khi thực hiện Best Choice:
+2) **Đọc Docker logs** nếu vấn đề liên quan đến container:
+   - `docker logs <container-name>` để xem logs chi tiết
+   - `docker logs --tail 50 <container-name>` để xem 50 dòng cuối
+   - `docker logs --since 1h <container-name>` để xem logs 1 giờ qua
+   - Phân tích error messages, stack traces, và warning
+   - Kiểm tra exit codes và restart patterns
+3) Xác định vị trí vấn đề (file, hàm, endpoint, tham số, controller/router).
+4) Đề xuất tối thiểu 3 phương án (bảng: Mô tả, Ưu/nhược, Độ khó, Thời gian, Chi phí).
+5) Chỉ ra Best Choice + lý do, rủi ro, và checklist các bước thực hiện.
+6) **CẢNH BÁO RỦI RO**: Liệt kê các lỗi có thể xảy ra khi thực hiện Best Choice:
    - Lỗi import/export khi di chuyển file
    - Lỗi dependency/classpath
    - Lỗi configuration/endpoint
    - Lỗi database migration
+   - Lỗi Docker container (port conflict, volume mount, environment variables)
    - Cách sửa từng loại lỗi cụ thể
-6) Tuyệt đối không thay đổi code/database. Nếu cần validate, chỉ đưa lệnh kiểm tra (không tự chạy).
+7) Tuyệt đối không thay đổi code/database. Nếu cần validate, chỉ đưa lệnh kiểm tra (không tự chạy).
 
 Đầu vào:
 <dán lỗi/triệu chứng/ngữ cảnh ở đây>
 
 Đầu ra bắt buộc:
 - Phân tích ngắn gọn nguyên nhân gốc rễ
+- **Docker logs analysis** (nếu có container liên quan)
 - Vị trí lỗi (file/hàm/endpoint/dòng nếu xác định được)
 - Bảng phương án so sánh
 - Best Choice + checklist bước làm

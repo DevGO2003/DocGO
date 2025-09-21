@@ -86,7 +86,7 @@ public class Contract extends BaseEntity implements Persistable<String> {
     private Boolean aiProcessed = false;
 
     @Field("processing_status")
-    private ProcessingStatus processingStatus = ProcessingStatus.PENDING;
+    private ProcessingStatus processingStatus = ProcessingStatus.PENDING_REVIEW;
 
     // New fields from updated schema
     @Field("contract_object")
@@ -153,7 +153,7 @@ public class Contract extends BaseEntity implements Persistable<String> {
     // Remove old enum - now using the new ContractStatus enum
 
     public enum ProcessingStatus {
-        PENDING, PROCESSING, COMPLETED, FAILED
+        PENDING_REVIEW, PROCESSING, COMPLETED, FAILED
     }
     
     @Override
@@ -175,7 +175,7 @@ public class Contract extends BaseEntity implements Persistable<String> {
         contract.id = null;
         contract.initializeNewEntity();
         contract.setAiProcessed(false);
-        contract.setProcessingStatus(ProcessingStatus.PENDING);
+        contract.setProcessingStatus(ProcessingStatus.PENDING_REVIEW);
         return contract;
     }
 }

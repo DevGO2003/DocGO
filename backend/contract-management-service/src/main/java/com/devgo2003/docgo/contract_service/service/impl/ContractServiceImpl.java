@@ -2,6 +2,8 @@ package com.devgo2003.docgo.contract_service.service.impl;
 
 import com.devgo2003.docgo.contract_service.entity.Contract;
 import com.devgo2003.docgo.contract_service.entity.ContractAttachment;
+import com.devgo2003.docgo.contract_service.enums.ContractStatus;
+import com.devgo2003.docgo.contract_service.enums.ContractType;
 import com.devgo2003.docgo.contract_service.entity.ContractClause;
 import com.devgo2003.docgo.contract_service.entity.ContractRiskAssessment;
 import com.devgo2003.docgo.contract_service.entity.ContractComplianceStatus;
@@ -259,7 +261,7 @@ public class ContractServiceImpl implements IContractService {
 
     public List<Contract> getContractsByStatus(String status) {
         try {
-            Contract.ContractStatus contractStatus = Contract.ContractStatus.valueOf(status.toUpperCase());
+            ContractStatus contractStatus = ContractStatus.fromValue(status.toUpperCase());
             return contractRepository.findByStatusAndIsDeletedFalse(contractStatus);
         } catch (IllegalArgumentException e) {
             throw new InvalidInputException("Trạng thái hợp đồng không hợp lệ: " + status);
@@ -318,7 +320,7 @@ public class ContractServiceImpl implements IContractService {
         logger.info("Validating contract deletion for contract ID: {}", contract.getId());
 
         contract.markAsDeleted("system");
-        contract.setStatus(Contract.ContractStatus.EXPIRED);
+        contract.setStatus(ContractStatus.EXPIRED);
         contractRepository.save(contract);
 
         ContractEvent event = new ContractEvent();
@@ -341,7 +343,7 @@ public class ContractServiceImpl implements IContractService {
         }
 
         contract.restore();
-        contract.setStatus(Contract.ContractStatus.DRAFT);
+        contract.setStatus(ContractStatus.DRAFT);
         contractRepository.save(contract);
 
         ContractEvent event = new ContractEvent();
@@ -474,7 +476,7 @@ public class ContractServiceImpl implements IContractService {
                 .endDate(contract.getEndDate())
                 .systemId(contract.getSystemId())
                 .summary(contract.getSummary())
-                .contractType(contract.getContractType())
+                .contractType(contract.getContractType() != null ? contract.getContractType().getValue() : null)
                 .riskLevel(contract.getRiskLevel())
                 .keyTerms(contract.getKeyTerms())
                 .aiProcessed(contract.getAiProcessed())
@@ -572,7 +574,7 @@ public class ContractServiceImpl implements IContractService {
                 .endDate(contract.getEndDate())
                 .systemId(contract.getSystemId())
                 .summary(contract.getSummary())
-                .contractType(contract.getContractType())
+                .contractType(contract.getContractType() != null ? contract.getContractType().getValue() : null)
                 .riskLevel(contract.getRiskLevel())
                 .keyTerms(contract.getKeyTerms())
                 .aiProcessed(contract.getAiProcessed())
@@ -845,7 +847,7 @@ public class ContractServiceImpl implements IContractService {
                 .id(contract.getId())
                 .contractNumber(contract.getContractNumber())
                 .status(contract.getStatus() != null ? contract.getStatus().name() : null)
-                .contractType(contract.getContractType())
+                .contractType(contract.getContractType() != null ? contract.getContractType().getValue() : null)
                 .title(contract.getTitle())
                 .tags(tags)
                 .parties(partyDtos)
@@ -1104,7 +1106,10 @@ public class ContractServiceImpl implements IContractService {
             contract.setTitle((String) summaryData.get("title"));
             contract.setContractNumber((String) summaryData.get("contractNumber"));
             // Summary field is no longer used - removed
-            contract.setContractType((String) summaryData.get("contractType"));
+            String contractTypeStr = (String) summaryData.get("contractType");
+            if (contractTypeStr != null) {
+                contract.setContractType(ContractType.fromValue(contractTypeStr));
+            }
             contract.setContractObject((String) summaryData.get("object"));
             contract.setEffectiveDate((String) summaryData.get("effectiveDate"));
             contract.setContractTerm((String) summaryData.get("term"));
@@ -1115,7 +1120,7 @@ public class ContractServiceImpl implements IContractService {
             if (tagsObj instanceof List) {
                 @SuppressWarnings("unchecked")
                 List<String> tags = (List<String>) tagsObj;
-                contract.setTags(String.join(", ", tags));
+                contract.setTags(tags);
             }
             
             // Map parties information - store as JSON and create individual party records
@@ -1244,7 +1249,7 @@ public class ContractServiceImpl implements IContractService {
                 contract.setId(java.util.UUID.randomUUID().toString());
                 contract.setCreatedAt(LocalDateTime.now());
                 contract.setCreatedBy("ai-processing-service");
-                contract.setStatus(Contract.ContractStatus.DRAFT);
+                contract.setStatus(ContractStatus.DRAFT);
                 // Provide minimal required fields
                 if (contract.getStartDate() == null) {
                     contract.setStartDate(java.time.LocalDateTime.now());

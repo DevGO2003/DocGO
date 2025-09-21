@@ -123,3 +123,4 @@ public enum ContractStatus {
         return this == TERMINATED || this == CANCELLED || this == ARCHIVED;
     }
 }
+
