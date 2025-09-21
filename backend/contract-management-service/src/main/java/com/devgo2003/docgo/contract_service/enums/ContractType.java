@@ -103,12 +103,22 @@ public enum ContractType {
     
     @JsonCreator
     public static ContractType fromValue(String value) {
+        if (value == null || value.trim().isEmpty()) {
+            throw new IllegalArgumentException("ContractType cannot be null or empty");
+        }
+        
+        String trimmedValue = value.trim();
+        
+        // Only accept English constants (case-insensitive)
         for (ContractType type : ContractType.values()) {
-            if (type.value.equals(value)) {
+            if (type.value.equalsIgnoreCase(trimmedValue)) {
                 return type;
             }
         }
-        throw new IllegalArgumentException("Unknown ContractType: " + value);
+        
+        // If not found, provide helpful error message with available English constants
+        throw new IllegalArgumentException("Unknown ContractType: '" + value + "'. " +
+                "Only English constants are accepted. Valid values are: " + getValidValuesString());
     }
     
     public String getDisplayName() {
@@ -197,6 +207,26 @@ public enum ContractType {
                     type.getGroup().toLowerCase().contains(lowerKeyword)
                 )
                 .toArray(ContractType[]::new);
+    }
+    
+    /**
+     * Lấy danh sách các giá trị hợp lệ cho error message
+     */
+    private static String getValidValuesString() {
+        return java.util.Arrays.stream(values())
+                .map(ContractType::getValue)
+                .limit(15) // Hiển thị 15 giá trị đầu để user có thể thấy các options
+                .collect(java.util.stream.Collectors.joining(", ")) + "...";
+    }
+    
+    /**
+     * Lấy danh sách các display name hợp lệ cho error message
+     */
+    private static String getValidDisplayNamesString() {
+        return java.util.Arrays.stream(values())
+                .map(ContractType::getDisplayName)
+                .limit(5) // Chỉ hiển thị 5 display name đầu
+                .collect(java.util.stream.Collectors.joining(", ")) + "...";
     }
 }
 

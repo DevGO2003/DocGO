@@ -172,17 +172,49 @@ export const STORAGE_KEYS = {
 // Route Paths
 export const ROUTES = {
   HOME: '/',
-  LOGIN: '/auth/login',
-  REGISTER: '/auth/register',
+  AUTH: {
+    LOGIN: '/login',
+    REGISTER: '/register',
+    FORGOT_PASSWORD: '/forgot-password',
+    RESET_PASSWORD: '/reset-password',
+  },
   DASHBOARD: '/dashboard',
-  CONTRACTS: '/contracts',
-  USERS: '/users',
-  AI_PROCESSING: '/ai-processing',
-  REPORTS: '/reports',
-  DOCUMENTS: '/documents',
-  STORAGE: '/storage',
-  PROFILE: '/profile',
+  CONTRACTS: {
+    LIST: '/contracts',
+    CREATE: '/contracts/create',
+    TEMPLATES: '/contracts/templates',
+    DETAIL: (id: string) => `/contracts/${id}`,
+    EDIT: (id: string) => `/contracts/${id}/edit`,
+    VERSIONS: (id: string) => `/contracts/${id}/versions`,
+    APPROVAL: (id: string) => `/contracts/${id}/approval`,
+  },
+  WORKFLOW: {
+    APPROVAL: '/workflow/approval',
+    SIGNATURE: '/workflow/signature',
+    COLLABORATION: '/workflow/collaboration',
+    NOTIFICATIONS: '/workflow/notifications',
+    CALENDAR: '/workflow/calendar',
+  },
+  ANALYTICS: {
+    OVERVIEW: '/analytics',
+    CONTRACTS: '/analytics/contracts',
+    PERFORMANCE: '/analytics/performance',
+    REPORTS: '/analytics/reports',
+  },
+  ADMIN: {
+    USERS: '/admin/users',
+    PERMISSIONS: '/admin/permissions',
+    SYSTEM: '/admin/system',
+    AUDIT: '/admin/audit',
+  },
+  TOOLS: {
+    AI_PROCESSING: '/tools/ai-processing',
+    OCR: '/tools/ocr',
+    IMPORT_EXPORT: '/tools/import-export',
+    BACKUP: '/tools/backup',
+  },
   SETTINGS: '/settings',
+  PROFILE: '/profile',
 } as const
 
 // Error Messages

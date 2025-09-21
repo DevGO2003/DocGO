@@ -258,6 +258,6 @@ public class ManualTestDataGenerator {
         contract5.setCreatedAt(now.minusDays(3));
         contract5.setUpdatedAt(now.minusDays(3));
 
-        return Arrays.asList(contract1, contract2, contract3, contract4, contract5);
+        return Arrays.asList(contract1, contract2, contract3, contract4);
     }
 }

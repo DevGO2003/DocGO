@@ -1,10 +1,12 @@
 'use client'
 
-import React from 'react'
+import React, { useState } from 'react'
 import Link from 'next/link'
 import { useAuth } from '@/hooks/useAuth'
+import { useTranslation } from '@/hooks/useTranslation'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
+import { NotificationDropdown } from '@/components/ui/NotificationDropdown'
 import { 
   MagnifyingGlassIcon, 
   BellIcon, 
@@ -12,6 +14,8 @@ import {
   Bars3Icon
 } from '@heroicons/react/24/outline'
 import { APP_CONFIG } from '@/lib/constants'
+import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher'
+import { Notification, mockNotifications } from '@/types/notification'
 
 interface HeaderProps {
   onMenuToggle?: () => void
@@ -27,7 +31,10 @@ export const Header: React.FC<HeaderProps> = ({
   showUserMenu = true,
 }) => {
   const { user, logout } = useAuth()
+  const { t } = useTranslation()
   const [searchTerm, setSearchTerm] = React.useState('')
+  const [notifications, setNotifications] = useState<Notification[]>(mockNotifications)
+  const [isNotificationDropdownOpen, setIsNotificationDropdownOpen] = useState(false)
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
@@ -38,6 +45,26 @@ export const Header: React.FC<HeaderProps> = ({
   const handleLogout = () => {
     logout()
   }
+
+  const handleNotificationClick = () => {
+    setIsNotificationDropdownOpen(!isNotificationDropdownOpen)
+  }
+
+  const handleMarkAsRead = (id: string) => {
+    setNotifications(prev => prev.map(n => 
+      n.id === id ? { ...n, isRead: true } : n
+    ))
+  }
+
+  const handleMarkAllAsRead = () => {
+    setNotifications(prev => prev.map(n => ({ ...n, isRead: true })))
+  }
+
+  const handleDeleteNotification = (id: string) => {
+    setNotifications(prev => prev.filter(n => n.id !== id))
+  }
+
+  const unreadCount = notifications.filter(n => !n.isRead).length
 
   return (
     <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
@@ -72,7 +99,7 @@ export const Header: React.FC<HeaderProps> = ({
               <form onSubmit={handleSearch} className="relative">
                 <Input
                   type="text"
-                  placeholder="Tìm kiếm tài liệu, hợp đồng..."
+                  placeholder={t('header.search.placeholder')}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   leftIcon={<MagnifyingGlassIcon className="h-5 w-5" />}
@@ -93,11 +120,19 @@ export const Header: React.FC<HeaderProps> = ({
 
             {/* Notifications */}
             {showNotifications && (
-              <button className="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 relative">
+              <button 
+                onClick={handleNotificationClick}
+                className="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 relative"
+              >
                 <BellIcon className="h-6 w-6" />
-                <span className="absolute top-1 right-1 block h-2 w-2 rounded-full bg-red-400"></span>
+                {unreadCount > 0 && (
+                  <span className="absolute top-1 right-1 block h-2 w-2 rounded-full bg-red-400"></span>
+                )}
               </button>
             )}
+
+            {/* Language Switcher */}
+            <LanguageSwitcher />
 
             {/* User Menu */}
             {showUserMenu && (
@@ -128,20 +163,20 @@ export const Header: React.FC<HeaderProps> = ({
                           href="/profile"
                           className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                         >
-                          Hồ sơ cá nhân
+                          {t('header.user.profile')}
                         </Link>
                         <Link
                           href="/settings"
                           className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                         >
-                          Cài đặt
+                          {t('header.user.settings')}
                         </Link>
                         <hr className="my-1" />
                         <button
                           onClick={handleLogout}
                           className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                         >
-                          Đăng xuất
+                          {t('header.user.logout')}
                         </button>
                       </div>
                     </div>
@@ -150,12 +185,12 @@ export const Header: React.FC<HeaderProps> = ({
                   <div className="flex items-center space-x-2">
                     <Link href="/auth/login">
                       <Button variant="outline" size="sm">
-                        Đăng nhập
+                        {t('header.user.login')}
                       </Button>
                     </Link>
                     <Link href="/auth/register">
                       <Button size="sm">
-                        Đăng ký
+                        {t('header.user.register')}
                       </Button>
                     </Link>
                   </div>
@@ -172,7 +207,7 @@ export const Header: React.FC<HeaderProps> = ({
           <form onSubmit={handleSearch}>
             <Input
               type="text"
-              placeholder="Tìm kiếm..."
+              placeholder={t('header.search.mobilePlaceholder')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               leftIcon={<MagnifyingGlassIcon className="h-5 w-5" />}
@@ -181,6 +216,16 @@ export const Header: React.FC<HeaderProps> = ({
           </form>
         </div>
       )}
+
+      {/* Notification Dropdown */}
+      <NotificationDropdown
+        isOpen={isNotificationDropdownOpen}
+        onClose={() => setIsNotificationDropdownOpen(false)}
+        notifications={notifications}
+        onMarkAsRead={handleMarkAsRead}
+        onMarkAllAsRead={handleMarkAllAsRead}
+        onDelete={handleDeleteNotification}
+      />
     </header>
   )
 }

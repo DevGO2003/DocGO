@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useTranslation } from '@/hooks/useTranslation'
 import {
   HomeIcon,
   DocumentTextIcon,
@@ -10,7 +11,6 @@ import {
   CogIcon,
   ChartBarIcon,
   DocumentDuplicateIcon,
-  CloudArrowUpIcon,
   Bars3Icon,
   XMarkIcon,
   PencilSquareIcon,
@@ -25,38 +25,137 @@ import {
   BellIcon,
   CalendarDaysIcon,
   DocumentChartBarIcon,
-  QuestionMarkCircleIcon
+  QuestionMarkCircleIcon,
+  ChevronDownIcon
 } from '@heroicons/react/24/outline'
 
 const navigation = [
-  { name: 'Bảng điều khiển', href: '/dashboard', icon: HomeIcon },
-  { name: 'Tải lên', href: '/dashboard/upload', icon: CloudArrowUpIcon },
-  { name: 'Hợp đồng', href: '/contracts', icon: DocumentTextIcon },
-  { name: 'Tạo hợp đồng', href: '/dashboard/create-contract', icon: DocumentDuplicateIcon },
-  { name: 'Tạo nhanh', href: '/dashboard/quick-create', icon: PencilSquareIcon },
-  { name: 'Chữ ký điện tử', href: '/dashboard/e-signature', icon: PencilSquareIcon },
-  { name: 'Bình luận & Cộng tác', href: '/dashboard/collaboration-comments', icon: ChatBubbleLeftRightIcon },
-  { name: 'Phiên bản hợp đồng', href: '/dashboard/contract-versions', icon: ClockIcon },
-  { name: 'Luồng phê duyệt', href: '/dashboard/approval-workflow', icon: CheckCircleIcon },
-  { name: 'Phân quyền theo vai trò', href: '/dashboard/role-based-permissions', icon: ShieldCheckIcon },
-  { name: 'Đã duyệt', href: '/dashboard/approved', icon: DocumentTextIcon },
-  { name: 'Thống kê', href: '/dashboard/analytics', icon: ChartBarIcon },
-  { name: 'Báo cáo', href: '/dashboard/reports', icon: DocumentChartBarIcon },
-  { name: 'Quản lý người dùng', href: '/dashboard/user-management', icon: UserGroupIcon },
-  { name: 'Phê duyệt tài khoản', href: '/dashboard/account-approval', icon: CogIcon },
-  { name: 'Thông báo', href: '/dashboard/notifications', icon: BellIcon },
-  { name: 'Lịch', href: '/dashboard/calendar', icon: CalendarDaysIcon },
-  { name: 'Lịch sử hoạt động', href: '/dashboard/activity-history', icon: ClipboardDocumentListIcon },
-  { name: 'Sao lưu & Khôi phục', href: '/dashboard/backup-restore', icon: ArrowPathIcon },
-  { name: 'Tài liệu API', href: '/dashboard/api-docs', icon: CodeBracketIcon },
-  { name: 'Trợ giúp & Hỗ trợ', href: '/dashboard/help-support', icon: QuestionMarkCircleIcon },
-  { name: 'Cài đặt', href: '/dashboard/settings', icon: WrenchScrewdriverIcon },
-  { name: 'Hướng dẫn', href: '/dashboard/guide', icon: DocumentTextIcon },
+  {
+    name: 'Dashboard',
+    href: '/dashboard',
+    icon: HomeIcon,
+  },
+  {
+    name: 'Hợp đồng',
+    href: '/contracts',
+    icon: DocumentTextIcon,
+    children: [
+      { name: 'Danh sách', href: '/contracts' },
+      { name: 'Tạo mới', href: '/contracts/create' },
+      { name: 'Mẫu hợp đồng', href: '/contracts/templates' },
+    ]
+  },
+  {
+    name: 'Workflow',
+    href: '/workflow/approval',
+    icon: CogIcon,
+    children: [
+      { name: 'Phê duyệt', href: '/workflow/approval' },
+      { name: 'Chữ ký điện tử', href: '/workflow/signature' },
+      { name: 'Cộng tác', href: '/workflow/collaboration' },
+      { name: 'Thông báo', href: '/workflow/notifications' },
+      { name: 'Lịch', href: '/workflow/calendar' },
+    ]
+  },
+  {
+    name: 'Phân tích',
+    href: '/analytics',
+    icon: ChartBarIcon,
+    children: [
+      { name: 'Tổng quan', href: '/analytics' },
+      { name: 'Hợp đồng', href: '/analytics/contracts' },
+      { name: 'Hiệu suất', href: '/analytics/performance' },
+      { name: 'Báo cáo', href: '/analytics/reports' },
+    ]
+  },
+  {
+    name: 'Quản trị',
+    href: '/admin/users',
+    icon: UserGroupIcon,
+    children: [
+      { name: 'Người dùng', href: '/admin/users' },
+      { name: 'Phân quyền', href: '/admin/permissions' },
+      { name: 'Hệ thống', href: '/admin/system' },
+      { name: 'Audit log', href: '/admin/audit' },
+    ]
+  },
+  {
+    name: 'Công cụ',
+    href: '/tools/ai-processing',
+    icon: WrenchScrewdriverIcon,
+    children: [
+      { name: 'Xử lý AI', href: '/tools/ai-processing' },
+      { name: 'OCR', href: '/tools/ocr' },
+      { name: 'Import/Export', href: '/tools/import-export' },
+      { name: 'Backup', href: '/tools/backup' },
+    ]
+  },
+  {
+    name: 'Cài đặt',
+    href: '/settings',
+    icon: CogIcon,
+  },
 ]
 
 export default function Sidebar() {
+  const { t } = useTranslation()
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [expandedItems, setExpandedItems] = useState<string[]>([])
   const pathname = usePathname()
+
+  const toggleExpanded = (itemName: string) => {
+    setExpandedItems(prev => 
+      prev.includes(itemName) 
+        ? prev.filter(name => name !== itemName)
+        : [...prev, itemName]
+    )
+  }
+
+  const renderNavigationItem = (item: any, isMobile = false) => {
+    const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
+    const isExpanded = expandedItems.includes(item.name)
+    const hasChildren = item.children && item.children.length > 0
+
+    return (
+      <div key={item.name}>
+        <div className="flex items-center">
+          <Link
+            href={item.href}
+            className={`sidebar-item flex-1 ${isActive ? 'active' : ''}`}
+            onClick={() => isMobile && setSidebarOpen(false)}
+          >
+            <item.icon className="h-5 w-5" />
+            <span className="ml-3">{item.name}</span>
+          </Link>
+          {hasChildren && (
+            <button
+              onClick={() => toggleExpanded(item.name)}
+              className="p-1 text-gray-400 hover:text-gray-600"
+            >
+              <ChevronDownIcon className={`h-4 w-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+            </button>
+          )}
+        </div>
+        {hasChildren && isExpanded && (
+          <div className="ml-8 mt-1 space-y-1">
+            {item.children.map((child: any) => {
+              const isChildActive = pathname === child.href
+              return (
+                <Link
+                  key={child.name}
+                  href={child.href}
+                  className={`sidebar-item text-sm ${isChildActive ? 'active' : ''}`}
+                  onClick={() => isMobile && setSidebarOpen(false)}
+                >
+                  <span className="ml-3">{child.name}</span>
+                </Link>
+              )
+            })}
+          </div>
+        )}
+      </div>
+    )
+  }
 
   return (
     <>
@@ -78,20 +177,7 @@ export default function Sidebar() {
             </button>
           </div>
           <nav className="flex-1 space-y-1 px-2 py-4">
-            {navigation.map((item) => {
-              const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
-              return (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className={`sidebar-item ${isActive ? 'active' : ''}`}
-                  onClick={() => setSidebarOpen(false)}
-                >
-                  <item.icon className="h-5 w-5" />
-                  <span className="ml-3">{item.name}</span>
-                </Link>
-              )
-            })}
+            {navigation.map((item) => renderNavigationItem(item, true))}
           </nav>
         </div>
       </div>
@@ -104,19 +190,7 @@ export default function Sidebar() {
             <span className="ml-2 text-xl font-bold text-gray-900">DocGO</span>
           </div>
           <nav className="flex-1 space-y-1 px-2 py-4">
-            {navigation.map((item) => {
-              const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
-              return (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className={`sidebar-item ${isActive ? 'active' : ''}`}
-                >
-                  <item.icon className="h-5 w-5" />
-                  <span className="ml-3">{item.name}</span>
-                </Link>
-              )
-            })}
+            {navigation.map((item) => renderNavigationItem(item))}
           </nav>
         </div>
       </div>
