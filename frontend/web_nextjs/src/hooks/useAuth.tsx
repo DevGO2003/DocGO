@@ -116,30 +116,11 @@ function clearStorage() {
 }
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // MOCK ADMIN FOR DEVELOPMENT
-  const [user, setUser] = useState<User | null>({
-    id: '1',
-    username: 'admin',
-    email: 'admin@docgo.local',
-    firstName: 'Admin',
-    lastName: 'User',
-    fullName: 'Admin User',
-    role: UserRole.ADMIN,
-    status: UserStatus.ACTIVE,
-    department: 'IT',
-    position: 'System Administrator',
-    createdAt: '2024-01-01T00:00:00Z',
-    updatedAt: '2024-01-01T00:00:00Z'
-  })
-  // MOCK TOKEN FOR DEVELOPMENT
-  const [accessToken, setAccessToken] = useState<string | null>('mock-admin-token')
-  const [tokenData, setTokenData] = useState<TokenData | null>({
-    accessToken: 'mock-admin-token',
-    refreshToken: 'mock-refresh-token',
-    expiresAt: Date.now() + (24 * 60 * 60 * 1000), // 24 hours
-    tokenType: 'Bearer'
-  })
-  const [loading, setLoading] = useState<boolean>(false)
+  // Initialize with null values - no mock user
+  const [user, setUser] = useState<User | null>(null)
+  const [accessToken, setAccessToken] = useState<string | null>(null)
+  const [tokenData, setTokenData] = useState<TokenData | null>(null)
+  const [loading, setLoading] = useState<boolean>(true)
 
   // Load from localStorage on mount
   useEffect(() => {
