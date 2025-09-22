@@ -159,6 +159,14 @@ docker run -v ${PWD}:/app -p 8000:8000 service
 - Luôn kiểm tra execution policy trước khi chạy scripts
 - Sử dụng `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser` nếu cần
 
+### Vị trí thư mục scripts trong dự án
+- Scripts tái sử dụng: đặt tại `.cursor/scripts/reusable/` (được track)
+- Scripts tạm thời: đặt tại `.cursor/scripts/temp/` (được ignore bởi `.cursorignore`)
+- Khi tham chiếu đường dẫn script trong lệnh, luôn dùng đường dẫn đầy đủ từ gốc repo, ví dụ:
+```powershell
+powershell -ExecutionPolicy Bypass -File .cursor/scripts/reusable/my-script.ps1
+```
+
 ### Long Commands
 - Sử dụng backtick ` để xuống dòng trong PowerShell
 - Ví dụ:
