@@ -42,7 +42,7 @@ export default function Error({
           
           <div className="text-sm text-gray-500">
             Hoặc{' '}
-            <a href="/dashboard" className="text-red-600 hover:text-red-800 underline">
+            <a href="/" className="text-red-600 hover:text-red-800 underline">
               quay về trang chủ
             </a>
           </div>

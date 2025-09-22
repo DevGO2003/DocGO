@@ -8,15 +8,10 @@ import com.devgo2003.docgo.auth_service.security.JwtUtil;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import io.jsonwebtoken.Claims;
-import org.springframework.beans.factory.annotation.Autowired;
-import com.devgo2003.docgo.auth_service.security.TokenBlacklist;
-import com.devgo2003.docgo.auth_service.service.AuthEventService;
-import jakarta.servlet.http.HttpServletRequest;
 
 @Service
 public class AuthService {
@@ -29,7 +24,7 @@ public class AuthService {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
-        this.accessTokenTtlSeconds = 900L; // 15 minutes - should be injected from config
+        this.accessTokenTtlSeconds = jwtUtil.getAccessTokenTtlSeconds();
     }
 
     public AuthResponse register(String username, String email, String password) {
@@ -115,8 +110,8 @@ public class AuthService {
 
     public boolean logout(String token) {
         try {
-            Claims claims = jwtUtil.parseClaims(token);
-            String username = claims.getSubject();
+            // Validate token before logout
+            jwtUtil.parseClaims(token);
             
             // TODO: Add token to blacklist when blacklist service is available
             // jwtUtil.addToBlacklist(token);
