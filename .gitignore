@@ -201,4 +201,4 @@ document/**/*.xls
 document/**/*.xlsx
 document/**/*.ppt
 document/**/*.pptx
-**/contract_uploads/
+**/contract_uploads/.git-backup/
