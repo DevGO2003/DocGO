@@ -1,135 +1,73 @@
-param(
-  [Parameter(Mandatory = $true, Position = 0)] [string]$SenderName,
-  [Parameter(Mandatory = $true, Position = 1)] [string]$Summary,
-  [Parameter(Mandatory = $true, Position = 2)] [string]$NextSuggestion,
-  [Parameter(Mandatory = $true, Position = 3)] [string]$ReceiverName,
-  [Parameter(Mandatory = $false, Position = 4)] [string]$Webhook
+Param(
+  [Parameter(Mandatory = $true)] [string] $TenTa,
+  [Parameter(Mandatory = $true)] [string] $TomTat,
+  [Parameter(Mandatory = $true)] [string] $DeXuat,
+  [Parameter(Mandatory = $true)] [string] $TenNguoi,
+  [Parameter(Mandatory = $false)] [string] $WebhookUrl
 )
 
-$ErrorActionPreference = 'Stop'
+function Get-DiscordWebhookUrl {
+  Param([string] $Provided)
 
-function New-DiscordPayload {
-  param(
-    [string]$SenderName,
-    [string]$Summary,
-    [string]$NextSuggestion,
-    [string]$ReceiverName
-  )
+  if (-not [string]::IsNullOrWhiteSpace($Provided)) { return $Provided }
 
-  $time = Get-Date
-  $content = @"
-[THU] :mailbox: Thu gui Discord
-[CONG VIEC] :clipboard: $Summary
-[DE XUAT] :bulb: $NextSuggestion
-—
-Chu ky: $ReceiverName :crossed_swords:
-[THOI GIAN] :clock1: $($time.ToString('HH:mm:ss')) | [NGAY] :calendar: $($time.ToString('yyyy-MM-dd'))
-Nguoi gui: $SenderName
-"@
-
-  return @{ content = $content }
-}
-
-try {
-  if (-not $Webhook) { $Webhook = $env:DISCORD_WEBHOOK_URL }
-
-  $payload = New-DiscordPayload -SenderName $SenderName -Summary $Summary -NextSuggestion $NextSuggestion -ReceiverName $ReceiverName
-  $json = $payload | ConvertTo-Json -Depth 4
-
-  if ([string]::IsNullOrWhiteSpace($Webhook)) {
-    Write-Host '[send-discord-letter] No webhook provided. Dry-run output:' -ForegroundColor Yellow
-    Write-Output $json
-    exit 0
+  if (-not [string]::IsNullOrWhiteSpace($env:DISCORD_WEBHOOK_URL)) {
+    return $env:DISCORD_WEBHOOK_URL
   }
 
-  Invoke-RestMethod -Method Post -Uri $Webhook -ContentType 'application/json' -Body $json | Out-Null
-  Write-Host '[send-discord-letter] Sent successfully.' -ForegroundColor Green
-} catch {
-  Write-Host "[send-discord-letter] Failed: $($_.Exception.Message)" -ForegroundColor Red
-  exit 1
-}
+  $envFile = Join-Path -Path (Join-Path -Path $PSScriptRoot -ChildPath "..\..\..\tools\discord\env") -ChildPath ".env"
+  if (Test-Path -LiteralPath $envFile) {
+    try {
+      $lines = Get-Content -LiteralPath $envFile -ErrorAction Stop
+      foreach ($line in $lines) {
+        if ($line -match "^\s*DISCORD_WEBHOOK_URL\s*=\s*(.*)\s*$") {
+          $url = $Matches[1].Trim().Trim('"').Trim("'")
+          if (-not [string]::IsNullOrWhiteSpace($url)) { return $url }
+        }
+      }
+    }
+    catch { }
+  }
 
-# Requires: PowerShell 5+
-# Script gửi thư Discord cho Yasuo phong linh
-param(
-    [Parameter(Mandatory=$true, Position=0)]
-    [string]$TenTa,
-    
-    [Parameter(Mandatory=$true, Position=1)]
-    [string]$TomTatNoiDung,
-    
-    [Parameter(Mandatory=$true, Position=2)]
-    [string]$DeXuatYeuCau,
-    
-    [Parameter(Mandatory=$true, Position=3)]
-    [string]$TenNguoi,
-    
-    [Parameter(Mandatory=$false)]
-    [string]$WebhookUrl = 'https://discord.com/api/webhooks/1419599183152681023/iA2aTGkV8PoMYlNriaw6bchzLfkmtWcw-HSjOX-8MXIj6C8QnCA7RbEwEH3NezxoanA4'
-)
+  return $null
+}
 
 try {
-    $now = Get-Date -Format 'yyyy-MM-dd HH:mm:ss'
-    $dateOnly = Get-Date -Format 'dd/MM/yyyy'
+  $webhook = Get-DiscordWebhookUrl -Provided $WebhookUrl
+  if ([string]::IsNullOrWhiteSpace($webhook)) {
+    Write-Host "Khong tim thay DISCORD_WEBHOOK_URL. Truyen tham so thu 5 hoac dat ENV/TOOLS .env" -ForegroundColor Red
+    Write-Host "Goi vi du:" -ForegroundColor Yellow
+    Write-Host "powershell -ExecutionPolicy Bypass -File .cursor/scripts/reusable/send-discord-letter.ps1 \"Thai Go\" \"Tom tat cong viec\" \"De xuat tiep theo\" \"Yasuo phong linh\" \"https://discord.com/api/webhooks/...\"" -ForegroundColor Yellow
+    exit 1
+  }
 
-    # Tao noi dung thu voi format dep
-    $content = @"
-========================================
-[THU] :mailbox: Thu gui $TenTa
-========================================
+  $now = Get-Date
+  $timeStr = $now.ToString('HH:mm:ss')
+  $dateStr = $now.ToString('dd/MM/yyyy')
 
-Kinh gui Quy ngai $TenTa,
+  $templatePath = Join-Path -Path $PSScriptRoot -ChildPath "template-discord-letter.txt"
+  if (-not (Test-Path -LiteralPath $templatePath)) {
+    Write-Host "Khong tim thay file template: $templatePath" -ForegroundColor Red
+    exit 1
+  }
 
-[CONG VIEC] :clipboard: Tom tat cong viec da hoan thanh:
-$TomTatNoiDung
+  $template = Get-Content -LiteralPath $templatePath -Raw -Encoding UTF8
+  $content = $template.Replace("{{TEN_TA}}", $TenTa).Replace("{{TOM_TAT}}", $TomTat).Replace("{{DE_XUAT}}", $DeXuat).Replace("{{TEN_NGUOI}}", $TenNguoi).Replace("{{TIME}}", $timeStr).Replace("{{DATE}}", $dateStr)
 
-[DE XUAT] :bulb: De xuat yeu cau tiep theo:
-$DeXuatYeuCau
+  $payload = @{ content = $content }
+  $json = $payload | ConvertTo-Json -Compress
 
-----------------------------------------
-Tran trong,
-$TenNguoi :crossed_swords:
+  $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+  $bodyBytes = $utf8NoBom.GetBytes($json)
 
-[THOI GIAN] :clock1: $now  
-[NGAY] :calendar: $dateOnly
-========================================
-"@
+  $response = Invoke-RestMethod -Uri $webhook -Method Post -ContentType 'application/json; charset=utf-8' -Body $bodyBytes -ErrorAction Stop
 
-    # Tạo payload Discord
-    $payload = @{ 
-        content = $content
-        username = "Yasuo Bot"
-        avatar_url = "https://cdn.discordapp.com/attachments/1234567890/yasuo-avatar.png"
-    }
-    $json = $payload | ConvertTo-Json -Compress
-
-    # Gửi request đến Discord webhook
-    $response = Invoke-RestMethod -Uri $WebhookUrl -Method Post -ContentType 'application/json; charset=utf-8' -Body $json
-    
-    Write-Host "Da gui thu Discord thanh cong!" -ForegroundColor Green
-    Write-Host "Nguoi nhan: $TenTa" -ForegroundColor Cyan
-    Write-Host "Thoi gian: $now" -ForegroundColor Yellow
-    
-    return $true
+  Write-Host "Da gui thu Discord thanh cong cho Quy ngai $TenTa" -ForegroundColor Green
 }
 catch {
-    Write-Error "Gui Discord that bai: $($_.Exception.Message)"
-    
-    if ($_.Exception.Response) {
-        try {
-            $reader = New-Object System.IO.StreamReader($_.Exception.Response.GetResponseStream())
-            $body = $reader.ReadToEnd()
-            Write-Error "Chi tiet loi: $body"
-        } catch {
-            Write-Error "Khong the doc chi tiet loi"
-        }
-    }
-    
-    Write-Host "Co the thu:" -ForegroundColor Yellow
-    Write-Host "   - Kiem tra ket noi internet" -ForegroundColor Gray
-    Write-Host "   - Xac minh webhook URL" -ForegroundColor Gray
-    Write-Host "   - Kiem tra quyen Discord webhook" -ForegroundColor Gray
-    
-    return $false
+  Write-Host "Loi khi gui thu Discord:" -ForegroundColor Red
+  Write-Host $_.Exception.Message -ForegroundColor Red
+  Write-Host "Kiem tra webhook URL va mang. Thu lai voi tham so webhook ro rang." -ForegroundColor Yellow
+  exit 1
 }
 
