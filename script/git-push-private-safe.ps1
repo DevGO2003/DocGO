@@ -181,21 +181,173 @@ try {
     exit 1
 }
 
-# Step 5.2: Push to private
-Write-Step "Step 5.2: Pushing to private repository"
-try {
-    # Push to private current branch
-    git push private HEAD:$CurrentBranch
-    Write-Success "Pushed to private/$CurrentBranch"
+# Step 5.2: Bidirectional Sync with AI-Powered Smart Merge
+Write-Step "Step 5.2: Bidirectional Sync with AI-Powered Smart Merge"
+
+# Function for AI-Powered Smart Merge
+function Invoke-SmartMerge {
+    param(
+        [string]$BranchName,
+        [string]$Description
+    )
     
-    # Push to additional branch if specified
-    if ($AdditionalBranch) {
-        git push private HEAD:$AdditionalBranch
-        Write-Success "Pushed to private/$AdditionalBranch"
+    Write-Info "Performing Smart Merge for $Description"
+    
+    try {
+        # Fetch from private
+        git fetch private $BranchName 2>$null
+        
+        # Check if branch exists on private
+        $BranchExists = git show-ref --verify --quiet "refs/remotes/private/$BranchName" 2>$null
+        if ($BranchExists) {
+            Write-Info "Branch private/$BranchName exists, performing smart merge..."
+            
+            # Get .env files from both local and remote
+            $LocalEnvFiles = Get-ChildItem -Path . -Recurse -Name ".env*" -File
+            $RemoteEnvFiles = @()
+            
+            # Checkout remote branch temporarily to get .env files
+            $CurrentCommit = git rev-parse HEAD
+            git stash push -m "temp-stash-for-smart-merge" 2>$null
+            
+            try {
+                git checkout "private/$BranchName" 2>$null
+                $RemoteEnvFiles = Get-ChildItem -Path . -Recurse -Name ".env*" -File
+            } finally {
+                git checkout $CurrentCommit 2>$null
+                git stash pop 2>$null
+            }
+            
+            # Perform smart merge for each .env file
+            foreach ($EnvFile in $LocalEnvFiles) {
+                if ($RemoteEnvFiles -contains $EnvFile) {
+                    Write-Info "Smart merging: $EnvFile"
+                    
+                    # Get local content
+                    $LocalContent = Get-Content $EnvFile -Raw -ErrorAction SilentlyContinue
+                    
+                    # Get remote content
+                    $RemoteContent = git show "private/${BranchName}:${EnvFile}" 2>$null
+                    
+                    if ($RemoteContent) {
+                        # Perform AI-Powered Smart Merge
+                        $MergedContent = Invoke-AISmartMerge -LocalContent $LocalContent -RemoteContent $RemoteContent -FileName $EnvFile
+                        
+                        # Write merged content
+                        Set-Content -Path $EnvFile -Value $MergedContent -NoNewline
+                        Write-Success "Smart merged: $EnvFile"
+                    }
+                }
+            }
+        } else {
+            Write-Info "Branch private/$BranchName does not exist, will create new branch"
+        }
+        
+        # Push to private
+        git push private HEAD:$BranchName
+        Write-Success "Pushed to private/$BranchName"
+        
+    } catch {
+        Write-Error "Smart Merge failed for $BranchName : $_"
+        throw
     }
+}
+
+# Function for AI-Powered Smart Merge logic
+function Invoke-AISmartMerge {
+    param(
+        [string]$LocalContent,
+        [string]$RemoteContent,
+        [string]$FileName
+    )
+    
+    Write-Info "Performing AI-Powered Smart Merge for $FileName"
+    
+    # Parse .env files
+    $LocalLines = $LocalContent -split "`n" | Where-Object { $_.Trim() -ne "" -and !$_.StartsWith("#") }
+    $RemoteLines = $RemoteContent -split "`n" | Where-Object { $_.Trim() -ne "" -and !$_.StartsWith("#") }
+    
+    # Create dictionaries for key-value pairs
+    $LocalDict = @{}
+    $RemoteDict = @{}
+    
+    foreach ($Line in $LocalLines) {
+        if ($Line -match "^([^=]+)=(.*)$") {
+            $LocalDict[$Matches[1].Trim()] = $Matches[2].Trim()
+        }
+    }
+    
+    foreach ($Line in $RemoteLines) {
+        if ($Line -match "^([^=]+)=(.*)$") {
+            $RemoteDict[$Matches[1].Trim()] = $Matches[2].Trim()
+        }
+    }
+    
+    # Smart merge logic
+    $MergedDict = @{}
+    $AllKeys = ($LocalDict.Keys + $RemoteDict.Keys) | Sort-Object -Unique
+    
+    foreach ($Key in $AllKeys) {
+        $LocalValue = $LocalDict[$Key]
+        $RemoteValue = $RemoteDict[$Key]
+        
+        if ($LocalValue -and $RemoteValue) {
+            # Both exist - apply smart merge rules
+            $MergedValue = switch -Regex ($Key) {
+                "MONGODB_URI|DATABASE_URL" { 
+                    Write-Info "Priority: Remote for $Key (Database)"
+                    $RemoteValue 
+                }
+                "API_KEY|SECRET|TOKEN" { 
+                    Write-Info "Priority: Local for $Key (API Key)"
+                    $LocalValue 
+                }
+                "SERVER_PORT|PORT|HOST" { 
+                    Write-Info "Priority: Local for $Key (Port/Host)"
+                    $LocalValue 
+                }
+                "DEBUG|ENABLE_|DISABLE_" { 
+                    Write-Info "Logic merge for $Key (Flag)"
+                    if ($LocalValue -eq "true" -or $RemoteValue -eq "true") { "true" } else { $LocalValue }
+                }
+                default { 
+                    Write-Info "Default: Local for $Key"
+                    $LocalValue 
+                }
+            }
+            $MergedDict[$Key] = $MergedValue
+        } elseif ($LocalValue) {
+            $MergedDict[$Key] = $LocalValue
+        } elseif ($RemoteValue) {
+            $MergedDict[$Key] = $RemoteValue
+        }
+    }
+    
+    # Reconstruct .env file
+    $MergedContent = ""
+    foreach ($Key in ($MergedDict.Keys | Sort-Object)) {
+        $MergedContent += "$Key=$($MergedDict[$Key])`n"
+    }
+    
+    return $MergedContent
+}
+
+# Perform Smart Merge for current branch
+try {
+    Invoke-SmartMerge -BranchName $CurrentBranch -Description "current branch"
 } catch {
-    Write-Error "Failed to push to private: $_"
+    Write-Error "Failed to push to private/$CurrentBranch : $_"
     exit 1
+}
+
+# Perform Smart Merge for additional branch if specified
+if ($AdditionalBranch) {
+    try {
+        Invoke-SmartMerge -BranchName $AdditionalBranch -Description "additional branch"
+    } catch {
+        Write-Error "Failed to push to private/$AdditionalBranch : $_"
+        exit 1
+    }
 }
 
 # Step 5.3: Cleanup local history (Safe Cleanup)
