@@ -52,25 +52,28 @@ function Backup-EnvFiles {
     $timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
     $backupDir = ".git-backup/env/$timestamp"
     
+    # Quet danh sach file env TRUOC khi tao thu muc backup (tranh backup long)
+    # Bo qua .git va .git-backup (ho tro ca \ va /, khong phan biet hoa thuong)
+    # Va loai bo mot so thu muc build pho bien
+    $envFiles = Get-ChildItem -Recurse -File -Force | Where-Object {
+        ($_.Name -eq '.env' -or $_.Name -like '.env.*') -and
+        ($_.FullName -notmatch '(?i)[\\/]\.git([\\/]|$)') -and
+        ($_.FullName -notmatch '(?i)[\\/]\.git-backup([\\/]|$)') -and
+        ($_.FullName -notmatch '(?i)[\\/]node_modules([\\/]|$)') -and
+        ($_.FullName -notmatch '(?i)[\\/]dist([\\/]|$)') -and
+        ($_.FullName -notmatch '(?i)[\\/]build([\\/]|$)') -and
+        ($_.FullName -notmatch '(?i)[\\/]target([\\/]|$)')
+    }
+
+    # Chi tao thu muc backup sau khi da xac dinh danh sach file
     if (!(Test-Path ".git-backup/env")) {
         New-Item -ItemType Directory -Path ".git-backup/env" -Force | Out-Null
     }
     New-Item -ItemType Directory -Path $backupDir -Force | Out-Null
-    
-    # Chỉ backup .env ngoài các thư mục nội bộ (.git, .git-backup, node_modules, dist, build, target)
-    $envFiles = Get-ChildItem -Recurse -File -Force | Where-Object {
-        ($_.Name -eq '.env' -or $_.Name -like '.env.*') -and
-        ($_.FullName -notmatch "\\.git(\\|$)") -and
-        ($_.FullName -notmatch "\\.git-backup(\\|$)") -and
-        ($_.FullName -notmatch "node_modules(\\|$)") -and
-        ($_.FullName -notmatch "dist(\\|$)") -and
-        ($_.FullName -notmatch "build(\\|$)") -and
-        ($_.FullName -notmatch "target(\\|$)")
-    }
     $backupCount = 0
     
+    $repoRoot = (git rev-parse --show-toplevel).Trim()
     foreach ($envFile in $envFiles) {
-        $repoRoot = (git rev-parse --show-toplevel).Trim()
         $abs = $envFile.FullName
         if ($abs.StartsWith($repoRoot)) { $relPath = $abs.Substring($repoRoot.Length) } else { $relPath = $abs }
         $relPath = $relPath -replace '^[\\/]+',''
@@ -78,6 +81,11 @@ function Backup-EnvFiles {
         $sourcePath = $envFile.FullName
         $targetPath = Join-Path $backupDir $relPath
         
+        # Guard bo sung: khong backup bat ky thu muc .git / .git-backup nao
+        if ($sourcePath -match '(?i)[\\/]\.git([\\/]|$)' -or $sourcePath -match '(?i)[\\/]\.git-backup([\\/]|$)') {
+            continue
+        }
+
         $targetDir = Split-Path $targetPath -Parent
         if (!(Test-Path $targetDir)) {
             New-Item -ItemType Directory -Path $targetDir -Force | Out-Null
