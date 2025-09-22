@@ -10,6 +10,9 @@ Gửi thư báo cáo công việc đã hoàn thành đến Discord cho quý ngà
 
 ## Script dùng kèm
 - Command này sẽ tạo (nếu chưa tồn tại) và sử dụng script PowerShell tại: `.cursor/scripts/reusable/send-discord-letter.ps1`.
+- Script tự động đọc webhook từ file `.env` cục bộ nếu biến môi trường thiếu:
+  - Đường dẫn: `tools/discord/env/.env`
+  - Key: `DISCORD_WEBHOOK_URL`
 - Có thể gọi trực tiếp script này khi cần:
 ```powershell
 powershell -ExecutionPolicy Bypass -File .cursor/scripts/reusable/send-discord-letter.ps1 "<tên ta>" "<tóm tắt nội dung>" "<đề xuất yêu cầu tiếp theo>" "<tên ngươi>" "https://discord.com/api/webhooks/xxx/yyy"

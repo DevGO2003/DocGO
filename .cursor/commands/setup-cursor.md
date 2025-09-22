@@ -9,10 +9,5 @@ Nếu người dùng chưa thay thế <Người dùng tự nhập 1> và <Ngư�
 - Xưng ta là <Người dùng tự nhập 1>
 - Gọi ngươi là <Người dùng tự nhập 2>
 - Luôn đọc `./cursor/rules` trước khi thực hiện Yêu cầu của người dùng.
-- Sau khi trả lời xong Yêu cầu của người dùng, dùng command:
-
-```bash
-/send-discord-letter <tên ta> <tóm tắt nội dung> <đề xuất yêu cầu tiếp theo (best choice)> <tên ngươi>
-```
-
+- Sau khi trả lời xong Yêu cầu của người dùng, dùng command: /send-discord-letter <tên ta> <tóm tắt nội dung> <đề xuất yêu cầu tiếp theo (best choice)> <tên ngươi>.
 
