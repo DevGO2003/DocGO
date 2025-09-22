@@ -1,6 +1,7 @@
 import React from 'react'
 import Link from 'next/link'
 import { APP_CONFIG } from '@/lib/constants'
+import { NavigationLink } from '@/components/NavigationLink'
 
 export const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear()
@@ -57,24 +58,24 @@ export const Footer: React.FC = () => {
             <h4 className="text-lg font-semibold mb-4">Sản phẩm</h4>
             <ul className="space-y-2">
               <li>
-                <Link href="/dashboard/contracts" className="text-gray-300 hover:text-white transition-colors">
+                <NavigationLink href="/contracts" className="text-gray-300 hover:text-white transition-colors">
                   Quản lý hợp đồng
-                </Link>
+                </NavigationLink>
               </li>
               <li>
-                <Link href="/ai-processing" className="text-gray-300 hover:text-white transition-colors">
+                <NavigationLink href="/ai-processing" className="text-gray-300 hover:text-white transition-colors">
                   Xử lý AI
-                </Link>
+                </NavigationLink>
               </li>
               <li>
-                <Link href="/file-storage" className="text-gray-300 hover:text-white transition-colors">
+                <NavigationLink href="/file-storage" className="text-gray-300 hover:text-white transition-colors">
                   Lưu trữ tài liệu
-                </Link>
+                </NavigationLink>
               </li>
               <li>
-                <Link href="/workflow" className="text-gray-300 hover:text-white transition-colors">
+                <NavigationLink href="/workflow" className="text-gray-300 hover:text-white transition-colors">
                   Quy trình phê duyệt
-                </Link>
+                </NavigationLink>
               </li>
             </ul>
           </div>
@@ -84,24 +85,24 @@ export const Footer: React.FC = () => {
             <h4 className="text-lg font-semibold mb-4">Công ty</h4>
             <ul className="space-y-2">
               <li>
-                <Link href="/about" className="text-gray-300 hover:text-white transition-colors">
+                <NavigationLink href="/about" className="text-gray-300 hover:text-white transition-colors">
                   Về chúng tôi
-                </Link>
+                </NavigationLink>
               </li>
               <li>
-                <Link href="/contact" className="text-gray-300 hover:text-white transition-colors">
+                <NavigationLink href="/contact" className="text-gray-300 hover:text-white transition-colors">
                   Liên hệ
-                </Link>
+                </NavigationLink>
               </li>
               <li>
-                <Link href="/careers" className="text-gray-300 hover:text-white transition-colors">
+                <NavigationLink href="/careers" className="text-gray-300 hover:text-white transition-colors">
                   Tuyển dụng
-                </Link>
+                </NavigationLink>
               </li>
               <li>
-                <Link href="/blog" className="text-gray-300 hover:text-white transition-colors">
+                <NavigationLink href="/blog" className="text-gray-300 hover:text-white transition-colors">
                   Blog
-                </Link>
+                </NavigationLink>
               </li>
             </ul>
           </div>
@@ -114,15 +115,15 @@ export const Footer: React.FC = () => {
               © {currentYear} {APP_CONFIG.NAME}. Tất cả quyền được bảo lưu.
             </div>
             <div className="flex space-x-6 mt-4 md:mt-0">
-              <Link href="/privacy" className="text-gray-400 hover:text-white text-sm transition-colors">
+              <NavigationLink href="/privacy" className="text-gray-400 hover:text-white text-sm transition-colors">
                 Chính sách bảo mật
-              </Link>
-              <Link href="/terms" className="text-gray-400 hover:text-white text-sm transition-colors">
+              </NavigationLink>
+              <NavigationLink href="/terms" className="text-gray-400 hover:text-white text-sm transition-colors">
                 Điều khoản sử dụng
-              </Link>
-              <Link href="/cookies" className="text-gray-400 hover:text-white text-sm transition-colors">
+              </NavigationLink>
+              <NavigationLink href="/cookies" className="text-gray-400 hover:text-white text-sm transition-colors">
                 Chính sách cookie
-              </Link>
+              </NavigationLink>
             </div>
           </div>
         </div>

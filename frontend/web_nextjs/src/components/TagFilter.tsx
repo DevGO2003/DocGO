@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react'
 import { TagIcon, ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline'
 import { tagAPI } from '@/lib/api'
+import { NoDataEmptyState } from '@/components/ui/EmptyState'
 
 interface Tag {
   name: string
@@ -142,9 +143,11 @@ export default function TagFilter({ selectedTags, onTagToggle, className = '' }:
 
       {/* No tags message */}
       {displayTags.length === 0 && !loading && (
-        <div className="text-sm text-gray-500 text-center py-2">
-          Chưa có tags nào
-        </div>
+        <NoDataEmptyState 
+          title="Chưa có tags nào"
+          description="Chưa có tags nào để hiển thị."
+          className="py-4"
+        />
       )}
     </div>
   )
