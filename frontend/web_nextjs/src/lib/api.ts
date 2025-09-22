@@ -51,6 +51,15 @@ class ApiClient {
         if (token) {
           config.headers.Authorization = `Bearer ${token}`
         }
+        
+        // Add debug logging for token status
+        if (process.env.NODE_ENV === 'development') {
+          console.log(`[API Request] ${config.method?.toUpperCase()} ${config.url}`, {
+            hasToken: !!token,
+            tokenPreview: token ? `${token.substring(0, 20)}...` : null
+          })
+        }
+        
         return config
       },
       (error) => {
@@ -82,25 +91,31 @@ class ApiClient {
       async (error) => {
         const originalRequest = error.config
         
-        // Handle 401 errors with token refresh (kiểm tra cả HTTP status và statusCode trong body)
+        // Handle 401/403 errors with token refresh (kiểm tra cả HTTP status và statusCode trong body)
         const isUnauthorized = error.response?.status === 401 || 
                               (error.response?.data?.statusCode === 401)
+        const isForbidden = error.response?.status === 403 || 
+                           (error.response?.data?.statusCode === 403)
         
-        if (isUnauthorized && !originalRequest._retry) {
+        if ((isUnauthorized || isForbidden) && !originalRequest._retry) {
           originalRequest._retry = true
           
           try {
+            console.log('[API] Token refresh needed, attempting refresh...')
             const refreshSuccess = await this.handleUnauthorized()
             if (refreshSuccess) {
+              console.log('[API] Token refresh successful, retrying request...')
               // Retry the original request with new token
               const newToken = this.getAuthToken()
               if (newToken) {
                 originalRequest.headers.Authorization = `Bearer ${newToken}`
                 return this.client(originalRequest)
               }
+            } else {
+              console.log('[API] Token refresh failed, redirecting to login...')
             }
           } catch (retryError) {
-            console.error('Request retry failed:', retryError)
+            console.error('[API] Request retry failed:', retryError)
           }
         }
         
@@ -118,6 +133,12 @@ class ApiClient {
         if (authData) {
           const parsed = JSON.parse(authData)
           if (parsed.tokenData?.accessToken) {
+            // Check if token is expired
+            if (parsed.tokenData.expiresAt && Date.now() >= parsed.tokenData.expiresAt) {
+              console.warn('[API] Token is expired, clearing storage')
+              this.clearExpiredTokens()
+              return null
+            }
             return parsed.tokenData.accessToken
           }
           if (parsed.accessToken) {
@@ -125,13 +146,27 @@ class ApiClient {
           }
         }
       } catch (error) {
-        console.warn('Error reading auth token from storage:', error)
+        console.warn('[API] Error reading auth token from storage:', error)
+        this.clearExpiredTokens()
       }
       
       // Fallback to legacy storage
       return localStorage.getItem('auth_token')
     }
     return null
+  }
+
+  private clearExpiredTokens(): void {
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.removeItem('docgo_auth_v1')
+        localStorage.removeItem('auth_token')
+        localStorage.removeItem('refresh_token')
+        localStorage.removeItem('user_data')
+      } catch (error) {
+        console.warn('[API] Error clearing expired tokens:', error)
+      }
+    }
   }
 
   private handleApiError(error: any) {
@@ -169,7 +204,13 @@ class ApiClient {
         this.handleUnauthorized()
         break
       case 403:
-        toast.error('Bạn không có quyền truy cập')
+        // For 403 errors, check if it's due to expired token
+        if (responseData?.message === 'permission error' || responseData?.msg === 'permission error') {
+          console.warn('[API] 403 permission error - likely expired token')
+          // Don't show toast for permission errors as they should be handled by token refresh
+        } else {
+          toast.error('Bạn không có quyền truy cập')
+        }
         break
       case 404:
         toast.error('Không tìm thấy tài nguyên')

@@ -26,7 +26,6 @@ function useDashboardData() {
       { label: 'Thiếu thông tin', count: 0 },
       { label: 'Không đúng quy định', count: 0 },
       { label: 'Cần bổ sung tài liệu', count: 0 },
-      { label: 'Giá trị vượt thẩm quyền', count: 0 },
     ],
   })
 

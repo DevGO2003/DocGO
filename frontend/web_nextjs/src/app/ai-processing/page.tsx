@@ -5,6 +5,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { aiProcessingAPI } from '@/lib/api'
 import { CogIcon, DocumentTextIcon, DocumentMagnifyingGlassIcon } from '@heroicons/react/24/outline'
 import toast from 'react-hot-toast'
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 
 export default function AIProcessingPage() {
   const { user } = useAuth()
@@ -218,9 +219,13 @@ export default function AIProcessingPage() {
                     <button
                       onClick={handleExtractText}
                       disabled={!selectedFile || loading}
-                      className="btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     >
-                      {loading ? 'Đang xử lý...' : 'Trích xuất văn bản'}
+                      {loading ? (
+                        <LoadingSpinner size="sm" text="Đang xử lý..." showText={false} />
+                      ) : (
+                        'Trích xuất văn bản'
+                      )}
                     </button>
                   </div>
 

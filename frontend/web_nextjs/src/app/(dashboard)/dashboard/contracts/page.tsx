@@ -175,7 +175,7 @@ export default function ContractsPage() {
               <p className="text-gray-600">Tìm kiếm, lọc trạng thái/loại và gắn thẻ nhanh</p>
             </div>
             <div className="flex gap-2">
-              <Link href="/dashboard/create-contract" className="px-4 py-2 rounded-lg bg-white text-indigo-700 border border-indigo-200 hover:bg-indigo-50 shadow-sm">
+              <Link href="/dashboard/import-document" className="px-4 py-2 rounded-lg bg-white text-indigo-700 border border-indigo-200 hover:bg-indigo-50 shadow-sm">
                 + Tạo hợp đồng
               </Link>
             </div>
