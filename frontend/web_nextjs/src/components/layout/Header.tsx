@@ -7,6 +7,7 @@ import { useTranslation } from '@/hooks/useTranslation'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { NotificationDropdown } from '@/components/ui/NotificationDropdown'
+import { NavigationLink } from '@/components/NavigationLink'
 import { 
   MagnifyingGlassIcon, 
   BellIcon, 
@@ -81,7 +82,7 @@ export const Header: React.FC<HeaderProps> = ({
               </button>
             )}
             
-            <Link href="/" className="flex items-center">
+            <NavigationLink href="/" className="flex items-center">
               <div className="flex-shrink-0">
                 <div className="h-8 w-8 bg-primary-600 rounded-lg flex items-center justify-center">
                   <span className="text-white font-bold text-lg">D</span>
@@ -90,7 +91,7 @@ export const Header: React.FC<HeaderProps> = ({
               <div className="ml-3">
                 <h1 className="text-xl font-bold text-gray-900">{APP_CONFIG.NAME}</h1>
               </div>
-            </Link>
+            </NavigationLink>
           </div>
 
           {/* Center - Search Bar */}
@@ -159,18 +160,18 @@ export const Header: React.FC<HeaderProps> = ({
                       
                       {/* Dropdown Menu */}
                       <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
-                        <Link
+                        <NavigationLink
                           href="/profile"
                           className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                         >
                           {t('header.user.profile')}
-                        </Link>
-                        <Link
+                        </NavigationLink>
+                        <NavigationLink
                           href="/settings"
                           className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                         >
                           {t('header.user.settings')}
-                        </Link>
+                        </NavigationLink>
                         <hr className="my-1" />
                         <button
                           onClick={handleLogout}
@@ -183,16 +184,16 @@ export const Header: React.FC<HeaderProps> = ({
                   </div>
                 ) : (
                   <div className="flex items-center space-x-2">
-                    <Link href="/auth/login">
+                    <NavigationLink href="/auth/login">
                       <Button variant="outline" size="sm">
                         {t('header.user.login')}
                       </Button>
-                    </Link>
-                    <Link href="/auth/register">
+                    </NavigationLink>
+                    <NavigationLink href="/auth/register">
                       <Button size="sm">
                         {t('header.user.register')}
                       </Button>
-                    </Link>
+                    </NavigationLink>
                   </div>
                 )}
               </div>

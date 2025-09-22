@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Upload, FileText, X, AlertCircle, CheckCircle, Search } from 'lucide-react';
 import { Contract } from '../types/contract';
+import { LoadingSpinner } from './ui/LoadingSpinner';
 
 interface ContractUploadProps {
   onUpload: (file: File, isBasedOnExisting: boolean, parentContractId?: string) => void;
@@ -259,10 +260,7 @@ export const ContractUpload: React.FC<ContractUploadProps> = ({
               className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
             >
               {uploadStatus === 'uploading' ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  <span>Đang tải lên...</span>
-                </>
+                <LoadingSpinner size="sm" text="Đang tải lên..." showText={false} />
               ) : (
                 <>
                   <Upload className="w-4 h-4" />

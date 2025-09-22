@@ -92,19 +92,19 @@ export default function TestAuthPage() {
                 <div className="grid grid-cols-3 gap-4 text-center">
                   <div>
                     <div className="text-2xl font-bold text-gray-900">
-                      {testResults.summary.total}
+                      {testResults.summary?.total || 0}
                     </div>
                     <div className="text-sm text-gray-600">Total Tests</div>
                   </div>
                   <div>
                     <div className="text-2xl font-bold text-green-600">
-                      {testResults.summary.passed}
+                      {testResults.summary?.passed || 0}
                     </div>
                     <div className="text-sm text-gray-600">Passed</div>
                   </div>
                   <div>
                     <div className="text-2xl font-bold text-red-600">
-                      {testResults.summary.failed}
+                      {testResults.summary?.failed || 0}
                     </div>
                     <div className="text-sm text-gray-600">Failed</div>
                   </div>

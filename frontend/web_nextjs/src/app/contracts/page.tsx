@@ -3,10 +3,8 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { DashboardLayout } from '@/components/layout'
-import { MagnifyingGlassIcon } from '@heroicons/react/24/outline'
+import { MagnifyingGlassIcon, TagIcon } from '@heroicons/react/24/outline'
 import { contractAPI } from '@/lib/api'
-import TagFilter from '@/components/TagFilter'
-import { useTranslation } from '@/hooks/useTranslation'
 import { InlineLoading } from '@/components/ui/LoadingSpinner'
 
 type ContractItem = {
@@ -36,14 +34,14 @@ const STATUS_OPTIONS = [
   { label: 'Đã chấm dứt', value: 'TERMINATED' },
   { label: 'Đã lưu trữ', value: 'ARCHIVED' },
 ] as const
-const CONTRACT_TYPE_VALUES = ['ALL','SERVICE_AGREEMENT','PURCHASE_AGREEMENT','PARTNERSHIP_AGREEMENT','EMPLOYMENT_CONTRACT','CONFIDENTIALITY_AGREEMENT','OTHER'] as const
-// Removed static TAGS array - now using dynamic tags from API
+const TYPES = ['ALL','SERVICE_AGREEMENT','PURCHASE_AGREEMENT','PARTNERSHIP_AGREEMENT','EMPLOYMENT_CONTRACT','CONFIDENTIALITY_AGREEMENT','OTHER'] as const
+const TAGS = ['ưu_tiên','gấp','gia_hạn','cao_giá','đối_tác_mới','rủi_ro']
 
 export default function ContractsPage() {
-  const { t } = useTranslation()
   const [items, setItems] = useState<ContractItem[]>([])
   const [loading, setLoading] = useState<boolean>(true)
   const [search, setSearch] = useState<string>('')
+  const [debouncedSearch, setDebouncedSearch] = useState<string>('')
   const [status, setStatus] = useState<string>('ALL')
   const [type, setType] = useState<string>('ALL')
   const [selectedTags, setSelectedTags] = useState<string[]>([])
@@ -58,26 +56,18 @@ export default function ContractsPage() {
   const [searchTrigger, setSearchTrigger] = useState<number>(0)
   const abortRef = useRef<AbortController | null>(null)
 
-  // Create contract type options with i18n
-  const contractTypeOptions = useMemo(() => {
-    return CONTRACT_TYPE_VALUES.map(value => ({
-      value,
-      label: value === 'ALL' ? t('contracts.types.all') : t(`contracts.types.${value}`)
-    }))
-  }, [t])
-
   const queryString = useMemo(() => {
     const params = new URLSearchParams()
     params.set('pageNumber', String(page))
     params.set('pageSize', String(pageSize))
-    if (search.trim()) params.set('searchTerm', search.trim())
+    if (debouncedSearch.trim()) params.set('searchTerm', debouncedSearch.trim())
     if (status !== 'ALL') params.set('status', status)
     if (type !== 'ALL') params.set('type', type)
     if (selectedTags.length > 0) params.set('tags', selectedTags.join(','))
     params.set('sortBy', sortBy)
     params.set('sortDirection', sortDirection)
     return params.toString()
-  }, [page, pageSize, search, status, type, selectedTags, sortBy, sortDirection, searchTrigger])
+  }, [page, pageSize, debouncedSearch, status, type, selectedTags, sortBy, sortDirection, searchTrigger])
 
   const fetchData = async () => {
     setLoading(true)
@@ -94,14 +84,21 @@ export default function ContractsPage() {
         pageSize,
         includeDeleted: false,
       }
-      const trimmed = search.trim()
+      const trimmed = debouncedSearch.trim()
       if (trimmed.length >= 2) params.searchTerm = trimmed
       if (sortBy) params.sortBy = sortBy
       if (sortDirection) params.sortDirection = sortDirection.toUpperCase()
 
-      let payload: any = {}
-      const res = await contractAPI.getContracts(params)
-      payload = res.data?.data || {}
+      // Ensure valid token before making request
+      const { default: TokenRefreshHelper } = await import('@/utils/token-refresh-helper')
+      const tokenValid = await TokenRefreshHelper.ensureValidToken()
+      
+      if (!tokenValid) {
+        console.warn('[Contracts] Token validation failed, request may fail')
+      }
+
+      const res = await contractAPI.getContracts(params, { signal: controller.signal })
+      const payload: any = res.data?.data || {}
       const content = Array.isArray(payload.content) ? payload.content : []
 
       const mapped: ContractItem[] = content.map((c: any) => ({
@@ -132,8 +129,6 @@ export default function ContractsPage() {
     }
   }
 
-  
-
   // Auto-fetch when filters change (except search)
   useEffect(() => {
     fetchData()
@@ -143,6 +138,7 @@ export default function ContractsPage() {
   // Manual search trigger
   useEffect(() => {
     if (searchTrigger > 0) {
+      setDebouncedSearch(search)
       fetchData()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -186,8 +182,8 @@ export default function ContractsPage() {
               </h1>
               <p className="text-gray-600">Tìm kiếm, lọc trạng thái/loại và gắn thẻ nhanh</p>
             </div>
-            <div className="flex gap-2 items-center">
-              <Link href="/dashboard/import-document" className="px-4 py-2 rounded-lg bg-white text-indigo-700 border border-indigo-200 hover:bg-indigo-50 shadow-sm">
+            <div className="flex gap-2">
+              <Link href="/import-document" className="px-4 py-2 rounded-lg bg-white text-indigo-700 border border-indigo-200 hover:bg-indigo-50 shadow-sm">
                 + Tạo hợp đồng
               </Link>
             </div>
@@ -241,8 +237,8 @@ export default function ContractsPage() {
                 onChange={(e) => { setType(e.target.value); setPage(0) }}
                 className="w-full rounded-lg border-gray-300 py-2 px-3 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
               >
-                {contractTypeOptions.map((option: { value: string; label: string }) => (
-                  <option key={option.value} value={option.value}>{option.label}</option>
+                {TYPES.map(t => (
+                  <option key={t} value={t}>{t === 'ALL' ? 'Tất cả loại' : t}</option>
                 ))}
               </select>
             </div>
@@ -288,11 +284,20 @@ export default function ContractsPage() {
           </div>
 
           {/* Tags */}
-          <div className="mt-4">
-            <TagFilter
-              selectedTags={selectedTags}
-              onTagToggle={toggleTag}
-            />
+          <div className="mt-4 flex flex-wrap gap-2">
+            {TAGS.map(t => {
+              const active = selectedTags.includes(t)
+              return (
+                <button
+                  key={t}
+                  onClick={() => toggleTag(t)}
+                  className={`inline-flex items-center gap-1 rounded-full border px-3 py-1 text-sm transition ${active ? 'bg-indigo-50 text-indigo-700 border-indigo-200' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'}`}
+                >
+                  <TagIcon className="h-4 w-4" />
+                  {t}
+                </button>
+              )
+            })}
           </div>
         </div>
 
@@ -361,7 +366,7 @@ export default function ContractsPage() {
                       className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
                     />
                   </div>
-                  <Link href={`/dashboard/contracts/${c.id}`} className="block">
+                  <Link href={`/contracts/${c.id}`} className="block">
                     <div className="flex justify-between items-start gap-4 ml-6">
                       <h3 className="font-semibold text-gray-900 line-clamp-2 group-hover:text-indigo-700 transition">{c.title}</h3>
                       <span className={`text-xs px-2 py-1 rounded-full border ${badgeClass(c.status)}`}>{c.status}</span>
@@ -370,9 +375,7 @@ export default function ContractsPage() {
                     <div className="mt-3 flex flex-wrap gap-2 ml-6">
                       <span className="text-xs px-2 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">{c.contractType}</span>
                       {c.tags?.slice(0,3).map(t => (
-                        <span key={t} className="text-xs px-2 py-1 rounded-full bg-gray-50 text-gray-700 border border-gray-200">
-                          #{t.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                        </span>
+                        <span key={t} className="text-xs px-2 py-1 rounded-full bg-gray-50 text-gray-700 border border-gray-200">#{t}</span>
                       ))}
                     </div>
                     <div className="mt-4 text-sm text-gray-500 space-y-1 ml-6">
@@ -419,15 +422,13 @@ export default function ContractsPage() {
                         </td>
                         <td className="px-6 py-4">
                           <div>
-                            <Link href={`/dashboard/contracts/${c.id}`} className="text-sm font-medium text-gray-900 hover:text-indigo-600">
+                            <Link href={`/contracts/${c.id}`} className="text-sm font-medium text-gray-900 hover:text-indigo-600">
                               {c.title}
                             </Link>
                             <p className="text-sm text-gray-500 line-clamp-1">{c.description || 'Không có mô tả'}</p>
                             <div className="flex flex-wrap gap-1 mt-1">
                               {c.tags?.slice(0,2).map(t => (
-                                <span key={t} className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">
-                                  #{t.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                                </span>
+                                <span key={t} className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">#{t}</span>
                               ))}
                             </div>
                           </div>
@@ -440,7 +441,7 @@ export default function ContractsPage() {
                         <td className="px-6 py-4 text-sm text-gray-900">{c.effectiveDate}</td>
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-2">
-                            <Link href={`/dashboard/contracts/${c.id}`} className="text-indigo-600 hover:text-indigo-900 text-sm">
+                            <Link href={`/contracts/${c.id}`} className="text-indigo-600 hover:text-indigo-900 text-sm">
                               Xem
                             </Link>
                             <button className="text-gray-400 hover:text-gray-600 text-sm">
@@ -502,6 +503,3 @@ function badgeClass(status: string) {
       return 'bg-gray-50 text-gray-700 border-gray-200'
   }
 }
-
-
-
