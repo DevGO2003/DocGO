@@ -2,7 +2,7 @@
 
 ## Mục đích
 Khi người dùng yêu cầu "xóa script" hoặc "delete scripts", command này sẽ:
-- **Tự động tìm và xóa** tất cả file script Python/JavaScript trong thư mục `script/`
+- **Tự động tìm và xóa** tất cả file script trong thư mục `.cursor/scripts/temp/`
 - **Giữ lại** các file cấu hình quan trọng (README, requirements, etc.)
 - **Dọn dẹp workspace** để tránh file rác
 - **Báo cáo chi tiết** về các file đã xóa
@@ -10,7 +10,7 @@ Khi người dùng yêu cầu "xóa script" hoặc "delete scripts", command nà
 ## Quy trình thực hiện
 
 ### 1. 🔍 Tìm kiếm file script
-- **Quét thư mục** `script/` để tìm file script
+- **Quét thư mục** `.cursor/scripts/temp/` để tìm file script
 - **Phân loại** file theo loại: Python (.py), JavaScript (.js), Batch (.bat), PowerShell (.ps1)
 - **Kiểm tra** file nào cần giữ lại (README, requirements, config)
 
@@ -26,7 +26,7 @@ Khi người dùng yêu cầu "xóa script" hoặc "delete scripts", command nà
 - **Trạng thái** workspace sau khi dọn dẹp
 
 ## ⚠️ QUY TẮC NGHIÊM NGẶT
-- **CHỈ xóa** file script trong thư mục `script/`
+- **CHỈ xóa** file script trong thư mục `.cursor/scripts/temp/`
 - **KHÔNG xóa** file cấu hình quan trọng
 - **KHÔNG xóa** file README hoặc documentation
 - **KHÔNG xóa** file requirements hoặc package.json

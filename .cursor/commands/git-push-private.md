@@ -7,7 +7,7 @@
 - **Có tham số**: ngoài `private/<current-branch>` còn push thêm vào `private/<param>`
 - **Env files**: được force-add tạm thời để push vào private nhưng không bị track ở origin
 - **Đồng bộ**: sau khi push, đồng bộ lại local từ `private/<current-branch>`
-- **Tự động tạo script**: Luôn tạo file `script/git-push-private-safe.ps1` với logic an toàn
+- **Tự động tạo script**: Luôn tạo file `.cursor/scripts/reusable/git-push-private-safe.ps1` với logic an toàn
 - **PowerShell only**: Chỉ tạo script PowerShell, không tạo Bash script
 
 ## Luồng thực thi chi tiết
@@ -101,10 +101,10 @@ Dựa trên phân tích ngữ cảnh, thuật toán áp dụng các quy tắc ư
 ### Sử dụng trực tiếp PowerShell
 ```powershell
 # Push vào private/<current-branch>
-powershell -ExecutionPolicy Bypass -File script/git-push-private-safe.ps1
+powershell -ExecutionPolicy Bypass -File .cursor/scripts/reusable/git-push-private-safe.ps1
 
 # Push vào private/<current-branch> và private/<param>
-powershell -ExecutionPolicy Bypass -File script/git-push-private-safe.ps1 <param>
+powershell -ExecutionPolicy Bypass -File .cursor/scripts/reusable/git-push-private-safe.ps1 <param>
 ```
 
 ## Lưu ý quan trọng
@@ -113,7 +113,7 @@ powershell -ExecutionPolicy Bypass -File script/git-push-private-safe.ps1 <param
 - Đảm bảo có quyền truy cập vào remote `private`
 - Các file `.env` sẽ được backup tự động trước khi xử lý
 - Smart Merge đảm bảo không mất dữ liệu quan trọng trong quá trình đồng bộ
-- Script tự động tạo file `git-push-private-safe.ps1` trong thư mục `script/`
+- Script tự động tạo file `git-push-private-safe.ps1` trong thư mục `.cursor/scripts/reusable/`
 
 ## ⚠️ Cảnh báo về file .env
 
@@ -160,15 +160,17 @@ done
 
 Khi thực hiện lệnh `/git-push-private`, hệ thống sẽ tự động:
 
-1. **Tạo script**: Tạo file `script/git-push-private-safe.ps1` với logic an toàn
+1. **Tạo script**: Tạo file `.cursor/scripts/reusable/git-push-private-safe.ps1` với logic an toàn
 2. **Kiểm tra Git**: Xác minh đây là Git repository và có remote `private`
 3. **Thực thi**: Chạy script PowerShell với quyền phù hợp
 4. **Báo cáo**: Hiển thị kết quả chi tiết và trạng thái file .env
 
 ### Cấu trúc script được tạo:
 ```
-script/
-└── git-push-private-safe.ps1
+.cursor/
+└── scripts/
+    └── reusable/
+        └── git-push-private-safe.ps1
     ├── Smart Backup (backup .env files)
     ├── Security Check (remove .env from Git tracking)
     ├── Push to Origin (code only)
@@ -190,5 +192,5 @@ script/
 ### Lưu ý về việc tạo script:
 - Script được tạo với encoding UTF-8 để tránh lỗi ký tự
 - Sử dụng syntax PowerShell chuẩn, không có lỗi parser
-- Tự động kiểm tra và tạo thư mục `script/` nếu chưa có
+- Tự động kiểm tra và tạo thư mục `.cursor/scripts/reusable/` nếu chưa có
 - Script có thể chạy lại nhiều lần mà không gây lỗi
