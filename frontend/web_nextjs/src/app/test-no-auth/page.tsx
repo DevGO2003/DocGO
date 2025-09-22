@@ -13,7 +13,7 @@ export default function TestNoAuth() {
         </p>
         <ul className="mt-2 text-sm text-blue-700">
           <li>• <a href="/" className="underline">Trang chủ</a></li>
-          <li>• <a href="/contracts" className="underline">Danh sách hợp đồng</a></li>
+          <li>• <a href="/dashboard/contracts" className="underline">Danh sách hợp đồng</a></li>
           <li>• <a href="/test-hot-reload" className="underline">Test Hot Reload</a></li>
         </ul>
       </div>

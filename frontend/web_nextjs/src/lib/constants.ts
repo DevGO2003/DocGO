@@ -175,7 +175,7 @@ export const ROUTES = {
   LOGIN: '/auth/login',
   REGISTER: '/auth/register',
   DASHBOARD: '/dashboard',
-  CONTRACTS: '/contracts',
+  CONTRACTS: '/dashboard/contracts',
   USERS: '/users',
   AI_PROCESSING: '/ai-processing',
   REPORTS: '/reports',

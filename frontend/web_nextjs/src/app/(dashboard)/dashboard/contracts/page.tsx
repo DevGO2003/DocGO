@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { DashboardLayout } from '@/components/layout'
 import { MagnifyingGlassIcon, TagIcon } from '@heroicons/react/24/outline'
 import { contractAPI } from '@/lib/api'
+import { InlineLoading } from '@/components/ui/LoadingSpinner'
 
 type ContractItem = {
   id: number
@@ -174,9 +175,6 @@ export default function ContractsPage() {
               <p className="text-gray-600">Tìm kiếm, lọc trạng thái/loại và gắn thẻ nhanh</p>
             </div>
             <div className="flex gap-2">
-              <Link href="/dashboard/quick-create" className="px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm">
-                ⚡ Tạo nhanh (OCR)
-              </Link>
               <Link href="/dashboard/create-contract" className="px-4 py-2 rounded-lg bg-white text-indigo-700 border border-indigo-200 hover:bg-indigo-50 shadow-sm">
                 + Tạo hợp đồng
               </Link>
@@ -343,10 +341,7 @@ export default function ContractsPage() {
         {/* Content */}
         <div>
           {loading ? (
-            <div className="text-center py-16">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto" />
-              <p className="mt-4 text-gray-600">Đang tải...</p>
-            </div>
+            <InlineLoading text="Đang tải hợp đồng..." size="lg" />
           ) : items.length === 0 ? (
             <div className="text-center py-16">
               <p className="text-gray-600">Không tìm thấy hợp đồng phù hợp.</p>
@@ -363,7 +358,7 @@ export default function ContractsPage() {
                       className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
                     />
                   </div>
-                  <Link href={`/contracts/${c.id}`} className="block">
+                  <Link href={`/dashboard/contracts/${c.id}`} className="block">
                     <div className="flex justify-between items-start gap-4 ml-6">
                       <h3 className="font-semibold text-gray-900 line-clamp-2 group-hover:text-indigo-700 transition">{c.title}</h3>
                       <span className={`text-xs px-2 py-1 rounded-full border ${badgeClass(c.status)}`}>{c.status}</span>
@@ -419,7 +414,7 @@ export default function ContractsPage() {
                         </td>
                         <td className="px-6 py-4">
                           <div>
-                            <Link href={`/contracts/${c.id}`} className="text-sm font-medium text-gray-900 hover:text-indigo-600">
+                            <Link href={`/dashboard/contracts/${c.id}`} className="text-sm font-medium text-gray-900 hover:text-indigo-600">
                               {c.title}
                             </Link>
                             <p className="text-sm text-gray-500 line-clamp-1">{c.description || 'Không có mô tả'}</p>
@@ -438,7 +433,7 @@ export default function ContractsPage() {
                         <td className="px-6 py-4 text-sm text-gray-900">{c.effectiveDate}</td>
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-2">
-                            <Link href={`/contracts/${c.id}`} className="text-indigo-600 hover:text-indigo-900 text-sm">
+                            <Link href={`/dashboard/contracts/${c.id}`} className="text-indigo-600 hover:text-indigo-900 text-sm">
                               Xem
                             </Link>
                             <button className="text-gray-400 hover:text-gray-600 text-sm">
