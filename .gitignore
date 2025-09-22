@@ -202,3 +202,6 @@ document/**/*.xlsx
 document/**/*.ppt
 document/**/*.pptx
 **/contract_uploads/.git-backup/
+
+# Scripts temporary directory
+scripts/temp/
