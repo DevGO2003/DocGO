@@ -21,9 +21,8 @@ const nextConfig = {
   },
   async redirects() {
     return [
-      { source: '/dashboard/hop-dong', destination: '/contracts', permanent: false },
+      { source: '/dashboard/hop-dong', destination: '/dashboard/contracts', permanent: false },
       { source: '/dashboard/tao-hop-dong', destination: '/dashboard/create-contract', permanent: false },
-      { source: '/dashboard/tao-nhanh', destination: '/dashboard/quick-create', permanent: false },
       { source: '/dashboard/chu-ky-dien-tu', destination: '/dashboard/e-signature', permanent: false },
       { source: '/dashboard/binh-luan-cong-tac', destination: '/dashboard/collaboration-comments', permanent: false },
       { source: '/dashboard/phien-ban-hop-dong', destination: '/dashboard/contract-versions', permanent: false },
@@ -40,7 +39,6 @@ const nextConfig = {
       { source: '/dashboard/tro-giup-ho-tro', destination: '/dashboard/help-support', permanent: false },
       { source: '/dashboard/cai-dat', destination: '/dashboard/settings', permanent: false },
       { source: '/dashboard/huong-dan', destination: '/dashboard/guide', permanent: false },
-      { source: '/dashboard/tai-len', destination: '/dashboard/quick-create', permanent: false },
     ]
   },
   async rewrites() {

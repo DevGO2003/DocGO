@@ -14,7 +14,7 @@ export default function NotFound() {
         
         <div className="space-y-4">
           <Link
-            href="/dashboard"
+            href="/"
             className="inline-flex items-center px-6 py-3 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition-colors"
           >
             <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -25,7 +25,7 @@ export default function NotFound() {
           
           <div className="text-sm text-gray-500">
             Hoặc{' '}
-            <Link href="/dashboard/huong-dan" className="text-blue-600 hover:text-blue-800 underline">
+            <Link href="/help-support" className="text-blue-600 hover:text-blue-800 underline">
               xem hướng dẫn sử dụng
             </Link>
           </div>

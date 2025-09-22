@@ -291,7 +291,7 @@ export const ROUTES = {
     RESET_PASSWORD: '/auth/reset-password',
   },
   DASHBOARD: '/dashboard',
-  CONTRACTS: '/contracts',
+  CONTRACTS: '/dashboard/contracts',
   USERS: '/users',
   AI_PROCESSING: '/ai-processing',
   DOCUMENTS: '/documents',
