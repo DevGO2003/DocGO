@@ -1,3 +1,182 @@
+param(
+  [Parameter(Mandatory = $false, Position = 0)] [string] $AdditionalPrivateBranch
+)
+
+$ErrorActionPreference = 'Stop'
+
+function Write-Info($msg)  { Write-Host $msg -ForegroundColor Cyan }
+function Write-Success($m){ Write-Host $m -ForegroundColor Green }
+function Write-Warn($m)   { Write-Host $m -ForegroundColor Yellow }
+function Write-ErrorMsg($m){ Write-Host $m -ForegroundColor Red }
+
+function Assert-GitRepo {
+  try { git rev-parse --is-inside-work-tree | Out-Null } catch { throw 'Not a Git repository.' }
+}
+
+function Ensure-Directory($path) {
+  if (-not (Test-Path $path)) { New-Item -ItemType Directory -Path $path -Force | Out-Null }
+}
+
+function Get-CurrentBranch {
+  try {
+    $b = git rev-parse --abbrev-ref HEAD 2>$null
+    if ($LASTEXITCODE -eq 0 -and $b) { return $b }
+    return 'main'
+  } catch { return 'main' }
+}
+
+function Has-Remote($name) {
+  $url = ''
+  try { $url = git remote get-url $name 2>$null } catch { }
+  return -not [string]::IsNullOrWhiteSpace($url)
+}
+
+function Get-EnvFiles {
+  # Return list of env-like files from workspace
+  $patterns = @('.env', '.env.*', '*\.env', '*\.env.*')
+  $files = @()
+  foreach ($p in $patterns) {
+    $files += Get-ChildItem -Recurse -File -Force -ErrorAction SilentlyContinue -Include $p | Where-Object { $_.Name -match '^\.env(\..+)?$' -or $_.Name -match '.+\.env(\..+)?$' }
+  }
+  # De-duplicate
+  return $files | Select-Object -Unique
+}
+
+function SmartBackup-Env {
+  $ts = Get-Date -Format 'yyyyMMdd-HHmmss'
+  $backupRoot = Join-Path '.git-backup' 'env'
+  $backupDir  = Join-Path $backupRoot $ts
+  Ensure-Directory $backupDir
+  $envFiles = Get-EnvFiles
+  foreach ($f in $envFiles) {
+    $rel = Resolve-Path -Relative $f.FullName
+    $target = Join-Path $backupDir $rel
+    Ensure-Directory (Split-Path $target -Parent)
+    Copy-Item $f.FullName $target -Force
+  }
+  Write-Info "Smart Backup saved: $backupDir"
+}
+
+function SecurityCheck-UntrackEnv {
+  Write-Info 'Security Check: ensure env files are not tracked by Git.'
+  $tracked = & git ls-files -z | ForEach-Object { $_ -split "`0" } | Where-Object { $_ -match '(?:^|\\|/)\.env(?:\..+)?$' -or $_ -match '(?:^|\\|/).+\.env(?:\..+)?$' }
+  if ($tracked -and $tracked.Count -gt 0) {
+    foreach ($t in $tracked) { git rm --cached -- "$t" | Out-Null }
+    git commit -m 'chore(security): remove env files from tracking' --no-verify | Out-Null
+    Write-Info ('Security cleanup committed for: ' + ($tracked -join ', '))
+  } else {
+    Write-Info 'No tracked env files found.'
+  }
+}
+
+function StageAndCommit-CodeOnly {
+  git add -A
+  git commit -m 'chore: push pending changes' --no-verify 2>$null
+  if ($LASTEXITCODE -ne 0) { Write-Info 'No changes to commit for code-only.' }
+}
+
+function Push-Origin($branch) {
+  if (-not (Has-Remote 'origin')) { Write-Warn 'Remote "origin" not found. Skipping push to origin.'; return }
+  git push origin $branch
+}
+
+function ForceAdd-EnvFiles {
+  $envFiles = Get-EnvFiles
+  if (-not $envFiles -or $envFiles.Count -eq 0) { return @() }
+  foreach ($f in $envFiles) { git add -f -- "$($f.FullName)" }
+  return $envFiles
+}
+
+function Commit-EnvSnapshot($envFiles) {
+  if (-not $envFiles -or $envFiles.Count -eq 0) { return $false }
+  git commit -m 'chore(private): env snapshot' --no-verify 2>$null
+  return $LASTEXITCODE -eq 0
+}
+
+function Push-Private($branch, $alsoBranch) {
+  if (-not (Has-Remote 'private')) { throw 'Remote "private" not configured.' }
+  $target1 = "refs/heads/private/$branch"
+  git push private HEAD:$target1
+  if ($alsoBranch -and -not [string]::IsNullOrWhiteSpace($alsoBranch)) {
+    $target2 = "refs/heads/private/$alsoBranch"
+    git push private HEAD:$target2
+  }
+}
+
+function Cleanup-EnvCommit {
+  # Remove last commit (env snapshot) softly and unstage env files
+  git reset --soft HEAD~1
+  git reset HEAD
+}
+
+function Sync-From-Private($branch) {
+  if (-not (Has-Remote 'private')) { Write-Warn 'Remote "private" not found. Skip sync.'; return }
+  git fetch private
+  # Move to private/<branch> softly
+  git reset --soft "private/private/$branch"
+}
+
+function Prevent-Env-Tracking-Local {
+  $excludeFile = Join-Path '.git' 'info/exclude'
+  Ensure-Directory (Split-Path $excludeFile -Parent)
+  $lines = @(
+    '**/.env'
+    '**/.env.*'
+    '**/*.env'
+    '**/*.env.*'
+  )
+  if (Test-Path $excludeFile) { $existing = Get-Content $excludeFile -ErrorAction SilentlyContinue } else { $existing = @() }
+  foreach ($l in $lines) {
+    if (-not ($existing -contains $l)) { Add-Content -Path $excludeFile -Value $l }
+  }
+}
+
+function Final-Pull-Private($branch) {
+  if (-not (Has-Remote 'private')) { return }
+  git pull private "private/$branch" 2>$null | Out-Null
+}
+
+try {
+  Assert-GitRepo
+  $branch = Get-CurrentBranch
+  Write-Info "Current branch: $branch"
+
+  # 2) Backup env
+  SmartBackup-Env
+
+  # 3) Security Check
+  SecurityCheck-UntrackEnv
+
+  # 4) Push code (origin)
+  StageAndCommit-CodeOnly
+  Push-Origin $branch
+
+  # 5) Push code+env to private
+  $envFiles = ForceAdd-EnvFiles
+  $didEnvCommit = Commit-EnvSnapshot $envFiles
+  if ($didEnvCommit) {
+    Push-Private $branch $AdditionalPrivateBranch
+    # 5.3) cleanup
+    Cleanup-EnvCommit
+  } else {
+    Write-Info 'No env files to push to private.'
+  }
+
+  # 6) Sync from private
+  Sync-From-Private $branch
+
+  # 7) Prevent local env tracking
+  Prevent-Env-Tracking-Local
+
+  # 8) Final pull
+  Final-Pull-Private $branch
+
+  Write-Success 'git-push-private: Completed successfully.'
+} catch {
+  Write-ErrorMsg ("git-push-private: Failed - " + $_.Exception.Message)
+  exit 1
+}
+
 # Git Push Private - AI-Powered Smart Merge (PowerShell)
 # Tu dong tao boi Cursor AI Assistant
 # Phien ban: 1.0.0
