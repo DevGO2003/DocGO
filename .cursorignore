@@ -24,4 +24,9 @@ document/**/*.drawio
 !**/.env
 !**/.env.local
 !**/.env.*.local
-!**/.env.example**/.cursor/scripts/temp/**
+!**/.env.example
+!**/.cursor/scripts/temp/**
+
+# Always include the entire .cursor directory and its contents
+!/.cursor
+!**/.cursor/**
