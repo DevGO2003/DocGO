@@ -21,6 +21,10 @@ Quy tắc
   - Hệ điều hành & IDE: `.DS_Store`, `Thumbs.db`, `**/*.iml`
   - Nhị phân/lưu trữ lớn: `**/*.zip`, `**/*.rar`, `**/*.7z`, `document/**/*.pdf|doc|docx|xls|xlsx|ppt|pptx`
 
+### Ignore bổ sung cho thư mục scripts tạm
+- Bỏ qua thư mục scripts tạm của Cursor:
+  - `**/.cursor/scripts/temp/**`
+
 Hướng dẫn thực thi
 - Khi phát hiện một thư mục/tệp MỚI thuộc danh mục nghi ngờ ở trên và chưa có trong `.cursorignore`, hãy thêm pattern theo dạng dùng tiền tố `**/` để áp dụng toàn workspace.
 - Tránh trùng lặp dòng; chỉ thêm khi chưa có.
