@@ -3,7 +3,8 @@
 # Phien ban: 1.0.0
 
 param(
-    [string]$AdditionalBranch = ""
+    [string]$AdditionalBranch = "",
+    [switch]$DryRun
 )
 
 function Write-ColorOutput {
@@ -12,6 +13,10 @@ function Write-ColorOutput {
         [string]$Color = "White"
     )
     Write-Host $Message -ForegroundColor $Color
+}
+
+function Write-DryRunNote {
+    if ($DryRun) { Write-ColorOutput "[DryRun] Mô phỏng hành động, không thay đổi trạng thái thực tế" "Yellow" }
 }
 
 function Test-GitRepository {
@@ -74,10 +79,14 @@ function Backup-EnvFiles {
     
     $repoRoot = (git rev-parse --show-toplevel).Trim()
     foreach ($envFile in $envFiles) {
-        $abs = $envFile.FullName
-        if ($abs.StartsWith($repoRoot)) { $relPath = $abs.Substring($repoRoot.Length) } else { $relPath = $abs }
+        $abs = [System.IO.Path]::GetFullPath($envFile.FullName)
+        $repoRootFull = [System.IO.Path]::GetFullPath($repoRoot)
+        if ($abs.StartsWith($repoRootFull, [System.StringComparison]::OrdinalIgnoreCase)) {
+            $relPath = $abs.Substring($repoRootFull.Length)
+        } else {
+            $relPath = $envFile.Name
+        }
         $relPath = $relPath -replace '^[\\/]+',''
-        $relPath = $relPath -replace '\\','/'
         $sourcePath = $envFile.FullName
         $targetPath = Join-Path $backupDir $relPath
         
@@ -90,7 +99,6 @@ function Backup-EnvFiles {
         if (!(Test-Path $targetDir)) {
             New-Item -ItemType Directory -Path $targetDir -Force | Out-Null
         }
-        
         Copy-Item $sourcePath $targetPath -Force
         $backupCount++
         Write-ColorOutput "  Backed up: $relPath" "Cyan"
@@ -112,16 +120,24 @@ function Remove-EnvFromGitTracking {
         }
         
         foreach ($file in $trackedEnvFiles) {
-            git reset HEAD $file 2>$null
-            git rm --cached $file 2>$null
-            Write-ColorOutput "  Removed from tracking: $file" "Green"
+            if ($DryRun) {
+                Write-ColorOutput "[DryRun] Would unstage and remove from tracking: $file" "Yellow"
+            } else {
+                git reset HEAD $file 2>$null
+                git rm --cached $file 2>$null
+                Write-ColorOutput "  Removed from tracking: $file" "Green"
+            }
         }
         
         $changes = git status --porcelain
         if ($changes) {
-            git add -A
-            git commit -m "Security: Remove .env files from Git tracking"
-            Write-ColorOutput "Da tao commit don dep .env files" "Green"
+            if ($DryRun) {
+                Write-ColorOutput "[DryRun] Would create cleanup commit for .env removals" "Yellow"
+            } else {
+                git add -A
+                git commit -m "Security: Remove .env files from Git tracking"
+                Write-ColorOutput "Da tao commit don dep .env files" "Green"
+            }
         }
     } else {
         Write-ColorOutput "Khong co file .env nao dang duoc Git theo doi" "Green"
@@ -132,7 +148,12 @@ function Push-ToOrigin {
     param([string]$branch)
     
     Write-ColorOutput "Push code len origin/$branch..." "Cyan"
+    Write-DryRunNote
     
+    if ($DryRun) {
+        Write-ColorOutput "[DryRun] Would: git add -A; commit if needed; git push origin $branch" "Yellow"
+        return
+    }
     git add -A
     $status = git status --porcelain
     if ($status) {
@@ -141,14 +162,8 @@ function Push-ToOrigin {
     } else {
         Write-ColorOutput "Khong co thay doi moi de commit. Van thuc hien push." "Yellow"
     }
-    
     git push origin $branch
-    if ($LASTEXITCODE -eq 0) {
-        Write-ColorOutput "Push thanh cong len origin/$branch" "Green"
-    } else {
-        Write-ColorOutput "Loi khi push len origin/$branch" "Red"
-        exit 1
-    }
+    if ($LASTEXITCODE -eq 0) { Write-ColorOutput "Push thanh cong len origin/$branch" "Green" } else { Write-ColorOutput "Loi khi push len origin/$branch" "Red"; exit 1 }
 }
 
 function Get-RemoteFileContent {
@@ -246,63 +261,86 @@ function Push-ToPrivate {
     )
     
     Write-ColorOutput "Push code + .env len private/$branch..." "Cyan"
+    Write-DryRunNote
     
     $envFiles = Get-ChildItem -Path . -Name ".env*" -Recurse -Force
     
-    git fetch private
+    if ($DryRun) {
+        Write-ColorOutput "[DryRun] Would: git fetch private" "Yellow"
+    } else {
+        git fetch private
+    }
     $remoteRef = "private/$branch"
     
     foreach ($envFile in $envFiles) {
         Invoke-AIPoweredSmartMerge -localEnvPath $envFile -remoteRef $remoteRef -remotePath $envFile | Out-Null
-        git add -f $envFile
-        Write-ColorOutput "  Force-added: $envFile" "Cyan"
+        if ($DryRun) {
+            Write-ColorOutput "[DryRun] Would force-add: $envFile" "Yellow"
+        } else {
+            git add -f $envFile
+            Write-ColorOutput "  Force-added: $envFile" "Cyan"
+        }
     }
     
-    $status = git diff --cached --name-only
-    if ($status) {
-        git commit -m "AI-Powered Smart Merge .env for private/$branch"
+    if ($DryRun) {
+        Write-ColorOutput "[DryRun] Would create commit for .env changes (if any)" "Yellow"
     } else {
-        Write-ColorOutput "Khong co thay doi .env de commit cho private" "Yellow"
+        $status = git diff --cached --name-only
+        if ($status) {
+            git commit -m "AI-Powered Smart Merge .env for private/$branch"
+        } else {
+            Write-ColorOutput "Khong co thay doi .env de commit cho private" "Yellow"
+        }
     }
     
-    git push private HEAD:$branch
-    if ($LASTEXITCODE -eq 0) {
-        Write-ColorOutput "Push thanh cong len private/$branch" "Green"
+    if ($DryRun) {
+        Write-ColorOutput "[DryRun] Would: git push private HEAD:$branch" "Yellow"
     } else {
-        Write-ColorOutput "Loi khi push len private/$branch" "Red"
-        exit 1
+        git push private HEAD:$branch
+        if ($LASTEXITCODE -eq 0) { Write-ColorOutput "Push thanh cong len private/$branch" "Green" } else { Write-ColorOutput "Loi khi push len private/$branch" "Red"; exit 1 }
     }
 }
 
 function Cleanup-LocalHistory {
     Write-ColorOutput "Thuc hien Safe Cleanup..." "Cyan"
-    
-    git reset --soft HEAD~1
-    git reset HEAD
-    
-    Write-ColorOutput "Safe Cleanup hoan thanh - File .env van con trong working directory" "Green"
+    Write-DryRunNote
+    if ($DryRun) {
+        Write-ColorOutput "[DryRun] Would: git reset --soft HEAD~1; git reset HEAD" "Yellow"
+    } else {
+        git reset --soft HEAD~1
+        git reset HEAD
+        Write-ColorOutput "Safe Cleanup hoan thanh - File .env van con trong working directory" "Green"
+    }
 }
 
 function Sync-FromPrivate {
     param([string]$branch)
     
     Write-ColorOutput "Dong bo tu private/$branch..." "Cyan"
-    
-    git fetch private
-    git reset --soft "private/$branch"
-    
-    Write-ColorOutput "Dong bo tu private/$branch hoan thanh" "Green"
+    Write-DryRunNote
+    if ($DryRun) {
+        Write-ColorOutput "[DryRun] Would: git fetch private; git reset --soft private/$branch" "Yellow"
+    } else {
+        git fetch private
+        git reset --soft "private/$branch"
+        Write-ColorOutput "Dong bo tu private/$branch hoan thanh" "Green"
+    }
 }
 
 function Final-Pull-FromPrivate {
     param([string]$branch)
     Write-ColorOutput "Pull tu private/$branch de dong bo hoan chinh..." "Cyan"
-    git pull private $branch 2>$null
+    Write-DryRunNote
+    if ($DryRun) {
+        Write-ColorOutput "[DryRun] Would: git pull private $branch" "Yellow"
+    } else {
+        git pull private $branch 2>$null
+    }
 }
 
 function Prevent-EnvTracking {
     Write-ColorOutput "Ngan .env bi track o local..." "Cyan"
-    
+    if ($DryRun) { Write-ColorOutput "[DryRun] Would update .git/info/exclude to ignore .env*" "Yellow"; return }
     $excludeFile = ".git/info/exclude"
     $envPatterns = @(
         "# Prevent .env files from being tracked",
