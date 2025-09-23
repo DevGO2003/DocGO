@@ -10,7 +10,7 @@ Command này được sử dụng khi:
 Gõ `/do-it` trong Agent input để:
 - Thực hiện công việc mà agent vừa gợi ý
 - Tiếp tục công việc đang dở dang
-- Khôi phục context và hoàn thành task
+- Khôi phục context và hoàn thành task và Cursor TODO
 
 ## Quy trình thực hiện
 
