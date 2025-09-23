@@ -142,43 +142,36 @@ export default function LoginPage() {
   }
 
   useEffect(() => {
-    // Prefer env-driven toggle to avoid network error when OAuth2 is disabled server-side
-    const envToggle = (process.env.NEXT_PUBLIC_ENABLE_GOOGLE_OAUTH || '').toLowerCase()
-    if (envToggle === 'true' || envToggle === '1') {
-      // Optional: keep runtime probe if explicitly enabled
-      const checkOauth = async () => {
-        try {
-          const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
-          const url = `${baseUrl}/api/oauth2/test`
-          const res = await fetch(url, {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            // Add timeout
-            signal: AbortSignal.timeout(5000)
-          })
-          
-          if (!res.ok) {
-            console.warn('OAuth status check failed:', res.status, res.statusText)
-            setOauthEnabled(false)
-            return
-          }
-          
-          const json = await res.json()
-          const enabled = typeof json?.data === 'string' ? 
-            json.data.toLowerCase().includes('true') : 
-            !!json?.data
-          setOauthEnabled(enabled)
-        } catch (error: any) {
-          console.warn('OAuth status check error:', error.message)
+    // Always probe runtime to reflect backend truth, independent of env flags
+    const checkOauth = async () => {
+      try {
+        const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
+        // Call auth service test endpoint via BFF proxy
+        const url = `${baseUrl}/api/v1/authentication-identity-service/auth/oauth2/test`
+        const res = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          // Add timeout
+          signal: AbortSignal.timeout(5000)
+        })
+
+        if (!res.ok) {
+          console.warn('OAuth status check failed:', res.status, res.statusText)
           setOauthEnabled(false)
+          return
         }
+
+        const json = await res.json()
+        const enabled = !!(json?.data?.google_oauth_available ?? json?.data)
+        setOauthEnabled(enabled)
+      } catch (error: any) {
+        console.warn('OAuth status check error:', error?.message || error)
+        setOauthEnabled(false)
       }
-      checkOauth()
-    } else {
-      setOauthEnabled(false)
     }
+    checkOauth()
   }, [])
 
   const features = [
