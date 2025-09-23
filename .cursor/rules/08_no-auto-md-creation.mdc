@@ -1,7 +1,28 @@
 ---
+id: "rule-no-auto-md"
 name: "Ngăn chặn tạo file MD tự động"
 description: "Quy tắc ngăn chặn Cursor AI tự động tạo file markdown không cần thiết"
+version: "1.0.0"
 alwaysApply: true
+enabled: true
+priority: 75
+tags: ["docs", "safety", "cleanup"]
+globs: []
+excludeGlobs: []
+scope: "project"
+services: ["*"]
+appliesTo: ["chat", "code"]
+match: ""
+variables: {}
+rules: []
+examples: []
+references: []
+commands: []
+owners: ["devgo2003"]
+createdAt: "2025-09-23T00:00:00Z"
+updatedAt: "2025-09-23T00:00:00Z"
+notes: "Bảo vệ workspace, chỉ tạo MD khi có yêu cầu rõ ràng"
+language: vi
 ---
 
 # Quy tắc ngăn chặn tạo file MD tự động

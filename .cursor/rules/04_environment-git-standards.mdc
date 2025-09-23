@@ -1,3 +1,30 @@
+---
+id: "rule-env-git"
+name: "Chuẩn hóa Environment & Git"
+description: "Quy tắc quản lý tệp môi trường, .gitignore, remote và workflow push"
+version: "1.0.0"
+alwaysApply: false
+enabled: true
+priority: 80
+tags: ["environment", "git", "secrets"]
+globs: []
+excludeGlobs: []
+scope: "project"
+services: ["*"]
+appliesTo: ["chat", "code"]
+match: ""
+variables: {}
+rules: []
+examples: []
+references: []
+commands: []
+owners: ["devgo2003"]
+createdAt: "2025-09-23T00:00:00Z"
+updatedAt: "2025-09-23T00:00:00Z"
+notes: "Tải theo yêu cầu để giảm context"
+language: vi
+---
+
 # Environment & Git Standards for DocGO
 
 ## 📋 Environment File Management
@@ -212,7 +239,7 @@ backend/
 
 ### Quy tắc bảo mật:
 - **KHÔNG BAO GIỜ commit** file `.env` chứa secrets thật
-- **LUÔN commit** file `.env.example` làm template
+- **LUÔN** commit file `.env.example` làm template
 - **KIỂM TRA** `.gitignore` trước mỗi commit để đảm bảo không có file nhạy cảm
 - **SỬ DỤNG** `.gitignore` global cho workspace nếu cần thiết
 
@@ -300,7 +327,3 @@ git_push_and_sync() {
 
 # Sử dụng: git_push_and_sync "feat: thêm tính năng mới"
 ```
-description:
-globs:
-alwaysApply: true
----

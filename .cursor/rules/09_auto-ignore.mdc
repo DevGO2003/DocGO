@@ -1,8 +1,28 @@
 ---
+id: "rule-auto-ignore"
 name: "Tự động thêm các tệp/thư mục không cần thiết vào .cursorignore (trừ env)"
 description: "Chuẩn hóa việc loại trừ các tệp/thư mục phát sinh khỏi index của Cursor"
+version: "1.0.0"
 alwaysApply: true
-scope: workspace
+enabled: true
+priority: 90
+tags: ["ignore", "cursorignore", "cleanup"]
+globs: []
+excludeGlobs: []
+scope: "workspace"
+services: ["*"]
+appliesTo: ["workspace"]
+match: ""
+variables: {}
+rules: []
+examples: []
+references: []
+commands: []
+owners: ["devgo2003"]
+createdAt: "2025-09-23T00:00:00Z"
+updatedAt: "2025-09-23T00:00:00Z"
+notes: "Không bao giờ thêm file env vào .cursorignore"
+language: vi
 ---
 
 Mục tiêu
