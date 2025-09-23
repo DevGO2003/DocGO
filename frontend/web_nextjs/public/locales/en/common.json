@@ -1,0 +1,322 @@
+{
+    "app": {
+    "name": "DocGO",
+    "description": "Smart document and contract management"
+    },
+    "navigation": {
+    "dashboard": "Dashboard",
+    "upload": "Upload",
+    "contracts": "Contracts",
+    "createContract": "Create Contract",
+    "quickCreate": "Quick Create",
+    "eSignature": "E-Signature",
+    "collaboration": "Comments & Collaboration",
+    "versions": "Contract Versions",
+    "approval": "Approval Workflow",
+    "permissions": "Role-based Permissions",
+    "approved": "Approved",
+    "analytics": "Analytics",
+    "reports": "Reports",
+    "users": "User Management",
+    "accountApproval": "Account Approval",
+    "notifications": "Notifications",
+    "calendar": "Calendar",
+    "settings": "Settings",
+    "help": "Help & Support",
+    "activity": "Activity History",
+    "backup": "Backup & Restore",
+    "integrations": "Integrations",
+    "aiProcessing": "AI Processing"
+    },
+    "header": {
+    "search": {
+    "placeholder": "Search documents, contracts...",
+    "mobilePlaceholder": "Search..."
+    },
+    "user": {
+    "profile": "Profile",
+    "settings": "Settings",
+    "logout": "Logout",
+    "login": "Login",
+    "register": "Register"
+    },
+    "language": {
+    "select": "Select Language",
+    "vietnamese": "Tiếng Việt",
+    "english": "English"
+    }
+    },
+    "auth": {
+    "login": "Login",
+    "register": "Register",
+    "logout": "Logout",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "fullName": "Full Name",
+    "forgotPassword": "Forgot Password?",
+    "rememberMe": "Remember Me",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?"
+    },
+    "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome back",
+    "stats": {
+    "pending": "Pending",
+    "approved": "Approved",
+    "rejected": "Rejected",
+    "expiring": "Expiring Soon"
+    },
+    "charts": {
+    "uploadsByMonth": "Uploads by Month",
+    "statusDistribution": "Status Distribution",
+    "rejectReasons": "Rejection Reasons"
+    }
+    },
+    "contracts": {
+    "title": "Contracts",
+    "create": "Create Contract",
+    "edit": "Edit",
+    "delete": "Delete",
+    "view": "View Details",
+    "status": "Status",
+    "value": "Value",
+    "currency": "Currency",
+    "createdAt": "Created At",
+    "expiresAt": "Expires At",
+    "parties": "Parties",
+    "description": "Description",
+    "types": {
+    "all": "All Types",
+    "SERVICE_AGREEMENT": "Service Agreement",
+    "PURCHASE_AGREEMENT": "Purchase Agreement",
+    "PARTNERSHIP_AGREEMENT": "Partnership Agreement",
+    "EMPLOYMENT_CONTRACT": "Employment Contract",
+    "CONFIDENTIALITY_AGREEMENT": "Confidentiality Agreement",
+    "OTHER": "Other"
+    }
+    },
+    "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "view": "View",
+    "create": "Create",
+    "update": "Update",
+    "search": "Search",
+    "filter": "Filter",
+    "sort": "Sort",
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "success": "Success",
+    "confirm": "Confirm",
+    "yes": "Yes",
+    "no": "No",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "submit": "Submit",
+    "reset": "Reset",
+    "clear": "Clear",
+    "select": "Select",
+    "all": "All",
+    "none": "None",
+    "required": "Required",
+    "optional": "Optional",
+    "total": "Total",
+    "page": "Page",
+    "of": "of",
+    "items": "items",
+    "perPage": "per page",
+    "clickToViewDetails": "Click to view details"
+    },
+    "validation": {
+    "required": "This field is required",
+    "email": "Invalid email address",
+    "minLength": "Minimum {{count}} characters",
+    "maxLength": "Maximum {{count}} characters",
+    "passwordMatch": "Passwords do not match"
+    },
+    "profile": {
+    "title": "Profile",
+    "subtitle": "Manage your personal information and account settings",
+    "tabs": {
+    "personal": "Personal Information",
+    "avatar": "Avatar",
+    "settings": "Settings",
+    "stats": "Statistics"
+    },
+    "personalInfo": {
+    "title": "Personal Information",
+    "description": "Update your personal information",
+    "form": {
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "email": "Email",
+    "phone": "Phone Number",
+    "position": "Position",
+    "department": "Department",
+    "company": "Company",
+    "address": "Address",
+    "bio": "Bio",
+    "birthDate": "Birth Date",
+    "gender": "Gender",
+    "nationality": "Nationality",
+    "language": "Preferred Language",
+    "timezone": "Timezone"
+    },
+    "genders": {
+    "male": "Male",
+    "female": "Female",
+    "other": "Other",
+    "preferNotToSay": "Prefer not to say"
+    }
+    },
+    "avatar": {
+    "title": "Avatar",
+    "description": "Upload and manage your profile picture",
+    "current": "Current Avatar",
+    "upload": "Upload New Image",
+    "remove": "Remove Image",
+    "change": "Change Image",
+    "requirements": "Requirements: JPG, PNG or GIF. Max 5MB. Recommended size: 400x400px",
+    "preview": "Preview"
+    },
+    "settings": {
+    "title": "Account Settings",
+    "description": "Manage your security and notification settings",
+    "security": {
+    "title": "Security",
+    "changePassword": "Change Password",
+    "twoFactor": "Two-Factor Authentication",
+    "loginHistory": "Login History",
+    "activeSessions": "Active Sessions"
+    },
+    "notifications": {
+    "title": "Notifications",
+    "email": "Email",
+    "push": "Push Notifications",
+    "sms": "SMS",
+    "contractUpdates": "Contract Updates",
+    "approvalRequests": "Approval Requests",
+    "systemAlerts": "System Alerts",
+    "weeklyDigest": "Weekly Digest"
+    },
+    "privacy": {
+    "title": "Privacy",
+    "profileVisibility": "Profile Visibility",
+    "activityStatus": "Activity Status",
+    "dataSharing": "Data Sharing"
+    }
+    },
+    "stats": {
+    "title": "Activity Statistics",
+    "description": "View your activity and performance statistics",
+    "overview": {
+    "title": "Overview",
+    "totalContracts": "Total Contracts",
+    "pendingApprovals": "Pending Approvals",
+    "completedTasks": "Completed Tasks",
+    "activeProjects": "Active Projects"
+    },
+    "activity": {
+    "title": "Recent Activity",
+    "lastLogin": "Last Login",
+    "documentsUploaded": "Documents Uploaded",
+    "contractsCreated": "Contracts Created",
+    "approvalsProcessed": "Approvals Processed"
+    },
+    "performance": {
+    "title": "Performance",
+    "responseTime": "Response Time",
+    "completionRate": "Completion Rate",
+    "accuracy": "Accuracy",
+    "efficiency": "Efficiency"
+    }
+    },
+    "actions": {
+    "save": "Save Changes",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "upload": "Upload",
+    "remove": "Remove",
+    "change": "Change",
+    "update": "Update",
+    "reset": "Reset",
+    "enable": "Enable",
+    "disable": "Disable"
+    },
+    "messages": {
+    "saveSuccess": "Information updated successfully",
+    "saveError": "An error occurred while updating information",
+    "uploadSuccess": "Image uploaded successfully",
+    "uploadError": "An error occurred while uploading image",
+    "removeSuccess": "Image removed successfully",
+    "removeError": "An error occurred while removing image",
+    "passwordChanged": "Password changed successfully",
+    "passwordError": "An error occurred while changing password",
+    "settingsUpdated": "Settings updated successfully",
+    "settingsError": "An error occurred while updating settings"
+    }
+    },
+    "userManagement": {
+    "title": "User Management",
+    "subtitle": "Create, edit, suspend, and manage user permissions",
+    "searchAndFilter": "Search & Filter",
+    "addUser": "Add User",
+    "search": "Search",
+    "clearSelection": "Clear Selection",
+    "selected": "selected",
+    "activate": "Activate",
+    "deactivate": "Deactivate",
+    "delete": "Delete",
+    "allRoles": "All Roles",
+    "allStatuses": "All Statuses",
+    "table": {
+    "name": "Name",
+    "email": "Email",
+    "role": "Role",
+    "status": "Status",
+    "createdAt": "Created At",
+    "lastLogin": "Last Login",
+    "actions": "Actions"
+    },
+    "roles": {
+    "ADMIN": "Admin",
+    "MANAGER": "Manager",
+    "STAFF": "Staff",
+    "USER": "User",
+    "VIEWER": "Viewer"
+    },
+    "statuses": {
+    "ACTIVE": "Active",
+    "INACTIVE": "Inactive",
+    "PENDING": "Pending",
+    "SUSPENDED": "Suspended"
+    },
+    "modals": {
+    "createUser": "Add New User",
+    "editUser": "Edit User",
+    "createUserButton": "Create User",
+    "updateButton": "Update",
+    "name": "Name",
+    "email": "Email",
+    "role": "Role",
+    "status": "Status",
+    "department": "Department"
+    },
+    "placeholders": {
+    "nameEmail": "Name / Email",
+    "enterName": "Enter user name",
+    "enterEmail": "Enter email",
+    "enterDepartment": "Enter department"
+    },
+    "messages": {
+    "loadError": "Error loading users",
+    "neverLoggedIn": "Never logged in"
+    }
+    }
+    }
