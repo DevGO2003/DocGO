@@ -1,4 +1,4 @@
----
+powershell: globs: ["**/*.ps1"]t%E1%BA%A1o %C4%91%E1%BA%A7y %C4%91%E1%BB%A7 cho t%E1%BA%A5t c%E1%BA%A3 file mdc, t%E1%BA%A5t c%E1%BA%A3 ph%E1%BA%A3i c%C3%B3 c%C3%A1c tr%C6%B0%E1%BB%9Dng sau:idnamedescriptionversionalwaysApplyenabledprioritytagsglobsexcludeGlobsscopeservicesappliesTomatchvariablesrulesexamplesreferencescommandsownerscreatedAtupdatedAtnotesI'll add a standardized YAML frontmatter to each .mdc with all requested fields (id, name, description, version, alwaysApply, enabled, priority, tags, globs, excludeGlobs, scope, services, appliesTo, match, variables, rules, examples, references, commands, owners, createdAt, updatedAt, notes), preserving existing content below. Now I'll update the first batch of files.I'll add the standardized frontmatter to multiple rule files now, preserving existing content below.I standardized each rule file's frontmatter with all request---
 id: "rule-env-git"
 name: "Chuẩn hóa Environment & Git"
 description: "Quy tắc quản lý tệp môi trường, .gitignore, remote và workflow push"

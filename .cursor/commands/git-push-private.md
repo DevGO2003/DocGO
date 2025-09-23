@@ -63,6 +63,10 @@
 - Thực hiện `git pull private <current-branch>` để đảm bảo kho lưu trữ cục bộ của bạn có cùng một bản sao hoàn chỉnh với private
 - Bao gồm cả các file `.env` không bị theo dõi
 
+### 9. Gửi thư Discord báo cáo
+- Sau khi hoàn thành tất cả các bước trên, tự động đọc và thực thi file `.cursor/commands/send-discord-letter.md`
+- Gửi thư báo cáo về việc push thành công lên cả origin và private
+
 ## Chi tiết về AI-Powered Smart Merge
 
 Trong bước 5, khi thực hiện hợp nhất các file `.env`, thuật toán AI-Powered Smart Merge sẽ diễn ra như sau:
@@ -178,7 +182,8 @@ Khi thực hiện lệnh `/git-push-private`, hệ thống sẽ tự động:
     ├── Safe Cleanup (git reset --soft)
     ├── Sync from Private
     ├── Prevent .env tracking
-    └── Smart Rollback (auto-recovery)
+    ├── Smart Rollback (auto-recovery)
+    └── Send Discord Letter (báo cáo hoàn thành)
 ```
 
 ### Tính năng an toàn của script:
@@ -194,3 +199,31 @@ Khi thực hiện lệnh `/git-push-private`, hệ thống sẽ tự động:
 - Sử dụng syntax PowerShell chuẩn, không có lỗi parser
 - Tự động kiểm tra và tạo thư mục `.cursor/scripts/reusable/` nếu chưa có
 - Script có thể chạy lại nhiều lần mà không gây lỗi
+
+## 📧 Tự động gửi thư Discord
+
+Sau khi hoàn thành tất cả các bước push, script sẽ tự động:
+
+### 1. Kiểm tra file send-discord-letter.md
+```powershell
+if (Test-Path ".cursor/commands/send-discord-letter.md") {
+    Write-Host "📧 Đang gửi thư báo cáo đến Discord..." -ForegroundColor Yellow
+    # Đọc và thực thi file send-discord-letter.md
+    Write-Host "✅ Đã gửi thư Discord báo cáo push thành công" -ForegroundColor Green
+} else {
+    Write-Host "⚠️ Không tìm thấy file send-discord-letter.md" -ForegroundColor Yellow
+}
+```
+
+### 2. Nội dung thư báo cáo
+Thư Discord sẽ bao gồm:
+- **Tên người nhận**: Thái Gõ
+- **Tóm tắt**: Push code thành công lên origin và private
+- **Đề xuất tiếp theo**: Tiếp tục phát triển DocGO project
+- **Người gửi**: Moe Moe
+- **Thời gian**: Tự động lấy thời gian hiện tại
+
+### 3. Xử lý lỗi
+- Nếu không tìm thấy file `send-discord-letter.md`, chỉ hiển thị cảnh báo
+- Không dừng quá trình push nếu việc gửi Discord thất bại
+- Log chi tiết để debug nếu cần
