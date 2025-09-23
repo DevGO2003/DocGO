@@ -40,7 +40,7 @@ Lệnh dưới đây sẽ bổ sung vào Curosr TODO:
 Lập Curosr TODO:
   Phần 1 - Lấy tham số
 
-  1) Sử dụng Cursor để quét repo, tìm kiếm file `tools/discord/env/.env` và đọc giá trị `DISCORD_WEBHOOK_URL` từ file này (không dùng PowerShell để đọc file).
+  1) Sử dụng Cursor để quét repo, tìm kiếm file `.cursor\tools\discord\env\.env` và đọc giá trị `DISCORD_WEBHOOK_URL` từ file này (không dùng PowerShell để đọc file mà hãy dùng Cursor AI).
 
   2) Tạo nội dung thư theo template ở trên
 
