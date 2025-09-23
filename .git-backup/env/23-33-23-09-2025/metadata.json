@@ -1,0 +1,34 @@
+﻿[
+    {
+        "BackupName":  "cursor_tools_discord_env_.env",
+        "OriginalPath":  "cursor\\tools\\discord\\env\\.env"
+    },
+    {
+        "BackupName":  "backend_ai-processing-service_env_.env",
+        "OriginalPath":  "backend\\ai-processing-service\\env\\.env"
+    },
+    {
+        "BackupName":  "backend_api-gateway-bff_env_.env",
+        "OriginalPath":  "backend\\api-gateway-bff\\env\\.env"
+    },
+    {
+        "BackupName":  "backend_authentication-identity-service_env_.env",
+        "OriginalPath":  "backend\\authentication-identity-service\\env\\.env"
+    },
+    {
+        "BackupName":  "backend_contract-management-service_env_.env",
+        "OriginalPath":  "backend\\contract-management-service\\env\\.env"
+    },
+    {
+        "BackupName":  "backend_file-storage-asset-service_env_.env",
+        "OriginalPath":  "backend\\file-storage-asset-service\\env\\.env"
+    },
+    {
+        "BackupName":  "frontend_web_env_.env",
+        "OriginalPath":  "frontend\\web\\env\\.env"
+    },
+    {
+        "BackupName":  "frontend_web_nextjs_env_.env",
+        "OriginalPath":  "frontend\\web_nextjs\\env\\.env"
+    }
+]
