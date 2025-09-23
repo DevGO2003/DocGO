@@ -45,15 +45,7 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
   return (
     <>
       {children}
-      {/* Transition overlay */}
-      {isTransitioning && (
-        <div className="fixed inset-0 bg-black/10 backdrop-blur-sm z-40 pointer-events-none">
-          <div className="absolute top-4 right-4 bg-white rounded-lg px-3 py-2 shadow-lg flex items-center space-x-2">
-            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-indigo-600"></div>
-            <span className="text-sm text-gray-700">Đang tải trang...</span>
-          </div>
-        </div>
-      )}
+      {/* Removed visual overlay to avoid duplicate loading UI. Title update remains. */}
     </>
   )
 }

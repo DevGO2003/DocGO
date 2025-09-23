@@ -15,6 +15,7 @@ export default function CreateContractPage() {
   const [apiKey, setApiKey] = useState('')
   const [ocrLoading, setOcrLoading] = useState(false)
   const [extractedText, setExtractedText] = useState('')
+  const [isOcrModalOpen, setIsOcrModalOpen] = useState(false)
   
   // File Tab states
   const [selectedRegularFile, setSelectedRegularFile] = useState<File | null>(null)
@@ -73,10 +74,11 @@ export default function CreateContractPage() {
 
     try {
       setOcrLoading(true)
-      const response = await aiProcessingAPI.extractText(selectedFile, apiKey || undefined)
+      const response = await aiProcessingAPI.extractText(selectedFile)
       
       if (response.data?.data) {
         setExtractedText(response.data.data)
+        setIsOcrModalOpen(true)
         toast.success('Trích xuất văn bản thành công!')
       } else {
         toast.error('Không thể trích xuất văn bản từ file')
@@ -379,21 +381,7 @@ export default function CreateContractPage() {
                         </div>
                       </div>
 
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Gemini API Key (tùy chọn)
-                        </label>
-                        <input
-                          type="password"
-                          value={apiKey}
-                          onChange={(e) => setApiKey(e.target.value)}
-                          placeholder="Nhập API key nếu có"
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-                        />
-                        <p className="mt-1 text-xs text-gray-500">
-                          Để trống nếu hệ thống đã cấu hình API key
-                        </p>
-                      </div>
+                      {/* API Key input removed as per requirement */}
 
                       <button
                         onClick={handleOcrExtract}
@@ -414,19 +402,7 @@ export default function CreateContractPage() {
                       </button>
                     </div>
 
-                    {/* Output Section */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Kết quả trích xuất
-                      </label>
-                      <div className="border border-gray-300 rounded-lg p-4 h-64 overflow-y-auto bg-gray-50">
-                        {extractedText ? (
-                          <pre className="text-sm text-gray-800 whitespace-pre-wrap">{extractedText}</pre>
-                        ) : (
-                          <p className="text-gray-500 text-center">Chưa có kết quả trích xuất</p>
-                        )}
-                      </div>
-                    </div>
+                    {/* Output moved to modal */}
                   </div>
                 </div>
               )}
@@ -436,7 +412,7 @@ export default function CreateContractPage() {
                 <div className="space-y-6">
                   <div>
                     <h3 className="text-lg font-medium text-gray-900 mb-2">Tải lên file thông thường</h3>
-                    <p className="text-gray-600">Upload file hợp đồng để lưu trữ và quản lý</p>
+                    <p className="text-gray-600">(File gì cũng được)</p>
                   </div>
 
                   <div className="max-w-md mx-auto">
@@ -1127,6 +1103,28 @@ export default function CreateContractPage() {
           </div>
         </div>
       </div>
+      {/* OCR Result Modal */}
+      {isOcrModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/40" onClick={() => setIsOcrModalOpen(false)}></div>
+          <div className="relative bg-white w-full max-w-3xl mx-4 rounded-2xl shadow-2xl border border-gray-200">
+            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-gray-900">Kết quả trích xuất</h3>
+              <button onClick={() => setIsOcrModalOpen(false)} className="text-gray-500 hover:text-gray-700">✕</button>
+            </div>
+            <div className="p-6 max-h-[70vh] overflow-y-auto">
+              {extractedText ? (
+                <pre className="text-sm text-gray-800 whitespace-pre-wrap">{extractedText}</pre>
+              ) : (
+                <p className="text-gray-500">Không có dữ liệu.</p>
+              )}
+            </div>
+            <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-end gap-3">
+              <button onClick={() => setIsOcrModalOpen(false)} className="btn-secondary">Đóng</button>
+            </div>
+          </div>
+        </div>
+      )}
     </DashboardLayout>
   )
 }

@@ -1,7 +1,28 @@
 ---
+id: "rule-docker-local"
 name: "Chuẩn hóa Docker Local"
 description: "Quy tắc Docker Local, cấu trúc Dockerfile và docker-compose"
+version: "1.0.0"
 alwaysApply: true
+enabled: true
+priority: 50
+tags: ["docker", "compose", "dev"]
+globs: []
+excludeGlobs: []
+scope: "project"
+services: ["*"]
+appliesTo: ["code", "chat"]
+match: ""
+variables: {}
+rules: []
+examples: []
+references: []
+commands: []
+owners: ["devgo2003"]
+createdAt: "2025-09-23T00:00:00Z"
+updatedAt: "2025-09-23T00:00:00Z"
+notes: "Luôn bật vì ảnh hưởng quy trình dev local"
+language: vi
 ---
 
 ## Quy tắc Docker Local
@@ -145,7 +166,3 @@ networks:
 - Sử dụng Docker secrets hoặc external configuration management
 - Không hardcode sensitive information trong Dockerfile
 - Sử dụng multi-stage builds để giảm image size
-description:
-globs:
-alwaysApply: true
----
