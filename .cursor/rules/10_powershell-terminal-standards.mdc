@@ -1,3 +1,30 @@
+---
+id: "rule-powershell-standards"
+name: "Chuẩn hóa PowerShell Terminal"
+description: "Quy tắc chạy lệnh PowerShell ổn định trong Cursor trên Windows"
+version: "1.0.0"
+alwaysApply: false
+enabled: true
+priority: 85
+tags: ["powershell", "windows", "terminal"]
+globs: []
+excludeGlobs: []
+scope: "project"
+services: ["*"]
+appliesTo: ["terminal", "chat"]
+match: ""
+variables: {}
+rules: []
+examples: []
+references: []
+commands: []
+owners: ["devgo2003"]
+createdAt: "2025-09-23T00:00:00Z"
+updatedAt: "2025-09-23T00:00:00Z"
+notes: "Tải theo yêu cầu để tiết kiệm context"
+language: vi
+---
+
 # Chuẩn hóa PowerShell Terminal Commands
 
 ## Mục tiêu

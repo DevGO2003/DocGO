@@ -1,7 +1,28 @@
 ---
+id: "rule-event-exception"
 name: "Chuẩn hóa Event và Exception"
 description: "Chuẩn hóa event payload, exception handling và tài liệu API"
+version: "1.0.0"
 alwaysApply: true
+enabled: true
+priority: 30
+tags: ["events", "exceptions", "docs"]
+globs: []
+excludeGlobs: []
+scope: "project"
+services: ["*"]
+appliesTo: ["code", "chat"]
+match: ""
+variables: {}
+rules: []
+examples: []
+references: []
+commands: []
+owners: ["devgo2003"]
+createdAt: "2025-09-23T00:00:00Z"
+updatedAt: "2025-09-23T00:00:00Z"
+notes: "Chuẩn hóa payload và exception để đồng bộ logging/trace"
+language: vi
 ---
 
 ## Chuẩn hóa Event Payload Standard (dùng cho mọi publisher)
@@ -10,23 +31,23 @@ Tất cả events giữa các services phải tuân thủ schema chuẩn sau đ�
 
 ```json
 {
-  "eventVersion": "<string>",       // Version của schema event (vd: "v1")
-  "eventType": "<string>",          // Loại sự kiện (vd: FileUploaded, ContractCreated)
-  "eventId": "<uuid>",              // UUID duy nhất cho mỗi event (dùng để idempotency)
-  "timestamp": "<ISO-8601>",        // Thời điểm phát sinh event theo chuẩn ISO-8601 UTC
-  "source": "<string>",             // Tên service phát sinh event (vd: FileStorageService)
-  "correlationId": "<uuid>",        // Liên kết với request gốc để trace end-to-end
-  "actor": {                        // Thông tin ai/what gây ra event
-    "userId": "<string>",           // ID của user (nếu có context user)
-    "userRole": "<string>",         // Role của user (vd: uploader, admin)
-    "ip": "<string>"                // IP hoặc thông tin client (optional)
+  "eventVersion": "<string>",
+  "eventType": "<string>",
+  "eventId": "<uuid>",
+  "timestamp": "<ISO-8601>",
+  "source": "<string>",
+  "correlationId": "<uuid>",
+  "actor": {
+    "userId": "<string>",
+    "userRole": "<string>",
+    "ip": "<string>"
   },
-  "data": {                         // Payload chính của sự kiện (domain object)
+  "data": {
     /* cấu trúc thay đổi tùy eventType */
   },
-  "metadata": {                     // Thông tin phụ cho logging/ops (optional)
-    "region": "<string>",           // Khu vực phát sinh event (vd: ap-southeast-1)
-    "serviceVersion": "<string>"    // Version của service phát event
+  "metadata": {
+    "region": "<string>",
+    "serviceVersion": "<string>"
   }
 }
 ```
@@ -95,7 +116,3 @@ Mô tả: <giải thích ngắn gọn>
 **FastAPI**:
 - Dùng `tags`, `summary`, `description` trong decorator; viết docstring phần "Đầu vào/Đầu ra"; chỉ rõ `multipart/form-data` hoặc `application/json` và ví dụ.
 - Với input có 2 lựa chọn (ví dụ summarize), ghi rõ chỉ sử dụng 1 trong 2 và nêu ví dụ cho mỗi lựa chọn.
-description:
-globs:
-alwaysApply: true
----

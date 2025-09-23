@@ -1,7 +1,28 @@
 ---
+id: "rule-api-standards"
 name: "Chuẩn hóa API cho DocGO"
 description: "Chuẩn hóa URL, payload, response format cho các microservices"
+version: "1.0.0"
 alwaysApply: true
+enabled: true
+priority: 20
+tags: ["api", "rest", "standards"]
+globs: []
+excludeGlobs: []
+scope: "project"
+services: ["ai-processing-service", "contract-management-service", "*"]
+appliesTo: ["code", "chat"]
+match: ""
+variables: {}
+rules: []
+examples: []
+references: []
+commands: []
+owners: ["devgo2003"]
+createdAt: "2025-09-23T00:00:00Z"
+updatedAt: "2025-09-23T00:00:00Z"
+notes: "Rule API cốt lõi, nên alwaysApply"
+language: vi
 ---
 
 ### Chuẩn hóa API cho DocGO (áp dụng cho ai-processing-service và contract-management-service)

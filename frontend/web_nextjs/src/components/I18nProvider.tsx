@@ -3,6 +3,7 @@
 import { createInstance } from 'i18next'
 import { I18nextProvider } from 'react-i18next'
 import { useEffect, useState } from 'react'
+import FullPageLoading from './ui/FullPageLoading'
 
 const createI18nInstance = async (lng: string) => {
   const i18nInstance = createInstance()
@@ -65,7 +66,7 @@ export const I18nProvider: React.FC<I18nProviderProps> = ({ children, locale = '
   }, [locale])
 
   if (isLoading || !i18nInstance) {
-    return <div>Loading...</div>
+    return <FullPageLoading />
   }
 
   return (

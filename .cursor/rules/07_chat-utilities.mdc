@@ -1,7 +1,28 @@
 ---
+id: "rule-chat-utilities"
 name: "Quy tắc tiện ích chat"
 description: "Quy tắc tạo prompt và quản lý chat utilities"
+version: "1.0.0"
 alwaysApply: true
+enabled: true
+priority: 65
+tags: ["chat", "prompt", "utilities"]
+globs: []
+excludeGlobs: []
+scope: "project"
+services: ["*"]
+appliesTo: ["chat"]
+match: ""
+variables: {}
+rules: []
+examples: []
+references: []
+commands: []
+owners: ["devgo2003"]
+createdAt: "2025-09-23T00:00:00Z"
+updatedAt: "2025-09-23T00:00:00Z"
+notes: "Dùng chung cho thao tác prompt nhanh"
+language: vi
 ---
 
 # Quy tắc tiện ích chat
@@ -37,7 +58,3 @@ Khi người dùng yêu cầu "tạo prompt: <nội dung prompt>" thì:
 ## Ví dụ
 - Input: "tạo prompt: lưu lại nội dung so sánh và yêu cầu ai thực hiện điều chỉnh tốt nhất"
 - Output: Tạo file `prompt/01.luu-lai-noi-dung-so-sanh-va-yeu-cau-ai-thuc-hien-dieu-chinh-tot-nhat.md`
-description:
-globs:
-alwaysApply: true
----
