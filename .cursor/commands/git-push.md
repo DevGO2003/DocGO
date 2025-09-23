@@ -2,19 +2,18 @@
 
 Push commits lên remote repository origin.
 
-Mục tiêu: Tự động hóa việc push thay đổi lên `origin` đúng nhánh, với quy trình rõ ràng, an toàn và không yêu cầu tương tác thủ công.
+Lập Curosr TODO:
+  Phần 1 - Lấy tham số
+  1) Lấy nhánh hiện tại bằng `git rev-parse --abbrev-ref HEAD`. Nếu đang ở `HEAD`/không xác định thì mặc định là `vibe-coding`. Tạo/chuyển bằng `git checkout -B <branch>` (Cho phép PowerShell).
+  2) Đọc những file chuẩn bị đang stage để tóm tắt nội dung tạo biến `<Nội dung commit>`.
 
-Phần 1 - Lấy tham số
-1) Lấy nhánh hiện tại bằng `git rev-parse --abbrev-ref HEAD`. Nếu đang ở `HEAD`/không xác định thì mặc định là `vibe-coding`. Tạo/chuyển bằng `git checkout -B <branch>` (Cho phép PowerShell).
-2) Đọc những file chuẩn bị đang stage để tóm tắt nội dung tạo biến `<Nội dung commit>`.
+  Phần 2 - Thực hiện lần lượt các PowerShell (Mỗi số thứ tự là 1 dòng PowerShell duy nhất)
+  1) `git add -A`
+  2) `git commit -m "<Nội dung commit>" --no-verify` (bỏ qua nếu không có gì để commit)
+  3) `git push origin <branch>` (cùng tên nhánh). Lần đầu có thể dùng `-u`.
 
-Phần 2 - Thực hiện lần lượt các PowerShell (Mỗi số thứ tự là 1 dòng PowerShell duy nhất)
-1) `git add -A`
-2) `git commit -m "<Nội dung commit>" --no-verify` (bỏ qua nếu không có gì để commit)
-3) `git push origin <branch>` (cùng tên nhánh). Lần đầu có thể dùng `-u`.
-
-Phần 3 - Thông báo discord
-1) Đọc và thực hiện .cursor\commands\send-discord-letter.md
+  Phần 3 - Thông báo discord
+  1) Đọc và thực hiện .cursor\commands\send-discord-letter.md
 
 Lưu ý/Best practices
 - Không force push nhánh `main/master`.
