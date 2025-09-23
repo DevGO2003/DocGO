@@ -60,7 +60,7 @@ Lập Curosr TODO:
   5) `git push origin <branch>` (cùng tên nhánh). Lần đầu có thể dùng `-u`.
 
   Phần 3 - Thông báo discord
-  1) Đọc và thực hiện .cursor\commands\send-discord-letter.md
+  1) Mở hướng dẫn .cursor\commands\send-discord-letter.md để lấy lệnh gửi thông báo, rồi thực thi ngay nếu có cấu hình sẵn.
 
   Gợi ý xử lý lỗi thường gặp:
   - Commit rỗng: Không có thay đổi để commit → bước 2 có thể báo lỗi, tiếp tục bước 3 nếu cần.
