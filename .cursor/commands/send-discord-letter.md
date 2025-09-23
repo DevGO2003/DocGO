@@ -40,13 +40,13 @@ Lệnh dưới đây sẽ bổ sung vào Curosr TODO:
 Lập Curosr TODO:
   Phần 1 - Lấy tham số
 
-  1) Đọc `DISCORD_WEBHOOK_URL` từ `tools/discord/env/.env`
+  1) Sử dụng Cursor để quét repo, tìm kiếm file `tools/discord/env/.env` và đọc giá trị `DISCORD_WEBHOOK_URL` từ file này (không dùng PowerShell để đọc file).
 
   2) Tạo nội dung thư theo template ở trên
 
   Phần 2 - Thực hiện lần lượt các PowerShell (Mỗi số thứ tự là 1 dòng PowerShell duy nhất)
 
-  1) Gửi tin nhắn đến Discord bằng webhook:
+  1) Gửi tin nhắn đến Discord bằng webhook, bắt buộc sử dụng cấu cấu trúc template :
 
   ```powershell
   $envPath = "tools/discord/env/.env"
