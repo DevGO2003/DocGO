@@ -1,4 +1,4 @@
-﻿﻿# Git Push
+﻿# Git Push
 
 Push commits lên remote repository origin.
 
@@ -32,7 +32,7 @@ Lập Curosr TODO:
      - Đẩy commit mới lên remote. Nếu là lần đầu push nhánh này, dùng thêm `-u` (`git push -u origin <branch>`).
 
   6) Nếu khi push bị chặn do phát hiện secret (ví dụ: lộ file .env, token, key,...):
-     - Lưu các file .env, .env.local vào thư mục `/git-backup/env/hh-mm-dd-MM-yyyy` ở gốc dự án, kèm metadata vị trí file.
+     - Lưu các file .env, .env.local (không lưu các file loại env trong thư mục git-backup nếu không cần thiết, tránh tạo các bản lưu env phụ không cần thiết.) vào thư mục `/git-backup/env/hh-mm-dd-MM-yyyy` ở gốc dự án, kèm metadata vị trí file. 
      - Dọn lịch sử để loại bỏ secret rồi force-push:
        - Dùng `git filter-repo` (khuyến nghị) hoặc BFG để xóa mọi dấu vết file chứa secret khỏi toàn bộ lịch sử git.
        - Thêm placeholder vào `env/.env.example`, giữ `.env` local và thêm vào `.gitignore`.

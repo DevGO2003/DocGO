@@ -1,32 +1,40 @@
-**/.git-backup/
-**/logs/
-**/*.log
-**/tmp/
-**/temp/
+# ===== Cursor bắt buộc theo dõi các thư mục và file cần thiết =====
+
+# Luôn include thư mục git-backup
+!**/.git-backup/
+
+# Luôn include toàn bộ thư mục .cursor và nội dung bên trong
+!/.cursor
+!**/.cursor/**
+!**/.cursor/scripts/temp/**
+
+# ===== Ignore các thư mục và file build, cache, log, temp =====
+
 **/.cache/
 **/__pycache__/
+**/build/
+**/dist/
+**/documents/
+**/logs/
 **/node_modules/
 **/target/
-**/dist/
-**/build/
-# VCS
+**/temp/
+**/tmp/
+**/*.log
+
+# ===== Ignore các thư mục VCS =====
+
 .git/
 .github/
 .gitlab/
 
-# Project-specific items not in .gitignore
-document/**/*.drawio
-**/documents/
+# ===== Project-specific items không nằm trong .gitignore =====
 
-# KHÔNG ignore file .env* để Cursor AI có thể track
+document/**/*.drawio
+
+# ===== KHÔNG ignore file .env* để Cursor AI có thể track =====
 # (Git vẫn ignore chúng qua .gitignore)
-# Explicitly include .env files for Cursor AI
 !**/.env
+!**/.env.example
 !**/.env.local
 !**/.env.*.local
-!**/.env.example
-!**/.cursor/scripts/temp/**
-
-# Always include the entire .cursor directory and its contents
-!/.cursor
-!**/.cursor/**
