@@ -1,76 +1,43 @@
-﻿# Git Push
+﻿﻿# Git Push
 
 Push commits lên remote repository origin.
 
 Lập Curosr TODO:
   Phần 1 - Lấy tham số
+  1) Lấy nhánh hiện tại bằng `git rev-parse --abbrev-ref HEAD`. Nếu đang ở `HEAD`/không xác định thì mặc định là `vibe-coding`. Tạo/chuyển bằng `git checkout -B <branch>` (Cho phép PowerShell).
+  2) Đọc những file chuẩn bị đang stage để tóm tắt nội dung tạo biến `<Nội dung commit>`.
 
-  1) Chạy `git add -A` để stage toàn bộ thay đổi.
+  Phần 2 - Thực hiện lần lượt các PowerShell (Mỗi số thứ tự là 1 dòng PowerShell duy nhất):
 
-  2) Commit với `git commit -m "<Nội dung commit>" --no-verify` (bỏ qua nếu không có gì để commit).
+  1) `git add -A`
+     - Stage toàn bộ thay đổi (bao gồm file mới, sửa, xóa).
 
-  3) Luôn luôn đồng bộ với remote trước khi push:
-     - Chạy `git pull --rebase origin <branch>`
+  2) `git commit -m "<Nội dung commit>" --no-verify`
+     - Commit với nội dung đã tóm tắt ở phần 1.
+     - Nếu không có gì để commit (commit rỗng), bỏ qua bước này và chuyển sang bước tiếp theo.
+
+  3) `git pull --rebase origin <branch>`
+     - Luôn đồng bộ với remote trước khi push để tránh xung đột.
      - Nếu có conflict khi rebase:
-       - Sửa file bị conflict
+       - Sửa file bị conflict.
        - `git add <file>`
        - `git rebase --continue`
-       - Nếu rebase quá phức tạp (quá nhiều conflict hoặc khó giải quyết):
-         - Lập Cursor TODO để liệt kê các file bị conflict và nội dung conflict.
-         - Đưa các phần nội dung bị conflict vào TODO để giải quyết dần.
-         - Có thể cân nhắc (nhưng hạn chế thôi nhé) dùng `git pull --no-rebase` để merge, nhưng mặc định nên rebase để tránh merge commit thừa.
+       - Nếu conflict phức tạp hoặc nhiều file, lập Cursor TODO ghi lại các file/nội dung conflict để giải quyết dần.
+       - Nếu quá khó giải quyết, có thể cân nhắc (hạn chế) dùng `git pull --no-rebase` để merge, nhưng mặc định nên rebase để tránh merge commit thừa.
 
-  4) Kiểm tra nếu local không có commit mới so với remote origin (tức là không có gì để push):
-     - Nếu không có gì mới, bỏ qua các bước push, chuyển tới bước cuối gửi thông báo Discord: "Không có gì để push".
+  4) Kiểm tra nếu local không có commit mới so với remote origin:
+     - Nếu không có gì mới để push, bỏ qua bước push, chuyển tới bước gửi thông báo Discord: "Không có gì để push".
 
-  5) Nếu có commit mới, đẩy lên remote với `git push origin <branch>` (lần đầu có thể thêm `-u`).
-  4) Đẩy lên remote với `git push origin <branch>` (lần đầu có thể thêm `-u`).
+  5) `git push origin <branch>`
+     - Đẩy commit mới lên remote. Nếu là lần đầu push nhánh này, dùng thêm `-u` (`git push -u origin <branch>`).
 
-  Phần 2 - Thực hiện lần lượt các PowerShell (Mỗi số thứ tự là 1 dòng PowerShell duy nhất)
-  1) `git add -A`
-  2) `git commit -m "<Nội dung commit>" --no-verify` (bỏ qua nếu không có gì để commit)
-  3) `git pull --rebase origin <branch>`
-  4) Nếu có conflict:
-     - Sửa file bị conflict
-     - `git add <file>`
-     - `git rebase --continue`
-     - Nếu conflict phức tạp:
-       - Lập Cursor TODO, ghi lại các file/nội dung conflict để xử lý dần.
-  5) `git push origin <branch>` (cùng tên nhánh). Lần đầu có thể dùng `-u`.
+  6) Nếu khi push bị chặn do phát hiện secret (ví dụ: lộ file .env, token, key,...):
+     - Lưu các file .env, .env.local vào thư mục `/git-backup/env/hh-mm-dd-MM-yyyy` ở gốc dự án, kèm metadata vị trí file.
+     - Dọn lịch sử để loại bỏ secret rồi force-push:
+       - Dùng `git filter-repo` (khuyến nghị) hoặc BFG để xóa mọi dấu vết file chứa secret khỏi toàn bộ lịch sử git.
+       - Thêm placeholder vào `env/.env.example`, giữ `.env` local và thêm vào `.gitignore`.
+       - Sau khi làm sạch lịch sử, force-push: `git push --force origin <branch>`
+       - Đưa các phần nội dung bị conflict vào Cursor TODO để giải quyết dần.
 
-  Phần 3 - Thông báo discord
-  1) Đọc và thực hiện .cursor\commands\send-discord-letter.md
-
-  Gợi ý xử lý lỗi thường gặp:
-  - Commit rỗng: Không có thay đổi để commit → bước 2 có thể báo lỗi, tiếp tục bước 3 nếu cần.
-  - Nhánh chưa có upstream: Dùng `git push -u origin <branch>` ở lần đầu.
-  - Diverged: Thực hiện `git pull --rebase` sau đó lặp lại bước 2-3.
-  - Rebase conflict:
-    - Sửa file bị conflict
-    - `git add <file>`
-    - `git rebase --continue`
-    - Nếu conflict phức tạp, lập Cursor TODO để ghi lại các file/nội dung conflict và giải quyết dần.
-  1) `git add -A`
-  2) `git commit -m "<Nội dung commit>" --no-verify` (bỏ qua nếu không có gì để commit)
-  3) `git pull --rebase origin <branch>`
-  4) Nếu có conflict:
-     - Sửa file bị conflict
-     - `git add <file>`
-     - `git rebase --continue`
-  5) `git push origin <branch>` (cùng tên nhánh). Lần đầu có thể dùng `-u`.
-
-  Phần 3 - Thông báo discord
-  1) Mở hướng dẫn .cursor\commands\send-discord-letter.md để lấy lệnh gửi thông báo, rồi thực thi ngay nếu có cấu hình sẵn.
-
-  Gợi ý xử lý lỗi thường gặp:
-  - Commit rỗng: Không có thay đổi để commit → bước 2 có thể báo lỗi, tiếp tục bước 3 nếu cần.
-  - Nhánh chưa có upstream: Dùng `git push -u origin <branch>` ở lần đầu.
-  - Diverged: Thực hiện `git pull --rebase` sau đó lặp lại bước 2-3.
-  - Rebase conflict:
-    - Sửa file bị conflict
-    - `git add <file>`
-    - `git rebase --continue`
-
-Ví dụ nội dung commit tham khảo
-- chore: cập nhật hướng dẫn và quy trình `@git-push.md`
-- docs: mô tả Part 1/Part 2 và lưu ý an toàn khi push
+  7) Sau khi dọn lịch sử git (ví dụ: dùng git filter-repo hoặc BFG để xóa secret), lấy hướng dẫn gửi thông báo từ .cursor\commands\send-discord-letter.md. Nếu đã cấu hình, thực thi lệnh gửi thông báo lên Discord để thông báo cho team biết lịch sử repo đã được làm sạch và mọi người cần clone lại repo nếu cần thiết.
+  
