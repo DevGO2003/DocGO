@@ -37,4 +37,4 @@ document/**/*.drawio
 !**/.env
 !**/.env.example
 !**/.env.local
-!**/.env.*.local
+!**/.env.*.local**/.git-backup/**
