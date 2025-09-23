@@ -1,7 +1,28 @@
 ---
+id: "rule-memory-actor"
 name: "Memory Actor Standards (DocGO)"
 description: "Chuẩn hóa actor mặc định và quy ước ghi audit/event cho toàn bộ microservices"
+version: "1.0.0"
 alwaysApply: true
+enabled: true
+priority: 60
+tags: ["actor", "audit", "event"]
+globs: []
+excludeGlobs: []
+scope: "project"
+services: ["*"]
+appliesTo: ["code", "chat"]
+match: ""
+variables: {}
+rules: []
+examples: []
+references: []
+commands: []
+owners: ["devgo2003"]
+createdAt: "2025-09-23T00:00:00Z"
+updatedAt: "2025-09-23T00:00:00Z"
+notes: "Cần alwaysApply để đồng bộ audit/event toàn dự án"
+language: vi
 ---
 
 # Chuẩn hóa Actor cho Audit/Event

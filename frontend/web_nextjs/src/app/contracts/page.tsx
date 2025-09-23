@@ -6,6 +6,8 @@ import { DashboardLayout } from '@/components/layout'
 import { MagnifyingGlassIcon, TagIcon } from '@heroicons/react/24/outline'
 import { contractAPI } from '@/lib/api'
 import { InlineLoading } from '@/components/ui/LoadingSpinner'
+import { tagAPI } from '@/lib/api'
+import { useTranslation } from '@/hooks/useTranslation'
 
 type ContractItem = {
   id: number
@@ -38,7 +40,9 @@ const TYPES = ['ALL','SERVICE_AGREEMENT','PURCHASE_AGREEMENT','PARTNERSHIP_AGREE
 const TAGS = ['ưu_tiên','gấp','gia_hạn','cao_giá','đối_tác_mới','rủi_ro']
 
 export default function ContractsPage() {
+  const { t } = useTranslation()
   const [items, setItems] = useState<ContractItem[]>([])
+  const [availableTags, setAvailableTags] = useState<string[]>([])
   const [loading, setLoading] = useState<boolean>(true)
   const [search, setSearch] = useState<string>('')
   const [debouncedSearch, setDebouncedSearch] = useState<string>('')
@@ -53,21 +57,9 @@ export default function ContractsPage() {
   const [showAdvanced, setShowAdvanced] = useState<boolean>(false)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [selectedItems, setSelectedItems] = useState<number[]>([])
-  const [searchTrigger, setSearchTrigger] = useState<number>(0)
   const abortRef = useRef<AbortController | null>(null)
 
-  const queryString = useMemo(() => {
-    const params = new URLSearchParams()
-    params.set('pageNumber', String(page))
-    params.set('pageSize', String(pageSize))
-    if (debouncedSearch.trim()) params.set('searchTerm', debouncedSearch.trim())
-    if (status !== 'ALL') params.set('status', status)
-    if (type !== 'ALL') params.set('type', type)
-    if (selectedTags.length > 0) params.set('tags', selectedTags.join(','))
-    params.set('sortBy', sortBy)
-    params.set('sortDirection', sortDirection)
-    return params.toString()
-  }, [page, pageSize, debouncedSearch, status, type, selectedTags, sortBy, sortDirection, searchTrigger])
+  // Removed manual queryString builder; fetchData composes params directly
 
   const fetchData = async () => {
     setLoading(true)
@@ -88,6 +80,9 @@ export default function ContractsPage() {
       if (trimmed.length >= 2) params.searchTerm = trimmed
       if (sortBy) params.sortBy = sortBy
       if (sortDirection) params.sortDirection = sortDirection.toUpperCase()
+      if (status && status !== 'ALL') params.status = status
+      if (type && type !== 'ALL') params.type = type
+      if (selectedTags.length > 0) params.tags = selectedTags.join(',')
 
       // Ensure valid token before making request
       const { default: TokenRefreshHelper } = await import('@/utils/token-refresh-helper')
@@ -129,20 +124,37 @@ export default function ContractsPage() {
     }
   }
 
+  // Load available tags once
+  useEffect(() => {
+    const loadTags = async () => {
+      try {
+        const res = await tagAPI.getAllTags()
+        const payload: any = res.data?.data
+        const tagsFromApi: string[] = Array.isArray(payload) ? payload : []
+        setAvailableTags(tagsFromApi)
+      } catch {
+        setAvailableTags([])
+      }
+    }
+    loadTags()
+  }, [])
+
   // Auto-fetch when filters change (except search)
   useEffect(() => {
     fetchData()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, pageSize, status, type, selectedTags, sortBy, sortDirection])
 
-  // Manual search trigger
+  // Debounced search: fetch as user types
   useEffect(() => {
-    if (searchTrigger > 0) {
+    const handler = setTimeout(() => {
       setDebouncedSearch(search)
+      setPage(0)
       fetchData()
-    }
+    }, 500)
+    return () => clearTimeout(handler)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchTrigger])
+  }, [search])
 
   const toggleTag = (t: string) => {
     setPage(0)
@@ -165,10 +177,7 @@ export default function ContractsPage() {
     setSelectedItems([])
   }
 
-  const handleSearch = () => {
-    setPage(0)
-    setSearchTrigger(prev => prev + 1)
-  }
+  // Removed handleSearch; using debounced search
 
   return (
     <DashboardLayout>
@@ -202,18 +211,9 @@ export default function ContractsPage() {
                 <input
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  onKeyDown={(e) => { if (e.key === 'Enter') handleSearch() }}
                   placeholder="Tìm theo tiêu đề hoặc mô tả"
-                  className="w-full rounded-lg border-gray-300 pl-10 pr-24 py-2 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                  className="w-full rounded-lg border-gray-300 pl-10 pr-3 py-2 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                 />
-                <button
-                  onClick={handleSearch}
-                  className="absolute right-1 top-1/2 -translate-y-1/2 px-4 py-2 text-sm bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-all duration-200 shadow-sm hover:shadow-md flex items-center gap-2"
-                  type="button"
-                >
-                  <MagnifyingGlassIcon className="h-4 w-4" />
-                  Tìm kiếm
-                </button>
               </div>
             </div>
 
@@ -237,8 +237,8 @@ export default function ContractsPage() {
                 onChange={(e) => { setType(e.target.value); setPage(0) }}
                 className="w-full rounded-lg border-gray-300 py-2 px-3 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
               >
-                {TYPES.map(t => (
-                  <option key={t} value={t}>{t === 'ALL' ? 'Tất cả loại' : t}</option>
+                {TYPES.map(typeKey => (
+                  <option key={typeKey} value={typeKey}>{typeKey === 'ALL' ? t('contracts.types.all') : t(`contracts.types.${typeKey}`)}</option>
                 ))}
               </select>
             </div>
@@ -285,7 +285,7 @@ export default function ContractsPage() {
 
           {/* Tags */}
           <div className="mt-4 flex flex-wrap gap-2">
-            {TAGS.map(t => {
+            {(availableTags.length > 0 ? availableTags : TAGS).map(t => {
               const active = selectedTags.includes(t)
               return (
                 <button

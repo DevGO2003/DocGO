@@ -1,7 +1,28 @@
 ---
+id: "rule-service-structure"
 name: "Chuẩn hóa cấu trúc dịch vụ"
 description: "Quy tắc cấu trúc thư mục, dependencies và port mapping cho microservices"
+version: "1.0.0"
 alwaysApply: true
+enabled: true
+priority: 40
+tags: ["structure", "python", "java", "ports"]
+globs: []
+excludeGlobs: []
+scope: "project"
+services: ["*"]
+appliesTo: ["code", "chat"]
+match: ""
+variables: {}
+rules: []
+examples: []
+references: []
+commands: []
+owners: ["devgo2003"]
+createdAt: "2025-09-23T00:00:00Z"
+updatedAt: "2025-09-23T00:00:00Z"
+notes: "Chuẩn cấu trúc cho cả FastAPI và Spring Boot"
+language: vi
 ---
 
 ## Quy tắc cấu trúc dịch vụ (structure)
@@ -89,7 +110,3 @@ alwaysApply: true
 - `general-file-management-service` (FastAPI): 8018 → Docs: `http://localhost:8018/docs#/`
 
 **Khi thêm microservice mới**, phải chọn cổng trống theo dãy 80xx, cập nhật mục này và README/How-to-run tương ứng.
-description:
-globs:
-alwaysApply: true
----
