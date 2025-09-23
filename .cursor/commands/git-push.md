@@ -34,15 +34,6 @@ $null = git commit -m "chore: push pending changes" --no-verify 2>$null; if ($LA
 # 3) Push lên origin cùng tên nhánh
 git push origin $branch
 
-# 4) Gửi thư Discord sau khi push thành công
-Write-Host "📧 Đang gửi thư báo cáo đến Discord..." -ForegroundColor Yellow
-if (Test-Path ".cursor/commands/send-discord-letter.md") {
-  # Đọc và thực thi file send-discord-letter.md
-  $discordCommand = Get-Content ".cursor/commands/send-discord-letter.md" -Raw
-  Write-Host "✅ Đã gửi thư Discord báo cáo push thành công" -ForegroundColor Green
-} else {
-  Write-Host "⚠️ Không tìm thấy file send-discord-letter.md" -ForegroundColor Yellow
-}
 ```
 
 ## Lệnh thực thi (Bash)
