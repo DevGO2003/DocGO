@@ -13,6 +13,9 @@ Phần 2 - Thực hiện lần lượt các PowerShell (Mỗi số thứ tự l�
 2) `git commit -m "<Nội dung commit>" --no-verify` (bỏ qua nếu không có gì để commit)
 3) `git push origin <branch>` (cùng tên nhánh). Lần đầu có thể dùng `-u`.
 
+Phần 3 - Thông báo discord
+1) Đọc và thực hiện .cursor\commands\send-discord-letter.md
+
 Lưu ý/Best practices
 - Không force push nhánh `main/master`.
 - Nên `git pull --rebase` nếu nhánh diverge.
