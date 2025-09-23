@@ -180,6 +180,26 @@ docker run -v $(pwd):/app -p 8000:8000 service
 docker run -v ${PWD}:/app -p 8000:8000 service
 ```
 
+### 11. Pipeline Commands trong PowerShell
+
+#### ❌ SAI - Dùng cat (alias Get-Content) để nhận output từ lệnh khác:
+```powershell
+git rev-parse --abbrev-ref HEAD | cat
+```
+
+#### ✅ ĐÚNG - Dùng Write-Output hoặc gán biến trực tiếp:
+
+##### Cách 1: In thẳng ra
+```powershell
+git rev-parse --abbrev-ref HEAD | Write-Output
+```
+
+##### Cách 2: Lưu vào biến rồi in
+```powershell
+$branch = git rev-parse --abbrev-ref HEAD
+Write-Output $branch
+```
+
 ## Quy tắc đặc biệt
 
 ### PowerShell Execution Policy
