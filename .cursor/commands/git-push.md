@@ -7,7 +7,7 @@ Lập Curosr TODO:
   1) Lấy nhánh hiện tại bằng `git rev-parse --abbrev-ref HEAD`. Nếu đang ở `HEAD`/không xác định thì mặc định là `vibe-coding`. Tạo/chuyển bằng `git checkout -B <branch>` (Cho phép PowerShell).
   2) Đọc những file chuẩn bị đang stage để tóm tắt nội dung tạo biến `<Nội dung commit>`.
 
-  Phần 2 - Thực hiện lần lượt các PowerShell (Mỗi số thứ tự là 1 dòng PowerShell duy nhất):
+  Phần 2 - Thực hiện lần lượt các PowerShell (Mỗi số thứ tự là 1 dòng PowerShell duy nhất, không tạo file powershell ps1):
 
   1) `git add -A`
      - Stage toàn bộ thay đổi (bao gồm file mới, sửa, xóa).
@@ -32,7 +32,7 @@ Lập Curosr TODO:
      - Đẩy commit mới lên remote. Nếu là lần đầu push nhánh này, dùng thêm `-u` (`git push -u origin <branch>`).
 
   6) Nếu khi push bị chặn do phát hiện secret (ví dụ: lộ file .env, token, key,...):
-     - Lưu tất cả các file .env, .env.local (không lưu các file loại env trong thư mục git-backup nếu không cần thiết, tránh tạo các bản lưu env phụ không cần thiết) vào thư mục `/git-backup/env/hh-mm-dd-MM-yyyy` ở gốc dự án.
+     - Lưu tất cả các file .env, .env.local (không lưu các file loại env trong thư mục .git-backup nếu không cần thiết, tránh tạo các bản lưu env phụ không cần thiết) vào thư mục `/.git-backup/env/hh-mm-dd-MM-yyyy` ở gốc dự án.
        - Khi lưu, tạo kèm file `metadata.json` (nếu chưa có) chứa một **mảng** các object metadata, mỗi object tương ứng với một file env backup, ví dụ:
          ```json
          [
@@ -56,5 +56,4 @@ Lập Curosr TODO:
        - Đưa các phần nội dung bị conflict vào Cursor TODO để giải quyết dần.
      - Sau khi push thành công, thả (restore) lại tất cả các file env đã lưu vào đúng vị trí ban đầu trong project dựa trên thông tin `OriginalPath` trong mảng `metadata.json`.
 
-  7) Sau khi dọn lịch sử git (ví dụ: dùng git filter-repo hoặc BFG để xóa secret), lấy hướng dẫn gửi thông báo từ .cursor\commands\send-discord-letter.md. Nếu đã cấu hình, thực thi lệnh gửi thông báo lên Discord để thông báo cho team biết lịch sử repo đã được làm sạch và mọi người cần clone lại repo nếu cần thiết.
-  
+  Phần 3 - Sau khi dọn lịch sử git (ví dụ: dùng git filter-repo hoặc BFG để xóa secret), lấy hướng dẫn gửi thông báo từ .cursor\commands\send-discord-letter.md. Nếu đã cấu hình, thực thi lệnh gửi thông báo lên Discord để thông báo cho team biết lịch sử repo đã được làm sạch và mọi người cần clone lại repo nếu cần thiết.
