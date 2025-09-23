@@ -17,7 +17,7 @@ export default function Home() {
       <Head>
         <title>DocGO - Redirecting to Swagger</title>
         <meta name="description" content="Redirecting to Swagger UI" />
-        <link rel="icon" href="/favicon.ico" />
+        <link rel="icon" href="/favicon.svg" />
       </Head>
 
       <div className="text-center">
