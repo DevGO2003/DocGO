@@ -1,4 +1,8 @@
-﻿Mục tiêu: Tự động hóa việc push thay đổi lên `origin` đúng nhánh, với quy trình rõ ràng, an toàn và không yêu cầu tương tác thủ công.
+﻿# Git Push
+
+Push commits lên remote repository origin.
+
+Mục tiêu: Tự động hóa việc push thay đổi lên `origin` đúng nhánh, với quy trình rõ ràng, an toàn và không yêu cầu tương tác thủ công.
 
 Phần 1 - Lấy tham số
 1) Lấy nhánh hiện tại bằng `git rev-parse --abbrev-ref HEAD`. Nếu đang ở `HEAD`/không xác định thì mặc định là `vibe-coding`. Tạo/chuyển bằng `git checkout -B <branch>` (Cho phép PowerShell).
