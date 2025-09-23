@@ -1,101 +1,26 @@
-﻿# Git Push
+﻿Mục tiêu: Tự động hóa việc push thay đổi lên `origin` đúng nhánh, với quy trình rõ ràng, an toàn và không yêu cầu tương tác thủ công.
 
-Push commits lên remote repository.
+Phần 1 - Lấy tham số
+1) Lấy nhánh hiện tại bằng `git rev-parse --abbrev-ref HEAD`. Nếu đang ở `HEAD`/không xác định thì mặc định là `vibe-coding`. Tạo/chuyển bằng `git checkout -B <branch>` (Cho phép PowerShell).
+2) Đọc những file chuẩn bị đang stage để tóm tắt nội dung tạo biến `<Nội dung commit>`.
 
-## Mô tả
-- Tự động và không yêu cầu xác nhận.
-- Xác định nhánh hiện tại; nếu không xác định được sẽ tự chọn theo danh tính dev:
-  - Nếu user là "thaiGO" → dùng nhánh `thaiGO`
-  - Nếu user là "LocTruongLuan" → dùng nhánh `LocTruongLuan`
-  - Nếu nhánh chưa tồn tại → tự tạo mới (`git checkout -B <branch>`)
-- Tự động add/commit trước khi push.
- 
+Phần 2 - Thực hiện lần lượt các PowerShell (Mỗi số thứ tự là 1 dòng PowerShell duy nhất)
+1) `git add -A`
+2) `git commit -m "<Nội dung commit>" --no-verify` (bỏ qua nếu không có gì để commit)
+3) `git push origin <branch>` (cùng tên nhánh). Lần đầu có thể dùng `-u`.
 
-## Luồng thực thi
-1. Xác định nhánh hiện tại bằng `git rev-parse --abbrev-ref HEAD`.
-   - Nếu không xác định được (ví dụ ở trạng thái `HEAD`): chọn nhánh theo danh tính dev
-     - Tên chứa "thai" → `thaiGO`
-     - Tên chứa "LocTruongLuan|Luan` → `LocTruongLuan`
-     - Mặc định → `thaiGO`
-   - Tạo/switch nhánh bằng `git checkout -B <branch>` nếu cần.
-2. Tự động stage toàn bộ thay đổi: `git add -A`.
-3. Commit tự động (bỏ qua nếu không có thay đổi):
-   - PowerShell: `git commit -m "chore: push pending changes" --no-verify` (bắt lỗi dịu).
-   - Bash: `git commit -m "chore: push pending changes" --no-verify || true`.
-4. Push lên remote `origin` cùng tên nhánh: `git push origin <branch>`.
-5. Tùy chọn: dùng `-u` cho lần đầu để thiết lập upstream (`git push -u origin <branch>`).
+Lưu ý/Best practices
+- Không force push nhánh `main/master`.
+- Nên `git pull --rebase` nếu nhánh diverge.
+- Tránh đẩy secrets; chỉ đẩy `.env.example`.
+- Khắc phục lỗi GH Push Protection, rebase dở dang… theo phần Troubleshooting.
 
+Ví dụ nội dung commit tham khảo
+- chore: cập nhật hướng dẫn và quy trình `@git-push.md`
+- docs: mô tả Part 1/Part 2 và lưu ý an toàn khi push
 
-## Cách sử dụng
-Gõ /git-push trong Agent input để chạy command này.
+Gợi ý xử lý lỗi thường gặp
+- Commit rỗng: Không có thay đổi để commit → bước 2 có thể báo lỗi, tiếp tục bước 3 nếu cần.
+- Nhánh chưa có upstream: Dùng `git push -u origin <branch>` ở lần đầu.
+- Diverged: Thực hiện `git pull --rebase` sau đó lặp lại bước 2-3.
 
-## Lệnh thực thi (PowerShell - Windows)
-```powershell
-$ErrorActionPreference = 'Stop'
-# 1) Xác định nhánh làm việc
-$branch = (git rev-parse --abbrev-ref HEAD 2>$null)
-if (-not $branch -or $branch -eq 'HEAD') {
-  $user = (git config user.name 2>$null); if (-not $user) { $user = $env:USERNAME }
-  if ($user -match 'thai' -or $user -match 'thaiGO') { $branch = 'thaiGO' }
-  elseif ($user -match 'LocTruongLuan' -or $user -match 'Luan') { $branch = 'LocTruongLuan' }
-  else { $branch = 'thaiGO' }
-  git checkout -B $branch
-}
-
-# 2) Stage & Commit tự động
-git add -A
-$null = git commit -m "chore: push pending changes" --no-verify 2>$null; if ($LASTEXITCODE -ne 0) { 'No changes to commit' | Out-Null }
-
-# 3) Push lên origin cùng tên nhánh
-git push origin $branch
-
-```
-
-## Lệnh thực thi (Bash)
-```bash
-set -e
-# 1) Xác định nhánh làm việc
-branch="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || true)"
-if [ -z "$branch" ] || [ "$branch" = "HEAD" ]; then
-  user="$(git config user.name 2>/dev/null || echo "$USER")"
-  if echo "$user" | grep -qi "thai"; then branch="thaiGO"
-  elif echo "$user" | grep -qi "LocTruongLuan\|Luan"; then branch="LocTruongLuan"
-  else branch="thaiGO"; fi
-  git checkout -B "$branch"
-fi
-
-# 2) Stage & Commit tự động
-git add -A
-git commit -m "chore: push pending changes" --no-verify || true
-
-# 3) Push lên origin cùng tên nhánh
-git push origin "$branch"
-```
-
-## Tùy chọn khác
-- Push branch cụ thể: git push origin <branch-name>
-- Push và set upstream: git push -u origin <branch-name>
-- Force push (cẩn thận): git push --force-with-lease
-
-## Lưu ý
-- Đảm bảo đã commit trước khi push
-- Kiểm tra branch hiện tại với git-status
-- Sử dụng git-pull để sync trước khi push
-- Không force push trên main/master branch
-
-## Quyền quyết định
-- Agent có toàn quyền quyết định và tự thực thi ngay phương án mà agent đánh giá là lựa chọn tốt nhất (Best Choice) mà không cần hỏi lại.
-- Chỉ dừng để xin xác nhận khi bị policy/hệ thống chặn (quyền, bảo mật) hoặc gặp lỗi kỹ thuật không tự khắc phục.
-
-## Kinh nghiệm/Best practices (rút ra từ thực tế)
-- `origin` không nên chứa secrets. Chỉ push `.env.example` lên `origin`; các `.env`/`.env.local` giữ ở local hoặc chuyển qua `private` nếu thật sự cần.
-- Khi cần track file bị ignore (chỉ ở `private`), dùng `git add -f` với pathspec cụ thể thay vì glob mơ hồ.
-- Tránh thao tác trong trạng thái `detached HEAD` hoặc khi đang rebase. Luôn `git switch <branch>` trước khi push.
-- Trên PowerShell, tránh dùng toán tử `||` và redirection `2>$null` trong một chuỗi lệnh dài; tách lệnh hoặc dùng `if (...) {}` để ổn định hơn.
-
-## Troubleshooting
-- Push bị chặn bởi GitHub Push Protection (GH013): loại bỏ secrets khỏi commit (thay bằng placeholder), `git commit --amend` hoặc `git reset --soft` rồi commit lại; nếu đã nằm trong lịch sử, cân nhắc `git filter-repo` và rotate secret.
-- Nhánh local/remote diverge mạnh: `git pull --rebase origin <branch>` rồi push lại.
-- Rebase đang dở: `git rebase --abort` hoặc `--continue` sau khi xử lý conflict.
-
- 
