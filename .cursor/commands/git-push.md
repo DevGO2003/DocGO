@@ -11,6 +11,21 @@ Push commits lên remote repository.
 - Tự động add/commit trước khi push.
  
 
+## Luồng thực thi
+1. Xác định nhánh hiện tại bằng `git rev-parse --abbrev-ref HEAD`.
+   - Nếu không xác định được (ví dụ ở trạng thái `HEAD`): chọn nhánh theo danh tính dev
+     - Tên chứa "thai" → `thaiGO`
+     - Tên chứa "LocTruongLuan|Luan` → `LocTruongLuan`
+     - Mặc định → `thaiGO`
+   - Tạo/switch nhánh bằng `git checkout -B <branch>` nếu cần.
+2. Tự động stage toàn bộ thay đổi: `git add -A`.
+3. Commit tự động (bỏ qua nếu không có thay đổi):
+   - PowerShell: `git commit -m "chore: push pending changes" --no-verify` (bắt lỗi dịu).
+   - Bash: `git commit -m "chore: push pending changes" --no-verify || true`.
+4. Push lên remote `origin` cùng tên nhánh: `git push origin <branch>`.
+5. Tùy chọn: dùng `-u` cho lần đầu để thiết lập upstream (`git push -u origin <branch>`).
+
+
 ## Cách sử dụng
 Gõ /git-push trong Agent input để chạy command này.
 
