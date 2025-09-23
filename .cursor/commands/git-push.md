@@ -9,7 +9,7 @@ Push commits lên remote repository.
   - Nếu user là "LocTruongLuan" → dùng nhánh `LocTruongLuan`
   - Nếu nhánh chưa tồn tại → tự tạo mới (`git checkout -B <branch>`)
 - Tự động add/commit trước khi push.
-- **Tự động gửi thư Discord** sau khi push thành công để báo cáo tiến độ.
+ 
 
 ## Cách sử dụng
 Gõ /git-push trong Agent input để chạy command này.
@@ -55,15 +55,6 @@ git commit -m "chore: push pending changes" --no-verify || true
 
 # 3) Push lên origin cùng tên nhánh
 git push origin "$branch"
-
-# 4) Gửi thư Discord sau khi push thành công
-echo "📧 Đang gửi thư báo cáo đến Discord..."
-if [ -f ".cursor/commands/send-discord-letter.md" ]; then
-  # Đọc và thực thi file send-discord-letter.md
-  echo "✅ Đã gửi thư Discord báo cáo push thành công"
-else
-  echo "⚠️ Không tìm thấy file send-discord-letter.md"
-fi
 ```
 
 ## Tùy chọn khác
