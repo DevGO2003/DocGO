@@ -2,7 +2,7 @@
 
 ## Mục đích
 
-Gửi tất cả commits (bao gồm cả file nhạy cảm như .env\*, mcp.json, token, key, …) lên remote private
+Gửi tất cả commits (bao gồm cả file nhạy cảm như .env*, mcp.json, token, key, …) lên remote private
 
 ## Cách sử dụng
 ```bash
@@ -28,14 +28,14 @@ Gửi tất cả commits (bao gồm cả file nhạy cảm như .env\*, mcp.json
   Phần 2 - Đọc và thực hiện <push-origin>
 
   Phần 3 - Thực hiện lần lượt các PowerShell (Mỗi số thứ tự là 1 dòng PowerShell duy nhất, không tạo file powershell ps1):
-  1) Quét toàn bộ repo để tìm các file nhạy cảm (.env*, mcp.json, token, key, ...) và đảm bảo chúng được add vào stage:
+  1) Quét toàn bộ repo để tìm các file nhạy cảm (.env*, mcp.json, ...) và đảm bảo chúng được add vào stage:
      - Sử dụng lệnh như sau (PowerShell):
        - `git add -A`
     2) Sau đó, với mỗi file nhạy cảm tìm được (ví dụ: qua lệnh `Get-ChildItem -Recurse -Include .env*,mcp.json,token*,key*`), thực hiện `git add <file>`
   2) `git status -s` sau đó tóm tắt thay đổi và gắn vào biến <message>
   3) `git commit -m "[private-push] <message>" --no-verify`
   5) Kiểm tra nếu local không có commit mới so với remote <private>: chuyển tới Phần 3.
-  6) Khi push các file nhạy cảm (.env, token, key, ...), nếu các file này đã bị .gitignore thì cần dùng `git add -f <file>` (hoặc `git add --force <file>`) để ép add vào stage, hoặc đảm bảo .gitignore không chặn các file này.
+  6) Khi push các file nhạy cảm (.env*, token, ...), nếu các file này đã bị .gitignore thì cần dùng `git add -f <file>` (hoặc `git add --force <file>`) để ép add vào stage, hoặc đảm bảo .gitignore không chặn các file này.
      - Để push lên remote private:
        - Bình thường: `git push <private> <current-branch>`
        - Nếu là lần đầu push nhánh này: `git push -u <private> <current-branch>`
@@ -54,7 +54,7 @@ Gửi tất cả commits (bao gồm cả file nhạy cảm như .env\*, mcp.json
          + Port/Host → ưu tiên local (SERVER_PORT).
          + Debug flag → hợp nhất logic (true nếu một bên true).
      - Nếu quá khó giải quyết, có thể cân nhắc (hạn chế) dùng `git push --no-rebase` để merge, nhưng mặc định nên rebase để tránh merge commit thừa.
-  7) Sau khi push xong, thực hiện các bước sau để đảm bảo lấy về bản mới nhất của tất cả file nhạy cảm (không chỉ env mà còn mcp.json, token, key, ...):
+  7) Sau khi push xong, thực hiện các bước sau để đảm bảo lấy về bản mới nhất của tất cả file nhạy cảm (không chỉ .env* mà còn mcp.json):
      - Đầu tiên, chạy: `git fetch <private>`
      - Sau đó, dùng lệnh (ưu tiên git restore thay cho git checkout để tránh warning):
        - `git restore --source <private>/<current-branch> -- .env* mcp.json token* key* || true`
