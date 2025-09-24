@@ -34,7 +34,7 @@ Gửi thư đến Discord.
 
     :alarm_clock: <time>
     ========================================
-      9) <webhook>: đọc DISCORD_SERVER_ID từ ".cursor/tools/discord/env/.env"
+    9) <webhook>: đọc DISCORD_SERVER_ID từ ".cursor/tools/discord/env/.env"
   Phần 2: 
   1) Kiểm tra MCP sẵn sàng: nếu không có Discord MCP → đợi 2s → thử lại (tối đa 3 lần). Nếu sau 3 lần vẫn không có, trả lời người dùng "Discord MCP chưa sẵn sàng" và kết thúc chat.
   2) Nếu MCP đã sẵn sàng, gửi tin nhắn bằng Discord MCP với các tham số <server>, <channel>, message: <content>
