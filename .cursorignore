@@ -6,7 +6,6 @@
 # Luôn include toàn bộ thư mục .cursor và nội dung bên trong
 !/.cursor
 !**/.cursor/**
-!**/.cursor/scripts/temp/**
 
 # ===== Ignore các thư mục và file build, cache, log, temp =====
 
@@ -37,4 +36,4 @@ document/**/*.drawio
 !**/.env
 !**/.env.example
 !**/.env.local
-!**/.env.*.local**/.git-backup/**
+!**/.env.*.local
