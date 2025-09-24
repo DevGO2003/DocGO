@@ -8,7 +8,7 @@ Gửi thư đến Discord.
 /send-discord-message
 ```
 
-## Lệnh dưới đây sẽ bổ sung vào Cursor TODO:
+## Lệnh dưới đây sẽ bổ sung vào Cursor TODO, lưu ý Phần nào trước thì phải thực thiện xong trước rồi mới qua Phần tiếp theo, ko được làm song song các Phần:
   Phần 1: Thiết lập biến môi trường, hãy tìm kiếm file bằng quét repo chứ đừng sài powershell
   1) <server>: đọc DISCORD_SERVER_ID từ ".cursor/tools/discord/env/.env"
   2) <channel>: đọc DISCORD_CHANNEL_ID từ ".cursor/tools/discord/env/.env"
