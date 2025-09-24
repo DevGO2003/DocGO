@@ -6,7 +6,7 @@ Lập Curosr TODO, lưu ý Phần nào trước thì phải thực thiện xong 
   Phần 1 - Lấy tham số
   1) Lấy thời gian hiện tại (theo định dạng hh-mm-dd-MM-yyyy) để làm tên thư mục backup env sẽ phục hồi, ví dụ: `.git-backup/env/<Thời gian hiện tại>`
 
-  Phần 2 - Thực hiện lần lượt các PowerShell (Mỗi số thứ tự là 1 dòng PowerShell duy nhất, không tạo file powershell ps1):
+  Phần 2 - Thực hiện lần lượt các công việc sau bằng Cursor, đừng sài powershell cũng như tạo file ps1:
   1) - Phục hồi (restore) tất cả các file env đã được lưu trong thư mục `/.git-backup/env/<Thời gian hiện tại>` về đúng vị trí gốc trong project.
     - Đọc file `metadata.json` trong thư mục backup để lấy thông tin mapping giữa tên file backup và đường dẫn gốc.
     - Với mỗi object trong mảng metadata:
