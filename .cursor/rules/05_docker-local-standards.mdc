@@ -1,0 +1,168 @@
+---
+id: "rule-docker-local"
+name: "Chuẩn hóa Docker Local"
+description: "Quy tắc Docker Local, cấu trúc Dockerfile và docker-compose"
+version: "1.0.0"
+alwaysApply: true
+enabled: true
+priority: 50
+tags: ["docker", "compose", "dev"]
+globs: []
+excludeGlobs: []
+scope: "project"
+services: ["*"]
+appliesTo: ["code", "chat"]
+match: ""
+variables: {}
+rules: []
+examples: []
+references: []
+commands: []
+owners: ["devgo2003"]
+createdAt: "2025-09-23T00:00:00Z"
+updatedAt: "2025-09-23T00:00:00Z"
+notes: "Luôn bật vì ảnh hưởng quy trình dev local"
+language: vi
+---
+
+## Quy tắc Docker Local
+
+- **Khi chạy Docker local**: Luôn sử dụng volume mount để mount code trực tiếp từ máy host vào container
+- **Mục đích**: Container không cần copy code sẵn vào image, mà dùng code thật đang chỉnh sửa ở máy
+- **Cách thực hiện**: Sử dụng `-v` hoặc `volumes` trong docker-compose để mount thư mục code
+
+**Ví dụ mount code**:
+```bash
+# Docker run với volume mount
+docker run -v $(pwd):/app -p 8000:8000 service-name
+
+# Hoặc trong docker-compose.yml
+volumes:
+  - ./:/app
+```
+
+- **Chạy toàn bộ service backend**: Khi cần chạy nhiều service, sử dụng docker-compose để khởi động đồng thời
+- **Hot reload**: Code thay đổi trên máy host sẽ được reflect ngay trong container (không cần rebuild image)
+- **Ưu điểm**: Phát triển nhanh, không cần rebuild image mỗi khi sửa code, dễ debug
+- **File cấu hình**: Sử dụng `script/docker-compose.dev.yml` cho development mode với volume mount
+- **Script hỗ trợ**: Có sẵn `script/docker-dev.bat` và `script/docker-dev.ps1` để chạy nhanh
+- **Port mapping**: Tuân thủ quy tắc port cố định theo tên nhánh (8000-8017)
+
+### Quy tắc lệnh Docker Local:
+- **`docker local`**: Khởi động local environment với hot reload và hybrid approach
+- **`docker local --new`**: Khởi động mới (xóa cache, rebuild toàn bộ)
+- **`docker local --down`**: Dừng tất cả services
+- **`docker local --logs`**: Xem logs tất cả services
+- **`docker local --status`**: Xem trạng thái services
+
+### Local workflow:
+1. **Lần đầu hoặc khi cần restart toàn bộ**: Chạy `docker local --new`
+2. **Khi chỉnh sửa code**: Chạy `docker local` để khởi động local environment
+3. Sửa code trực tiếp trên máy host
+4. Code thay đổi được sync ngay vào container
+5. Service tự động reload (nếu có hot reload)
+6. Xem logs: `docker-compose -f script/docker-compose.local.yml logs -f`
+7. Dừng: `docker-compose -f script/docker-compose.local.yml down`
+
+## Quy tắc cấu trúc Docker
+
+### Dockerfile chuẩn cho Python (FastAPI):
+```dockerfile
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Copy requirements first for better caching
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy source code
+COPY . .
+
+# Expose port
+EXPOSE 8000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:8000/health || exit 1
+
+# Run the application
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+```
+
+### Dockerfile chuẩn cho Java (Spring Boot):
+```dockerfile
+FROM openjdk:17-jdk-slim
+
+WORKDIR /app
+
+# Copy the JAR file
+COPY target/*.jar app.jar
+
+# Expose port
+EXPOSE 8000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:8000/actuator/health || exit 1
+
+# Run the application
+CMD ["java", "-jar", "app.jar"]
+```
+
+### Docker Compose Development:
+```yaml
+version: '3.8'
+
+services:
+  ai-processing-service:
+    build: ./backend/ai-processing-service
+    ports:
+      - "8017:8000"
+    volumes:
+      - ./backend/ai-processing-service:/app
+    environment:
+      - ENVIRONMENT=development
+    networks:
+      - docgo-network
+
+  contract-management-service:
+    build: ./backend/contract-management-service
+    ports:
+      - "8003:8000"
+    volumes:
+      - ./backend/contract-management-service:/app
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+    networks:
+      - docgo-network
+
+networks:
+  docgo-network:
+    driver: bridge
+```
+
+## Quy tắc Port và Networking
+
+### Port mapping chuẩn:
+- Mỗi service phải có port cố định theo quy tắc đã định
+- Sử dụng internal port 8000 cho tất cả services
+- Map ra port ngoài theo quy tắc: 8000 + index
+
+### Network configuration:
+- Sử dụng bridge network cho development
+- Mỗi service có thể giao tiếp với nhau qua service name
+- Health check endpoint phải được expose để monitoring
+
+## Quy tắc Environment Variables
+
+### Development environment:
+- Sử dụng `.env` file cho local development
+- Không commit `.env` file vào Git
+- Sử dụng `.env.example` làm template
+- Override environment variables qua docker-compose khi cần
+
+### Production considerations:
+- Sử dụng Docker secrets hoặc external configuration management
+- Không hardcode sensitive information trong Dockerfile
+- Sử dụng multi-stage builds để giảm image size

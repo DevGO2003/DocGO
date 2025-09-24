@@ -259,4 +259,4 @@ document/**/*.pptx
 ###############################################################################
 
 scripts/temp/
-\n# Ignore Cursor workspace\n.cursor/
+.cursor/mcp.json
