@@ -9,7 +9,8 @@ Lập Curosr TODO:
   Phần 2 - Thực hiện lần lượt các PowerShell (Mỗi số thứ tự là 1 dòng PowerShell duy nhất, không tạo file powershell ps1):
   1) - Backup tất cả các file env từ project vào thư mục `/.git-backup/env/<Thời gian mới nhất>`.
     - Xác định các file env cần backup, ví dụ: `.env`, `.env.local` trong project.
-    - Với mỗi file env:
+    - Ngoài ra, backup cả file `.cursor/mcp.json` nếu tồn tại.
+    - Với mỗi file env và file `.cursor/mcp.json`:
         - Tạo một bản sao và đặt tên thành `BackupName` (có thể thêm prefix để phân biệt module hoặc thư mục).
         - Lưu file này vào thư mục `/.git-backup/env/<Thời gian mới nhất>`.
     - Cập nhật hoặc tạo mới file `metadata.json` trong thư mục backup, chứa thông tin mapping giữa `BackupName` và `OriginalPath`.
@@ -26,8 +27,13 @@ Lập Curosr TODO:
             {
             "BackupName": "frontend_env_.env.local",
             "OriginalPath": "frontend/env/.env.local"
+            },
+            {
+            "BackupName": "cursor_mcp.json",
+            "OriginalPath": ".cursor/mcp.json"
             }
         ]
         ```
         - File gốc `backend/authentication-identity-service/env/.env` → được lưu thành `backend_authentication-identity-service_env_.env` trong backup.
         - File gốc `frontend/env/.env.local` → được lưu thành `frontend_env_.env.local` trong backup.
+        - File gốc `.cursor/mcp.json` → được lưu thành `cursor_mcp.json` trong backup.
