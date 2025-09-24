@@ -23,9 +23,9 @@
 
 # ===== Ignore các thư mục VCS =====
 
-.git/
-.github/
-.gitlab/
+!.git/
+!.github/
+!.gitlab/
 
 # ===== Project-specific items không nằm trong .gitignore =====
 
