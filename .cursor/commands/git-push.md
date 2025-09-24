@@ -3,7 +3,8 @@
 ## Mục đích
 Gửi tất cả commits lên remote origin
 
-## Cách sử dụng```bash
+## Cách sử dụng
+```bash
 /git-push <destination-branch>
 ```
   1) Nếu không có tham số: mặc định push nhánh hiện tại.
@@ -25,7 +26,7 @@ Gửi tất cả commits lên remote origin
   Phần 2 - Thực hiện lần lượt các PowerShell (Mỗi số thứ tự là 1 dòng PowerShell duy nhất, không tạo file powershell ps1):
   1) `git add -A`
   2) `git status -s` sau đó tóm tắt thay đổi và gắn vào biến <message>
-  3) `git commit -m "<message>" --no-verify`
+  3) `git commit -m "[origin-push] <message>" --no-verify`
   4) `git pull --rebase <origin> <current-branch>`
      - Nếu có conflict khi rebase:
        - Sửa file bị conflict.
@@ -37,10 +38,13 @@ Gửi tất cả commits lên remote origin
   6) `git push <origin> <current-branch>`
      - Nếu là lần đầu push nhánh này, dùng thêm `-u` (`git push -u <origin> <current-branch>`).
      - Nếu có tham số `<destination-branch>`:  
-       `git push <origin> <current-branch>:<destination-branch>`  
-       Nếu `<destination-branch>` chưa tồn tại, lệnh trên sẽ tạo mới.
-     - Nếu muốn theo dõi (tracking branch):  
-       `git push -u <origin> <current-branch>:<destination-branch>`
+       - Push cả hai:
+         - `git push <origin> <current-branch>`
+         - `git push <origin> <current-branch>:<destination-branch>`
+       - Nếu `<destination-branch>` chưa tồn tại, lệnh trên sẽ tạo mới.
+       - Nếu muốn theo dõi (tracking branch):  
+         - `git push -u <origin> <current-branch>`
+         - `git push -u <origin> <current-branch>:<destination-branch>`
 
   7) Nếu khi push bị chặn do phát hiện secret (ví dụ: lộ file .env, token, key,...):
      - Đọc và thực hiện <backup>
