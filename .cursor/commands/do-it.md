@@ -1,28 +1,38 @@
-# Do It Command - Thực hiện công việc được gợi ý hoặc tiếp tục công việc giữa chừng
+# Do It Command - Thực hiện công việc được gợi ý, tiếp tục công việc giữa chừng, hoặc kiểm tra hoàn thành lệnh khác
 
 ## Mục đích
 Command này được sử dụng khi:
 1. **Agent gợi ý thực hiện công việc** và người dùng muốn agent thực hiện ngay
 2. **Tiếp tục công việc giữa chừng** khi agent bị ngừng đột ngột do hết context/token
-3. **Ưu tiên vế sau**: Tập trung vào việc tiếp tục công việc bị gián đoạn
+3. **Kiểm tra và hoàn thành lệnh khác**: Khi được truyền thêm tham số là một command khác (ví dụ: `/do-it /git-push`), agent sẽ kiểm tra tiến độ thực hiện của command đó và tiếp tục nếu chưa hoàn thành.
+4. **Ưu tiên vế sau**: Tập trung vào việc tiếp tục công việc bị gián đoạn hoặc hoàn thành lệnh tham số
 
 ## Cách sử dụng
-Gõ `/do-it` trong Agent input để:
-- Thực hiện công việc mà agent vừa gợi ý
-- Tiếp tục công việc đang dở dang
-- Khôi phục context và hoàn thành task và Cursor TODO
+- Gõ `/do-it` trong Agent input để:
+  - Thực hiện công việc mà agent vừa gợi ý
+  - Tiếp tục công việc đang dở dang
+  - Khôi phục context và hoàn thành task và Cursor TODO
+- Gõ `/do-it <command>` (ví dụ: `/do-it /git-push`) để:
+  - Tóm tắt lại đoạn chat liên quan đến `<command>`
+  - Kiểm tra xem các bước của `<command>` đã được thực hiện đầy đủ chưa (dựa trên mô tả của command đó)
+  - Nếu chưa đủ, tự động thực hiện tiếp các bước còn thiếu cho đến khi hoàn thành
 
 ## Quy trình thực hiện
 
 ### 1. 🔍 Phân tích context hiện tại
-- Kiểm tra công việc đang thực hiện
+- Kiểm tra công việc đang thực hiện hoặc command tham số (nếu có)
 - Xác định bước tiếp theo cần làm
 - Đánh giá trạng thái hiện tại
 
-### 2. 📋 Xác định công việc cần tiếp tục
+### 2. 📋 Xác định công việc cần tiếp tục hoặc kiểm tra command tham số
 - Nếu có gợi ý từ agent: Thực hiện gợi ý đó
 - Nếu không có gợi ý: Tiếp tục công việc giữa chừng
-- Ưu tiên hoàn thành task đang dở dang
+- Nếu có tham số command (ví dụ `/do-it /git-push`):
+  - Tóm tắt lại các đoạn chat liên quan đến command đó
+  - Đọc mô tả của command tham số để biết các bước cần thực hiện
+  - So sánh với tiến độ hiện tại, xác định các bước còn thiếu
+  - Thực hiện tiếp các bước còn thiếu cho đến khi hoàn thành
+- Ưu tiên hoàn thành task đang dở dang hoặc command tham số
 
 ### 3. ⚡ Thực hiện ngay lập tức
 - Không hỏi lại xác nhận
