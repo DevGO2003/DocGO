@@ -2,7 +2,7 @@
 
 Push commits lên remote repository origin.
 
-Lập Curosr TODO: 
+Lập Curosr TODO, lưu ý Phần nào trước thì phải thực thiện xong trước rồi mới qua Phần tiếp theo, ko được làm song song các Phần: 
   Phần 1 - Lấy tham số
   1) Lấy thời gian hiện tại (theo định dạng hh-mm-dd-MM-yyyy) để làm tên thư mục backup env sẽ phục hồi, ví dụ: `.git-backup/env/<Thời gian hiện tại>`
 

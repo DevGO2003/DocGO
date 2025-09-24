@@ -1,8 +1,17 @@
 ﻿# Git Push
 
-Push commits lên remote repository origin.
+## Mục đích
+Gửi tất cả commits lên remote origin
 
-## Lệnh dưới đây sẽ bổ sung vào Cursor TODO:
+## Cách sử dụng
+```bash
+/git-push
+```
+
+## Trước khi thực hiện:
+  1) Đọc '@10_powershell-terminal-standards.mdc' trong repo
+
+## Lệnh dưới đây sẽ bổ sung vào Cursor TODO, lưu ý Phần nào trước thì phải thực thiện xong trước rồi mới qua Phần tiếp theo, ko được làm song song các Phần: 
   Phần 1: Thiết lập biến môi trường, hãy tìm kiếm file bằng quét repo chứ đừng sài powershell
   1) <origin>: đọc REMOTE_ORIGIN từ ".cursor/tools/github/env/.env"
   2) <destination-branch>: tham số thứ nhất, nếu không có tham số: mặc định nhánh hiện tại
