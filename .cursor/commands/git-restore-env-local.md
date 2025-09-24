@@ -13,7 +13,7 @@ Lập Curosr TODO:
         - `BackupName`: tên file backup mới nhất hiện có trong thư mục `/.git-backup/env/<Thời gian hiện tại>`.
         - `OriginalPath`: đường dẫn và tên file gốc trong project.
     - Thực hiện copy hoặc di chuyển: lấy file theo `BackupName` trong thư mục backup và đặt lại đúng vị trí, đúng tên gốc theo `OriginalPath` trong project.
-    - Nhờ vậy, các file env như `.env`, `.env.local` sẽ được khôi phục lại đúng tên và vị trí ban đầu, không giữ nguyên tên backup.
+    - Nhờ vậy, các file env như `.env`, `.env.local` và `mcp.json` sẽ được khôi phục lại đúng tên và vị trí ban đầu, không giữ nguyên tên backup.
     - Ví dụ:
         ```json
         [
@@ -24,8 +24,13 @@ Lập Curosr TODO:
         {
             "BackupName": "frontend_env_.env.local",
             "OriginalPath": "frontend/env/.env.local"
+        },
+        {
+            "BackupName": "cursor_mcp.json",
+            "OriginalPath": ".cursor/mcp.json"
         }
         ]
         ```
         - File `backend_authentication-identity-service_env_.env` trong backup sẽ được đặt lại thành `backend/authentication-identity-service/env/.env`.
         - File `frontend_env_.env.local` trong backup sẽ được đặt lại thành `frontend/env/.env.local`.
+        - File `cursor_mcp.json` trong backup sẽ được đặt lại thành `.cursor/mcp.json`.
