@@ -27,15 +27,16 @@ Gửi tất cả commits lên remote origin
   1) `git add -A`
   2) `git status -s` sau đó tóm tắt thay đổi và gắn vào biến <message>
   3) `git commit -m "[origin-push] <message>" --no-verify`
-  4) `git pull --rebase <origin> <current-branch>`
+  4) `git fetch <private>`
+  5) `git pull --rebase <origin> <current-branch>`
      - Nếu có conflict khi rebase:
        - Sửa file bị conflict.
        - `git add <file>`
        - `git rebase --continue`
        - Nếu conflict phức tạp hoặc nhiều file, lập Cursor TODO ghi lại các file/nội dung conflict để giải quyết dần.
        - Nếu quá khó giải quyết, có thể cân nhắc (hạn chế) dùng `git pull --no-rebase` để merge, nhưng mặc định nên rebase để tránh merge commit thừa.
-  5) Kiểm tra nếu local không có commit mới so với remote <origin>: chuyển tới Phần 3.
-  6) `git push <origin> <current-branch>`
+  6) Kiểm tra nếu local không có commit mới so với remote <origin>: chuyển tới Phần 3.
+  7) `git push <origin> <current-branch>`
      - Nếu là lần đầu push nhánh này, dùng thêm `-u` (`git push -u <origin> <current-branch>`).
      - Nếu có tham số `<destination-branch>`:  
        - Push cả hai:
@@ -46,7 +47,7 @@ Gửi tất cả commits lên remote origin
          - `git push -u <origin> <current-branch>`
          - `git push -u <origin> <current-branch>:<destination-branch>`
 
-  7) Nếu khi push bị chặn do phát hiện secret (ví dụ: lộ file .env, token, key,...):
+  8) Nếu khi push bị chặn do phát hiện secret (ví dụ: lộ file .env, token, key,...):
      - Đọc và thực hiện <backup>
      - Dọn lịch sử để loại bỏ secret rồi force-push:
        - Dùng `git filter-repo` (khuyến nghị) hoặc BFG để xóa file secret khỏi lịch sử.
