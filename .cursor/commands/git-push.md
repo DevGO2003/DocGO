@@ -27,7 +27,7 @@ Gửi tất cả commits lên remote origin
   1) `git add -A`
   2) `git status -s` sau đó tóm tắt thay đổi và gắn vào biến <message>
   3) `git commit -m "[origin-push] <message>" --no-verify`
-  4) `git fetch <private>`
+  4) `git fetch <origin>`
   5) `git pull --rebase <origin> <current-branch>`
      - Nếu có conflict khi rebase:
        - Sửa file bị conflict.
