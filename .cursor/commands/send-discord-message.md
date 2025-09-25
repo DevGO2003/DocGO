@@ -16,7 +16,7 @@ Gửi thư đến Discord.
   4) <you>: xưng hô của Cursor trong Cursor saved memories.
   5) <me>: xưng hô của Cursor trong người dùng saved memories.
   6) <time>: thời gian hiện tại, định dạng hh:mm:ss | dd-MM-yyyy (cho phép sài powershell để lấy time: powershell -NoProfile -Command "Get-Date -Format 'HH:mm:ss | dd-MM-yyyy'" )
-  7) <suggetion>: đề xuất cho nội dung công việc tiếp theo từ tóm tắt.
+  7) <suggestion>: đề xuất cho nội dung công việc tiếp theo từ tóm tắt.
   8) <content>:
     ========================================
     :mailbox: [THƯ] - Gửi đến <me>
@@ -26,7 +26,7 @@ Gửi thư đến Discord.
     <message>
 
     :bulb: **Đề xuất tiếp theo**  
-    <suggetion>
+    <suggestion>
 
     ----------------------------------------
     Trân trọng,  
@@ -34,7 +34,15 @@ Gửi thư đến Discord.
 
     :alarm_clock: <time>
     ========================================
-    9) <webhook>: đọc DISCORD_SERVER_ID từ ".cursor/tools/discord/env/.env"
+    9) <webhook>: đọc DISCORD_WEBHOOK_URL từ ".cursor/tools/discord/env/.env"
   Phần 2: 
   1) Kiểm tra MCP sẵn sàng: nếu không có Discord MCP → đợi 2s → thử lại (tối đa 3 lần). Nếu sau 3 lần vẫn không có, trả lời người dùng "Discord MCP chưa sẵn sàng" và kết thúc chat.
-  2) Nếu MCP đã sẵn sàng, gửi tin nhắn bằng Discord MCP với các tham số <server>, <channel>, message: <content>
+  2) Nếu MCP đã sẵn sàng, gửi tin nhắn bằng Discord MCP với các tham số <server>, <channel>, message: <content> và NHẬN lại "messageId".
+  3) Xác nhận gửi thành công: chỉ đánh dấu hoàn tất khi nhận được "messageId" hợp lệ. Nếu không có "messageId" → coi như thất bại, ghi log/báo lỗi và không đánh dấu hoàn tất.
+  4) Gợi ý logging: log <server>, <channel>, độ dài <content>, và "messageId" để dễ trace khi cần.
+
+  Chuẩn bước thực thi (pseudo):
+  - Lấy <server>, <channel>, <you>, <me>, <time>, <message>, <suggestion> → dựng <content> đúng mẫu trên.
+  - Retry tối đa 3 lần (sleep 2s mỗi lần) để kiểm MCP sẵn sàng.
+  - Gửi tin qua MCP Discord: params { server: <server>, channel: <channel>, message: <content> }.
+  - Nếu trả về có "messageId" → thông báo thành công; nếu không → báo lỗi "Gửi Discord thất bại, không nhận được messageId".

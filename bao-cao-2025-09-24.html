@@ -1,0 +1,72 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Báo Cáo Tiến Độ Dự Án DocGO - 2025-09-24</title>
+    <style>
+        body{font-family:Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:#0f172a;color:#e2e8f0;margin:0;padding:0}
+        .container{max-width:1100px;margin:0 auto;padding:28px}
+        .header{background:linear-gradient(135deg,#0ea5e9,#6366f1);padding:24px;border-radius:14px;color:#fff;margin-bottom:24px}
+        .header h1{margin:0 0 8px 0;font-size:26px}
+        .subtitle{margin:0;opacity:.9}
+        .section{background:#111827;border:1px solid #1f2937;border-radius:12px;padding:18px;margin-bottom:18px}
+        .section h2{margin-top:0;font-size:18px}
+        .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+        .card{background:#0b1220;border:1px solid #1f2937;border-radius:12px;padding:16px}
+        .stat{font-size:28px;font-weight:700}
+        table{width:100%;border-collapse:collapse}
+        th,td{border-bottom:1px solid #1f2937;padding:8px 10px;text-align:left;font-size:13px}
+        th{color:#93c5fd;background:#0b1220}
+        .tag{display:inline-block;padding:2px 8px;border-radius:999px;font-size:12px;border:1px solid #374151;background:#0b1220;margin-right:6px}
+        .ok{color:#22c55e}
+        .warn{color:#f59e0b}
+        .bad{color:#ef4444}
+        .muted{color:#94a3b8}
+        .footer{margin-top:26px;color:#94a3b8;font-size:12px;text-align:center}
+        @media(max-width:600px){.container{padding:16px}}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1> BÁO CÁO TIẾN ĐỘ DỰ ÁN DOCGO</h1>
+            <p class="subtitle">Ngày báo cáo: 2025-09-25 | Thời gian báo cáo: Ngày hôm qua (2025-09-24)</p>
+        </div>
+        <div class="section">
+            <h2> TỔNG QUAN HOẠT ĐỘNG</h2>
+            <div class="grid">
+                <div class="card"><div class="muted">Tổng số commit</div><div class="stat">24</div></div>
+                <div class="card"><div class="muted">Files được thay đổi</div><div class="stat">46</div></div>
+                <div class="card"><div class="muted">Services được cập nhật</div><div class="stat">1</div></div>
+                <div class="card"><div class="muted">Thời gian làm việc (ước tính)</div><div class="stat">12h</div></div>
+            </div>
+        </div>
+        <div class="section">
+            <h2> CHI TIẾT CÔNG VIỆC THỰC HIỆN</h2>
+            <div style="overflow:auto"><table><thead><tr><th>STT</th><th>Công việc</th><th>Commit</th><th>Thời gian</th><th>Loại</th></tr></thead><tbody><tr><td>1</td><td>merge: resolve conflicts preferring remote for .cursor/commands</td><td><code>bd8b33b</code></td><td class='muted'>2025-09-24T23:33:10+07:00</td><td><span class='tag'>Other</span></td></tr><tr><td>2</td><td>[origin-push] M  .cursor/commands/git-restore-env-local.md</td><td><code>0d2d11c</code></td><td class='muted'>2025-09-24T23:25:52+07:00</td><td><span class='tag'>Other</span></td></tr><tr><td>3</td><td>[origin-push] M  .cursor/commands/git-push.md</td><td><code>15c80dd</code></td><td class='muted'>2025-09-24T23:15:25+07:00</td><td><span class='tag'>Other</span></td></tr><tr><td>4</td><td>[origin-push] M  .cursor/commands/git-push.md</td><td><code>4cb6551</code></td><td class='muted'>2025-09-24T23:13:40+07:00</td><td><span class='tag'>Other</span></td></tr><tr><td>5</td><td>chore: update .gitignore to maintain temp directory and remove cursor workspace entry</td><td><code>9ca76f1</code></td><td class='muted'>2025-09-24T23:10:00+07:00</td><td><span class='tag'>Infrastructure</span></td></tr><tr><td>6</td><td>[origin-push] D  &quot;.cursor/commands/git-push-private-backup copy.md&quot;; R  .cursor/commands/git-push-private-backup.md -&gt; .cursor/commands/git-push-private.md</td><td><code>c49d793</code></td><td class='muted'>2025-09-24T22:50:58+07:00</td><td><span class='tag'>Other</span></td></tr><tr><td>7</td><td>chore: update git-push-private-backup doc</td><td><code>f4dabf7</code></td><td class='muted'>2025-09-24T22:42:09+07:00</td><td><span class='tag'>Infrastructure</span></td></tr><tr><td>8</td><td>[private-push] update command files, add discord/github env, mcp.json</td><td><code>6575855</code></td><td class='muted'>2025-09-24T22:41:00+07:00</td><td><span class='tag'>Other</span></td></tr><tr><td>9</td><td>chore(commands): update git-push usage with destination refspec support</td><td><code>3c8fc78</code></td><td class='muted'>2025-09-24T21:41:43+07:00</td><td><span class='tag'>Infrastructure</span></td></tr><tr><td>10</td><td>chore(commands): update send-discord-message; add backup variant</td><td><code>c78933f</code></td><td class='muted'>2025-09-24T21:19:41+07:00</td><td><span class='tag'>Infrastructure</span></td></tr><tr><td>11</td><td>chore(git): update command docs - git-backup-env.md, git-push.md, git-restore-env-local.md, send-discord-message.md</td><td><code>be2c202</code></td><td class='muted'>2025-09-24T16:53:27+07:00</td><td><span class='tag'>Infrastructure</span></td></tr><tr><td>12</td><td>chore(git): update command docs - git-backup-env.md, git-push.md, git-restore-env-local.md, send-discord-message.md</td><td><code>cb5f9b1</code></td><td class='muted'>2025-09-24T16:53:27+07:00</td><td><span class='tag'>Infrastructure</span></td></tr><tr><td>13</td><td>chore: workspace maintenance | M  .cursor/commands/git-backup-env.md M  .cursor/commands/git-push.md M  .cursor/commands/git-restore-env-local.md M  .cursorignore</td><td><code>34f5aa3</code></td><td class='muted'>2025-09-24T16:41:40+07:00</td><td><span class='tag'>Infrastructure</span></td></tr><tr><td>14</td><td>chore: workspace maintenance | M  .cursor/commands/git-backup-env.md M  .cursor/commands/git-push.md M  .cursor/commands/git-restore-env-local.md M  .cursorignore</td><td><code>e31b33d</code></td><td class='muted'>2025-09-24T16:41:40+07:00</td><td><span class='tag'>Infrastructure</span></td></tr><tr><td>15</td><td>chore: re-track .cursor standards (exclude mcp.json)</td><td><code>d13cc28</code></td><td class='muted'>2025-09-24T15:56:34+07:00</td><td><span class='tag'>Infrastructure</span></td></tr><tr><td>16</td><td>chore: re-track .cursor standards (exclude mcp.json)</td><td><code>1dcb186</code></td><td class='muted'>2025-09-24T15:56:34+07:00</td><td><span class='tag'>Infrastructure</span></td></tr><tr><td>17</td><td>chore(mcp): verify MCP GitHub push (server-github)</td><td><code>fc44069</code></td><td class='muted'>2025-09-24T15:42:47+07:00</td><td><span class='tag'>Infrastructure</span></td></tr><tr><td>18</td><td>chore(mcp): verify MCP GitHub push (server-github)</td><td><code>a7a7ba2</code></td><td class='muted'>2025-09-24T15:42:47+07:00</td><td><span class='tag'>Infrastructure</span></td></tr><tr><td>19</td><td>chore: mcp verification sync</td><td><code>1f853d2</code></td><td class='muted'>2025-09-24T15:41:36+07:00</td><td><span class='tag'>Infrastructure</span></td></tr><tr><td>20</td><td>chore: mcp verification sync</td><td><code>e2f44e0</code></td><td class='muted'>2025-09-24T15:41:36+07:00</td><td><span class='tag'>Infrastructure</span></td></tr><tr><td>21</td><td>chore: sync workspace to vibe-coding</td><td><code>a9f7ca8</code></td><td class='muted'>2025-09-24T15:19:44+07:00</td><td><span class='tag'>Infrastructure</span></td></tr><tr><td>22</td><td>chore: sync workspace to vibe-coding</td><td><code>5f2a01b</code></td><td class='muted'>2025-09-24T15:19:44+07:00</td><td><span class='tag'>Infrastructure</span></td></tr></tbody></table></div>
+        </div>
+        <div class="section">
+            <h2> SERVICES ĐƯỢC CẬP NHẬT</h2>
+            <div style="overflow:auto"><table><thead><tr><th>Tên service</th><th>Loại</th><th>Port</th><th>Ghi chú</th></tr></thead><tbody><tr><td>api-gateway-bff</td><td>Next.js</td><td>:8000</td><td><span class='tag'>Cập nhật</span></td></tr></tbody></table></div>
+        </div>
+        <div class="section">
+            <h2> THỐNG KÊ HOẠT ĐỘNG</h2>
+            <ul><li><code>.cursor/commands/ask.md</code></li><li><code>.cursor/commands/best-choice.md</code></li><li><code>.cursor/commands/delete-all-scripts.md</code></li><li><code>.cursor/commands/docker-logs.md</code></li><li><code>.cursor/commands/docker-start.md</code></li><li><code>.cursor/commands/docker-status.md</code></li><li><code>.cursor/commands/do-it.md</code></li><li><code>.cursor/commands/git-backup-env.md</code></li><li><code>.cursor/commands/git-commit.md</code></li><li><code>.cursor/commands/git-push.md</code></li><li><code>.cursor/commands/git-push-backup.md</code></li><li><code>.cursor/commands/git-push-private.md</code></li><li><code>.cursor/commands/git-push-private-backup copy.md</code></li><li><code>.cursor/commands/git-push-private-backup.md</code></li><li><code>.cursor/commands/git-restore-env-from-private-remote.md</code></li><li><code>.cursor/commands/git-restore-env-local.md</code></li><li><code>.cursor/commands/make-report.md</code></li><li><code>.cursor/commands/mongo.md</code></li><li><code>.cursor/commands/send-discord-letter.md</code></li><li><code>.cursor/commands/send-discord-message.md</code></li><li><code>.cursor/commands/send-discord-message-backup.md</code></li><li><code>.cursor/commands/setup-cursor.md</code></li><li><code>.cursor/prompts/make-command-files.md</code></li><li><code>.cursor/rules/00_project-architecture-overview.mdc</code></li><li><code>.cursor/rules/01_api-standards.mdc</code></li><li><code>.cursor/rules/02_event-exception-standards.mdc</code></li><li><code>.cursor/rules/03_service-structure-standards.mdc</code></li><li><code>.cursor/rules/04_environment-git-standards.mdc</code></li><li><code>.cursor/rules/05_docker-local-standards.mdc</code></li><li><code>.cursor/rules/06_memory-actor-standards.mdc</code></li><li><code>.cursor/rules/07_chat-utilities.mdc</code></li><li><code>.cursor/rules/08_no-auto-md-creation.mdc</code></li><li><code>.cursor/rules/09_auto-ignore.mdc</code></li><li><code>.cursor/rules/10_powershell-terminal-standards.mdc</code></li><li><code>.cursor/scripts/api-gateway-bff-start.bat</code></li><li><code>.cursor/scripts/reusable/git-push.ps1</code></li><li><code>.cursor/scripts/reusable/git-push-private-safe.ps1</code></li><li><code>.cursor/scripts/reusable/send-discord-letter.ps1</code></li><li><code>.cursor/tools/discord/README.md</code></li><li><code>.cursor/tools/github/README.md</code></li><li><code>.cursorignore</code></li><li><code>.github/mcp-sync.txt</code></li><li><code>.gitignore</code></li><li><code>package.json</code></li><li><code>package-lock.json</code></li><li><code>test-discord.js</code></li></ul>
+        </div>
+        <div class="section">
+            <h2> KẾT QUẢ ĐẠT ĐƯỢC</h2>
+            <ul><li>Tăng tiến độ phát triển với 24 commit.</li><li>Cập nhật 1 services.</li><li>Điều chỉnh 46 tệp, cải thiện chất lượng mã nguồn.</li></ul>
+        </div>
+        <div class="section">
+            <h2> KẾ HOẠCH TIẾP THEO</h2>
+            <table><thead><tr><th>Ưu tiên</th><th>Công việc</th><th>Thời gian dự kiến</th></tr></thead><tbody>
+                <tr><td>Cao</td><td>Hoàn thiện hạng mục đang dở theo commit gần nhất</td><td>1-2 ngày</td></tr>
+                <tr><td>Trung bình</td><td>Tối ưu code/refactor theo nhóm commit</td><td>2-3 ngày</td></tr>
+                <tr><td>Thấp</td><td>Cập nhật tài liệu và kiểm thử</td><td>3-5 ngày</td></tr>
+            </tbody></table>
+        </div>
+        <div class="footer">Tạo bởi make-report lúc 2025-09-25 22:18:56</div>
+    </div>
+</body>
+</html>
