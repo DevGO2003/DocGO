@@ -32,7 +32,7 @@ const navigation = [
   { nameKey: 'navigation.dashboard', href: '/dashboard', icon: HomeIcon },
   { nameKey: 'navigation.analytics', href: '/analytics', icon: ChartBarIcon },
   { nameKey: 'navigation.contracts', href: '/contracts', icon: DocumentTextIcon },
-  { nameKey: 'navigation.createContract', href: '/import-document', icon: DocumentDuplicateIcon },
+  { nameKey: 'navigation.importDocument', href: '/import-document', icon: DocumentDuplicateIcon },
   { nameKey: 'navigation.eSignature', href: '/e-signature', icon: PencilSquareIcon },
   { nameKey: 'navigation.collaboration', href: '/collaboration-comments', icon: ChatBubbleLeftRightIcon },
   { nameKey: 'navigation.versions', href: '/contract-versions', icon: ClockIcon },

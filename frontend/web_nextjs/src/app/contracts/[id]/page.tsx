@@ -4,9 +4,12 @@ import React, { useEffect, useState } from 'react'
 import { DashboardLayout } from '@/components/layout'
 import { useParams } from 'next/navigation'
 import { contractAPI } from '@/lib/api'
+import { useTranslation } from '@/hooks/useTranslation'
+import { translateContractType, translateContractStatus, translateContractTag } from '@/utils/tagTranslations'
 
 export default function ContractDetailPage() {
   const params = useParams() as { id: string }
+  const { t } = useTranslation()
   const [data, setData] = useState<any>(null)
   const [loading, setLoading] = useState<boolean>(true)
   const [error, setError] = useState<string>('')
@@ -93,11 +96,11 @@ export default function ContractDetailPage() {
           <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
             <div>
               <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600">{data.title}</h1>
-              <p className="text-gray-600">Mã: HD-{data.id} · Loại: {data.contractType}</p>
+              <p className="text-gray-600">Mã: HD-{data.id} · Loại: {translateContractType(data.contractType, t)}</p>
             </div>
             <div className="flex gap-2">
-              <span className={`px-3 py-1 text-sm rounded-full border ${badgeClass(data.status)}`}>{data.status}</span>
-              <span className="px-3 py-1 text-sm rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">{data.contractType}</span>
+              <span className={`px-3 py-1 text-sm rounded-full border ${badgeClass(data.status)}`}>{translateContractStatus(data.status, t)}</span>
+              <span className="px-3 py-1 text-sm rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">{translateContractType(data.contractType, t)}</span>
             </div>
           </div>
           <div className="pointer-events-none absolute -top-16 -right-16 h-56 w-56 rounded-full bg-indigo-200/30 blur-3xl" />

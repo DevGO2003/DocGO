@@ -16,6 +16,10 @@ export default function CreateContractPage() {
   const [ocrLoading, setOcrLoading] = useState(false)
   const [extractedText, setExtractedText] = useState('')
   const [isOcrModalOpen, setIsOcrModalOpen] = useState(false)
+  // Versioning from existing contract (OCR tab)
+  const [createFromOldVersion, setCreateFromOldVersion] = useState(false)
+  const [baseContractId, setBaseContractId] = useState<string>('')
+  const [newVersionName, setNewVersionName] = useState<string>('')
   
   // File Tab states
   const [selectedRegularFile, setSelectedRegularFile] = useState<File | null>(null)
@@ -309,10 +313,10 @@ export default function CreateContractPage() {
               <nav className="flex space-x-8 px-6">
                 <button
                   onClick={() => setActiveTab('ocr')}
-                  className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                  className={`py-4 px-3 rounded-t-lg border-b-2 font-medium text-sm ${
                     activeTab === 'ocr'
-                      ? 'border-primary-500 text-primary-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      ? 'border-primary-500 text-primary-700 bg-blue-50'
+                      : 'border-transparent text-gray-600 hover:text-gray-800 hover:border-gray-300 hover:bg-gray-50'
                   }`}
                 >
                   <DocumentTextIcon className="h-5 w-5 inline mr-2" />
@@ -320,21 +324,21 @@ export default function CreateContractPage() {
                 </button>
                 <button
                   onClick={() => setActiveTab('file')}
-                  className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                  className={`py-4 px-3 rounded-t-lg border-b-2 font-medium text-sm ${
                     activeTab === 'file'
-                      ? 'border-primary-500 text-primary-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      ? 'border-emerald-500 text-emerald-700 bg-emerald-50'
+                      : 'border-transparent text-gray-600 hover:text-gray-800 hover:border-gray-300 hover:bg-gray-50'
                   }`}
                 >
                   <ArrowUpTrayIcon className="h-5 w-5 inline mr-2" />
-                  File thông thường
+                  Upload tệp
                 </button>
                 <button
                   onClick={() => setActiveTab('manual')}
-                  className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                  className={`py-4 px-3 rounded-t-lg border-b-2 font-medium text-sm ${
                     activeTab === 'manual'
                       ? 'border-primary-500 text-primary-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      : 'border-transparent text-gray-600 hover:text-gray-800 hover:border-gray-300 hover:bg-gray-50'
                   }`}
                 >
                   <PlusIcon className="h-5 w-5 inline mr-2" />
@@ -347,10 +351,55 @@ export default function CreateContractPage() {
               {/* OCR Tab Content */}
               {activeTab === 'ocr' && (
                 <div className="space-y-6">
-                  <div>
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">Trích xuất văn bản từ file hợp đồng</h3>
-                    <p className="text-gray-600">Upload file (PDF, DOCX, TXT) để trích xuất nội dung văn bản bằng OCR</p>
+                  {/* Versioning panel moved above upload */}
+                  <div className="bg-gradient-to-r from-indigo-50 to-blue-50 border border-indigo-100 rounded-xl p-4">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <h3 className="text-lg font-medium text-gray-900">Tạo phiên bản từ hợp đồng cũ</h3>
+                        <p className="text-sm text-gray-600 mt-1">Chọn hợp đồng đã có để tạo phiên bản mới (ví dụ: v2, v3).</p>
+                      </div>
+                      <label className="inline-flex items-center cursor-pointer select-none">
+                        <input type="checkbox" className="sr-only peer" checked={createFromOldVersion} onChange={(e) => setCreateFromOldVersion(e.target.checked)} />
+                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:bg-indigo-600 transition-colors relative">
+                          <span className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-colors shadow" />
+                        </div>
+                        <span className="ml-3 text-sm text-gray-700">{createFromOldVersion ? 'Bật' : 'Tắt'}</span>
+                      </label>
+                    </div>
+
+                    {createFromOldVersion && (
+                      <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                        <div className="grid gap-2">
+                          <label className="text-sm font-medium text-gray-700">ID hợp đồng gốc</label>
+                          <input
+                            type="text"
+                            value={baseContractId}
+                            onChange={(e) => setBaseContractId(e.target.value)}
+                            placeholder="VD: 1024"
+                            className="border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                          />
+                          <p className="text-xs text-gray-500">Nhập ID của hợp đồng cần tạo phiên bản mới.</p>
+                        </div>
+                        <div className="grid gap-2">
+                          <label className="text-sm font-medium text-gray-700">Tên phiên bản mới (tùy chọn)</label>
+                          <input
+                            type="text"
+                            value={newVersionName}
+                            onChange={(e) => setNewVersionName(e.target.value)}
+                            placeholder="VD: v2 hoặc 2.0"
+                            className="border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                          />
+                          <p className="text-xs text-gray-500">Để trống để hệ thống tự đánh số tiếp theo.</p>
+                        </div>
+                      </div>
+                    )}
                   </div>
+
+                  <div className="space-y-4">
+                    <div>
+                      <h3 className="text-lg font-medium text-gray-900 mb-2">Tải lên tệp hợp đồng để trích xuất văn bản</h3>
+                      <p className="text-gray-600">Hỗ trợ định dạng: PDF, DOCX, TXT. Kéo thả hoặc chọn tệp để hệ thống OCR trích xuất nội dung.</p>
+                    </div>
 
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {/* Input Section */}
@@ -369,7 +418,7 @@ export default function CreateContractPage() {
                           />
                           <button
                             onClick={() => ocrFileInputRef.current?.click()}
-                            className="btn-secondary"
+                            className="inline-flex items-center px-5 py-2.5 rounded-xl border-2 border-dashed border-blue-500 text-blue-700 bg-transparent hover:bg-blue-50 hover:border-blue-600 active:scale-[0.98] transition-all"
                           >
                             Chọn file
                           </button>
@@ -405,6 +454,7 @@ export default function CreateContractPage() {
                     {/* Output moved to modal */}
                   </div>
                 </div>
+              </div>
               )}
 
               {/* File Tab Content */}
@@ -415,8 +465,8 @@ export default function CreateContractPage() {
                     <p className="text-gray-600">(File gì cũng được)</p>
                   </div>
 
-                  <div className="max-w-md mx-auto">
-                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-primary-400 transition-colors">
+                  <div>
+                    <div className="w-full border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-primary-400 transition-colors">
                       <input
                         ref={regularFileInputRef}
                         type="file"
@@ -428,7 +478,7 @@ export default function CreateContractPage() {
                       <div className="mt-4">
                         <button
                           onClick={() => regularFileInputRef.current?.click()}
-                          className="btn-secondary"
+                          className="inline-flex items-center px-5 py-2.5 rounded-xl border-2 border-dashed border-emerald-500 text-emerald-700 bg-transparent hover:bg-emerald-50 hover:border-emerald-600 active:scale-[0.98] transition-all"
                         >
                           Chọn file
                         </button>

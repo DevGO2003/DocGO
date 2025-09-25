@@ -38,6 +38,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Call auth service
     const result = await authService.logout(logoutRequest)
 
+    // Clear cookies on logout
+    try {
+      const isSecure = false // dev over http
+      const sameSite = 'Lax'
+      const cookieBase = `Path=/; HttpOnly; SameSite=${sameSite}${isSecure ? '; Secure' : ''}`
+      res.setHeader('Set-Cookie', [
+        `auth_token=; Max-Age=0; ${cookieBase}`,
+        `refresh_token=; Max-Age=0; ${cookieBase}`,
+        `user_data=; Max-Age=0; ${cookieBase}`,
+      ])
+    } catch (e) {
+      console.warn('[Auth Logout] Failed clearing cookies:', e)
+    }
+
     // Return success response
     return res.status(200).json(result)
 

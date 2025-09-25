@@ -82,10 +82,13 @@ export function loggingMiddleware(request: NextRequest): void {
 // CORS middleware
 export function corsMiddleware(request: NextRequest): NextResponse | null {
   if (request.method === 'OPTIONS') {
+    const corsOrigin = process.env.CORS_ORIGIN || '*';
+    logger.info(`🌐 CORS Origin: ${corsOrigin}`);
+    
     return new NextResponse(null, {
       status: 200,
       headers: {
-        'Access-Control-Allow-Origin': process.env.CORS_ORIGIN || '*',
+        'Access-Control-Allow-Origin': corsOrigin,
         'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
         'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
         'Access-Control-Max-Age': '86400'

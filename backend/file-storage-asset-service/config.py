@@ -154,7 +154,7 @@ TEMP_DIR: str = get_env("TEMP_DIR", "temp")
 
 # MongoDB configuration
 MONGODB_URL: str = get_env("MONGODB_ATLAS_URI", get_env("MONGODB_URL", "mongodb://localhost:27017"))
-MONGODB_DATABASE: str = get_env("MONGODB_DATABASE", "docgo_file_storage")
+MONGODB_DATABASE: str = get_env("MONGODB_DATABASE", "docgo_file")
 MONGODB_FILES_COLLECTION: str = get_env("MONGODB_FILES_COLLECTION", "files")
 MONGODB_ASSETS_COLLECTION: str = get_env("MONGODB_ASSETS_COLLECTION", "assets")
 

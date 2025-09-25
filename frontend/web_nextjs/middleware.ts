@@ -78,16 +78,28 @@ export function middleware(request: NextRequest) {
 
   // If it's a protected route, check authentication
   if (isProtectedRoute) {
-    // Check for authentication token in cookies or headers
+    // Check for authentication token in cookies (primary) or headers (fallback)
     const authToken = request.cookies.get('auth_token')?.value ||
                      request.headers.get('authorization')?.replace('Bearer ', '')
 
-    // If no token, redirect to unauthorized page
+    // Debug logging for middleware
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[Middleware] Protected route check:', {
+        pathname,
+        hasCookieToken: !!request.cookies.get('auth_token')?.value,
+        hasHeaderToken: !!request.headers.get('authorization'),
+        tokenPreview: authToken ? `${authToken.substring(0, 20)}...` : null
+      })
+    }
+
+    // If no token, redirect to login page instead of unauthorized
     if (!authToken) {
-      return NextResponse.redirect(new URL('/unauthorized', request.url))
+      console.log('[Middleware] No auth token found, redirecting to login')
+      return NextResponse.redirect(new URL('/auth/login', request.url))
     }
 
     // If token exists, allow access
+    console.log('[Middleware] Auth token found, allowing access')
     return NextResponse.next()
   }
 
