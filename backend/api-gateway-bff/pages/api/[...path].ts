@@ -334,6 +334,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       // Forward with API version prefix expected by the service
       endpoint = `/api/v1/${fullPath}`;
     } else {
+      // CORS for early return
+      res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000')
+      res.setHeader('Access-Control-Allow-Credentials', 'true')
+      res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With')
       return res.status(404).json({
         error: 'Service not found',
         message: `No service configured for path: ${fullPath}. Available services: authentication-identity-service, user-management-service, contract-management-service, ai-processing-service, file-storage-asset-service, general-file-management-service`
@@ -343,6 +348,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Get service instance
     const service = serviceManager.getService(serviceKey);
     if (!service) {
+      // CORS for early return
+      res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000')
+      res.setHeader('Access-Control-Allow-Credentials', 'true')
+      res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With')
       return res.status(503).json({
         error: 'Service unavailable',
         message: `Service ${serviceKey} is not available`
@@ -384,6 +394,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             res.setHeader(key, value as any);
           }
         }
+        // Ensure correct CORS on proxied streaming response
+        res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000')
+        res.setHeader('Access-Control-Allow-Credentials', 'true')
+        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+        res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With')
         (upstreamResponse.data as any).pipe(res);
         return;
       }
@@ -441,9 +456,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         case 'OPTIONS':
           // Handle CORS preflight requests
           res.status(200);
-          res.setHeader('Access-Control-Allow-Origin', '*');
+          res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
           res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
           res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+          res.setHeader('Access-Control-Allow-Credentials', 'true');
           res.setHeader('Access-Control-Max-Age', '86400');
           return res.end();
         default:
@@ -453,12 +469,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           });
       }
 
+      // Ensure CORS for success responses
+      res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000')
+      res.setHeader('Access-Control-Allow-Credentials', 'true')
+      res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With')
       return res.status(response.status).json(response.data);
 
     } catch (error: any) {
       logger.error(`❌ Error calling ${serviceKey} service:`, error);
 
-      // Return error response
+      // Return error response with CORS
+      res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000')
+      res.setHeader('Access-Control-Allow-Credentials', 'true')
+      res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With')
       if (error.response) {
         return res.status(error.response.status).json(error.response.data);
       } else {
@@ -472,6 +497,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   } catch (error: any) {
     logger.error('❌ Unhandled error in API gateway:', error);
 
+    // Ensure CORS on unhandled error
+    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000')
+    res.setHeader('Access-Control-Allow-Credentials', 'true')
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With')
     return res.status(500).json({
       error: 'Internal server error',
       message: process.env.NODE_ENV === 'development' ? error.message : 'Something went wrong'

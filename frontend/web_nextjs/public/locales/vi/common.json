@@ -7,7 +7,7 @@
       "dashboard": "Bảng điều khiển",
       "upload": "Tải lên",
       "contracts": "Hợp đồng",
-      "createContract": "Tạo hợp đồng",
+      "importDocument": "Nhập tài liệu",
       "quickCreate": "Tạo nhanh",
       "eSignature": "Chữ ký điện tử",
       "collaboration": "Bình luận & Cộng tác",
@@ -94,7 +94,35 @@
         "PARTNERSHIP_AGREEMENT": "Hợp đồng đối tác",
         "EMPLOYMENT_CONTRACT": "Hợp đồng lao động",
         "CONFIDENTIALITY_AGREEMENT": "Hợp đồng bảo mật",
+        "LEASE_AGREEMENT": "Hợp đồng thuê",
         "OTHER": "Khác"
+      },
+      "statuses": {
+        "DRAFT": "Nháp",
+        "PENDING_REVIEW": "Chờ duyệt",
+        "APPROVED": "Đã duyệt",
+        "ACTIVE": "Đang hiệu lực",
+        "EXPIRED": "Hết hạn",
+        "TERMINATED": "Đã chấm dứt",
+        "ARCHIVED": "Đã lưu trữ"
+      },
+      "tags": {
+        "LEASE_AGREEMENT": "Hợp đồng thuê",
+        "SERVICE_AGREEMENT": "Hợp đồng dịch vụ",
+        "PURCHASE_AGREEMENT": "Hợp đồng mua bán",
+        "PARTNERSHIP_AGREEMENT": "Hợp đồng đối tác",
+        "EMPLOYMENT_CONTRACT": "Hợp đồng lao động",
+        "CONFIDENTIALITY_AGREEMENT": "Hợp đồng bảo mật",
+        "OTHER": "Khác",
+        "Real Estate": "Bất động sản",
+        "Office Rental": "Thuê văn phòng",
+        "Landmark": "Tòa nhà Landmark",
+        "IT": "Công nghệ thông tin",
+        "Software Development": "Phát triển phần mềm",
+        "Maintenance": "Bảo trì",
+        "Logistics": "Hậu cần",
+        "Transportation": "Vận tải",
+        "Delivery": "Giao hàng"
       }
     },
     "common": {

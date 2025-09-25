@@ -38,6 +38,7 @@ class ApiClient {
       headers: {
         'Content-Type': 'application/json',
       },
+      withCredentials: true, // Enable cookies for CORS requests
     })
 
     this.setupInterceptors()
@@ -163,6 +164,11 @@ class ApiClient {
         localStorage.removeItem('auth_token')
         localStorage.removeItem('refresh_token')
         localStorage.removeItem('user_data')
+        
+        // Also clear cookies
+        document.cookie = 'auth_token=; Max-Age=0; Path=/'
+        document.cookie = 'refresh_token=; Max-Age=0; Path=/'
+        document.cookie = 'user_data=; Max-Age=0; Path=/'
       } catch (error) {
         console.warn('[API] Error clearing expired tokens:', error)
       }
@@ -222,6 +228,11 @@ class ApiClient {
         toast.error(message || 'Dữ liệu không hợp lệ')
         break
       case 500:
+        console.error('[API] Server error 500:', {
+          url: this.baseURL,
+          message,
+          response: responseData
+        })
         toast.error('Lỗi server, vui lòng thử lại sau')
         break
       default:
@@ -260,6 +271,12 @@ class ApiClient {
               localStorage.setItem('refresh_token', refreshData.refreshToken)
             }
             
+            // Update cookies
+            document.cookie = `auth_token=${refreshData.accessToken}; Max-Age=${(refreshData.expiresIn || 900)}; Path=/`
+            if (refreshData.refreshToken) {
+              document.cookie = `refresh_token=${refreshData.refreshToken}; Max-Age=${7 * 24 * 60 * 60}; Path=/`
+            }
+            
             // Retry the original request
             return true
           }
@@ -273,6 +290,11 @@ class ApiClient {
       localStorage.removeItem('auth_token')
       localStorage.removeItem('refresh_token')
       localStorage.removeItem('user_data')
+      
+      // Clear cookies
+      document.cookie = 'auth_token=; Max-Age=0; Path=/'
+      document.cookie = 'refresh_token=; Max-Age=0; Path=/'
+      document.cookie = 'user_data=; Max-Age=0; Path=/'
       // Avoid forcing a full reload if we're already on any auth page
       const path = window.location.pathname || ''
       const isOnAuthPages = path === '/auth/login' || path.startsWith('/auth')

@@ -24,6 +24,7 @@ import { HelpGuide } from './components/HelpGuide';
 import { UserApprovalPanel } from './components/UserApprovalPanel';
 import { ManualContractCreator } from './components/ManualContractCreator';
 import { TimeFilteredAnalytics } from './components/TimeFilteredAnalytics';
+import TagsDemo from './pages/TagsDemo';
 
 
 function App() {
@@ -485,7 +486,7 @@ function handleTagChange(selectedOptions) {
     ]
   });
 
-  const [activeView, setActiveView] = useState<'dashboard' | 'upload' | 'contracts' | 'approved' | 'analytics' | 'users' | 'help'>('dashboard');
+  const [activeView, setActiveView] = useState<'dashboard' | 'upload' | 'contracts' | 'approved' | 'analytics' | 'users' | 'help' | 'tags-demo'>('dashboard');
   const [showManualCreator, setShowManualCreator] = useState(false);
   const [showUserApproval, setShowUserApproval] = useState(false);
   const [selectedContract, setSelectedContract] = useState<Contract | null>(null);
@@ -1640,7 +1641,7 @@ function handleTagChange(selectedOptions) {
                   className="w-full flex items-center space-x-3 px-6 py-3 text-left hover:bg-gray-50 text-gray-700"
                 >
                   <Edit3 className="w-4 h-4" />
-                  <span>Tạo hợp đồng</span>
+                  <span>Nhập tài liệu</span>
                 </button>
               )}
               
@@ -1702,6 +1703,16 @@ function handleTagChange(selectedOptions) {
                 <HelpCircle className="w-4 h-4" />
                 <span>Hướng dẫn</span>
               </button>
+              
+              <button
+                onClick={() => setActiveView('tags-demo')}
+                className={`w-full flex items-center space-x-3 px-6 py-3 text-left hover:bg-gray-50 ${
+                  activeView === 'tags-demo' ? 'bg-blue-50 text-blue-600 border-r-2 border-blue-600' : 'text-gray-700'
+                }`}
+              >
+                <Tag className="w-4 h-4" />
+                <span>Demo Tags</span>
+              </button>
             </div>
           </nav>
         </div>
@@ -1722,6 +1733,7 @@ function handleTagChange(selectedOptions) {
           )}
           {activeView === 'users' && authState.user?.permissions.canManageUsers && renderUserManagement()}
           {activeView === 'help' && renderHelpGuide()}
+          {activeView === 'tags-demo' && <TagsDemo />}
         </div>
       </div>
       
