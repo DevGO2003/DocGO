@@ -12,6 +12,9 @@
   3) **Xử lý rủi ro** đã được liệt kê trong phần "Rủi ro và cách xử lý"
   4) Thực thi các bước chẩn đoán/hành động theo đúng khuyến nghị (không yêu cầu mô tả lại)
 
+## Trước khi thực hiện:
+  1) Đọc '@10_powershell-terminal-standards.mdc' trong repo
+
 ## Xử lý rủi ro tự động
 
 ### 🔧 Các loại rủi ro được xử lý:

@@ -37,6 +37,30 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Call auth service
     const result = await authService.refreshToken(refreshRequest)
 
+    // Set rotated cookies
+    try {
+      const token = result?.data?.token
+      const newRefresh = result?.data?.refreshToken
+
+      const isSecure = false // dev over http
+      const sameSite = 'Lax'
+      const cookieBase = `Path=/; HttpOnly; SameSite=${sameSite}${isSecure ? '; Secure' : ''}`
+
+      const setCookies: string[] = []
+      if (typeof token === 'string' && token.length > 0) {
+        // Assume 15 minutes default if backend not providing expiresIn here
+        setCookies.push(`auth_token=${encodeURIComponent(token)}; Max-Age=${15 * 60}; ${cookieBase}`)
+      }
+      if (typeof newRefresh === 'string' && newRefresh.length > 0) {
+        setCookies.push(`refresh_token=${encodeURIComponent(newRefresh)}; Max-Age=${7 * 24 * 60 * 60}; ${cookieBase}`)
+      }
+      if (setCookies.length) {
+        res.setHeader('Set-Cookie', setCookies)
+      }
+    } catch (e) {
+      console.warn('[Auth Refresh] Failed setting cookies:', e)
+    }
+
     // Return success response
     return res.status(200).json(result)
 
