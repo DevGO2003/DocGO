@@ -28,46 +28,81 @@ const STORAGE_KEY = 'docgo_auth_v1'
 
 function readStorage(): { accessToken: string | null; user: User | null; tokenData: TokenData | null } {
   if (typeof window === 'undefined') return { accessToken: null, user: null, tokenData: null }
+  
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY)
-    if (!raw) return { accessToken: null, user: null, tokenData: null }
+    if (!raw) {
+      console.log('[Auth] No stored auth data found')
+      return { accessToken: null, user: null, tokenData: null }
+    }
+    
     const parsed = JSON.parse(raw)
+    console.log('[Auth] Reading storage:', {
+      hasTokenData: !!parsed.tokenData,
+      hasLegacyToken: !!parsed.token,
+      hasAccessToken: !!parsed.accessToken,
+      timestamp: parsed.timestamp ? new Date(parsed.timestamp).toISOString() : 'unknown'
+    })
     
     // Check if we have the new format with tokenData
     if (parsed.tokenData && parsed.tokenData.accessToken) {
       const tokenData = parsed.tokenData as TokenData
-      // Validate token format and expiration
+      const now = Date.now()
+      
+      console.log('[Auth] Token validation:', {
+        hasAccessToken: !!tokenData.accessToken,
+        tokenLength: tokenData.accessToken?.length,
+        expiresAt: tokenData.expiresAt ? new Date(tokenData.expiresAt).toISOString() : 'no expiration',
+        now: new Date(now).toISOString(),
+        isExpired: tokenData.expiresAt ? now >= tokenData.expiresAt : false,
+        timeUntilExpiry: tokenData.expiresAt ? tokenData.expiresAt - now : 'unknown'
+      })
+      
+      // Validate token format and expiration with buffer time
       if (tokenData.accessToken && typeof tokenData.accessToken === 'string' && tokenData.accessToken.length > 10) {
-        // Check if token is expired
-        if (tokenData.expiresAt && Date.now() < tokenData.expiresAt) {
+        // Add 5 minutes buffer time to prevent premature clearing
+        const bufferTime = 5 * 60 * 1000 // 5 minutes
+        const isExpired = tokenData.expiresAt ? now >= (tokenData.expiresAt - bufferTime) : false
+        
+        if (!isExpired) {
+          console.log('[Auth] Token is valid, returning stored data')
           return {
             accessToken: tokenData.accessToken,
             user: parsed.user,
             tokenData: tokenData
           }
         } else {
-          // Token expired, clear storage
-          clearStorage()
-          return { accessToken: null, user: null, tokenData: null }
+          console.log('[Auth] Token expired, but not clearing storage yet - will let refresh logic handle')
+          // Don't clear storage immediately, let the refresh logic handle it
+          return { accessToken: null, user: parsed.user, tokenData: tokenData }
         }
+      } else {
+        console.log('[Auth] Invalid token format, clearing storage')
+        clearStorage()
+        return { accessToken: null, user: null, tokenData: null }
       }
     }
     
     // Legacy format support
-    if (parsed.token && typeof parsed.token === 'string' && parsed.token.length > 10) {
+    if (parsed.accessToken && typeof parsed.accessToken === 'string' && parsed.accessToken.length > 10) {
+      console.log('[Auth] Using legacy token format')
       return {
-        accessToken: parsed.token,
+        accessToken: parsed.accessToken,
         user: parsed.user,
         tokenData: null
       }
     }
     
-    // If token is invalid, clear storage
-    clearStorage()
+    // If no valid token found, don't clear storage immediately
+    console.log('[Auth] No valid token found in storage')
     return { accessToken: null, user: null, tokenData: null }
   } catch (error) {
-    console.error('Error reading auth storage:', error)
-    clearStorage()
+    console.error('[Auth] Error reading auth storage:', error)
+    // Only clear storage if there's a critical error (JSON parse failure, etc.)
+    if (error instanceof SyntaxError) {
+      console.log('[Auth] JSON parse error, clearing corrupted storage')
+      clearStorage()
+    }
     return { accessToken: null, user: null, tokenData: null }
   }
 }
@@ -95,6 +130,11 @@ function writeStorage(data: { accessToken: string | null; user: User | null; tok
       if (data.tokenData?.refreshToken) {
         window.localStorage.setItem('refresh_token', data.tokenData.refreshToken)
       }
+      
+      // Use TokenManager to store in both localStorage and cookies
+      if (data.tokenData) {
+        TokenManager.storeTokens(data.tokenData, data.user)
+      }
     } else {
       clearStorage()
     }
@@ -110,6 +150,9 @@ function clearStorage() {
     window.localStorage.removeItem('auth_token')
     window.localStorage.removeItem('refresh_token')
     window.localStorage.removeItem('user_data')
+    
+    // Use TokenManager to clear both localStorage and cookies
+    TokenManager.clearTokens()
   } catch (error) {
     console.error('Error clearing auth storage:', error)
   }
@@ -124,6 +167,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Load from localStorage on mount
   useEffect(() => {
+    // Sync cookies to localStorage first
+    TokenManager.syncFromCookies()
+    
     const stored = readStorage()
     setUser(stored.user)
     setAccessToken(stored.accessToken)
@@ -139,7 +185,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     writeStorage({ accessToken, user, tokenData })
   }, [accessToken, user, tokenData])
 
-  // Token validation and expiration checking
+  // Token validation and expiration checking with buffer time
   const validateToken = useCallback((): TokenValidationResult => {
     if (!accessToken || !tokenData) {
       return { isValid: false, isExpired: true }
@@ -147,7 +193,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const now = Date.now()
     const expiresAt = tokenData.expiresAt
-    const isExpired = expiresAt ? now >= expiresAt : false
+    const bufferTime = 5 * 60 * 1000 // 5 minutes buffer
+    const isExpired = expiresAt ? now >= (expiresAt - bufferTime) : false
     const timeUntilExpiry = expiresAt ? expiresAt - now : 0
 
     return {
@@ -162,19 +209,44 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return validateToken().isExpired
   }, [validateToken])
 
+  // Check if token needs refresh (with buffer time)
+  const needsRefresh = useCallback((): boolean => {
+    if (!accessToken || !tokenData) return false
+    
+    const now = Date.now()
+    const expiresAt = tokenData.expiresAt
+    const bufferTime = 10 * 60 * 1000 // 10 minutes buffer for refresh
+    
+    return expiresAt ? now >= (expiresAt - bufferTime) : false
+  }, [accessToken, tokenData])
+
   const fetchCurrentUser = useCallback(async () => {
     setLoading(true)
     try {
+      console.log('[Auth] Fetching current user profile...')
       const res = await authAPI.getProfile()
       const current = res.data?.data as unknown as User
-      if (current) setUser(current)
+      if (current) {
+        console.log('[Auth] Successfully fetched user profile:', current.email)
+        setUser(current)
+      } else {
+        console.log('[Auth] No user data in response')
+      }
     } catch (error) {
-      console.error('Error fetching current user:', error)
-      // If profile fetch fails, clear auth data
-      setAccessToken(null)
-      setTokenData(null)
-      setUser(null)
-      clearStorage()
+      console.error('[Auth] Error fetching current user:', error)
+      
+      // Only clear auth data if it's a 401/403 (unauthorized) error
+      // Other errors (network, server) should not clear the session
+      if ((error as any)?.response?.status === 401 || (error as any)?.response?.status === 403) {
+        console.log('[Auth] Unauthorized error, clearing auth data')
+        setAccessToken(null)
+        setTokenData(null)
+        setUser(null)
+        clearStorage()
+      } else {
+        console.log('[Auth] Non-auth error, keeping session but not setting user')
+        // Don't clear the session for network/server errors
+      }
     } finally {
       setLoading(false)
     }
@@ -184,12 +256,40 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // If there is a token in storage, try to fetch current user
     if (accessToken && !user && !isTokenExpired()) {
       fetchCurrentUser()
+    } else if (needsRefresh() && tokenData?.refreshToken) {
+      // Token needs refresh, try to refresh proactively
+      console.log('[Auth] Token needs refresh, attempting proactive refresh...')
+      refreshToken()
     } else if (isTokenExpired() && tokenData?.refreshToken) {
       // Token expired, try to refresh only if we have refresh token
-      console.log('Token expired, attempting refresh...')
+      console.log('[Auth] Token expired, attempting refresh...')
       refreshToken()
+    } else if (!accessToken && !user && !loading) {
+      // No token and no user, check if we can restore from storage
+      const stored = readStorage()
+      if (stored.accessToken && stored.tokenData) {
+        // Check if stored token is expired
+        const now = Date.now()
+        const expiresAt = stored.tokenData.expiresAt
+        const bufferTime = 5 * 60 * 1000 // 5 minutes buffer
+        const isStoredTokenExpired = expiresAt ? now >= (expiresAt - bufferTime) : true
+        
+        if (!isStoredTokenExpired) {
+          // Restore valid token from storage
+          setAccessToken(stored.accessToken)
+          setTokenData(stored.tokenData)
+          setUser(stored.user)
+        } else if (stored.tokenData.refreshToken) {
+          // Stored token expired but we have refresh token, try to refresh
+          console.log('[Auth] Stored token expired, attempting refresh from storage...')
+          setAccessToken(stored.accessToken)
+          setTokenData(stored.tokenData)
+          setUser(stored.user)
+          refreshToken()
+        }
+      }
     }
-  }, [accessToken, user, fetchCurrentUser, isTokenExpired, tokenData?.refreshToken])
+  }, [accessToken, user, fetchCurrentUser, isTokenExpired, needsRefresh, tokenData?.refreshToken, loading])
 
   const login = useCallback(async (credentials: LoginCredentials): Promise<boolean> => {
     setLoading(true)
@@ -325,7 +425,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [])
 
-  const refreshToken = useCallback(async (): Promise<boolean> => {
+  const refreshToken = useCallback(async (retryCount = 0): Promise<boolean> => {
+    const maxRetries = 3
+    const baseDelay = 1000 // 1 second
     try {
       const refreshTokenValue = tokenData?.refreshToken || 
         (typeof window !== 'undefined' ? window.localStorage.getItem('refresh_token') : null)
@@ -360,17 +462,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setAccessToken(accessToken)
         setTokenData(newTokenData)
         
+        console.log('Token refreshed successfully')
         return true
       }
       
       return false
-    } catch (error) {
-      console.error('Token refresh error:', error)
+    } catch (error: unknown) {
+      console.error(`Token refresh error (attempt ${retryCount + 1}):`, error)
+      
+      // Check if it's a retryable error (network issues)
+      const errorObj = error as any
+      const isRetryableError = error && typeof error === 'object' && 
+        (errorObj.code === 'NETWORK_ERROR' || !errorObj.response) // No response = network error
+      
+      if (isRetryableError && retryCount < maxRetries) {
+        // Exponential backoff retry
+        const delay = baseDelay * Math.pow(2, retryCount)
+        console.log(`Retrying token refresh in ${delay}ms...`)
+        
+        await new Promise<void>(resolve => setTimeout(resolve, delay))
+        return refreshToken(retryCount + 1)
+      }
+      
       // Only logout if it's a critical error, not network issues
       if (error && typeof error === 'object' && 'response' in error) {
         const axiosError = error as any
         if (axiosError.response?.status === 401 || axiosError.response?.status === 403) {
           // Invalid refresh token, logout user
+          console.log('Refresh token invalid, logging out user')
           logout()
         } else {
           // Network or other errors, don't logout immediately

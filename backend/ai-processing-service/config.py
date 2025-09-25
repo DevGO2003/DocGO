@@ -32,7 +32,7 @@ def get_mongodb_uri():
 
 def get_mongodb_database():
     """Lấy tên database MongoDB"""
-    return os.getenv("MONGODB_DATABASE", "ai_processing_db")
+    return os.getenv("MONGODB_DATABASE", "docgo_ai")
 
 def get_mongodb_collections():
     """Lấy tên các collections MongoDB"""

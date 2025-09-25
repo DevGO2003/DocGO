@@ -8,14 +8,16 @@ import { contractAPI } from '@/lib/api'
 import { InlineLoading } from '@/components/ui/LoadingSpinner'
 import { tagAPI } from '@/lib/api'
 import { useTranslation } from '@/hooks/useTranslation'
+import { translateContractType, translateContractStatus, translateContractTag, getContractTypes, getContractStatuses } from '@/utils/tagTranslations'
 
 type ContractItem = {
-  id: number
+  id: string
   title: string
   description?: string
   status: string
   contractType: string
   tags?: string[]
+  contractNumber?: string
   createdAt: string
   updatedAt: string
   creatorId: number
@@ -24,18 +26,11 @@ type ContractItem = {
   currency: string
   effectiveDate: string
   expiryDate: string
+  riskLevel?: string
+  reminders?: any[]
 }
 
-const STATUS_OPTIONS = [
-  { label: 'Tất cả trạng thái', value: 'ALL' },
-  { label: 'Nháp', value: 'DRAFT' },
-  { label: 'Chờ duyệt', value: 'PENDING_REVIEW' },
-  { label: 'Đã duyệt', value: 'APPROVED' },
-  { label: 'Đang hiệu lực', value: 'ACTIVE' },
-  { label: 'Hết hạn', value: 'EXPIRED' },
-  { label: 'Đã chấm dứt', value: 'TERMINATED' },
-  { label: 'Đã lưu trữ', value: 'ARCHIVED' },
-] as const
+// STATUS_OPTIONS will be generated dynamically using getContractStatuses
 const TYPES = ['ALL','SERVICE_AGREEMENT','PURCHASE_AGREEMENT','PARTNERSHIP_AGREEMENT','EMPLOYMENT_CONTRACT','CONFIDENTIALITY_AGREEMENT','OTHER'] as const
 const TAGS = ['ưu_tiên','gấp','gia_hạn','cao_giá','đối_tác_mới','rủi_ro']
 
@@ -56,17 +51,23 @@ export default function ContractsPage() {
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
   const [showAdvanced, setShowAdvanced] = useState<boolean>(false)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
-  const [selectedItems, setSelectedItems] = useState<number[]>([])
+  const [selectedItems, setSelectedItems] = useState<string[]>([])
   const abortRef = useRef<AbortController | null>(null)
 
   // Removed manual queryString builder; fetchData composes params directly
 
   const fetchData = async () => {
+    console.log('[Contracts] Starting fetchData...')
     setLoading(true)
     try {
       // Abort previous in-flight request
       if (abortRef.current) {
-        try { abortRef.current.abort() } catch {}
+        console.log('[Contracts] Aborting previous request')
+        try { 
+          abortRef.current.abort() 
+        } catch (e) {
+          console.warn('[Contracts] Error aborting previous request:', e)
+        }
       }
       const controller = new AbortController()
       abortRef.current = controller
@@ -84,6 +85,8 @@ export default function ContractsPage() {
       if (type && type !== 'ALL') params.type = type
       if (selectedTags.length > 0) params.tags = selectedTags.join(',')
 
+      console.log('[Contracts] Request params:', params)
+
       // Ensure valid token before making request
       const { default: TokenRefreshHelper } = await import('@/utils/token-refresh-helper')
       const tokenValid = await TokenRefreshHelper.ensureValidToken()
@@ -92,17 +95,36 @@ export default function ContractsPage() {
         console.warn('[Contracts] Token validation failed, request may fail')
       }
 
+      console.log('[Contracts] Making API request...')
       const res = await contractAPI.getContracts(params, { signal: controller.signal })
       const payload: any = res.data?.data || {}
       const content = Array.isArray(payload.content) ? payload.content : []
 
+      const computeExpiryDate = (effectiveDate: string, term: string | undefined): string => {
+        if (!effectiveDate || !term) return ''
+        // Try to parse term as number of months (e.g., "12", "12M", "12 months")
+        const match = String(term).match(/(\d{1,3})\s*(m|mo|mon|month|months)?/i)
+        if (match) {
+          const months = parseInt(match[1], 10)
+          if (!isNaN(months)) {
+            const d = new Date(effectiveDate)
+            if (!isNaN(d.getTime())) {
+              d.setMonth(d.getMonth() + months)
+              return d.toISOString().slice(0, 10)
+            }
+          }
+        }
+        return ''
+      }
+
       const mapped: ContractItem[] = content.map((c: any) => ({
-        id: c.id,
+        id: String(c.id),
         title: c.title || c.contractNumber || `Contract ${c.id}`,
         description: c.object || c.description || '',
         status: c.status || 'DRAFT',
         contractType: c.contractType || 'Other',
         tags: c.tags || [],
+        contractNumber: c.contractNumber,
         createdAt: c.createdAt || '',
         updatedAt: c.updatedAt || '',
         creatorId: 0,
@@ -110,17 +132,41 @@ export default function ContractsPage() {
         totalValue: Number(c.paymentDetails?.totalValue || 0),
         currency: c.paymentDetails?.currency || 'VND',
         effectiveDate: c.effectiveDate || '',
-        expiryDate: c.expiryDate || '',
+        expiryDate: c.expiryDate || computeExpiryDate(c.effectiveDate, c.term),
+        riskLevel: c.riskAssessment?.riskLevel,
+        reminders: Array.isArray(c.reminders) ? c.reminders : [],
       }))
 
       setItems(mapped)
       const totalPagesFromApi = payload?.result?.totalPages ?? payload?.totalPages ?? 1
       setTotalPages(Number(totalPagesFromApi) || 1)
-    } catch (e) {
+      console.log('[Contracts] Successfully fetched data:', {
+        itemsCount: mapped.length,
+        totalPages: totalPagesFromApi,
+        response: res.data
+      })
+    } catch (e: any) {
+      console.error('[Contracts] Error fetching data:', {
+        error: e,
+        message: e?.message,
+        response: e?.response?.data,
+        status: e?.response?.status,
+        params: {
+          page,
+          pageSize,
+          status,
+          type,
+          selectedTags,
+          sortBy,
+          sortDirection,
+          search: debouncedSearch
+        }
+      })
       setItems([])
       setTotalPages(1)
     } finally {
       setLoading(false)
+      console.log('[Contracts] Fetch completed')
     }
   }
 
@@ -139,21 +185,32 @@ export default function ContractsPage() {
     loadTags()
   }, [])
 
-  // Auto-fetch when filters change (except search)
+  // Unified data fetching with debounce for all filters
   useEffect(() => {
-    fetchData()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, pageSize, status, type, selectedTags, sortBy, sortDirection])
+    const handler = setTimeout(() => {
+      console.log('[Contracts] Fetching data with params:', {
+        page,
+        pageSize,
+        status,
+        type,
+        selectedTags,
+        sortBy,
+        sortDirection,
+        search: debouncedSearch
+      })
+      fetchData()
+    }, 300) // Reduced debounce time for better UX
+    
+    return () => clearTimeout(handler)
+  }, [page, pageSize, status, type, selectedTags, sortBy, sortDirection, debouncedSearch])
 
-  // Debounced search: fetch as user types
+  // Separate effect for search input to update debouncedSearch
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearch(search)
-      setPage(0)
-      fetchData()
+      setPage(0) // Reset to first page when searching
     }, 500)
     return () => clearTimeout(handler)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search])
 
   const toggleTag = (t: string) => {
@@ -161,7 +218,7 @@ export default function ContractsPage() {
     setSelectedTags(prev => prev.includes(t) ? prev.filter(x => x !== t) : [...prev, t])
   }
 
-  const toggleSelectItem = (id: number) => {
+  const toggleSelectItem = (id: string) => {
     setSelectedItems(prev => 
       prev.includes(id) 
         ? prev.filter(x => x !== id)
@@ -224,7 +281,7 @@ export default function ContractsPage() {
                 onChange={(e) => { setStatus(e.target.value); setPage(0) }}
                 className="w-full rounded-lg border-gray-300 py-2 px-3 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
               >
-                {STATUS_OPTIONS.map(opt => (
+                {getContractStatuses(t).map(opt => (
                   <option key={opt.value} value={opt.value}>{opt.label}</option>
                 ))}
               </select>
@@ -237,8 +294,8 @@ export default function ContractsPage() {
                 onChange={(e) => { setType(e.target.value); setPage(0) }}
                 className="w-full rounded-lg border-gray-300 py-2 px-3 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
               >
-                {TYPES.map(typeKey => (
-                  <option key={typeKey} value={typeKey}>{typeKey === 'ALL' ? t('contracts.types.all') : t(`contracts.types.${typeKey}`)}</option>
+                {getContractTypes(t).map(opt => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
                 ))}
               </select>
             </div>
@@ -368,20 +425,40 @@ export default function ContractsPage() {
                   </div>
                   <Link href={`/contracts/${c.id}`} className="block">
                     <div className="flex justify-between items-start gap-4 ml-6">
-                      <h3 className="font-semibold text-gray-900 line-clamp-2 group-hover:text-indigo-700 transition">{c.title}</h3>
-                      <span className={`text-xs px-2 py-1 rounded-full border ${badgeClass(c.status)}`}>{c.status}</span>
+                      <div>
+                        <h3 className="font-semibold text-gray-900 line-clamp-2 group-hover:text-indigo-700 transition">{c.title}</h3>
+                        {c.contractNumber && (
+                          <div className="mt-1 text-xs text-gray-500">Mã HĐ: {c.contractNumber}</div>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {c.reminders && c.reminders.length > 0 && (
+                          <span title="Có nhắc nhở" className="text-amber-600">🔔</span>
+                        )}
+                        {c.riskLevel && (
+                          <span className={`text-xs px-2 py-1 rounded-full border ${
+                            c.riskLevel === 'High' ? 'bg-rose-50 text-rose-700 border-rose-200' :
+                            c.riskLevel === 'Medium' ? 'bg-amber-50 text-amber-700 border-amber-200' :
+                            'bg-emerald-50 text-emerald-700 border-emerald-200'
+                          }`}>{c.riskLevel}</span>
+                        )}
+                        <span className={`text-xs px-2 py-1 rounded-full border ${badgeClass(c.status)}`}>{translateContractStatus(c.status, t)}</span>
+                      </div>
                     </div>
                     <p className="mt-2 text-sm text-gray-600 line-clamp-3 ml-6">{c.description || 'Không có mô tả'}</p>
                     <div className="mt-3 flex flex-wrap gap-2 ml-6">
-                      <span className="text-xs px-2 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">{c.contractType}</span>
-                      {c.tags?.slice(0,3).map(t => (
-                        <span key={t} className="text-xs px-2 py-1 rounded-full bg-gray-50 text-gray-700 border border-gray-200">#{t}</span>
+                      <span className="text-xs px-2 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">{translateContractType(c.contractType, t)}</span>
+                      {c.tags?.slice(0,3).map(tag => (
+                        <span key={tag} className="text-xs px-2 py-1 rounded-full bg-gray-50 text-gray-700 border border-gray-200">#{translateContractTag(tag, t)}</span>
                       ))}
                     </div>
                     <div className="mt-4 text-sm text-gray-500 space-y-1 ml-6">
                       <div className="flex justify-between"><span>Hiệu lực</span><span>{c.effectiveDate}</span></div>
                       <div className="flex justify-between"><span>Hết hạn</span><span>{c.expiryDate}</span></div>
                       <div className="flex justify-between"><span>Giá trị</span><span>{c.totalValue.toLocaleString('vi-VN')} {c.currency}</span></div>
+                      {c.parties && c.parties.length > 0 && (
+                        <div className="flex justify-between"><span>Đối tác</span><span className="truncate max-w-[60%]">{c.parties.map(p => p.name).filter(Boolean).slice(0,2).join(' · ')}</span></div>
+                      )}
                     </div>
                   </Link>
                 </div>
@@ -402,10 +479,13 @@ export default function ContractsPage() {
                         />
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hợp đồng</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mã HĐ</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Trạng thái</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Loại</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Giá trị</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hiệu lực</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hết hạn</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rủi ro</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hành động</th>
                     </tr>
                   </thead>
@@ -433,12 +513,26 @@ export default function ContractsPage() {
                             </div>
                           </div>
                         </td>
+                        <td className="px-6 py-4 text-sm text-gray-900">{c.contractNumber || '-'}</td>
                         <td className="px-6 py-4">
-                          <span className={`text-xs px-2 py-1 rounded-full border ${badgeClass(c.status)}`}>{c.status}</span>
+                          <span className={`text-xs px-2 py-1 rounded-full border ${badgeClass(c.status)}`}>{translateContractStatus(c.status, t)}</span>
                         </td>
                         <td className="px-6 py-4 text-sm text-gray-900">{c.contractType}</td>
                         <td className="px-6 py-4 text-sm text-gray-900">{c.totalValue.toLocaleString('vi-VN')} {c.currency}</td>
                         <td className="px-6 py-4 text-sm text-gray-900">{c.effectiveDate}</td>
+                        <td className="px-6 py-4 text-sm text-gray-900">{c.expiryDate || '-'}</td>
+                        <td className="px-6 py-4 text-sm text-gray-900">
+                          {c.riskLevel ? (
+                            <span className={`text-xs px-2 py-1 rounded-full border ${
+                              c.riskLevel === 'High' ? 'bg-rose-50 text-rose-700 border-rose-200' :
+                              c.riskLevel === 'Medium' ? 'bg-amber-50 text-amber-700 border-amber-200' :
+                              'bg-emerald-50 text-emerald-700 border-emerald-200'
+                            }`}>{c.riskLevel}</span>
+                          ) : '-'}
+                          {c.reminders && c.reminders.length > 0 && (
+                            <span title="Có nhắc nhở" className="ml-2">🔔</span>
+                          )}
+                        </td>
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-2">
                             <Link href={`/contracts/${c.id}`} className="text-indigo-600 hover:text-indigo-900 text-sm">

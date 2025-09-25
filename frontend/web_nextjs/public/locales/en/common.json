@@ -7,7 +7,7 @@
     "dashboard": "Dashboard",
     "upload": "Upload",
     "contracts": "Contracts",
-    "createContract": "Create Contract",
+    "importDocument": "Import Document",
     "quickCreate": "Quick Create",
     "eSignature": "E-Signature",
     "collaboration": "Comments & Collaboration",
@@ -94,7 +94,35 @@
     "PARTNERSHIP_AGREEMENT": "Partnership Agreement",
     "EMPLOYMENT_CONTRACT": "Employment Contract",
     "CONFIDENTIALITY_AGREEMENT": "Confidentiality Agreement",
+    "LEASE_AGREEMENT": "Lease Agreement",
     "OTHER": "Other"
+    },
+    "statuses": {
+    "DRAFT": "Draft",
+    "PENDING_REVIEW": "Pending Review",
+    "APPROVED": "Approved",
+    "ACTIVE": "Active",
+    "EXPIRED": "Expired",
+    "TERMINATED": "Terminated",
+    "ARCHIVED": "Archived"
+    },
+    "tags": {
+    "LEASE_AGREEMENT": "Lease Agreement",
+    "SERVICE_AGREEMENT": "Service Agreement",
+    "PURCHASE_AGREEMENT": "Purchase Agreement",
+    "PARTNERSHIP_AGREEMENT": "Partnership Agreement",
+    "EMPLOYMENT_CONTRACT": "Employment Contract",
+    "CONFIDENTIALITY_AGREEMENT": "Confidentiality Agreement",
+    "OTHER": "Other",
+    "Real Estate": "Real Estate",
+    "Office Rental": "Office Rental",
+    "Landmark": "Landmark",
+    "IT": "IT",
+    "Software Development": "Software Development",
+    "Maintenance": "Maintenance",
+    "Logistics": "Logistics",
+    "Transportation": "Transportation",
+    "Delivery": "Delivery"
     }
     },
     "common": {
