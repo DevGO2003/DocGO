@@ -1,5 +1,8 @@
 
 from fastapi import APIRouter, File, UploadFile, Header, HTTPException, Body, Request, Query
+import logging
+import asyncio
+import aiohttp
 from docx import Document
 import PyPDF2
 import os
@@ -26,11 +29,12 @@ from services.event_service import EventService
 # )
 from schemas.batch_schemas import (
     BatchJobRequest, BatchJobStatusRequest, BatchJobListRequest,
-    BatchJobCancelRequest, BatchJobRetryRequest, BatchProcessingRequest
+    BatchJobCancelRequest, BatchJobRetryRequest, BatchProcessingRequest,
+    BatchProcessingResponse
 )
 from schemas.event_schemas import (
     EventHandlerRequest, EventSubscriptionRequest, EventPublishRequest,
-    EventHistoryRequest
+    EventHistoryRequest, EventHandlerResponse
 )
 
 router = APIRouter(prefix="/api/v1/ai-processing-service")
@@ -164,7 +168,7 @@ async def extract_api(
 @router.post("/classify", summary="Phân loại loại tài liệu (file đa định dạng hoặc text)", tags=["AI Processing Service"])
 async def classify_api(
     request: Request,
-    file: UploadFile = File(None, description="File cần phân loại (txt, md, html, json, csv, xlsx, pptx, rtf, docx, pdf)"),
+    file: UploadFile = File(None, description="File cần phân loại (txt, md, html, json, csv, xlsx, pptx, rtf, doc, docx, pdf)"),
     text: str = Body(None, description="Nội dung văn bản dạng chuỗi"),
     gemini_api_key: str = Header(None, description="Gemini API Key (tùy chọn)")
 ):
@@ -271,6 +275,13 @@ async def classify_api(
                     content = rtf_to_text(rf.read())
             elif filename_lower.endswith(".docx"):
                 content = read_docx(temp_path)
+            elif filename_lower.endswith(".doc"):
+                try:
+                    import textract  # optional dependency, may require system utils (antiword/catdoc)
+                    bytes_text = textract.process(temp_path)
+                    content = bytes_text.decode('utf-8', errors='ignore')
+                except Exception as e:
+                    raise HTTPException(status_code=422, detail=f"Không thể đọc file .doc: {str(e)}. Vui lòng cài antiword/catdoc trong môi trường hoặc chuyển sang .docx/.pdf")
             elif filename_lower.endswith(".pdf"):
                 content = read_pdf(temp_path)
             else:
@@ -367,7 +378,7 @@ async def classify_api(
 @router.post("/summarize", summary="Tóm tắt hợp đồng (nhiều định dạng văn bản hoặc chuỗi)", tags=["AI Processing Service"])
 async def summarize_api(
     request: Request,
-    file: UploadFile = File(None, description="File văn bản cần tóm tắt (txt, md, html, json, csv, xlsx, pptx, rtf, docx, pdf)"),
+    file: UploadFile = File(None, description="File văn bản cần tóm tắt (txt, md, html, json, csv, xlsx, pptx, rtf, doc, docx, pdf)"),
     text: str = Body(None, description="Nội dung văn bản dạng chuỗi"),
     gemini_api_key: str = Header(None, description="Gemini API Key (tùy chọn)")
 ):
@@ -474,6 +485,13 @@ async def summarize_api(
                     content = rtf_to_text(rf.read())
             elif filename_lower.endswith(".docx"):
                 content = read_docx(temp_path)
+            elif filename_lower.endswith(".doc"):
+                try:
+                    import textract
+                    bytes_text = textract.process(temp_path)
+                    content = bytes_text.decode('utf-8', errors='ignore')
+                except Exception as e:
+                    raise HTTPException(status_code=422, detail=f"Không thể đọc file .doc: {str(e)}. Vui lòng cài antiword/catdoc trong môi trường hoặc chuyển sang .docx/.pdf")
             elif filename_lower.endswith(".pdf"):
                 content = read_pdf(temp_path)
             else:
@@ -527,7 +545,7 @@ async def summarize_api(
             '    "riskLevel": "LOW|MEDIUM|HIGH",\n'
             '      "riskFactors": ["string"],\n'
             '      "mitigationMeasures": ["string"],\n'
-            '      "riskDetails": ["ghi chú/chi tiết rủi ro có thật nếu văn bản nêu"]\n'
+            
             '  },\n'
             '  "complianceStatus": {\n'
             '    "status": "COMPLIANT|NON_COMPLIANT|REVIEW_REQUIRED",\n'
@@ -550,15 +568,27 @@ async def summarize_api(
         
         # Use shared AI service instead of creating new Gemini configuration
         ai_service = AIProcessingService()
-        answer = ai_service.generate_contract_summary(content, file.filename if file else "text_input")
-        
-        # Handle AI service response
-        if answer is None:
-            # AI service failed to generate summary
+        try:
+            answer = ai_service.generate_contract_summary(content, file.filename if file else "text_input")
+        except Exception as e:
+            # Bổ sung chi tiết lỗi từ exception vào description
             return RestResponse(
                 statusCode=422,
                 shortMessage="Unprocessable Entity",
-                description="AI không thể tóm tắt thông tin từ tài liệu này. Có thể do định dạng không hỗ trợ hoặc nội dung không phù hợp.",
+                description=f"AI không thể tóm tắt thông tin từ tài liệu này. Có thể do định dạng không hỗ trợ hoặc nội dung không phù hợp. | Chi tiết: {str(e)}",
+                data=None,
+                path=request.url.path,
+                timestamp=datetime.now(),
+                requestId=str(uuid.uuid4())
+            )
+        
+        # Handle AI service response
+        if answer is None:
+            # AI service failed to generate summary (không có exception)
+            return RestResponse(
+                statusCode=422,
+                shortMessage="Unprocessable Entity",
+                description="AI không thể tóm tắt thông tin từ tài liệu này. Có thể do định dạng không hỗ trợ hoặc nội dung không phù hợp. | Chi tiết: Không nhận được phản hồi hợp lệ từ AI.",
                 data=None,
                 path=request.url.path,
                 timestamp=datetime.now(),

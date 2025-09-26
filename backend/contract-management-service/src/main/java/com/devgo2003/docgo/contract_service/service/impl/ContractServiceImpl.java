@@ -776,7 +776,6 @@ public class ContractServiceImpl implements IContractService {
                 .riskLevel(contract.getRiskLevel())
                 .riskFactors(new ArrayList<>())
                 .mitigationMeasures(new ArrayList<>())
-                .riskDetails(new ArrayList<>())
                 .build();
 
         List<ContractRiskItemDto> riskAssessmentList = new ArrayList<>();
@@ -795,7 +794,7 @@ public class ContractServiceImpl implements IContractService {
                 Map<String, Object> riskMap = mapper.readValue(contract.getRiskAssessment(), 
                     new TypeReference<Map<String, Object>>() {});
                 Object riskFactorsObj = riskMap.get("riskFactors");
-                Object riskDetailsObj = riskMap.get("riskDetails");
+                // riskDetails removed
                 String levelFromJson = (riskMap.get("riskLevel") instanceof String) ? (String) riskMap.get("riskLevel") : contract.getRiskLevel();
                 if (riskFactorsObj instanceof List) {
                     @SuppressWarnings("unchecked")
@@ -808,17 +807,7 @@ public class ContractServiceImpl implements IContractService {
                                 .build());
                     }
                 }
-                if (riskDetailsObj instanceof List) {
-                    @SuppressWarnings("unchecked")
-                    List<String> riskDetails = (List<String>) riskDetailsObj;
-                    riskAssessment.setRiskDetails(riskDetails);
-                    for (String detail : riskDetails) {
-                        riskAssessmentList.add(ContractRiskItemDto.builder()
-                                .riskLevel(levelFromJson)
-                                .riskDetail(detail)
-                                .build());
-                    }
-                } else if (levelFromJson != null) {
+                if (levelFromJson != null) {
                     riskAssessmentList.add(ContractRiskItemDto.builder()
                             .riskLevel(levelFromJson)
                             .riskDetail(null)
