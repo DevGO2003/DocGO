@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
+import { authAPI } from '@/lib/api'
 import { UserRole, UserStatus, TokenData } from '@/types/auth'
 import TokenManager from '@/utils/token-manager'
 import { AuthLayout } from '@/components/layout'
@@ -120,42 +121,67 @@ export default function OAuth2CallbackPage() {
               const expMs = decodeJwtExp(token) || (Date.now() + 24 * 60 * 60 * 1000)
               const tokenData: TokenData = {
                 accessToken: token,
-                refreshToken: refreshToken || undefined,
+                refreshToken: refreshToken || '',
                 expiresAt: expMs,
                 tokenType: 'Bearer'
               }
+
+              // Store tokens immediately to ensure cookie is available for middleware
+              TokenManager.storeTokens(tokenData)
               
-              // Create user object from OAuth2 data
-              // Use username from URL or fallback to email from token
-              const userEmail = username || 'oauth-user@example.com'
-              const userData = {
-                id: userEmail,
-                userId: userEmail,
-                username: userEmail,
-                email: userEmail,
-                name: username || 'OAuth User',
-                role: 'USER' as UserRole,
-                status: 'ACTIVE' as UserStatus
+              // Try to fetch full profile from backend so it matches normal login
+              let userData: any = null
+              try {
+                // Bypass global axios interceptor to avoid auto-redirect on transient 401
+                const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
+                const resp = await fetch(`${baseUrl}/api/auth/me`, {
+                  method: 'GET',
+                  headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                  },
+                  credentials: 'include'
+                })
+                if (resp.ok) {
+                  const body = await resp.json()
+                  if (body?.data?.user) {
+                    userData = body.data.user
+                  }
+                }
+              } catch (e) {
+                // Fallback: construct minimal user from username
+                const userEmail = username || 'oauth-user@example.com'
+                userData = {
+                  id: userEmail,
+                  userId: userEmail,
+                  username: userEmail,
+                  email: userEmail,
+                  name: username || 'OAuth User',
+                  role: 'USER' as UserRole,
+                  status: 'ACTIVE' as UserStatus
+                }
               }
+
               localStorage.setItem('user_data', JSON.stringify(userData))
               TokenManager.storeTokens(tokenData, userData)
-              
+
               // Update auth context
               setAuthData(userData)
               
               setStatus('success')
-              setMessage(`Đăng nhập Google thành công! Chào mừng ${userEmail}`)
+              setMessage('Đăng nhập Google thành công!')
               
               // If opened as a popup, notify opener and close
               try {
                 const opener = window.opener
                 if (opener && !opener.closed) {
                   const targetOrigin = window.location.origin
+                  const notifyUser = (userData?.email ?? userData?.username ?? username ?? 'oauth-user@example.com')
                   opener.postMessage({
                     type: 'oauth_success',
                     token,
                     refreshToken: refreshToken || null,
-                    username: userEmail
+                    username: notifyUser
                   }, targetOrigin)
                   window.close()
                   return

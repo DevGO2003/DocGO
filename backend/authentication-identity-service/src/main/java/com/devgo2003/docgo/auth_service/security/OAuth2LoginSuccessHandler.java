@@ -14,7 +14,6 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.time.ZonedDateTime;
 import java.util.Map;
 import java.util.UUID;
 
@@ -56,6 +55,9 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
             String subject = extractStringAttribute(attributes, "sub", requestId);
             String email = extractStringAttribute(attributes, "email", requestId);
             String name = extractStringAttribute(attributes, "name", requestId);
+            String givenName = extractStringAttribute(attributes, "given_name", requestId);
+            String familyName = extractStringAttribute(attributes, "family_name", requestId);
+            String pictureUrl = extractStringAttribute(attributes, "picture", requestId);
             String googleId = extractStringAttribute(attributes, "id", requestId);
 
             // Determine username: prefer email, then subject/id, then name
@@ -81,7 +83,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
             logger.debug("[{}] OAuth2 All attributes: {}", requestId, attributes);
 
             // Find or create user with error handling
-            UserMongo user = findOrCreateUser(username, email, requestId);
+            UserMongo user = findOrCreateUser(username, email, givenName, familyName, pictureUrl, requestId);
             if (user == null) {
                 logger.error("[{}] Failed to find or create user: {}", requestId, username);
                 redirectToError(response, "user_creation_failed", requestId);
@@ -127,28 +129,43 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         }
     }
 
-    private String determineUsername(String email, String name, String requestId) {
-        if (email != null && !email.trim().isEmpty()) {
-            logger.debug("[{}] Using email as username: {}", requestId, email);
-            return email;
-        } else if (name != null && !name.trim().isEmpty()) {
-            logger.debug("[{}] Using name as username: {}", requestId, name);
-            return name;
-        } else {
-            logger.warn("[{}] Both email and name are empty, cannot determine username", requestId);
-            return null;
-        }
-    }
+    // kept: helper removed as logic now handled inline
 
-    private UserMongo findOrCreateUser(String username, String email, String requestId) {
+    private UserMongo findOrCreateUser(String username, String email, String firstName, String lastName, String avatarUrl, String requestId) {
         try {
             return userRepository.findByUsername(username)
+                    .map(existing -> {
+                        boolean changed = false;
+                        if ((existing.getFirstName() == null || existing.getFirstName().isBlank()) && firstName != null && !firstName.isBlank()) {
+                            existing.setFirstName(firstName);
+                            changed = true;
+                        }
+                        if ((existing.getLastName() == null || existing.getLastName().isBlank()) && lastName != null && !lastName.isBlank()) {
+                            existing.setLastName(lastName);
+                            changed = true;
+                        }
+                        if ((existing.getAvatarUrl() == null || existing.getAvatarUrl().isBlank()) && avatarUrl != null && !avatarUrl.isBlank()) {
+                            existing.setAvatarUrl(avatarUrl);
+                            changed = true;
+                        }
+                        if (changed) {
+                            try {
+                                return userRepository.save(existing);
+                            } catch (Exception e) {
+                                logger.warn("[{}] Failed to update existing OAuth2 user {}: {}", requestId, username, e.getMessage());
+                            }
+                        }
+                        return existing;
+                    })
                     .orElseGet(() -> {
                         logger.info("[{}] Creating new OAuth2 user: {}", requestId, username);
                         try {
                             UserMongo newUser = UserMongo.builder()
                                     .username(username)
                                     .email(email)
+                                    .firstName((firstName != null && !firstName.isBlank()) ? firstName : null)
+                                    .lastName((lastName != null && !lastName.isBlank()) ? lastName : null)
+                                    .avatarUrl((avatarUrl != null && !avatarUrl.isBlank()) ? avatarUrl : null)
                                     .password("") // OAuth2 users don't need password
                                     .status(UserStatus.ACTIVE)
                                     .build();

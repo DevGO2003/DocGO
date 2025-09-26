@@ -151,6 +151,22 @@ class AuthService {
     }
   }
 
+  async getProfile(token: string): Promise<any> {
+    try {
+      const response = await this.client.get(
+        '/api/v1/authentication-identity-service/auth/me',
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (error: any) {
+      throw this.handleError(error, 'Get profile failed');
+    }
+  }
+
   async healthCheck(): Promise<boolean> {
     try {
       const response = await this.client.get(
