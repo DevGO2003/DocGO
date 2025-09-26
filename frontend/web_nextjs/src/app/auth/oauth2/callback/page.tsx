@@ -29,9 +29,22 @@ export default function OAuth2CallbackPage() {
         // Get the current URL to check for OAuth2 response
         const currentUrl = window.location.href
         
+        // Debug logging
+        console.log('[OAuth2 Callback] Current URL:', currentUrl)
+        console.log('[OAuth2 Callback] Search params:', {
+          token: searchParams.get('token'),
+          refreshToken: searchParams.get('refreshToken'),
+          success: searchParams.get('success'),
+          username: searchParams.get('username'),
+          code: searchParams.get('code'),
+          error: searchParams.get('error')
+        })
+        
         // Accept both the Spring callback URL and the final frontend callback URL
         const isSpringCallback = currentUrl.includes('/login/oauth2/code/google')
         const isFrontendCallback = currentUrl.includes('/auth/oauth2/callback')
+        console.log('[OAuth2 Callback] URL check:', { isSpringCallback, isFrontendCallback })
+        
         if (isSpringCallback || isFrontendCallback) {
           // Only enforce presence of 'code' for Spring callback URL
           if (isSpringCallback) {
@@ -67,6 +80,14 @@ export default function OAuth2CallbackPage() {
           const refreshToken = searchParams.get('refreshToken')
           const success = searchParams.get('success')
           const username = searchParams.get('username')
+          
+          console.log('[OAuth2 Callback] Token validation:', {
+            hasToken: !!token,
+            tokenLength: token?.length,
+            hasRefreshToken: !!refreshToken,
+            success,
+            username
+          })
           
           if (token && token.length > 10) {
             try {
@@ -135,6 +156,7 @@ export default function OAuth2CallbackPage() {
             }
           } else {
             // No tokens found, OAuth2LoginSuccessHandler might not have processed correctly
+            console.log('[OAuth2 Callback] No valid token found, showing warning')
             setStatus('warning')
             setMessage('Đăng nhập Google hoàn tất nhưng chưa nhận được thông tin người dùng')
             setError({
@@ -144,6 +166,7 @@ export default function OAuth2CallbackPage() {
           }
           
         } else {
+          console.log('[OAuth2 Callback] URL not recognized as OAuth2 callback')
           setStatus('error')
           setMessage('URL callback không hợp lệ')
           setError({
