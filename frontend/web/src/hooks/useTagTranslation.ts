@@ -1,11 +1,22 @@
-import { useTranslation } from 'react-i18next'
+// Mock i18n cho frontend/web (React thuần)
+// Trong thực tế, cần cài đặt react-i18next hoặc sử dụng i18n library khác
 
 /**
  * Hook để dịch tags sử dụng i18n
  * @returns Object chứa function translateTag
  */
 export const useTagTranslation = () => {
-  const { t, i18n } = useTranslation()
+  // Mock translation function
+  const t = (key: string, options?: { defaultValue?: string }) => {
+    // Trong thực tế, đây sẽ là logic i18n thật
+    // Hiện tại chỉ return defaultValue hoặc key
+    return options?.defaultValue || key
+  }
+  
+  // Mock i18n object
+  const i18n = {
+    isInitialized: true
+  }
 
   /**
    * Dịch tag name sang ngôn ngữ hiện tại

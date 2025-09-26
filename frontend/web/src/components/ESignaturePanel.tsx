@@ -236,9 +236,9 @@ export const ESignaturePanel: React.FC<ESignaturePanelProps> = ({
             <button
               onClick={handleSend}
               disabled={signers.filter(s => s.email && s.name && s.role).length === 0}
-              className="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+              className="w-full flex items-center justify-center space-x-1 px-2 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
             >
-              <Send className="w-4 h-4" />
+              <Send className="w-3 h-3" />
               <span>Gửi yêu cầu ký</span>
             </button>
           </div>
