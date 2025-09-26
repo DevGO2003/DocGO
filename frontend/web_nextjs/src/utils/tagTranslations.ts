@@ -2,6 +2,8 @@
  * Utility functions for translating contract tags and statuses
  */
 
+import { getTagDisplayName } from '@/constants/contractTags'
+
 /**
  * Translate contract type to Vietnamese
  */
@@ -39,6 +41,13 @@ export const translateContractTag = (tag: string, t: (key: string) => string): s
   // Remove # prefix if present
   const cleanTag = tag.startsWith('#') ? tag.substring(1) : tag
   
+  // First try to get display name from constants
+  const displayName = getTagDisplayName(cleanTag)
+  if (displayName !== cleanTag) {
+    return displayName
+  }
+  
+  // Fallback to translation system
   const translationKey = `contracts.tags.${cleanTag}`
   const translated = t(translationKey)
   
