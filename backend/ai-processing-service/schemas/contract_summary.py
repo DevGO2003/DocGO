@@ -41,6 +41,7 @@ class RiskAssessment(BaseModel):
     riskLevel: str = Field(..., description="Mức độ rủi ro (LOW, MEDIUM, HIGH)")
     riskFactors: List[str] = Field(..., description="Danh sách các yếu tố rủi ro")
     mitigationMeasures: List[str] = Field(..., description="Các biện pháp giảm thiểu rủi ro")
+    riskDetails: List[str] = Field(default_factory=list, description="Ghi chú/chi tiết rủi ro tự do")
 
 class ComplianceStatus(BaseModel):
     status: str = Field(..., description="Trạng thái tuân thủ (COMPLIANT, NON_COMPLIANT, REVIEW_REQUIRED)")

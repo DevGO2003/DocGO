@@ -73,7 +73,7 @@ class AIProcessingService:
             "- Giá trị hợp đồng (số tiền cụ thể)\n"
             "- Thời hạn hợp đồng\n"
             "- Đối tượng hợp đồng (sản phẩm/dịch vụ cụ thể)\n\n"
-            "TRẢ VỀ JSON VỚI CẤU TRÚC SAU:\n"
+            "TRẢ VỀ JSON VỚI CẤU TRÚC SAU (LƯU Ý: CÁC MẢNG favorableClauses, unfavorableClauses, reminders, riskAssessment.riskDetails phải được TRÍCH XUẤT TỪ NỘI DUNG CÓ THẬT, KHÔNG BỊA ĐẶT. Mỗi mảng nên có 2-5 mục nếu văn bản có đủ thông tin; nếu KHÔNG CÓ, để mảng rỗng):\n"
             '{\n'
             '  "contractNumber": "số hợp đồng thực tế từ văn bản",\n'
             '  "status": null,\n'
@@ -101,20 +101,23 @@ class AIProcessingService:
             '    "paymentMethod": "phương thức thanh toán"\n'
             '  },\n'
             '  "keyClauses": [\n'
-            '    {"name": "tên điều khoản", "description": "mô tả chi tiết nội dung", "source": "điều số tham chiếu"}\n'
+            '    {"name": "tên điều khoản", "description": "mô tả chi tiết nội dung", "source": "điều/số mục trong văn bản"}\n'
             '  ],\n'
             '  "favorableClauses": [\n'
-            '    {"clauseName": "tên điều khoản có lợi", "description": "mô tả lợi ích", "benefitTo": "bên được hưởng lợi"}\n'
+            '    {"clauseName": "điều khoản có lợi trích từ văn bản", "description": "mô tả lợi ích có thật", "benefitTo": "bên được hưởng lợi"}\n'
             '  ],\n'
             '  "unfavorableClauses": [\n'
-            '    {"clauseName": "tên điều khoản bất lợi", "description": "mô tả rủi ro", "riskTo": "bên chịu rủi ro"}\n'
+            '    {"clauseName": "điều khoản bất lợi trích từ văn bản", "description": "mô tả rủi ro có thật", "riskTo": "bên chịu rủi ro"}\n'
             '  ],\n'
-            '  "reminders": [],\n'
+            '  "reminders": [\n'
+            '    {"type": "General", "date": "yyyy-MM-dd hoặc ISO nếu có trong văn bản", "content": "nhắc việc xuất hiện trong tài liệu (nếu có)"}\n'
+            '  ],\n'
             '  "terminationConditions": "các điều kiện chấm dứt hợp đồng",\n'
             '  "riskAssessment": {\n'
             '    "riskLevel": "LOW|MEDIUM|HIGH",\n'
-            '    "riskFactors": ["các yếu tố rủi ro cụ thể"],\n'
-            '    "mitigationMeasures": ["các biện pháp giảm thiểu rủi ro"]\n'
+            '    "riskFactors": ["các yếu tố rủi ro cụ thể trích từ văn bản"],\n'
+            '    "mitigationMeasures": ["các biện pháp giảm thiểu rủi ro trích từ văn bản"],\n'
+            '    "riskDetails": ["ghi chú/chi tiết rủi ro có thật, nếu văn bản nêu"]\n'
             '  },\n'
             '  "complianceStatus": {\n'
             '    "status": "COMPLIANT|NON_COMPLIANT|REVIEW_REQUIRED",\n'
@@ -264,13 +267,20 @@ class AIProcessingService:
                         parsed['paymentDetails']['totalValue'] = str(total_value)
                 
                 if 'riskAssessment' not in parsed or not isinstance(parsed['riskAssessment'], dict):
-                    parsed['riskAssessment'] = {"riskLevel": "MEDIUM", "riskFactors": [], "mitigationMeasures": []}
+                    parsed['riskAssessment'] = {"riskLevel": "MEDIUM", "riskFactors": [], "mitigationMeasures": [], "riskDetails": []}
+                else:
+                    # Ensure unified keys exist
+                    ra = parsed['riskAssessment']
+                    if 'riskDetails' not in ra or not isinstance(ra['riskDetails'], list):
+                        ra['riskDetails'] = []
                 
                 if 'complianceStatus' not in parsed or not isinstance(parsed['complianceStatus'], dict):
                     parsed['complianceStatus'] = {"status": "REVIEW_REQUIRED", "issues": [], "recommendations": []}
                 
                 # Normalize Unicode characters in the entire parsed object
                 parsed = normalize_object(parsed)
+
+                # Không tự chèn dữ liệu mặc định; giữ nguyên mảng rỗng nếu văn bản không có thông tin
                 
                 logging.info(f"[AI_GEMINI_SUMMARY_SUCCESS] Summary created for: {filename}")
                 return parsed
@@ -362,7 +372,8 @@ class AIProcessingService:
             "riskAssessment": {
                 "riskLevel": "MEDIUM",
                 "riskFactors": ["Không thể phân tích chi tiết"],
-                "mitigationMeasures": ["Cần xem xét kỹ hợp đồng"]
+                "mitigationMeasures": ["Cần xem xét kỹ hợp đồng"],
+                "riskDetails": []
             },
             "complianceStatus": {
                 "status": "REVIEW_REQUIRED",

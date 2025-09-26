@@ -31,6 +31,9 @@ public class ContractRiskAssessment extends BaseEntity {
     @Field("mitigation_measures")
     private List<String> mitigationMeasures;
 
+    @Field("risk_details")
+    private List<String> riskDetails;
+
     @Override
     public boolean isNew() {
         return this.id == null;

@@ -27,8 +27,8 @@ public class ContractResponseDto {
     private List<ContractFavorableClauseDto> favorableClauses;
     private List<ContractUnfavorableClauseDto> unfavorableClauses;
     private List<ContractReminderDto> reminders;
-    private String terminationConditions;
-    private ContractRiskAssessmentResponseDto riskAssessment;
+    private List<String> terminationConditions;
+    private List<ContractRiskItemDto> riskAssessment;
     private ContractComplianceStatusResponseDto complianceStatus;
 }
 

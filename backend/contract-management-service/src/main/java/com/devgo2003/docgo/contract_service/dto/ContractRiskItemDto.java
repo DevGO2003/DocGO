@@ -5,15 +5,11 @@ import lombok.Builder;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
-import java.util.List;
-
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ContractRiskAssessmentDto {
+public class ContractRiskItemDto {
     private String riskLevel;
-    private List<String> riskFactors;
-    private List<String> mitigationMeasures;
-    private List<String> riskDetails;
+    private String riskDetail;
 }
