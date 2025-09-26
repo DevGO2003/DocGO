@@ -4,6 +4,11 @@
 
 DocGO là một hệ thống quản lý tài liệu thông minh với kiến trúc microservices, tích hợp AI để xử lý và phân tích tài liệu tự động.
 
+### Tính năng mới được thêm vào
+- Xử lý tài liệu thông minh với AI
+- Quản lý hợp đồng tự động
+- Tích hợp chữ ký điện tử
+
 ## 🏗️ Kiến trúc Hệ thống
 
 ### Microservices Architecture

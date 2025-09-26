@@ -1,0 +1,28 @@
+Đây là dòng đầu tiên
+Đây là dòng thứ hai
+<<<<<<< HEAD
+Đây là dòng thứ ba - từ HEAD
+Đây là dòng thứ tư - từ HEAD
+=======
+Đây là dòng thứ ba - từ feature branch
+Đây là dòng thứ tư - từ feature branch
+>>>>>>> feature-branch
+Đây là dòng thứ năm
+<<<<<<< HEAD
+Đây là dòng thứ sáu - từ HEAD
+=======
+Đây là dòng thứ sáu - từ feature branch
+>>>>>>> feature-branch
+Đây là dòng thứ bảy
+<<<<<<< HEAD
+Đây là dòng thứ tám - từ HEAD
+=======
+Đây là dòng thứ tám - từ feature branch
+>>>>>>> feature-branch
+Đây là dòng thứ chín
+<<<<<<< HEAD
+Đây là dòng thứ mười - từ HEAD
+=======
+Đây là dòng thứ mười - từ feature branch
+>>>>>>> feature-branch
+Đây là dòng thứ mười một

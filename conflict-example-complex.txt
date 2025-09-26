@@ -1,0 +1,12 @@
+Đây là dòng đầu tiên
+Đây là dòng thứ hai
+<<<<<<< HEAD
+Đây là dòng thứ ba - từ HEAD
+Đây là dòng thứ tư - từ HEAD
+Đây là dòng thứ năm - từ HEAD
+=======
+Đây là dòng thứ ba - từ feature branch
+Đây là dòng thứ tư - từ feature branch
+Đây là dòng thứ sáu - từ feature branch
+>>>>>>> feature-branch
+Đây là dòng thứ bảy
