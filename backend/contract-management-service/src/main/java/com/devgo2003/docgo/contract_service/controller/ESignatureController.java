@@ -133,8 +133,11 @@ public class ESignatureController {
             eSignatures = eSignatureService.getESignaturesByContractIdOrderBySignedAt(contractId);
         } else if (contractId != null && signedFrom != null && signedTo != null) {
             try {
-                LocalDateTime from = LocalDateTime.parse(signedFrom);
-                LocalDateTime to = LocalDateTime.parse(signedTo);
+                // Handle date format "2024-03-01" by adding time component
+                String fromStr = signedFrom.contains("T") ? signedFrom : signedFrom + "T00:00:00";
+                String toStr = signedTo.contains("T") ? signedTo : signedTo + "T23:59:59";
+                LocalDateTime from = LocalDateTime.parse(fromStr);
+                LocalDateTime to = LocalDateTime.parse(toStr);
                 eSignatures = eSignatureService.getESignaturesBySignedAtBetween(from, to);
             } catch (Exception e) {
                 eSignatures = eSignatureService.getAllESignatures();

@@ -23,8 +23,9 @@ export default function CreateContractPage() {
   
   // File Tab states
   const [selectedRegularFile, setSelectedRegularFile] = useState<File | null>(null)
-  const [fileUploading, setFileUploading] = useState(false)
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            const [dragActive, setDragActive] = useState(false)
+    const [fileUploading, setFileUploading] = useState(false)
+    const [dragActive, setDragActive] = useState(false)
+    const [ocrDragActive, setOcrDragActive] = useState(false)
   
   // Manual Tab states (existing form states)
   const [title, setTitle] = useState('')
@@ -68,6 +69,7 @@ export default function CreateContractPage() {
     const file = event.target.files?.[0]
     if (file) {
       setSelectedFile(file)
+      toast.success(`Đã chọn file: ${file.name}`)
     }
   }
 
@@ -121,6 +123,37 @@ export default function CreateContractPage() {
     
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       setSelectedRegularFile(e.dataTransfer.files[0])
+    }
+  }
+
+  const handleOcrDrag = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (e.type === 'dragenter' || e.type === 'dragover') {
+      setOcrDragActive(true)
+    } else if (e.type === 'dragleave') {
+      setOcrDragActive(false)
+    }
+  }
+
+  const handleOcrDrop = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setOcrDragActive(false)
+    
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      const file = e.dataTransfer.files[0]
+      
+      // Tab OCR chỉ nhận PDF, DOCX, TXT
+      const allowedTypes = ['pdf', 'docx', 'txt']
+      const fileExtension = file.name.split('.').pop()?.toLowerCase()
+      
+      if (fileExtension && allowedTypes.includes(fileExtension)) {
+        setSelectedFile(file)
+        toast.success(`Đã chọn file: ${file.name}`)
+      } else {
+        toast.error('Chỉ hỗ trợ file PDF, DOCX, TXT cho OCR')
+      }
     }
   }
 
@@ -483,7 +516,17 @@ export default function CreateContractPage() {
                   <div className="max-w-4xl mx-auto">
                     {/* Upload Zone */}
                     <div className="space-y-6">
-                      <div className="w-full border-2 border-dashed border-gray-300 rounded-2xl p-12 text-center hover:border-blue-400 hover:bg-blue-50 transition-all duration-300">
+                      <div 
+                        className={`w-full border-2 border-dashed rounded-2xl p-12 text-center transition-all duration-300 ${
+                          ocrDragActive
+                            ? 'border-blue-500 bg-blue-50 scale-[1.02]'
+                            : 'border-gray-300 hover:border-blue-400 hover:bg-blue-50'
+                        }`}
+                        onDragEnter={handleOcrDrag}
+                        onDragLeave={handleOcrDrag}
+                        onDragOver={handleOcrDrag}
+                        onDrop={handleOcrDrop}
+                      >
                           <input
                             ref={ocrFileInputRef}
                             type="file"

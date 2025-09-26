@@ -144,24 +144,33 @@ public class VersionController {
             versions = versionService.getVersionsByContractIdOrderByCreatedAt(contractId);
         } else if (createdFrom != null && createdTo != null) {
             try {
-                LocalDateTime from = LocalDateTime.parse(createdFrom);
-                LocalDateTime to = LocalDateTime.parse(createdTo);
+                // Handle date format "2024-03-01" by adding time component
+                String fromStr = createdFrom.contains("T") ? createdFrom : createdFrom + "T00:00:00";
+                String toStr = createdTo.contains("T") ? createdTo : createdTo + "T23:59:59";
+                LocalDateTime from = LocalDateTime.parse(fromStr);
+                LocalDateTime to = LocalDateTime.parse(toStr);
                 versions = versionService.getVersionsByCreatedAtBetween(from, to);
             } catch (Exception e) {
                 versions = versionService.getAllVersions();
             }
         } else if (publishedFrom != null && publishedTo != null) {
             try {
-                LocalDateTime from = LocalDateTime.parse(publishedFrom);
-                LocalDateTime to = LocalDateTime.parse(publishedTo);
+                // Handle date format "2024-03-01" by adding time component
+                String fromStr = publishedFrom.contains("T") ? publishedFrom : publishedFrom + "T00:00:00";
+                String toStr = publishedTo.contains("T") ? publishedTo : publishedTo + "T23:59:59";
+                LocalDateTime from = LocalDateTime.parse(fromStr);
+                LocalDateTime to = LocalDateTime.parse(toStr);
                 versions = versionService.getVersionsByPublishedAtBetween(from, to);
             } catch (Exception e) {
                 versions = versionService.getAllVersions();
             }
         } else if (approvedFrom != null && approvedTo != null) {
             try {
-                LocalDateTime from = LocalDateTime.parse(approvedFrom);
-                LocalDateTime to = LocalDateTime.parse(approvedTo);
+                // Handle date format "2024-03-01" by adding time component
+                String fromStr = approvedFrom.contains("T") ? approvedFrom : approvedFrom + "T00:00:00";
+                String toStr = approvedTo.contains("T") ? approvedTo : approvedTo + "T23:59:59";
+                LocalDateTime from = LocalDateTime.parse(fromStr);
+                LocalDateTime to = LocalDateTime.parse(toStr);
                 versions = versionService.getVersionsByApprovedAtBetween(from, to);
             } catch (Exception e) {
                 versions = versionService.getAllVersions();
