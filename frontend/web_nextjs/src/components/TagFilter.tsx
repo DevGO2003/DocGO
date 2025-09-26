@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react'
 import { TagIcon, ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline'
 import { tagAPI } from '@/lib/api'
 import { NoDataEmptyState } from '@/components/ui/EmptyState'
+import { useTagTranslation } from '@/hooks/useTagTranslation'
 
 interface Tag {
   name: string
@@ -19,6 +20,8 @@ interface TagFilterProps {
 }
 
 export default function TagFilter({ selectedTags, onTagToggle, className = '' }: TagFilterProps) {
+  const { translateTag, isReady } = useTagTranslation()
+  
   const [popularTags, setPopularTags] = useState<Tag[]>([])
   const [allTags, setAllTags] = useState<Tag[]>([])
   const [showAll, setShowAll] = useState(false)
@@ -107,7 +110,7 @@ export default function TagFilter({ selectedTags, onTagToggle, className = '' }:
               }`}
             >
               <TagIcon className="h-4 w-4" />
-              {tag.displayName}
+              {translateTag(tag.name)}
               {tag.count > 0 && (
                 <span className="text-xs text-gray-500">({tag.count})</span>
               )}

@@ -8,6 +8,7 @@ import { User as UserType, AuthState, LoginCredentials, RegisterData, TimeFilter
 import { VersionHistory } from './components/VersionHistory';
 import { VersionComparison } from './components/VersionComparison';
 import { ContractUpload } from './components/ContractUpload';
+import { useTagTranslation } from './hooks/useTagTranslation';
 import { ApprovalWorkflowModal } from './components/ApprovalWorkflowModal';
 import { ContractDetailView } from './components/ContractDetailView';
 import { ESignaturePanel } from './components/ESignaturePanel';
@@ -28,6 +29,8 @@ import TagsDemo from './pages/TagsDemo';
 
 
 function App() {
+  const { translateTag } = useTagTranslation();
+  
   // Authentication state - MOCK ADMIN FOR DEVELOPMENT
   const [authState, setAuthState] = useState<AuthState>({
     isAuthenticated: true,
@@ -457,7 +460,7 @@ function App() {
   { value: '', label: 'Tất cả tags' },
   ...availableTags.map(tag => ({
     value: tag.id,
-    label: tag.name,
+    label: translateTag(tag.name),
   }))
 ];
 function handleTagChange(selectedOptions) {
@@ -1232,7 +1235,7 @@ function handleTagChange(selectedOptions) {
           >
             <option value="">Tất cả tags</option>
             {availableTags.map(tag => (
-              <option key={tag.id} value={tag.id}>{tag.name}</option>
+              <option key={tag.id} value={tag.id}>{translateTag(tag.name)}</option>
             ))}
           </select> */}
     {/* the select da chinh sua  */}
@@ -1252,7 +1255,7 @@ function handleTagChange(selectedOptions) {
             >
               <option value="">Tất cả tags</option>
               {availableTags.map(tag => (
-                <option key={tag.id} value={tag.id}>{tag.name}</option>
+                <option key={tag.id} value={tag.id}>{translateTag(tag.name)}</option>
               ))}
             </select>
           {authState.user?.permissions.canUpload && (
@@ -1311,7 +1314,7 @@ function handleTagChange(selectedOptions) {
                             key={tag.id}
                             className={`px-2 py-1 text-xs font-medium rounded-full border ${getTagColor(tag.color)}`}
                           >
-                            {tag.name}
+                            {translateTag(tag.name)}
                           </span>
                         ))}
                       </div>
@@ -1488,7 +1491,7 @@ function handleTagChange(selectedOptions) {
                           key={tag.id}
                           className={`px-3 py-1 text-sm font-medium rounded-full border ${getTagColor(tag.color)}`}
                         >
-                          {tag.name}
+                          {translateTag(tag.name)}
                         </span>
                       ))}
                     </div>
