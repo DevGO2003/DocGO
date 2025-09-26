@@ -24,7 +24,7 @@ export default function CreateContractPage() {
   // File Tab states
   const [selectedRegularFile, setSelectedRegularFile] = useState<File | null>(null)
   const [fileUploading, setFileUploading] = useState(false)
-  const [dragActive, setDragActive] = useState(false)
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            const [dragActive, setDragActive] = useState(false)
   
   // Manual Tab states (existing form states)
   const [title, setTitle] = useState('')
@@ -412,8 +412,32 @@ export default function CreateContractPage() {
               {/* OCR Tab Content */}
               {activeTab === 'ocr' && (
                 <div className="space-y-6">
-                  {/* Versioning panel moved above upload */}
-                  <div className="bg-gradient-to-r from-indigo-50 to-blue-50 border border-indigo-100 rounded-xl p-4">
+                  <div className="space-y-4">
+                  <div className="text-center">
+                    <h3 className="text-2xl font-bold text-gray-900 mb-2">Tải lên tệp hợp đồng để trích xuất văn bản</h3>
+                    <p className="text-gray-600 text-lg mb-4">Sử dụng AI để trích xuất nội dung từ tài liệu hợp đồng một cách chính xác</p>
+                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 rounded-xl p-4 max-w-4xl mx-auto">
+                      <div className="flex items-start space-x-3">
+                        <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                          <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                          </svg>
+                        </div>
+                        <div className="text-left">
+                          <h4 className="text-sm font-semibold text-gray-900 mb-1">Công nghệ AI OCR tiên tiến</h4>
+                          <p className="text-sm text-gray-600 mb-2">Hệ thống sử dụng AI để nhận diện và trích xuất văn bản từ các file PDF, DOCX, TXT với độ chính xác cao, hỗ trợ tiếng Việt và tiếng Anh.</p>
+                          <div className="flex flex-wrap gap-2 text-xs">
+                            <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full">AI chính xác</span>
+                            <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full">Hỗ trợ đa ngôn ngữ</span>
+                            <span className="px-2 py-1 bg-orange-100 text-orange-700 rounded-full">Xử lý nhanh</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    </div>
+
+                  {/* Versioning panel moved between AI info and upload */}
+                  <div className="bg-gradient-to-r from-indigo-50 to-blue-50 border border-indigo-100 rounded-xl p-4 max-w-4xl mx-auto">
                     <div className="flex items-start justify-between">
                       <div>
                         <h3 className="text-lg font-medium text-gray-900">Tạo phiên bản từ hợp đồng cũ</h3>
@@ -455,30 +479,6 @@ export default function CreateContractPage() {
                       </div>
                     )}
                   </div>
-
-                  <div className="space-y-4">
-                  <div className="text-center">
-                    <h3 className="text-2xl font-bold text-gray-900 mb-2">Tải lên tệp hợp đồng để trích xuất văn bản</h3>
-                    <p className="text-gray-600 text-lg mb-4">Sử dụng AI để trích xuất nội dung từ tài liệu hợp đồng một cách chính xác</p>
-                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 rounded-xl p-4 max-w-4xl mx-auto">
-                      <div className="flex items-start space-x-3">
-                        <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center flex-shrink-0">
-                          <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                          </svg>
-                        </div>
-                        <div className="text-left">
-                          <h4 className="text-sm font-semibold text-gray-900 mb-1">Công nghệ AI OCR tiên tiến</h4>
-                          <p className="text-sm text-gray-600 mb-2">Hệ thống sử dụng AI để nhận diện và trích xuất văn bản từ các file PDF, DOCX, TXT với độ chính xác cao, hỗ trợ tiếng Việt và tiếng Anh.</p>
-                          <div className="flex flex-wrap gap-2 text-xs">
-                            <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full">AI chính xác</span>
-                            <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full">Hỗ trợ đa ngôn ngữ</span>
-                            <span className="px-2 py-1 bg-orange-100 text-orange-700 rounded-full">Xử lý nhanh</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    </div>
 
                   <div className="max-w-4xl mx-auto">
                     {/* Upload Zone */}
@@ -623,14 +623,14 @@ export default function CreateContractPage() {
                                 </div>
                                 <h5 className="text-sm font-semibold text-gray-900">AI thông minh</h5>
                                 <p className="text-xs text-gray-600">Nhận diện văn bản chính xác 99%</p>
-                              </div>
-                              
+                    </div>
+
                               <div className="flex flex-col items-center space-y-2">
                                 <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center">
                                   <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                                   </svg>
-                                </div>
+                  </div>
                                 <h5 className="text-sm font-semibold text-gray-900">Đa ngôn ngữ</h5>
                                 <p className="text-xs text-gray-600">Hỗ trợ tiếng Việt và tiếng Anh</p>
                               </div>
@@ -680,10 +680,10 @@ export default function CreateContractPage() {
                     </div>
                   </div>
 
-                  <div className="max-w-2xl mx-auto">
+                  <div className="max-w-4xl mx-auto">
                     {/* Drag & Drop Zone */}
                     <div
-                      className={`relative w-full rounded-2xl border-2 border-dashed transition-all duration-300 ${
+                      className={`relative w-full border-2 border-dashed rounded-2xl p-12 text-center transition-all duration-300 ${
                         dragActive
                           ? 'border-emerald-500 bg-emerald-50 scale-[1.02]'
                           : 'border-gray-300 hover:border-emerald-400 hover:bg-gray-50'
