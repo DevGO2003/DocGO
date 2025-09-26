@@ -23,7 +23,7 @@ Gửi tất cả commits lên remote origin
   Phần 1: Thiết lập biến môi trường, hãy tìm kiếm file bằng quét repo chứ đừng sài powershell
   1) <origin>: đọc REMOTE_ORIGIN từ ".cursor/tools/github/env/.env"
   2) <destination-branch>: tham số thứ nhất, nếu không có tham số: mặc định nhánh hiện tại
-  3) <current-branch>: nhánh hiện tại, nếu không xác định: mặc định tạo vibe-coding
+  3) <current-branch>: đọc từ file ".git/HEAD" (format: "ref: refs/heads/<branch-name>"), nếu không xác định: mặc định tạo vibe-coding
   4) <message>: đọc những file chuẩn bị đang stage để tóm tắt nội dung
   5) <restore>: file trong đường dẫn ".cursor\commands\git-restore-env-local.md"
   6) <backup>: file trong đường dẫn ".cursor\commands\git-backup-env.md"
