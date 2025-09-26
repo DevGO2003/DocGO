@@ -15,7 +15,7 @@ public class ContractRiskAssessmentResponseDto {
     private String riskLevel;
     private List<String> riskFactors;
     private List<String> mitigationMeasures;
-    private List<String> riskDetails;
+    // riskDetails removed
 }
 
 

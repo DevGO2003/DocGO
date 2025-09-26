@@ -25,8 +25,11 @@ class AIProcessingService:
         if not self._initialized:
             self.api_key = get_gemini_api_key()
             genai.configure(api_key=self.api_key)
+            # Allow override via ENV, fallback to preferred order
+            import os
+            env_model = os.getenv('GEMINI_MODEL', '').strip()
             # Try different models in order of preference
-            models_to_try = [
+            models_to_try = ([env_model] if env_model else []) + [
                 'gemini-2.0-flash',
                 'gemini-1.5-flash',
                 'gemini-1.5-pro',
@@ -61,7 +64,8 @@ class AIProcessingService:
             "6. Đưa ra khuyến nghị tuân thủ pháp luật\n"
             "7. QUAN TRỌNG: Nếu không tìm thấy thông tin cụ thể, hãy trả về null thay vì \"Chưa xác định\"\n"
             "8. Đảm bảo mỗi điều khoản trong keyClauses, favorableClauses, unfavorableClauses là một object riêng biệt\n"
-            "9. riskFactors và mitigationMeasures phải là danh sách chi tiết từng yếu tố\n\n"
+            "9. riskFactors và mitigationMeasures phải là danh sách chi tiết từng yếu tố\n"
+            "10. Với CÁC MẢNG (keyClauses, favorableClauses, unfavorableClauses, reminders, riskAssessment.riskFactors, riskAssessment.mitigationMeasures): LIỆT KÊ CÀNG NHIỀU MỤC CÓ THẬT TRONG VĂN BẢN CÀNG TỐT (không bịa). Nếu văn bản có nhiều mục, ưu tiên lấy tối đa theo ngữ cảnh; tối thiểu gợi ý: keyClauses ≥ 5 (nếu văn bản đủ), favorableClauses 3–8, unfavorableClauses 3–8, reminders 2–5, riskFactors 3–10, mitigationMeasures 3–10. Nếu KHÔNG CÓ thì để mảng rỗng.\n\n"
             "THÔNG TIN CẦN TRÍCH XUẤT:\n"
             "- Tên công ty/tổ chức tham gia (Bên A, Bên B)\n"
             "- Tên người đại diện và chức vụ\n"
@@ -73,7 +77,7 @@ class AIProcessingService:
             "- Giá trị hợp đồng (số tiền cụ thể)\n"
             "- Thời hạn hợp đồng\n"
             "- Đối tượng hợp đồng (sản phẩm/dịch vụ cụ thể)\n\n"
-            "TRẢ VỀ JSON VỚI CẤU TRÚC SAU (LƯU Ý: CÁC MẢNG favorableClauses, unfavorableClauses, reminders, riskAssessment.riskDetails phải được TRÍCH XUẤT TỪ NỘI DUNG CÓ THẬT, KHÔNG BỊA ĐẶT. Mỗi mảng nên có 2-5 mục nếu văn bản có đủ thông tin; nếu KHÔNG CÓ, để mảng rỗng):\n"
+            "TRẢ VỀ JSON VỚI CẤU TRÚC SAU (LƯU Ý: CHỈ TRÍCH XUẤT TỪ NỘI DUNG CÓ THẬT. CÁC MẢNG cố gắng liệt kê tối đa theo dữ liệu thực tế, nếu không có thì để mảng rỗng):\n"
             '{\n'
             '  "contractNumber": "số hợp đồng thực tế từ văn bản",\n'
             '  "status": null,\n'
@@ -117,7 +121,7 @@ class AIProcessingService:
             '    "riskLevel": "LOW|MEDIUM|HIGH",\n'
             '    "riskFactors": ["các yếu tố rủi ro cụ thể trích từ văn bản"],\n'
             '    "mitigationMeasures": ["các biện pháp giảm thiểu rủi ro trích từ văn bản"],\n'
-            '    "riskDetails": ["ghi chú/chi tiết rủi ro có thật, nếu văn bản nêu"]\n'
+            
             '  },\n'
             '  "complianceStatus": {\n'
             '    "status": "COMPLIANT|NON_COMPLIANT|REVIEW_REQUIRED",\n'
@@ -144,15 +148,23 @@ class AIProcessingService:
         """Gọi Gemini để tạo JSON tóm tắt hợp đồng; fallback nếu lỗi."""
         import time
         import random
+        import os
         
         max_retries = 3
         base_delay = 5  # seconds
+        # Soft prompt-size guard (approx by characters)
+        max_chars = int(os.getenv('AI_SUMMARY_MAX_PROMPT_CHARS', '180000'))  # ~180k chars ~ 90k tokens heuristic
         
         logging.info(f"[AI_SUMMARY_START] Starting summary generation for: {filename}")
         
         for attempt in range(max_retries):
             try:
-                prompt = self.get_contract_summary_prompt(content, filename)
+                # Truncate content if too large
+                safe_content = content
+                if len(safe_content) > max_chars:
+                    logging.warning(f"[AI_PROMPT_TRUNCATE] Content too large ({len(safe_content)} chars). Truncating to {max_chars} chars.")
+                    safe_content = safe_content[:max_chars]
+                prompt = self.get_contract_summary_prompt(safe_content, filename)
                 logging.info(f"[AI_SUMMARY_ATTEMPT] Attempt {attempt + 1}/{max_retries} for: {filename}")
                 response = self.model.generate_content(prompt)
                 
@@ -267,12 +279,11 @@ class AIProcessingService:
                         parsed['paymentDetails']['totalValue'] = str(total_value)
                 
                 if 'riskAssessment' not in parsed or not isinstance(parsed['riskAssessment'], dict):
-                    parsed['riskAssessment'] = {"riskLevel": "MEDIUM", "riskFactors": [], "mitigationMeasures": [], "riskDetails": []}
+                    parsed['riskAssessment'] = {"riskLevel": "MEDIUM", "riskFactors": [], "mitigationMeasures": []}
                 else:
                     # Ensure unified keys exist
                     ra = parsed['riskAssessment']
-                    if 'riskDetails' not in ra or not isinstance(ra['riskDetails'], list):
-                        ra['riskDetails'] = []
+                    # riskDetails field removed
                 
                 if 'complianceStatus' not in parsed or not isinstance(parsed['complianceStatus'], dict):
                     parsed['complianceStatus'] = {"status": "REVIEW_REQUIRED", "issues": [], "recommendations": []}
@@ -373,7 +384,7 @@ class AIProcessingService:
                 "riskLevel": "MEDIUM",
                 "riskFactors": ["Không thể phân tích chi tiết"],
                 "mitigationMeasures": ["Cần xem xét kỹ hợp đồng"],
-                "riskDetails": []
+                
             },
             "complianceStatus": {
                 "status": "REVIEW_REQUIRED",
