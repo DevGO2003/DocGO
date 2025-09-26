@@ -1,42 +1,6 @@
 # DocGO Workspace .gitignore
 
-###############################################################################
-# ENVIRONMENT VARIABLES
-###############################################################################
-
-# Root-level environment files
-.env
-.env.local
-.env.production
-.env.staging
-.env.*.local
-
-# Track example env file as template
-!.env.example
-
-# Track env/ directories (contains .env.example)
-!**/env/
-
-# Environment files in all modules
-**/.env
-**/.env.local
-**/.env.production
-**/.env.staging
-
-# Track example env files in all modules
-!**/.env.example
-
-# Ignore sensitive environment files inside env/ directories
-**/env/.env
-**/env/.env.local
-**/env/.env.production
-**/env/.env.staging
-
-# Track example env file inside env/ directories
-!**/env/.env.example
-
-# Bỏ theo dõi .git-backup/env
-.git-backup/env/
+# ENVIRONMENT VARIABLES - TEMPORARILY DISABLED FOR TESTING
 
 ###############################################################################
 # IDE / EDITOR FILES

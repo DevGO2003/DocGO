@@ -1,0 +1,14 @@
+[
+    {
+        "BackupName":  ".cursor_tools_github_.env",
+        "OriginalPath":  ".cursor/tools/github/.env"
+    },
+    {
+        "BackupName":  ".cursor_tools_discord_env_.env",
+        "OriginalPath":  ".cursor/tools/discord/env/.env"
+    },
+    {
+        "BackupName":  ".cursor_mcp.json",
+        "OriginalPath":  ".cursor/mcp.json"
+    }
+]
