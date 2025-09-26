@@ -244,6 +244,14 @@ Remove-Item "temp.txt" -ErrorAction SilentlyContinue
 | `which command` | `Get-Command command` | Tìm đường dẫn command |
 | `ps aux` | `Get-Process` | Liệt kê processes |
 | `kill -9 PID` | `Stop-Process -Id PID -Force` | Dừng process |
+| `git log` | `git log --oneline -10 --no-pager` | Xem log không mở pager |
+| `git diff` | `git diff --no-pager` | Xem diff không mở pager |
+| `git status` | `git status --porcelain` | Xem status không mở pager |
+| `git show` | `git show --no-pager` | Xem show không mở pager |
+| `git blame` | `git blame --no-pager` | Xem blame không mở pager |
+| `cat file.txt` | `Get-Content file.txt` | Đọc file không mở pager |
+| `less file.txt` | `Get-Content file.txt` | Đọc file không mở pager |
+| `more file.txt` | `Get-Content file.txt` | Đọc file không mở pager |
 
 ## Best Practices
 
@@ -260,7 +268,46 @@ Remove-Item "temp.txt" -ErrorAction SilentlyContinue
 
 ## Quy tắc Command Execution
 
-### 11. HẠN CHẾ GỘP LỆNH - Chạy từng dòng lệnh riêng biệt
+### 11. TRÁNH CÁC LỆNH GÂY KẸT TERMINAL
+
+#### ❌ TUYỆT ĐỐI KHÔNG sử dụng các lệnh interactive:
+```powershell
+# KHÔNG BAO GIỜ - Các lệnh mở editor/pager
+git log                    # Mở pager (less/more)
+git diff                   # Mở pager
+git show                   # Mở pager
+git blame                  # Mở pager
+git log --oneline -10      # Mở pager
+git status                 # Mở pager
+git add -p                 # Interactive mode
+git rebase -i              # Mở editor
+git commit                 # Mở editor
+git merge                  # Mở editor
+vim file.txt               # Mở Vim editor
+nano file.txt              # Mở Nano editor
+less file.txt              # Mở less pager
+more file.txt              # Mở more pager
+man command                # Mở manual pager
+```
+
+#### ✅ SỬ DỤNG các lệnh non-interactive:
+```powershell
+# ĐÚNG - Các lệnh không mở pager/editor
+git log --oneline -10 --no-pager
+git diff --no-pager
+git show --no-pager
+git status --porcelain
+git add -A
+git commit -m "message" --no-verify
+git log --oneline -5 --no-pager
+git diff --name-only
+git diff --stat
+git log --stat --no-pager
+Get-Content file.txt
+Select-String pattern file.txt
+```
+
+### 12. HẠN CHẾ GỘP LỆNH - Chạy từng dòng lệnh riêng biệt
 
 #### ❌ TRÁNH - Gộp nhiều lệnh phức tạp:
 ```powershell
@@ -326,7 +373,55 @@ cd "C:\project"; Get-ChildItem
 npm install; npm run build
 ```
 
-### 14. Quy tắc ưu tiên
+### 14. XỬ LÝ KHI BỊ KẸT TERMINAL
+
+#### 🚨 **Khi terminal bị kẹt trong pager/editor:**
+```powershell
+# Cách thoát khỏi pager (less/more)
+q                          # Thoát khỏi less/more
+Ctrl+C                     # Thoát khỏi pager
+Ctrl+Z                     # Suspend process
+
+# Cách thoát khỏi Vim
+:q!                        # Thoát không lưu
+:wq                        # Lưu và thoát
+ESC + :q!                  # Thoát không lưu
+
+# Cách thoát khỏi Nano
+Ctrl+X                     # Thoát Nano
+```
+
+#### 🔧 **Cách tránh bị kẹt:**
+```powershell
+# Luôn sử dụng --no-pager cho git commands
+git log --oneline -10 --no-pager
+git diff --no-pager
+git show --no-pager
+git status --porcelain
+
+# Sử dụng PowerShell commands thay vì Unix
+Get-Content file.txt       # Thay vì cat
+Select-String pattern      # Thay vì grep
+Get-ChildItem              # Thay vì ls
+```
+
+#### ⚠️ **Các lệnh NGUY HIỂM - TUYỆT ĐỐI TRÁNH:**
+```powershell
+# KHÔNG BAO GIỜ chạy trong Cursor AI agent
+git log                    # Mở pager
+git diff                   # Mở pager  
+git status                 # Mở pager
+git add -p                 # Interactive mode
+git rebase -i              # Mở editor
+git commit                 # Mở editor
+vim file.txt               # Mở Vim
+nano file.txt              # Mở Nano
+less file.txt              # Mở less
+more file.txt              # Mở more
+man command                # Mở manual
+```
+
+### 15. Quy tắc ưu tiên
 
 #### 🥇 **Ưu tiên 1: Chạy từng dòng lệnh riêng biệt**
 #### 🥈 **Ưu tiên 2: Gộp tối đa 2-3 lệnh đơn giản**
@@ -339,7 +434,44 @@ npm install; npm run build
 - **Không sử dụng Unix commands** - sẽ gây lỗi
 - **Luôn quote paths có spaces** - tránh lỗi parsing
 - **Sử dụng Windows path separators** - `\` thay vì `/`
+- **🚨 TUYỆT ĐỐI TRÁNH các lệnh interactive** - sẽ gây kẹt terminal
+- **Luôn sử dụng --no-pager** cho git commands
+- **Ưu tiên PowerShell commands** thay vì Unix commands
+
+## ⚠️ CẢNH BÁO QUAN TRỌNG
+
+### 🚨 **CÁC LỆNH NGUY HIỂM - TUYỆT ĐỐI KHÔNG SỬ DỤNG:**
+```powershell
+# ❌ TUYỆT ĐỐI KHÔNG - Sẽ gây kẹt terminal
+git log                    # Mở pager
+git diff                   # Mở pager
+git status                 # Mở pager
+git show                   # Mở pager
+git blame                  # Mở pager
+git add -p                 # Interactive mode
+git rebase -i              # Mở editor
+git commit                 # Mở editor
+vim file.txt               # Mở Vim
+nano file.txt              # Mở Nano
+less file.txt              # Mở less
+more file.txt              # Mở more
+man command                # Mở manual
+```
+
+### ✅ **CÁC LỆNH AN TOÀN - LUÔN SỬ DỤNG:**
+```powershell
+# ✅ AN TOÀN - Không gây kẹt terminal
+git log --oneline -10 --no-pager
+git diff --no-pager
+git status --porcelain
+git show --no-pager
+git add -A
+git commit -m "message" --no-verify
+Get-Content file.txt
+Select-String pattern file.txt
+Get-ChildItem
+```
 
 ---
 
-**Mục tiêu**: Đảm bảo 100% terminal commands chạy thành công trên Windows PowerShell environment của Cursor IDE.
+**Mục tiêu**: Đảm bảo 100% terminal commands chạy thành công trên Windows PowerShell environment của Cursor IDE mà không bị kẹt trong pager/editor.

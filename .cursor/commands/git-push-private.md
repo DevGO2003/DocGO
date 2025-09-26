@@ -17,13 +17,14 @@ Gửi tất cả commits (bao gồm cả file nhạy cảm như .env*, mcp.json,
 ## Lệnh dưới đây sẽ bổ sung vào Cursor TODO, lưu ý Phần nào trước thì phải thực thiện xong trước rồi mới qua Phần tiếp theo, ko được làm song song các Phần:
   Phần 1: Thiết lập biến môi trường, hãy tìm kiếm file bằng quét repo chứ đừng sài powershell
   1) <origin>: đọc REMOTE_ORIGIN từ ".cursor/tools/github/env/.env"
-  2) <destination-branch>: tham số thứ nhất, nếu không có tham số: mặc định nhánh hiện tại
-  3) <current-branch>: nhánh hiện tại, nếu không xác định: mặc định tạo vibe-coding
-  4) <message>: đọc những file chuẩn bị đang stage để tóm tắt nội dung
-  5) <restore>: file trong đường dẫn ".cursor\commands\git-restore-env-local.md"
-  6) <backup>: file trong đường dẫn ".cursor\commands\git-backup-env.md"
-  7) <mcp-discord>: file trong đường dẫn ".cursor\commands\send-discord-message.md"
-  8) <push-origin>: file trong đường dẫn ".cursor\commands\git-push.md"
+  2) <private>: đọc REMOTE_PRIVATE từ ".cursor/tools/github/env/.env"
+  3) <destination-branch>: tham số thứ nhất, nếu không có tham số: mặc định nhánh hiện tại
+  4) <current-branch>: đọc từ file ".git/HEAD" (format: "ref: refs/heads/<branch-name>"), nếu không xác định: mặc định tạo vibe-coding
+  5) <message>: đọc những file chuẩn bị đang stage để tóm tắt nội dung
+  6) <restore>: file trong đường dẫn ".cursor\commands\git-restore-env-local.md"
+  7) <backup>: file trong đường dẫn ".cursor\commands\git-backup-env.md"
+  8) <mcp-discord>: file trong đường dẫn ".cursor\commands\send-discord-message.md"
+  9) <push-origin>: file trong đường dẫn ".cursor\commands\git-push.md"
 
   Phần 2 - Đọc và thực hiện <push-origin>
 
