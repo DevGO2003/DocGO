@@ -122,7 +122,27 @@
     "Maintenance": "Maintenance",
     "Logistics": "Logistics",
     "Transportation": "Transportation",
-    "Delivery": "Delivery"
+    "Delivery": "Delivery",
+    "ưu_tiên_cao": "High Priority",
+    "hợp_đồng_dài_hạn": "Long-term Contract",
+    "thanh_toán_định_kỳ": "Periodic Payment",
+    "bảo_hiểm": "Insurance",
+    "giai_đoạn_thử_việc": "Probation Period",
+    "tăng_lương": "Salary Increase",
+    "nghỉ_phép": "Leave",
+    "đào_tạo": "Training",
+    "công_tác": "Work",
+    "thưởng": "Bonus",
+    "kỷ_luật": "Discipline",
+    "chấm_dứt_hợp_đồng": "Contract Termination",
+    "bảo_mật": "Security",
+    "bí_mật_thương_mại": "Trade Secret",
+    "cạnh_tranh": "Competition",
+    "sở_hữu_trí_tuệ": "Intellectual Property",
+    "giải_quyết_tranh_chấp": "Dispute Resolution",
+    "luật_áp_dụng": "Applicable Law",
+    "điều_khoản_đặc_biệt": "Special Terms",
+    "phụ_lục": "Appendix"
     }
     },
     "common": {

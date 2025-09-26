@@ -43,6 +43,8 @@ export default function ContractsPage() {
   const { t } = useTranslation()
   const [items, setItems] = useState<ContractItem[]>([])
   const [availableTags, setAvailableTags] = useState<string[]>([])
+  const [tagsLoading, setTagsLoading] = useState<boolean>(true)
+  const [tagsError, setTagsError] = useState<boolean>(false)
   const [loading, setLoading] = useState<boolean>(true)
   const [search, setSearch] = useState<string>('')
   const [debouncedSearch, setDebouncedSearch] = useState<string>('')
@@ -88,7 +90,7 @@ export default function ContractsPage() {
     if (isLoadMore) {
       setIsLoadingMore(true)
     } else {
-      setLoading(true)
+    setLoading(true)
       setPage(0) // Reset to first page when not loading more
     }
     
@@ -179,7 +181,7 @@ export default function ContractsPage() {
         setAllItems(newItems)
       } else {
         // Replace all items
-        setItems(mapped)
+      setItems(mapped)
         setDisplayedItems(mapped)
         setAllItems(mapped)
       }
@@ -216,10 +218,10 @@ export default function ContractsPage() {
         }
       })
       if (!isLoadMore) {
-        setItems([])
+      setItems([])
         setDisplayedItems([])
         setAllItems([])
-        setTotalPages(1)
+      setTotalPages(1)
       }
     } finally {
       setLoading(false)
@@ -231,6 +233,9 @@ export default function ContractsPage() {
   // Load available tags once
   useEffect(() => {
     const loadTags = async () => {
+      setTagsLoading(true)
+      setTagsError(false)
+      
       try {
         const res = await tagAPI.getPopularTags()
         const payload: any = res.data?.data
@@ -238,12 +243,22 @@ export default function ContractsPage() {
         const tagsFromApi: string[] = Array.isArray(payload) 
           ? payload.map((tag: any) => tag.name || tag.displayName).filter(Boolean)
           : []
+        
+        if (tagsFromApi.length === 0) {
+          setTagsError(true)
+          setAvailableTags([])
+          console.warn('[Contracts] No tags returned from API')
+        } else {
         setAvailableTags(tagsFromApi)
+          setTagsError(false)
         console.log('[Contracts] Loaded tags from API:', tagsFromApi)
+        }
       } catch (error) {
         console.error('[Contracts] Error loading tags:', error)
-        // Fallback to hardcoded tags if API fails
-        setAvailableTags(['ưu_tiên','gấp','gia_hạn','cao_giá','đối_tác_mới','rủi_ro'])
+        setTagsError(true)
+        setAvailableTags([])
+      } finally {
+        setTagsLoading(false)
       }
     }
     loadTags()
@@ -356,6 +371,37 @@ export default function ContractsPage() {
     }
   }
 
+  // Retry loading tags
+  const handleRetryTags = () => {
+    const loadTags = async () => {
+      setTagsLoading(true)
+      setTagsError(false)
+      
+      try {
+        const res = await tagAPI.getPopularTags()
+        const payload: any = res.data?.data
+        const tagsFromApi: string[] = Array.isArray(payload) 
+          ? payload.map((tag: any) => tag.name || tag.displayName).filter(Boolean)
+          : []
+        
+        if (tagsFromApi.length === 0) {
+          setTagsError(true)
+          setAvailableTags([])
+        } else {
+          setAvailableTags(tagsFromApi)
+          setTagsError(false)
+        }
+      } catch (error) {
+        console.error('[Contracts] Error loading tags on retry:', error)
+        setTagsError(true)
+        setAvailableTags([])
+      } finally {
+        setTagsLoading(false)
+      }
+    }
+    loadTags()
+  }
+
   // Removed handleSearch; using debounced search
 
   return (
@@ -364,10 +410,10 @@ export default function ContractsPage() {
         {/* Page Header */}
         <div className="relative overflow-hidden rounded-2xl border border-indigo-100 bg-gradient-to-br from-indigo-50 via-white to-purple-50 p-6 shadow-sm">
           <div className="relative z-10">
-            <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600">
-              Quản lý Hợp đồng
-            </h1>
-            <p className="text-gray-600">Tìm kiếm, lọc trạng thái/loại và gắn thẻ nhanh</p>
+              <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600">
+                Quản lý Hợp đồng
+              </h1>
+              <p className="text-gray-600">Tìm kiếm, lọc trạng thái/loại và gắn thẻ nhanh</p>
           </div>
           <div className="pointer-events-none absolute -top-16 -right-16 h-56 w-56 rounded-full bg-indigo-200/30 blur-3xl" />
           <div className="pointer-events-none absolute -bottom-16 -left-16 h-56 w-56 rounded-full bg-purple-200/30 blur-3xl" />
@@ -467,20 +513,85 @@ export default function ContractsPage() {
           </div>
 
           {/* Tags */}
-          <div className="mt-4 flex flex-wrap gap-2">
+          <div className="mt-4">
+            <div className="flex items-center gap-2 mb-3">
+              <h4 className="text-sm font-semibold text-gray-700">Thẻ phân loại</h4>
+              {tagsLoading && (
+                <div className="flex items-center gap-1 text-xs text-gray-500">
+                  <svg className="animate-spin w-3 h-3" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Đang tải...
+                </div>
+              )}
+            </div>
+            
+            {tagsError ? (
+              <div className="flex items-center justify-between p-3 bg-red-50 border border-red-200 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <div>
+                    <p className="text-sm font-medium text-red-800">Không thể tải danh sách thẻ</p>
+                    <p className="text-xs text-red-600">Vui lòng thử lại sau hoặc liên hệ quản trị viên</p>
+                  </div>
+                </div>
+                <button
+                  onClick={handleRetryTags}
+                  disabled={tagsLoading}
+                  className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-red-700 bg-red-100 hover:bg-red-200 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {tagsLoading ? (
+                    <>
+                      <svg className="animate-spin w-3 h-3" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Đang thử...
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                      </svg>
+                      Thử lại
+                    </>
+                  )}
+                </button>
+              </div>
+            ) : availableTags.length === 0 && !tagsLoading ? (
+              <div className="flex items-center gap-2 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <svg className="w-5 h-5 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
+                <div>
+                  <p className="text-sm font-medium text-yellow-800">Chưa có thẻ nào</p>
+                  <p className="text-xs text-yellow-600">Hãy tạo thẻ mới để phân loại hợp đồng</p>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-wrap gap-2">
             {availableTags.map((t: string) => {
               const active = selectedTags.includes(t)
               return (
                 <button
                   key={t}
                   onClick={() => toggleTag(t)}
-                  className={`inline-flex items-center gap-1 rounded-full border px-3 py-1 text-sm transition ${active ? 'bg-indigo-50 text-indigo-700 border-indigo-200' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'}`}
+                      className={`inline-flex items-center gap-1 rounded-full border px-3 py-1.5 text-sm transition-all duration-200 hover:scale-105 ${
+                        active 
+                          ? 'bg-gradient-to-r from-indigo-50 to-purple-50 text-indigo-700 border-indigo-200 shadow-md' 
+                          : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50 hover:border-gray-400'
+                      }`}
                 >
                   <TagIcon className="h-4 w-4" />
                   {t}
                 </button>
               )
             })}
+              </div>
+            )}
           </div>
         </div>
 
@@ -511,7 +622,7 @@ export default function ContractsPage() {
             </span>
           </div>
           
-          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2">
             {viewMode === 'list' && (
               <button
                 onClick={() => setShowTableSettings(true)}
@@ -523,7 +634,7 @@ export default function ContractsPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
               </button>
-            )}
+          )}
           </div>
         </div>
 
@@ -568,8 +679,8 @@ export default function ContractsPage() {
                 </div>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                {items.map(c => (
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+              {items.map(c => (
                 <div key={c.id} className="group bg-white rounded-2xl border border-gray-200 p-5 shadow-sm hover:shadow-md hover:-translate-y-[1px] transition relative">
                   <div className="absolute top-4 left-4">
                     <input
@@ -664,7 +775,7 @@ export default function ContractsPage() {
                   </button>
                 </div>
               )}
-            </div>
+        </div>
           )}
 
         </div>

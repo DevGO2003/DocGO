@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ArrowLeft, Edit, FileText, Calendar, DollarSign, Users, AlertTriangle, CheckCircle, Clock, Star, Building, Scale, Handshake } from 'lucide-react';
 import { Contract } from '../types/contract';
+import { useTagTranslation } from '../hooks/useTagTranslation';
 
 interface ContractDetailViewProps {
   contract: Contract;
@@ -15,6 +16,7 @@ export const ContractDetailView: React.FC<ContractDetailViewProps> = ({
   onEdit,
   canEdit
 }) => {
+  const { translateTag } = useTagTranslation();
   const [activeTab, setActiveTab] = useState<'overview' | 'details' | 'highlights'>('overview');
 
   const getStatusColor = (status: string) => {
@@ -499,7 +501,7 @@ export const ContractDetailView: React.FC<ContractDetailViewProps> = ({
                         key={tag.id}
                         className="px-3 py-1 text-sm font-medium rounded-full bg-blue-100 text-blue-800"
                       >
-                        {tag.name}
+                        {translateTag(tag.name)}
                       </span>
                     ))}
                   </div>

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Save, X, FileText, Edit3 } from 'lucide-react';
 import { Contract, ContractTag } from '../types/contract';
+import { useTagTranslation } from '../hooks/useTagTranslation';
 
 interface ContractEditorProps {
   contract: Contract;
@@ -17,6 +18,7 @@ export const ContractEditor: React.FC<ContractEditorProps> = ({
   onClose,
   canEdit
 }) => {
+  const { translateTag } = useTagTranslation();
   const [editedContract, setEditedContract] = useState({
     title: contract.title,
     description: contract.description,
@@ -169,7 +171,7 @@ export const ContractEditor: React.FC<ContractEditorProps> = ({
                     className={`px-3 py-1 text-sm font-medium rounded-full border ${getTagColor(tag.color)} cursor-pointer`}
                     onClick={() => handleRemoveTag(tag.id)}
                   >
-                    {tag.name} ×
+                    {translateTag(tag.name)} ×
                   </span>
                 ))}
               </div>
@@ -182,7 +184,7 @@ export const ContractEditor: React.FC<ContractEditorProps> = ({
                       onClick={() => handleAddTag(tag)}
                       className={`px-3 py-1 text-sm font-medium rounded-full border border-dashed hover:bg-opacity-50 ${getTagColor(tag.color)}`}
                     >
-                      + {tag.name}
+                      + {translateTag(tag.name)}
                     </button>
                   ))}
               </div>

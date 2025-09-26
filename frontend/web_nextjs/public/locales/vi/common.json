@@ -122,7 +122,27 @@
         "Maintenance": "Bảo trì",
         "Logistics": "Hậu cần",
         "Transportation": "Vận tải",
-        "Delivery": "Giao hàng"
+        "Delivery": "Giao hàng",
+        "ưu_tiên_cao": "Ưu tiên cao",
+        "hợp_đồng_dài_hạn": "Hợp đồng dài hạn",
+        "thanh_toán_định_kỳ": "Thanh toán định kỳ",
+        "bảo_hiểm": "Bảo hiểm",
+        "giai_đoạn_thử_việc": "Giai đoạn thử việc",
+        "tăng_lương": "Tăng lương",
+        "nghỉ_phép": "Nghỉ phép",
+        "đào_tạo": "Đào tạo",
+        "công_tác": "Công tác",
+        "thưởng": "Thưởng",
+        "kỷ_luật": "Kỷ luật",
+        "chấm_dứt_hợp_đồng": "Chấm dứt hợp đồng",
+        "bảo_mật": "Bảo mật",
+        "bí_mật_thương_mại": "Bí mật thương mại",
+        "cạnh_tranh": "Cạnh tranh",
+        "sở_hữu_trí_tuệ": "Sở hữu trí tuệ",
+        "giải_quyết_tranh_chấp": "Giải quyết tranh chấp",
+        "luật_áp_dụng": "Luật áp dụng",
+        "điều_khoản_đặc_biệt": "Điều khoản đặc biệt",
+        "phụ_lục": "Phụ lục"
       }
     },
     "common": {
