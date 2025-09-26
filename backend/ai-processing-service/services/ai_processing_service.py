@@ -277,6 +277,21 @@ class AIProcessingService:
                 
             except Exception as e:
                 error_str = str(e)
+                
+                # Check for API key invalid error
+                if "API key not valid" in error_str or "API_KEY_INVALID" in error_str:
+                    # Get API key info for debugging
+                    api_key_info = "Thiếu api key"
+                    try:
+                        if hasattr(self, 'api_key') and self.api_key:
+                            api_key_info = f"+ {self.api_key[:10]}..."
+                    except:
+                        api_key_info = "Thiếu api key"
+                    
+                    logging.error(f"[AI_API_KEY_INVALID] Invalid API key: {e}")
+                    # Return special error indicator for API key issues
+                    return {"error": "API_KEY_INVALID", "message": f"API key không hợp lệ. Vui lòng kiểm tra lại API key. {api_key_info}"}
+                
                 if "429" in error_str or "quota" in error_str.lower() or "rate" in error_str.lower():
                     if attempt < max_retries - 1:
                         # Calculate delay with exponential backoff and jitter

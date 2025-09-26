@@ -29,7 +29,7 @@ export const UserApprovalPanel: React.FC<UserApprovalPanelProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-lg shadow-xl max-w-xl w-full max-h-[90vh] overflow-y-auto">
         <div className="p-6 border-b border-gray-200">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-semibold text-gray-900">
@@ -90,16 +90,16 @@ export const UserApprovalPanel: React.FC<UserApprovalPanelProps> = ({
                     <div className="flex space-x-3">
                       <button
                         onClick={() => onApprove(user.id)}
-                        className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                        className="flex items-center space-x-1 px-2 py-1 bg-green-600 text-white rounded text-sm hover:bg-green-700 transition-colors"
                       >
-                        <Check className="w-4 h-4" />
+                        <Check className="w-3 h-3" />
                         <span>Phê duyệt</span>
                       </button>
                       <button
                         onClick={() => onReject(user.id)}
-                        className="flex items-center space-x-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                        className="flex items-center space-x-1 px-2 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700 transition-colors"
                       >
-                        <XCircle className="w-4 h-4" />
+                        <XCircle className="w-3 h-3" />
                         <span>Từ chối</span>
                       </button>
                     </div>

@@ -563,6 +563,30 @@ async def summarize_api(
                 requestId=str(uuid.uuid4())
             )
         
+        # Check for API key error
+        if isinstance(answer, dict) and answer.get("error") == "API_KEY_INVALID":
+            # Get API key info for debugging
+            api_key_info = "Thiếu api key"
+            if gemini_api_key:
+                api_key_info = f"+ {gemini_api_key[:10]}..."
+            else:
+                try:
+                    env_api_key = get_gemini_api_key()
+                    if env_api_key:
+                        api_key_info = f"+ {env_api_key[:10]}..."
+                except:
+                    api_key_info = "Thiếu api key"
+            
+            return RestResponse(
+                statusCode=422,
+                shortMessage="Unprocessable Entity",
+                description=f"API key không hợp lệ. Vui lòng kiểm tra lại API key. {api_key_info}",
+                data=None,
+                path=request.url.path,
+                timestamp=datetime.now(),
+                requestId=str(uuid.uuid4())
+            )
+        
         # Convert dict result back to string for compatibility
         if isinstance(answer, dict):
             answer = json.dumps(answer, ensure_ascii=False, indent=2)

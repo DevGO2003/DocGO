@@ -1,11 +1,11 @@
-# Best Choice Command - Thực thi phương án tối ưu
+# Do Best Choice Command - Thực thi phương án tối ưu
 
 ## Mục đích
 - Chạy ngay phương án tốt nhất (best choice) được AI agent đề xuất ở lần `/ask` gần nhất.
 - **Tự động xử lý rủi ro** đã được gợi ý trong phân tích `/ask`.
 
 ## Cách dùng
-- Nhập: `best-choice`
+- Nhập: `do-best-choice`
 - Hệ thống sẽ tự động:
   1) Lấy kết quả phân tích gần nhất từ `/ask`
   2) Xác định phương án được gợi ý là "Best Choice"
