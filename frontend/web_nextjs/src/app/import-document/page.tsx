@@ -3,6 +3,7 @@
 import React, { useState, useRef } from 'react'
 import { DashboardLayout } from '@/components/layout'
 import ContractSummaryRender from '@/components/ContractSummaryRender'
+import EditableArrayTable from '@/components/EditableArrayTable'
 import { DocumentTextIcon, DocumentMagnifyingGlassIcon, ArrowUpTrayIcon, PlusIcon } from '@heroicons/react/24/outline'
 import { useRouter } from 'next/navigation'
 import { aiProcessingAPI } from '@/lib/api'
@@ -1629,10 +1630,78 @@ export default function CreateContractPage() {
             {/* Summary Tab Content */}
             {activeTab === 'summary' && (
               <div className="space-y-8">
+                <div>
+                  <h3 className="text-lg font-medium text-gray-900 mb-1">Thao tác tóm tắt hợp đồng</h3>
+                  <p className="text-gray-600">Nhập thông tin để chỉnh sửa/hoàn thiện dữ liệu tóm tắt hợp đồng.</p>
+                </div>
+
                 <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
                   <div className="p-6">
                     {/* Luôn hiển thị form giống Tab 3, đọc dữ liệu nếu có */}
                     <ContractSummaryRender data={summaryData || {}} />
+                  </div>
+                </div>
+
+                {/* Bảng chỉnh sửa các mảng */}
+                <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+                  <div className="px-6 py-4 border-b border-gray-100">
+                    <h2 className="text-lg font-semibold text-gray-900">Các bên (parties)</h2>
+                  </div>
+                  <div className="p-6">
+                    <EditableArrayTable
+                      data={summaryData?.parties || []}
+                      setData={(rows) => setSummaryData((prev: any) => ({ ...(prev || {}), parties: rows }))}
+                      columns={[
+                        { key: 'role', label: 'Vai trò' },
+                        { key: 'name', label: 'Tên' },
+                        { key: 'representative', label: 'Đại diện' },
+                        { key: 'taxCode', label: 'MST' },
+                        { key: 'contact', label: 'Liên hệ' },
+                        { key: 'address', label: 'Địa chỉ' }
+                      ]}
+                      addRowTemplate={{ role: '', name: '', representative: '', taxCode: '', contact: '', address: '' }}
+                    />
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+                  <div className="px-6 py-4 border-b border-gray-100">
+                    <h2 className="text-lg font-semibold text-gray-900">Điều khoản</h2>
+                  </div>
+                  <div className="p-6 grid gap-8">
+                    <EditableArrayTable
+                      title="Điều khoản chính"
+                      data={summaryData?.keyClauses || []}
+                      setData={(rows) => setSummaryData((prev: any) => ({ ...(prev || {}), keyClauses: rows }))}
+                      columns={[
+                        { key: 'name', label: 'Tên' },
+                        { key: 'description', label: 'Mô tả' },
+                        { key: 'source', label: 'Nguồn/Điều khoản' }
+                      ]}
+                      addRowTemplate={{ name: '', description: '', source: '' }}
+                    />
+                    <EditableArrayTable
+                      title="Điều khoản có lợi"
+                      data={summaryData?.favorableClauses || []}
+                      setData={(rows) => setSummaryData((prev: any) => ({ ...(prev || {}), favorableClauses: rows }))}
+                      columns={[
+                        { key: 'name', label: 'Tên' },
+                        { key: 'description', label: 'Mô tả' },
+                        { key: 'source', label: 'Nguồn/Điều khoản' }
+                      ]}
+                      addRowTemplate={{ name: '', description: '', source: '' }}
+                    />
+                    <EditableArrayTable
+                      title="Điều khoản bất lợi"
+                      data={summaryData?.unfavorableClauses || []}
+                      setData={(rows) => setSummaryData((prev: any) => ({ ...(prev || {}), unfavorableClauses: rows }))}
+                      columns={[
+                        { key: 'name', label: 'Tên' },
+                        { key: 'description', label: 'Mô tả' },
+                        { key: 'source', label: 'Nguồn/Điều khoản' }
+                      ]}
+                      addRowTemplate={{ name: '', description: '', source: '' }}
+                    />
                   </div>
                 </div>
               </div>

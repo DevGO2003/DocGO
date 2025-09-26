@@ -74,7 +74,7 @@ export default function ContractSummaryRender({ data }: Props) {
               <span className="w-3 h-3 bg-blue-500 rounded-full mr-3"></span>
               Tiêu đề hợp đồng
             </label>
-            <input readOnly value={data.title ?? ''} className="border border-gray-200 rounded-xl px-6 py-4 text-base bg-gray-50" />
+            <input value={data.title ?? ''} onChange={() => {}} className="border border-gray-200 rounded-xl px-6 py-4 text-base" />
           </div>
           <div className="grid gap-8 md:grid-cols-2 xl:grid-cols-2">
             <div className="grid gap-4">
@@ -82,21 +82,21 @@ export default function ContractSummaryRender({ data }: Props) {
                 <span className="w-3 h-3 bg-purple-500 rounded-full mr-3"></span>
                 Loại hợp đồng
               </label>
-              <input readOnly value={data.contractType ?? ''} className="border border-gray-200 rounded-xl px-6 py-4 text-base bg-gray-50" />
+              <input value={data.contractType ?? ''} onChange={() => {}} className="border border-gray-200 rounded-xl px-6 py-4 text-base" />
             </div>
             <div className="grid gap-4">
               <label className="text-base font-semibold text-gray-800 flex items-center">
                 <span className="w-3 h-3 bg-indigo-500 rounded-full mr-3"></span>
                 Đối tượng
               </label>
-              <input readOnly value={data.object ?? ''} className="border border-gray-200 rounded-xl px-6 py-4 text-base bg-gray-50" />
+              <input value={data.object ?? ''} onChange={() => {}} className="border border-gray-200 rounded-xl px-6 py-4 text-base" />
             </div>
             <div className="grid gap-4 md:col-span-2">
               <label className="text-base font-semibold text-gray-800 flex items-center">
                 <span className="w-3 h-3 bg-orange-500 rounded-full mr-3"></span>
                 Tags
               </label>
-              <input readOnly value={(data.tags || []).join(', ')} className="border border-gray-200 rounded-xl px-6 py-4 text-base bg-gray-50" />
+              <input value={(data.tags || []).join(', ')} onChange={() => {}} className="border border-gray-200 rounded-xl px-6 py-4 text-base" />
             </div>
           </div>
         </div>
@@ -126,21 +126,21 @@ export default function ContractSummaryRender({ data }: Props) {
                 <span className="w-3 h-3 bg-emerald-500 rounded-full mr-3"></span>
                 Ngày hiệu lực
               </label>
-              <input readOnly value={data.effectiveDate ?? ''} className="border border-gray-200 rounded-xl px-6 py-4 text-base bg-gray-50" />
+              <input value={data.effectiveDate ?? ''} onChange={() => {}} className="border border-gray-200 rounded-xl px-6 py-4 text-base" />
             </div>
             <div className="grid gap-4">
               <label className="text-base font-semibold text-gray-800 flex items-center">
                 <span className="w-3 h-3 bg-teal-500 rounded-full mr-3"></span>
                 Thời hạn
               </label>
-              <input readOnly value={data.term ?? ''} className="border border-gray-200 rounded-xl px-6 py-4 text-base bg-gray-50" />
+              <input value={data.term ?? ''} onChange={() => {}} className="border border-gray-200 rounded-xl px-6 py-4 text-base" />
             </div>
             <div className="grid gap-4 sm:col-span-2 lg:col-span-1">
               <label className="text-base font-semibold text-gray-800 flex items-center">
                 <span className="w-3 h-3 bg-rose-500 rounded-full mr-3"></span>
                 Điều kiện chấm dứt
               </label>
-              <input readOnly value={data.terminationConditions ?? ''} className="border border-gray-200 rounded-xl px-6 py-4 text-base bg-gray-50" />
+              <input value={data.terminationConditions ?? ''} onChange={() => {}} className="border border-gray-200 rounded-xl px-6 py-4 text-base" />
             </div>
           </div>
         </div>
@@ -170,28 +170,28 @@ export default function ContractSummaryRender({ data }: Props) {
                 <span className="w-3 h-3 bg-amber-500 rounded-full mr-3"></span>
                 Tổng giá trị
               </label>
-              <input readOnly value={(data.paymentDetails?.totalValue ?? '') as any} className="border border-gray-200 rounded-xl px-6 py-4 text-base bg-gray-50" />
+              <input value={(data.paymentDetails?.totalValue ?? '') as any} onChange={() => {}} className="border border-gray-200 rounded-xl px-6 py-4 text-base" />
             </div>
             <div className="grid gap-4">
               <label className="text-base font-semibold text-gray-800 flex items-center">
                 <span className="w-3 h-3 bg-orange-500 rounded-full mr-3"></span>
                 Tiền tệ
               </label>
-              <input readOnly value={data.paymentDetails?.currency ?? ''} className="border border-gray-200 rounded-xl px-6 py-4 text-base bg-gray-50" />
+              <input value={data.paymentDetails?.currency ?? ''} onChange={() => {}} className="border border-gray-200 rounded-xl px-6 py-4 text-base" />
             </div>
             <div className="grid gap-4">
               <label className="text-base font-semibold text-gray-800 flex items-center">
                 <span className="w-3 h-3 bg-yellow-500 rounded-full mr-3"></span>
                 Phương thức
               </label>
-              <input readOnly value={data.paymentDetails?.paymentMethod ?? ''} className="border border-gray-200 rounded-xl px-6 py-4 text-base bg-gray-50" />
+              <input value={data.paymentDetails?.paymentMethod ?? ''} onChange={() => {}} className="border border-gray-200 rounded-xl px-6 py-4 text-base" />
             </div>
             <div className="grid gap-4">
               <label className="text-base font-semibold text-gray-800 flex items-center">
                 <span className="w-3 h-3 bg-amber-400 rounded-full mr-3"></span>
                 Lịch thanh toán
               </label>
-              <input readOnly value={data.paymentDetails?.schedule ?? ''} className="border border-gray-200 rounded-xl px-6 py-4 text-base bg-gray-50" />
+              <input value={data.paymentDetails?.schedule ?? ''} onChange={() => {}} className="border border-gray-200 rounded-xl px-6 py-4 text-base" />
             </div>
           </div>
         </div>
@@ -199,16 +199,7 @@ export default function ContractSummaryRender({ data }: Props) {
 
       {/* Các bên, điều khoản, rủi ro... */}
       <div className="grid gap-8">
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-100">
-            <h2 className="text-lg font-semibold text-gray-900">Các bên (parties)</h2>
-          </div>
-          <div className="p-6">
-            <div className="border border-gray-200 rounded-lg p-3 bg-gray-50 overflow-x-auto">
-              <pre className="text-xs text-gray-800">{JSON.stringify(data.parties ?? [], null, 2)}</pre>
-            </div>
-          </div>
-        </div>
+        {/* Các bảng mảng sẽ được render từ trang cha bằng component EditableArrayTable */}
 
         <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-100">
@@ -243,15 +234,11 @@ export default function ContractSummaryRender({ data }: Props) {
           <div className="p-6 grid gap-6 md:grid-cols-2">
             <div className="grid gap-2">
               <label className="text-sm font-medium text-gray-700">Rủi ro</label>
-              <div className="border border-gray-200 rounded-lg p-3 bg-gray-50 overflow-x-auto">
-                <pre className="text-xs text-gray-800">{JSON.stringify(data.riskAssessment ?? {}, null, 2)}</pre>
-              </div>
+              <textarea value={JSON.stringify(data.riskAssessment ?? {}, null, 2)} onChange={() => {}} rows={6} className="border border-gray-200 rounded-lg px-4 py-2 text-sm" />
             </div>
             <div className="grid gap-2">
               <label className="text-sm font-medium text-gray-700">Trạng thái tuân thủ</label>
-              <div className="border border-gray-200 rounded-lg p-3 bg-gray-50 overflow-x-auto">
-                <pre className="text-xs text-gray-800">{JSON.stringify(data.complianceStatus ?? {}, null, 2)}</pre>
-              </div>
+              <textarea value={JSON.stringify(data.complianceStatus ?? {}, null, 2)} onChange={() => {}} rows={6} className="border border-gray-200 rounded-lg px-4 py-2 text-sm" />
             </div>
           </div>
         </div>
