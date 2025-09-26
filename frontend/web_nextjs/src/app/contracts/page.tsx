@@ -11,6 +11,8 @@ import { useTranslation } from '@/hooks/useTranslation'
 import { translateContractType, translateContractStatus, translateContractTag, getContractTypes, getContractStatuses } from '@/utils/tagTranslations'
 import { CONTRACT_TAGS, getTagDisplayName } from '@/constants/contractTags'
 import ContractControlPanel from '@/components/contracts/ContractControlPanel'
+import CustomTable from '@/components/contracts/CustomTable'
+import TableSettings, { TableColumn } from '@/components/contracts/TableSettings'
 
 type ContractItem = {
   id: string
@@ -55,13 +57,41 @@ export default function ContractsPage() {
   const [showAdvanced, setShowAdvanced] = useState<boolean>(false)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [selectedItems, setSelectedItems] = useState<string[]>([])
+  const [showTableSettings, setShowTableSettings] = useState<boolean>(false)
+  const [allItems, setAllItems] = useState<ContractItem[]>([])
+  const [displayedItems, setDisplayedItems] = useState<ContractItem[]>([])
+  const [hasMoreData, setHasMoreData] = useState<boolean>(true)
+  const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false)
   const abortRef = useRef<AbortController | null>(null)
+
+  // Table columns configuration
+  const [tableColumns, setTableColumns] = useState<TableColumn[]>([
+    { key: 'checkbox', label: '', visible: true, order: 0 },
+    { key: 'title', label: 'Hợp đồng', visible: true, order: 1 },
+    { key: 'contractNumber', label: 'Mã HĐ', visible: true, order: 2 },
+    { key: 'status', label: 'Trạng thái', visible: true, order: 3 },
+    { key: 'contractType', label: 'Loại', visible: true, order: 4 },
+    { key: 'totalValue', label: 'Giá trị', visible: true, order: 5 },
+    { key: 'effectiveDate', label: 'Hiệu lực', visible: true, order: 6 },
+    { key: 'expiryDate', label: 'Hết hạn', visible: true, order: 7 },
+    { key: 'riskLevel', label: 'Rủi ro', visible: true, order: 8 },
+    { key: 'parties', label: 'Đối tác', visible: false, order: 9 },
+    { key: 'createdAt', label: 'Ngày tạo', visible: false, order: 10 },
+    { key: 'actions', label: 'Hành động', visible: true, order: 11 }
+  ])
 
   // Removed manual queryString builder; fetchData composes params directly
 
-  const fetchData = async () => {
-    console.log('[Contracts] Starting fetchData...')
-    setLoading(true)
+  const fetchData = async (isLoadMore = false) => {
+    console.log('[Contracts] Starting fetchData...', { isLoadMore })
+    
+    if (isLoadMore) {
+      setIsLoadingMore(true)
+    } else {
+      setLoading(true)
+      setPage(0) // Reset to first page when not loading more
+    }
+    
     try {
       // Abort previous in-flight request
       if (abortRef.current) {
@@ -75,8 +105,9 @@ export default function ContractsPage() {
       const controller = new AbortController()
       abortRef.current = controller
 
+      const currentPage = isLoadMore ? Math.floor(displayedItems.length / pageSize) : 0
       const params: any = {
-        pageNumber: page,
+        pageNumber: currentPage,
         pageSize,
         includeDeleted: false,
       }
@@ -140,12 +171,31 @@ export default function ContractsPage() {
         reminders: Array.isArray(c.reminders) ? c.reminders : [],
       }))
 
-      setItems(mapped)
+      if (isLoadMore) {
+        // Append new items to existing ones
+        const newItems = [...displayedItems, ...mapped]
+        setDisplayedItems(newItems)
+        setItems(newItems)
+        setAllItems(newItems)
+      } else {
+        // Replace all items
+        setItems(mapped)
+        setDisplayedItems(mapped)
+        setAllItems(mapped)
+      }
+
       const totalPagesFromApi = payload?.result?.totalPages ?? payload?.totalPages ?? 1
       setTotalPages(Number(totalPagesFromApi) || 1)
+      
+      // Check if there's more data to load
+      const currentTotalItems = isLoadMore ? displayedItems.length + mapped.length : mapped.length
+      setHasMoreData(currentTotalItems < (payload?.result?.totalElements ?? payload?.totalElements ?? 0))
+      
       console.log('[Contracts] Successfully fetched data:', {
         itemsCount: mapped.length,
+        totalItems: currentTotalItems,
         totalPages: totalPagesFromApi,
+        hasMoreData: currentTotalItems < (payload?.result?.totalElements ?? payload?.totalElements ?? 0),
         response: res.data
       })
     } catch (e: any) {
@@ -165,10 +215,15 @@ export default function ContractsPage() {
           search: debouncedSearch
         }
       })
-      setItems([])
-      setTotalPages(1)
+      if (!isLoadMore) {
+        setItems([])
+        setDisplayedItems([])
+        setAllItems([])
+        setTotalPages(1)
+      }
     } finally {
       setLoading(false)
+      setIsLoadingMore(false)
       console.log('[Contracts] Fetch completed')
     }
   }
@@ -279,6 +334,25 @@ export default function ContractsPage() {
     if (confirmed) {
       // TODO: Implement send for approval
       alert(`Chức năng gửi duyệt hàng loạt cho ${selectedItems.length} hợp đồng đang được phát triển`)
+    }
+  }
+
+  // Table Settings Handlers
+  const handleTableColumnsChange = (newColumns: TableColumn[]) => {
+    setTableColumns(newColumns)
+  }
+
+  const handlePageSizeChange = (newPageSize: number) => {
+    setPageSize(newPageSize)
+    // Reset displayed items when page size changes
+    setDisplayedItems([])
+    setAllItems([])
+    setHasMoreData(true)
+  }
+
+  const handleShowMore = () => {
+    if (hasMoreData && !isLoadingMore) {
+      fetchData(true)
     }
   }
 
@@ -432,9 +506,24 @@ export default function ContractsPage() {
               </button>
             </div>
             <span className="text-sm text-gray-600">
-              {items.length} hợp đồng
+              {displayedItems.length} hợp đồng
               {selectedItems.length > 0 && ` · ${selectedItems.length} đã chọn`}
             </span>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            {viewMode === 'list' && (
+              <button
+                onClick={() => setShowTableSettings(true)}
+                className="p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+                title="Cài đặt bảng"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+              </button>
+            )}
           </div>
         </div>
 
@@ -533,118 +622,62 @@ export default function ContractsPage() {
               </div>
             </div>
           ) : (
-            <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-6 py-3 text-left">
-                        <div className="flex items-center gap-2">
-                          <input
-                            type="checkbox"
-                            checked={selectedItems.length === items.length && items.length > 0}
-                            onChange={selectedItems.length === items.length ? clearSelection : selectAll}
-                            className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
-                          />
-                          <span className="text-xs text-gray-500">
-                            {selectedItems.length === items.length && items.length > 0 ? 'Bỏ chọn tất cả' : 'Chọn tất cả'}
-                          </span>
-                        </div>
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hợp đồng</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mã HĐ</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Trạng thái</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Loại</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Giá trị</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hiệu lực</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hết hạn</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rủi ro</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hành động</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-200">
-                    {items.map(c => (
-                      <tr key={c.id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4">
-                          <input
-                            type="checkbox"
-                            checked={selectedItems.includes(c.id)}
-                            onChange={() => toggleSelectItem(c.id)}
-                            className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
-                          />
-                        </td>
-                        <td className="px-6 py-4">
-                          <div>
-                            <Link href={`/contracts/${c.id}`} className="text-sm font-medium text-gray-900 hover:text-indigo-600">
-                              {c.title}
-                            </Link>
-                            <p className="text-sm text-gray-500 line-clamp-1">{c.description || 'Không có mô tả'}</p>
-                            <div className="flex flex-wrap gap-1 mt-1">
-                              {c.tags?.slice(0,2).map(t => (
-                                <span key={t} className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">#{t}</span>
-                              ))}
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 text-sm text-gray-900">{c.contractNumber || '-'}</td>
-                        <td className="px-6 py-4">
-                          <span className={`text-xs px-2 py-1 rounded-full border ${badgeClass(c.status)}`}>{translateContractStatus(c.status, t)}</span>
-                        </td>
-                        <td className="px-6 py-4 text-sm text-gray-900">{c.contractType}</td>
-                        <td className="px-6 py-4 text-sm text-gray-900">{c.totalValue.toLocaleString('vi-VN')} {c.currency}</td>
-                        <td className="px-6 py-4 text-sm text-gray-900">{c.effectiveDate}</td>
-                        <td className="px-6 py-4 text-sm text-gray-900">{c.expiryDate || '-'}</td>
-                        <td className="px-6 py-4 text-sm text-gray-900">
-                          {c.riskLevel ? (
-                            <span className={`text-xs px-2 py-1 rounded-full border ${
-                              c.riskLevel === 'High' ? 'bg-rose-50 text-rose-700 border-rose-200' :
-                              c.riskLevel === 'Medium' ? 'bg-amber-50 text-amber-700 border-amber-200' :
-                              'bg-emerald-50 text-emerald-700 border-emerald-200'
-                            }`}>{c.riskLevel}</span>
-                          ) : '-'}
-                          {c.reminders && c.reminders.length > 0 && (
-                            <span title="Có nhắc nhở" className="ml-2">🔔</span>
-                          )}
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-2">
-                            <Link href={`/contracts/${c.id}`} className="text-indigo-600 hover:text-indigo-900 text-sm">
-                              Xem
-                            </Link>
-                            <button className="text-gray-400 hover:text-gray-600 text-sm">
-                              ⋮
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-
-              {/* Pagination */}
-              {totalPages > 1 && (
-                <div className="mt-8 flex justify-center gap-2">
+            <div>
+              <CustomTable
+                items={displayedItems}
+                columns={tableColumns}
+                selectedItems={selectedItems}
+                onToggleSelect={toggleSelectItem}
+                onSelectAll={selectAll}
+                onClearSelection={clearSelection}
+                translateContractStatus={translateContractStatus}
+                translateContractType={translateContractType}
+                translateContractTag={translateContractTag}
+                badgeClass={badgeClass}
+                t={t}
+              />
+              
+              {/* Show More Button */}
+              {hasMoreData && (
+                <div className="mt-6 flex justify-center">
                   <button
-                    onClick={() => setPage(p => Math.max(0, p - 1))}
-                    disabled={page === 0}
-                    className="px-3 py-2 text-sm rounded-md border bg-white text-gray-700 disabled:opacity-50"
+                    onClick={handleShowMore}
+                    disabled={isLoadingMore}
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
-                    Trước
-                  </button>
-                  <span className="px-3 py-2 text-sm text-gray-600">Trang {page + 1} / {totalPages}</span>
-                  <button
-                    onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
-                    disabled={page >= totalPages - 1}
-                    className="px-3 py-2 text-sm rounded-md border bg-white text-gray-700 disabled:opacity-50"
-                  >
-                    Sau
+                    {isLoadingMore ? (
+                      <>
+                        <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Đang tải...
+                      </>
+                    ) : (
+                      <>
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                        Hiển thị thêm {pageSize} hợp đồng
+                      </>
+                    )}
                   </button>
                 </div>
               )}
+            </div>
+          )}
+
         </div>
+
+        {/* Table Settings Modal */}
+        <TableSettings
+          columns={tableColumns}
+          onColumnsChange={handleTableColumnsChange}
+          pageSize={pageSize}
+          onPageSizeChange={handlePageSizeChange}
+          isOpen={showTableSettings}
+          onClose={() => setShowTableSettings(false)}
+        />
       </div>
     </DashboardLayout>
   )

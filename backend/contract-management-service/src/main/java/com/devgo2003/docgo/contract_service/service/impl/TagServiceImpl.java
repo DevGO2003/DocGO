@@ -38,6 +38,7 @@ public class TagServiceImpl implements ITagService {
             Aggregation.limit(10) // Chỉ lấy 10 tags đầu
         );
 
+        @SuppressWarnings("unchecked")
         AggregationResults<Map<String, Object>> results = mongoTemplate.aggregate(
             aggregation, 
             "contracts", 
@@ -72,6 +73,7 @@ public class TagServiceImpl implements ITagService {
             Aggregation.sort(org.springframework.data.domain.Sort.Direction.ASC, "_id") // Sắp xếp theo tên tag
         );
 
+        @SuppressWarnings("unchecked")
         AggregationResults<Map<String, Object>> results = mongoTemplate.aggregate(
             aggregation, 
             "contracts", 
@@ -111,6 +113,7 @@ public class TagServiceImpl implements ITagService {
             Aggregation.sort(org.springframework.data.domain.Sort.Direction.ASC, "_id") // Sắp xếp theo tên tag
         );
 
+        @SuppressWarnings("unchecked")
         AggregationResults<Map<String, Object>> results = mongoTemplate.aggregate(
             aggregation, 
             "contracts", 
