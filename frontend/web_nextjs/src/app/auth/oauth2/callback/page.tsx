@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
-import { UserRole, UserStatus } from '@/types/auth'
+import { UserRole, UserStatus, TokenData } from '@/types/auth'
+import TokenManager from '@/utils/token-manager'
 import { AuthLayout } from '@/components/layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
@@ -102,6 +103,28 @@ export default function OAuth2CallbackPage() {
                 localStorage.setItem('refresh_token', refreshToken)
               }
               
+              // Also store tokens via TokenManager to set cookies for middleware
+              const decodeJwtExp = (jwt: string): number | null => {
+                try {
+                  const parts = jwt.split('.')
+                  if (parts.length !== 3) return null
+                  const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')))
+                  if (payload && typeof payload.exp === 'number') {
+                    return payload.exp * 1000
+                  }
+                  return null
+                } catch {
+                  return null
+                }
+              }
+              const expMs = decodeJwtExp(token) || (Date.now() + 24 * 60 * 60 * 1000)
+              const tokenData: TokenData = {
+                accessToken: token,
+                refreshToken: refreshToken || undefined,
+                expiresAt: expMs,
+                tokenType: 'Bearer'
+              }
+              
               // Create user object from OAuth2 data
               // Use username from URL or fallback to email from token
               const userEmail = username || 'oauth-user@example.com'
@@ -115,6 +138,7 @@ export default function OAuth2CallbackPage() {
                 status: 'ACTIVE' as UserStatus
               }
               localStorage.setItem('user_data', JSON.stringify(userData))
+              TokenManager.storeTokens(tokenData, userData)
               
               // Update auth context
               setAuthData(userData)
@@ -140,10 +164,8 @@ export default function OAuth2CallbackPage() {
                 // ignore if cross-origin or no opener
               }
               
-              // Redirect to dashboard after a short delay
-              setTimeout(() => {
-                router.push('/dashboard')
-              }, 2000)
+              // Redirect to dashboard immediately
+              router.push('/dashboard')
               
             } catch (storageError) {
               console.error('Error storing OAuth2 data:', storageError)
