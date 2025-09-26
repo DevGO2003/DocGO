@@ -139,16 +139,22 @@ public class CommentController {
             comments = commentService.getCommentsByContractIdOrderByCreatedAt(contractId);
         } else if (createdFrom != null && createdTo != null) {
             try {
-                LocalDateTime from = LocalDateTime.parse(createdFrom);
-                LocalDateTime to = LocalDateTime.parse(createdTo);
+                // Handle date format "2024-03-01" by adding time component
+                String fromStr = createdFrom.contains("T") ? createdFrom : createdFrom + "T00:00:00";
+                String toStr = createdTo.contains("T") ? createdTo : createdTo + "T23:59:59";
+                LocalDateTime from = LocalDateTime.parse(fromStr);
+                LocalDateTime to = LocalDateTime.parse(toStr);
                 comments = commentService.getCommentsByCreatedAtBetween(from, to);
             } catch (Exception e) {
                 comments = commentService.getAllComments();
             }
         } else if (resolvedFrom != null && resolvedTo != null) {
             try {
-                LocalDateTime from = LocalDateTime.parse(resolvedFrom);
-                LocalDateTime to = LocalDateTime.parse(resolvedTo);
+                // Handle date format "2024-03-01" by adding time component
+                String fromStr = resolvedFrom.contains("T") ? resolvedFrom : resolvedFrom + "T00:00:00";
+                String toStr = resolvedTo.contains("T") ? resolvedTo : resolvedTo + "T23:59:59";
+                LocalDateTime from = LocalDateTime.parse(fromStr);
+                LocalDateTime to = LocalDateTime.parse(toStr);
                 comments = commentService.getCommentsByResolvedAtBetween(from, to);
             } catch (Exception e) {
                 comments = commentService.getAllComments();

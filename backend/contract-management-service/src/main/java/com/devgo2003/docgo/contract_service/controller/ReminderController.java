@@ -125,16 +125,22 @@ public class ReminderController {
             reminders = reminderService.getRemindersByContractIdOrderByCreatedAt(contractId);
         } else if (scheduledFrom != null && scheduledTo != null) {
             try {
-                LocalDateTime from = LocalDateTime.parse(scheduledFrom);
-                LocalDateTime to = LocalDateTime.parse(scheduledTo);
+                // Handle date format "2024-03-01" by adding time component
+                String fromStr = scheduledFrom.contains("T") ? scheduledFrom : scheduledFrom + "T00:00:00";
+                String toStr = scheduledTo.contains("T") ? scheduledTo : scheduledTo + "T23:59:59";
+                LocalDateTime from = LocalDateTime.parse(fromStr);
+                LocalDateTime to = LocalDateTime.parse(toStr);
                 reminders = reminderService.getRemindersByScheduledAtBetween(from, to);
             } catch (Exception e) {
                 reminders = reminderService.getAllReminders();
             }
         } else if (dueFrom != null && dueTo != null) {
             try {
-                LocalDateTime from = LocalDateTime.parse(dueFrom);
-                LocalDateTime to = LocalDateTime.parse(dueTo);
+                // Handle date format "2024-03-01" by adding time component
+                String fromStr = dueFrom.contains("T") ? dueFrom : dueFrom + "T00:00:00";
+                String toStr = dueTo.contains("T") ? dueTo : dueTo + "T23:59:59";
+                LocalDateTime from = LocalDateTime.parse(fromStr);
+                LocalDateTime to = LocalDateTime.parse(toStr);
                 reminders = reminderService.getRemindersByDueDateBetween(from, to);
             } catch (Exception e) {
                 reminders = reminderService.getAllReminders();
