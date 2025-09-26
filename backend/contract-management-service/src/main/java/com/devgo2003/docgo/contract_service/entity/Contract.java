@@ -3,6 +3,7 @@ package com.devgo2003.docgo.contract_service.entity;
 import com.devgo2003.docgo.contract_service.enums.ContractCategory;
 import com.devgo2003.docgo.contract_service.enums.ContractStatus;
 import com.devgo2003.docgo.contract_service.enums.ContractType;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.domain.Persistable;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -45,9 +46,11 @@ public class Contract extends BaseEntity implements Persistable<String> {
 
     @Field("start_date")
     @NotNull(message = "Ngày bắt đầu không được để trống")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime startDate;
 
     @Field("end_date")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime endDate;
 
     @Field("system_id")
@@ -135,6 +138,7 @@ public class Contract extends BaseEntity implements Persistable<String> {
     private Boolean legalReviewRequired = false;
 
     @Field("review_deadline")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime reviewDeadline;
     
     private List<String> tags;
