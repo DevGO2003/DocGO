@@ -37,3 +37,6 @@ document/**/*.drawio
 !**/.env.example
 !**/.env.local
 !**/.env.*.local
+
+# Đảm bảo track cả env trong .cursor/tools
+!/.cursor/tools/**/env/.env

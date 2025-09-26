@@ -245,6 +245,15 @@ site/
 **/.gradle/
 **/.cache/
 **/.nyc_output/
+ 
+###############################################################################
+# CURSOR TOOLS ENV (ignore in Git, track in Cursor)
+###############################################################################
+
+# Ignore sensitive env files under .cursor/tools for Git
+.cursor/tools/**/env/.env
+
+# Note: Cursor will still track these via .cursorignore (!**/.env)
 document/**/*.pdf
 document/**/*.doc
 document/**/*.docx
