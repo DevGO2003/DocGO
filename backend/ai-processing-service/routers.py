@@ -493,7 +493,8 @@ async def summarize_api(
         prompt = (
             "Luôn trả lời HOÀN TOÀN bằng TIẾNG VIỆT.\n"
             "Hãy phân tích và tóm tắt hợp đồng dưới đây thành một JSON với cấu trúc như sau:\n"
-            "QUAN TRỌNG: Nếu không tìm thấy thông tin cụ thể, hãy trả về null thay vì \"Chưa xác định\"\n"
+            "QUAN TRỌNG: Nếu không tìm thấy thông tin cụ thể, hãy trả về null thay vì \"Chưa xác định\".\n"
+            "CÁC MẢNG favorableClauses, unfavorableClauses, reminders, riskAssessment.riskDetails phải được TRÍCH XUẤT TỪ NỘI DUNG CÓ THẬT, KHÔNG bịa đặt. Mỗi mảng nên có 2-5 mục nếu văn bản có; nếu KHÔNG CÓ, để mảng rỗng.\n"
             "Đảm bảo mỗi điều khoản trong keyClauses, favorableClauses, unfavorableClauses là một object riêng biệt\n"
             "riskFactors và mitigationMeasures phải là danh sách chi tiết từng yếu tố\n\n"
             '{\n'
@@ -519,13 +520,14 @@ async def summarize_api(
             '    {"clauseName": "string", "description": "string", "riskTo": "string"}, ...\n'
             '  ],\n'
             '  "reminders": [\n'
-            '    {"type": "string", "date": "string (ISO 8601)", "content": "string"}, ...\n'
+            '    {"type": "string", "date": "string (ISO 8601) hoặc null nếu không ghi rõ trong văn bản", "content": "string trích từ văn bản"}, ...\n'
             '  ],\n'
             '  "terminationConditions": "string",\n'
             '  "riskAssessment": {\n'
             '    "riskLevel": "LOW|MEDIUM|HIGH",\n'
             '      "riskFactors": ["string"],\n'
-            '      "mitigationMeasures": ["string"]\n'
+            '      "mitigationMeasures": ["string"],\n'
+            '      "riskDetails": ["ghi chú/chi tiết rủi ro có thật nếu văn bản nêu"]\n'
             '  },\n'
             '  "complianceStatus": {\n'
             '    "status": "COMPLIANT|NON_COMPLIANT|REVIEW_REQUIRED",\n'

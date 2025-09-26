@@ -81,6 +81,7 @@ import com.devgo2003.docgo.contract_service.dto.ContractUnfavorableClauseDto;
 import com.devgo2003.docgo.contract_service.dto.ContractReminderDto;
 import com.devgo2003.docgo.contract_service.dto.ContractRiskAssessmentResponseDto;
 import com.devgo2003.docgo.contract_service.dto.ContractComplianceStatusResponseDto;
+import com.devgo2003.docgo.contract_service.dto.ContractRiskItemDto;
 
 @Service
 public class ContractServiceImpl implements IContractService {
@@ -775,7 +776,16 @@ public class ContractServiceImpl implements IContractService {
                 .riskLevel(contract.getRiskLevel())
                 .riskFactors(new ArrayList<>())
                 .mitigationMeasures(new ArrayList<>())
+                .riskDetails(new ArrayList<>())
                 .build();
+
+        List<ContractRiskItemDto> riskAssessmentList = new ArrayList<>();
+        if (contract.getRiskLevel() != null && !contract.getRiskLevel().isEmpty()) {
+            riskAssessmentList.add(ContractRiskItemDto.builder()
+                    .riskLevel(contract.getRiskLevel())
+                    .riskDetail(null)
+                    .build());
+        }
 
         if (contract.getRiskAssessment() != null && !contract.getRiskAssessment().trim().isEmpty()) {
             try {
@@ -784,25 +794,64 @@ public class ContractServiceImpl implements IContractService {
                 @SuppressWarnings("unchecked")
                 Map<String, Object> riskMap = mapper.readValue(contract.getRiskAssessment(), 
                     new TypeReference<Map<String, Object>>() {});
-                
-                riskAssessment.setRiskLevel((String) riskMap.get("riskLevel"));
-                
                 Object riskFactorsObj = riskMap.get("riskFactors");
+                Object riskDetailsObj = riskMap.get("riskDetails");
+                String levelFromJson = (riskMap.get("riskLevel") instanceof String) ? (String) riskMap.get("riskLevel") : contract.getRiskLevel();
                 if (riskFactorsObj instanceof List) {
                     @SuppressWarnings("unchecked")
                     List<String> riskFactors = (List<String>) riskFactorsObj;
                     riskAssessment.setRiskFactors(riskFactors);
+                    for (String factor : riskFactors) {
+                        riskAssessmentList.add(ContractRiskItemDto.builder()
+                                .riskLevel(levelFromJson)
+                                .riskDetail(factor)
+                                .build());
+                    }
                 }
-                
-                Object mitigationMeasuresObj = riskMap.get("mitigationMeasures");
-                if (mitigationMeasuresObj instanceof List) {
+                if (riskDetailsObj instanceof List) {
                     @SuppressWarnings("unchecked")
-                    List<String> mitigationMeasures = (List<String>) mitigationMeasuresObj;
-                    riskAssessment.setMitigationMeasures(mitigationMeasures);
+                    List<String> riskDetails = (List<String>) riskDetailsObj;
+                    riskAssessment.setRiskDetails(riskDetails);
+                    for (String detail : riskDetails) {
+                        riskAssessmentList.add(ContractRiskItemDto.builder()
+                                .riskLevel(levelFromJson)
+                                .riskDetail(detail)
+                                .build());
+                    }
+                } else if (levelFromJson != null) {
+                    riskAssessmentList.add(ContractRiskItemDto.builder()
+                            .riskLevel(levelFromJson)
+                            .riskDetail(null)
+                            .build());
                 }
             } catch (Exception e) {
-                // Fallback to string format
-                riskAssessment.setRiskFactors(Arrays.asList(contract.getRiskAssessment().split("\\s*,\\s*")));
+                // Fallback to string format (comma separated or newline)
+                String raw = contract.getRiskAssessment();
+                String[] parts = raw.split("\\r?\\n|\\s*,\\s*");
+                for (String p : parts) {
+                    String v = p.trim();
+                    if (!v.isEmpty()) {
+                        riskAssessmentList.add(ContractRiskItemDto.builder()
+                                .riskLevel(contract.getRiskLevel())
+                                .riskDetail(v)
+                                .build());
+                    }
+                }
+            }
+        }
+
+        // Build termination conditions as list
+        List<String> terminationConditionsList = new ArrayList<>();
+        if (contract.getTerminationConditions() != null && !contract.getTerminationConditions().trim().isEmpty()) {
+            String raw = contract.getTerminationConditions();
+            // Split theo xuống dòng, loại bỏ chỉ mục dạng "1. ", "2. "
+            String[] lines = raw.split("\\r?\\n");
+            for (String line : lines) {
+                String cleaned = line.replaceFirst("^\\s*\\d+\\.\\s*", "").trim();
+                if (!cleaned.isEmpty()) terminationConditionsList.add(cleaned);
+            }
+            if (terminationConditionsList.isEmpty()) {
+                terminationConditionsList.add(raw.trim());
             }
         }
 
@@ -859,8 +908,8 @@ public class ContractServiceImpl implements IContractService {
                 .favorableClauses(favorableClauses)
                 .unfavorableClauses(unfavorableClauses)
                 .reminders(reminders)
-                .terminationConditions(contract.getTerminationConditions())
-                .riskAssessment(riskAssessment)
+                .terminationConditions(terminationConditionsList)
+                .riskAssessment(riskAssessmentList)
                 .complianceStatus(complianceStatus)
                 .build();
     }
