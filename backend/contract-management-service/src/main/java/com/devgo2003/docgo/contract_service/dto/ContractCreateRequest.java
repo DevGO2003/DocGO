@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import jakarta.validation.constraints.Pattern;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -28,8 +29,10 @@ public class ContractCreateRequest {
     private String partiesJson;
 
     @NotNull(message = "Ngày bắt đầu không được để trống")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime startDate;
 
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime endDate;
 
     @Size(max = 100, message = "System ID không được vượt quá 100 ký tự")
@@ -91,6 +94,7 @@ public class ContractCreateRequest {
 
     private Boolean legalReviewRequired = false;
 
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime reviewDeadline;
     
     private List<String> tags;

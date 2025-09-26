@@ -9,6 +9,8 @@ import { InlineLoading } from '@/components/ui/LoadingSpinner'
 import { tagAPI } from '@/lib/api'
 import { useTranslation } from '@/hooks/useTranslation'
 import { translateContractType, translateContractStatus, translateContractTag, getContractTypes, getContractStatuses } from '@/utils/tagTranslations'
+import { CONTRACT_TAGS, getTagDisplayName } from '@/constants/contractTags'
+import ContractControlPanel from '@/components/contracts/ContractControlPanel'
 
 type ContractItem = {
   id: string
@@ -32,7 +34,8 @@ type ContractItem = {
 
 // STATUS_OPTIONS will be generated dynamically using getContractStatuses
 const TYPES = ['ALL','SERVICE_AGREEMENT','PURCHASE_AGREEMENT','PARTNERSHIP_AGREEMENT','EMPLOYMENT_CONTRACT','CONFIDENTIALITY_AGREEMENT','OTHER'] as const
-const TAGS = ['ưu_tiên','gấp','gia_hạn','cao_giá','đối_tác_mới','rủi_ro']
+// Sử dụng CONTRACT_TAGS từ constants thay vì hardcode array
+const TAGS = CONTRACT_TAGS
 
 export default function ContractsPage() {
   const { t } = useTranslation()
@@ -174,12 +177,18 @@ export default function ContractsPage() {
   useEffect(() => {
     const loadTags = async () => {
       try {
-        const res = await tagAPI.getAllTags()
+        const res = await tagAPI.getPopularTags()
         const payload: any = res.data?.data
-        const tagsFromApi: string[] = Array.isArray(payload) ? payload : []
+        // Extract tag names from TagDto objects
+        const tagsFromApi: string[] = Array.isArray(payload) 
+          ? payload.map((tag: any) => tag.name || tag.displayName).filter(Boolean)
+          : []
         setAvailableTags(tagsFromApi)
-      } catch {
-        setAvailableTags([])
+        console.log('[Contracts] Loaded tags from API:', tagsFromApi)
+      } catch (error) {
+        console.error('[Contracts] Error loading tags:', error)
+        // Fallback to hardcoded tags if API fails
+        setAvailableTags(['ưu_tiên','gấp','gia_hạn','cao_giá','đối_tác_mới','rủi_ro'])
       }
     }
     loadTags()
@@ -234,29 +243,72 @@ export default function ContractsPage() {
     setSelectedItems([])
   }
 
+  // Control Panel Handlers
+  const handleCreateContract = () => {
+    // Navigate to create contract page
+    window.location.href = '/import-document'
+  }
+
+  const handleEditSelected = () => {
+    if (selectedItems.length === 0) return
+    
+    if (selectedItems.length === 1) {
+      // Edit single contract
+      window.location.href = `/contracts/${selectedItems[0]}/edit`
+    } else {
+      // Bulk edit - show modal or navigate to bulk edit page
+      alert(`Chức năng chỉnh sửa hàng loạt cho ${selectedItems.length} hợp đồng đang được phát triển`)
+    }
+  }
+
+  const handleDeleteSelected = () => {
+    if (selectedItems.length === 0) return
+    
+    const confirmed = confirm(`Bạn có chắc chắn muốn xóa ${selectedItems.length} hợp đồng đã chọn?`)
+    if (confirmed) {
+      // TODO: Implement bulk delete
+      alert(`Chức năng xóa hàng loạt cho ${selectedItems.length} hợp đồng đang được phát triển`)
+      setSelectedItems([])
+    }
+  }
+
+  const handleSendForApproval = () => {
+    if (selectedItems.length === 0) return
+    
+    const confirmed = confirm(`Gửi ${selectedItems.length} hợp đồng để duyệt?`)
+    if (confirmed) {
+      // TODO: Implement send for approval
+      alert(`Chức năng gửi duyệt hàng loạt cho ${selectedItems.length} hợp đồng đang được phát triển`)
+    }
+  }
+
   // Removed handleSearch; using debounced search
 
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        {/* Fancy Header */}
+        {/* Page Header */}
         <div className="relative overflow-hidden rounded-2xl border border-indigo-100 bg-gradient-to-br from-indigo-50 via-white to-purple-50 p-6 shadow-sm">
-          <div className="relative z-10 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-            <div>
-              <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600">
-                Quản lý Hợp đồng
-              </h1>
-              <p className="text-gray-600">Tìm kiếm, lọc trạng thái/loại và gắn thẻ nhanh</p>
-            </div>
-            <div className="flex gap-2">
-              <Link href="/import-document" className="px-4 py-2 rounded-lg bg-white text-indigo-700 border border-indigo-200 hover:bg-indigo-50 shadow-sm">
-                + Tạo hợp đồng
-              </Link>
-            </div>
+          <div className="relative z-10">
+            <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600">
+              Quản lý Hợp đồng
+            </h1>
+            <p className="text-gray-600">Tìm kiếm, lọc trạng thái/loại và gắn thẻ nhanh</p>
           </div>
           <div className="pointer-events-none absolute -top-16 -right-16 h-56 w-56 rounded-full bg-indigo-200/30 blur-3xl" />
           <div className="pointer-events-none absolute -bottom-16 -left-16 h-56 w-56 rounded-full bg-purple-200/30 blur-3xl" />
         </div>
+
+        {/* Control Panel */}
+        <ContractControlPanel
+          selectedItems={selectedItems}
+          onRefresh={fetchData}
+          onCreateContract={handleCreateContract}
+          onEditSelected={handleEditSelected}
+          onDeleteSelected={handleDeleteSelected}
+          onSendForApproval={handleSendForApproval}
+          onClearSelection={clearSelection}
+        />
 
         {/* Filters */}
         <div className="bg-white/80 backdrop-blur rounded-2xl border border-gray-200 p-4 shadow-sm">
@@ -342,7 +394,7 @@ export default function ContractsPage() {
 
           {/* Tags */}
           <div className="mt-4 flex flex-wrap gap-2">
-            {(availableTags.length > 0 ? availableTags : TAGS).map(t => {
+            {availableTags.map((t: string) => {
               const active = selectedTags.includes(t)
               return (
                 <button
@@ -384,23 +436,6 @@ export default function ContractsPage() {
               {selectedItems.length > 0 && ` · ${selectedItems.length} đã chọn`}
             </span>
           </div>
-          
-          {selectedItems.length > 0 && (
-            <div className="flex items-center gap-2">
-              <button
-                onClick={clearSelection}
-                className="px-3 py-1 text-sm text-gray-600 hover:text-gray-800"
-              >
-                Bỏ chọn
-              </button>
-              <button className="px-3 py-1 bg-red-600 text-white rounded-lg hover:bg-red-700 transition text-sm">
-                🗑️ Xóa ({selectedItems.length})
-              </button>
-              <button className="px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm">
-                📤 Gửi duyệt ({selectedItems.length})
-              </button>
-            </div>
-          )}
         </div>
 
         {/* Content */}
@@ -409,11 +444,43 @@ export default function ContractsPage() {
             <InlineLoading text="Đang tải hợp đồng..." size="lg" />
           ) : items.length === 0 ? (
             <div className="text-center py-16">
-              <p className="text-gray-600">Không tìm thấy hợp đồng phù hợp.</p>
+              <div className="max-w-md mx-auto">
+                <div className="mb-4">
+                  <svg className="mx-auto h-16 w-16 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                </div>
+                <p className="text-gray-600 mb-6">Không tìm thấy hợp đồng phù hợp.</p>
+                <button
+                  onClick={() => fetchData()}
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  Làm mới
+                </button>
+              </div>
             </div>
           ) : viewMode === 'grid' ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-              {items.map(c => (
+            <div>
+              {/* Grid Header with Select All */}
+              <div className="mb-4 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={selectedItems.length === items.length && items.length > 0}
+                    onChange={selectedItems.length === items.length ? clearSelection : selectAll}
+                    className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                  />
+                  <span className="text-sm text-gray-600">
+                    {selectedItems.length === items.length && items.length > 0 ? 'Bỏ chọn tất cả' : 'Chọn tất cả'}
+                  </span>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                {items.map(c => (
                 <div key={c.id} className="group bg-white rounded-2xl border border-gray-200 p-5 shadow-sm hover:shadow-md hover:-translate-y-[1px] transition relative">
                   <div className="absolute top-4 left-4">
                     <input
@@ -463,6 +530,7 @@ export default function ContractsPage() {
                   </Link>
                 </div>
               ))}
+              </div>
             </div>
           ) : (
             <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
@@ -471,12 +539,17 @@ export default function ContractsPage() {
                   <thead className="bg-gray-50">
                     <tr>
                       <th className="px-6 py-3 text-left">
-                        <input
-                          type="checkbox"
-                          checked={selectedItems.length === items.length && items.length > 0}
-                          onChange={selectedItems.length === items.length ? clearSelection : selectAll}
-                          className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
-                        />
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            checked={selectedItems.length === items.length && items.length > 0}
+                            onChange={selectedItems.length === items.length ? clearSelection : selectAll}
+                            className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                          />
+                          <span className="text-xs text-gray-500">
+                            {selectedItems.length === items.length && items.length > 0 ? 'Bỏ chọn tất cả' : 'Chọn tất cả'}
+                          </span>
+                        </div>
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hợp đồng</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mã HĐ</th>
