@@ -29,32 +29,37 @@ export default function OAuth2CallbackPage() {
         // Get the current URL to check for OAuth2 response
         const currentUrl = window.location.href
         
-        // Check if this is a successful OAuth2 callback from Spring Security
-        if (currentUrl.includes('/login/oauth2/code/google')) {
-          // Extract parameters from URL
-          const code = searchParams.get('code')
-          const state = searchParams.get('state')
-          const error = searchParams.get('error')
-          
-          if (error) {
-            setStatus('error')
-            setMessage('Đăng nhập Google thất bại')
-            setError({
-              code: error,
-              message: `Lỗi OAuth2: ${error}`,
-              details: searchParams.get('error_description') || undefined
-            })
-            return
-          }
-          
-          if (!code) {
-            setStatus('error')
-            setMessage('Không nhận được authorization code từ Google')
-            setError({
-              message: 'Authorization code không được cung cấp',
-              details: 'Vui lòng thử đăng nhập lại'
-            })
-            return
+        // Accept both the Spring callback URL and the final frontend callback URL
+        const isSpringCallback = currentUrl.includes('/login/oauth2/code/google')
+        const isFrontendCallback = currentUrl.includes('/auth/oauth2/callback')
+        if (isSpringCallback || isFrontendCallback) {
+          // Only enforce presence of 'code' for Spring callback URL
+          if (isSpringCallback) {
+            // Extract parameters from URL
+            const code = searchParams.get('code')
+            const state = searchParams.get('state')
+            const error = searchParams.get('error')
+
+            if (error) {
+              setStatus('error')
+              setMessage('Đăng nhập Google thất bại')
+              setError({
+                code: error,
+                message: `Lỗi OAuth2: ${error}`,
+                details: searchParams.get('error_description') || undefined
+              })
+              return
+            }
+
+            if (!code) {
+              setStatus('error')
+              setMessage('Không nhận được authorization code từ Google')
+              setError({
+                message: 'Authorization code không được cung cấp',
+                details: 'Vui lòng thử đăng nhập lại'
+              })
+              return
+            }
           }
           
           // Extract tokens from URL parameters (sent by OAuth2LoginSuccessHandler)
@@ -63,7 +68,7 @@ export default function OAuth2CallbackPage() {
           const success = searchParams.get('success')
           const username = searchParams.get('username')
           
-          if (token && success === 'true' && username) {
+          if (token && token.length > 10) {
             try {
               // Validate token format (basic check)
               if (token.length < 10) {
@@ -77,12 +82,14 @@ export default function OAuth2CallbackPage() {
               }
               
               // Create user object from OAuth2 data
+              // Use username from URL or fallback to email from token
+              const userEmail = username || 'oauth-user@example.com'
               const userData = {
-                id: username,
-                userId: username,
-                username: username,
-                email: username,
-                name: username,
+                id: userEmail,
+                userId: userEmail,
+                username: userEmail,
+                email: userEmail,
+                name: username || 'OAuth User',
                 role: 'USER' as UserRole,
                 status: 'ACTIVE' as UserStatus
               }
@@ -92,7 +99,7 @@ export default function OAuth2CallbackPage() {
               setAuthData(userData)
               
               setStatus('success')
-              setMessage(`Đăng nhập Google thành công! Chào mừng ${username}`)
+              setMessage(`Đăng nhập Google thành công! Chào mừng ${userEmail}`)
               
               // If opened as a popup, notify opener and close
               try {
@@ -103,7 +110,7 @@ export default function OAuth2CallbackPage() {
                     type: 'oauth_success',
                     token,
                     refreshToken: refreshToken || null,
-                    username
+                    username: userEmail
                   }, targetOrigin)
                   window.close()
                   return

@@ -9,7 +9,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
 import java.io.IOException;
@@ -43,7 +43,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
                 return;
             }
 
-            DefaultOAuth2User oAuth2User = (DefaultOAuth2User) authentication.getPrincipal();
+            OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
             Map<String, Object> attributes = oAuth2User.getAttributes();
             
             if (attributes == null || attributes.isEmpty()) {
@@ -52,10 +52,23 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
                 return;
             }
 
-            // Extract user information with validation
+            // Extract identifiers with OIDC compatibility (prefer 'sub')
+            String subject = extractStringAttribute(attributes, "sub", requestId);
             String email = extractStringAttribute(attributes, "email", requestId);
             String name = extractStringAttribute(attributes, "name", requestId);
-            String username = determineUsername(email, name, requestId);
+            String googleId = extractStringAttribute(attributes, "id", requestId);
+
+            // Determine username: prefer email, then subject/id, then name
+            String username = null;
+            if (email != null && !email.trim().isEmpty()) {
+                username = email;
+            } else if (subject != null && !subject.trim().isEmpty()) {
+                username = subject;
+            } else if (googleId != null && !googleId.trim().isEmpty()) {
+                username = googleId;
+            } else if (name != null && !name.trim().isEmpty()) {
+                username = name;
+            }
 
             if (username == null || username.trim().isEmpty()) {
                 logger.error("[{}] Username cannot be determined from OAuth2 attributes", requestId);
@@ -63,8 +76,8 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
                 return;
             }
 
-            logger.info("[{}] OAuth2 User Info - Email: {}, Name: {}, Username: {}", 
-                       requestId, email, name, username);
+            logger.info("[{}] OAuth2 User Info - Email: {}, Name: {}, Sub: {}, Id: {}, Username: {}", 
+                       requestId, email, name, subject, googleId, username);
             logger.debug("[{}] OAuth2 All attributes: {}", requestId, attributes);
 
             // Find or create user with error handling
