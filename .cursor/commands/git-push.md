@@ -1,7 +1,13 @@
-﻿# Git Push
+# Git Push
 
 ## Mục đích
 Gửi tất cả commits lên remote origin
+
+## ⚠️ QUY TẮC QUAN TRỌNG
+- **LUÔN LUÔN push lên `origin` remote** (không bao giờ chuyển sang `private`)
+- **Nếu branch không tồn tại trên origin**: Tạo mới trước khi pull
+- **Không được fallback sang private** khi gặp lỗi branch không tồn tại
+- **Mục đích**: Đảm bảo code được push đúng repository công khai
 
 ## Cách sử dụng
 ```bash
@@ -28,15 +34,22 @@ Gửi tất cả commits lên remote origin
   2) `git status -s` sau đó tóm tắt thay đổi và gắn vào biến <message>
   3) `git commit -m "[origin-push] <message>" --no-verify`
   4) `git fetch <origin>`
-  5) `git pull --rebase <origin> <current-branch>`
+  5) **KIỂM TRA VÀ TẠO BRANCH TRÊN ORIGIN** (QUAN TRỌNG: Luôn push lên origin, không bao giờ chuyển sang private):
+     - `git ls-remote <origin> | grep <current-branch>`
+     - **Nếu branch không tồn tại trên origin**: 
+       - `git push -u <origin> <current-branch>` (tạo branch mới trên origin)
+       - Sau khi tạo thành công: tiếp tục bước 6
+     - **Nếu branch đã tồn tại**: tiếp tục bước 6
+     - **Nếu lỗi quyền truy cập origin**: Dừng và báo lỗi, KHÔNG chuyển sang private
+  6) `git pull --rebase <origin> <current-branch>`
      - Nếu có conflict khi rebase:
        - Sửa file bị conflict.
        - `git add <file>`
        - `git rebase --continue`
        - Nếu conflict phức tạp hoặc nhiều file, lập Cursor TODO ghi lại các file/nội dung conflict để giải quyết dần.
        - Nếu quá khó giải quyết, có thể cân nhắc (hạn chế) dùng `git pull --no-rebase` để merge, nhưng mặc định nên rebase để tránh merge commit thừa.
-  6) Kiểm tra nếu local không có commit mới so với remote <origin>: chuyển tới Phần 3.
-  7) `git push <origin> <current-branch>`
+  7) Kiểm tra nếu local không có commit mới so với remote <origin>: chuyển tới Phần 3.
+  8) `git push <origin> <current-branch>`
      - Nếu là lần đầu push nhánh này, dùng thêm `-u` (`git push -u <origin> <current-branch>`).
      - Nếu có tham số `<destination-branch>`:  
        - Push cả hai:
@@ -47,7 +60,7 @@ Gửi tất cả commits lên remote origin
          - `git push -u <origin> <current-branch>`
          - `git push -u <origin> <current-branch>:<destination-branch>`
 
-  8) Nếu khi push bị chặn do phát hiện secret (ví dụ: lộ file .env, token, key,...):
+  9) Nếu khi push bị chặn do phát hiện secret (ví dụ: lộ file .env, token, key,...):
      - Đọc và thực hiện <backup>
      - Dọn lịch sử để loại bỏ secret rồi force-push:
        - Dùng `git filter-repo` (khuyến nghị) hoặc BFG để xóa file secret khỏi lịch sử.
