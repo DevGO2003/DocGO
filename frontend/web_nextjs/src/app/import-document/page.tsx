@@ -1,14 +1,16 @@
 'use client'
 
 import React, { useState, useRef } from 'react'
+import { useRouter } from 'next/navigation'
 import { DashboardLayout } from '@/components/layout'
 import { DocumentTextIcon, DocumentMagnifyingGlassIcon, ArrowUpTrayIcon, PlusIcon } from '@heroicons/react/24/outline'
 import { aiProcessingAPI } from '@/lib/api'
 import toast from 'react-hot-toast'
 
 export default function CreateContractPage() {
+  const router = useRouter()
   // Tab state
-  const [activeTab, setActiveTab] = useState<'ocr' | 'file' | 'manual'>('ocr')
+  const [activeTab, setActiveTab] = useState<'ocr' | 'file' | 'manual' | 'summary'>('ocr')
   
   // OCR Tab states
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
@@ -16,6 +18,8 @@ export default function CreateContractPage() {
   const [ocrLoading, setOcrLoading] = useState(false)
   const [extractedText, setExtractedText] = useState('')
   const [isOcrModalOpen, setIsOcrModalOpen] = useState(false)
+  const [isSummarizeChoiceOpen, setIsSummarizeChoiceOpen] = useState(false)
+  const [summaryData, setSummaryData] = useState<any | null>(null)
   // Versioning from existing contract (OCR tab)
   const [createFromOldVersion, setCreateFromOldVersion] = useState(false)
   const [baseContractId, setBaseContractId] = useState<string>('')
@@ -81,18 +85,21 @@ export default function CreateContractPage() {
 
     try {
       setOcrLoading(true)
-      const response = await aiProcessingAPI.extractText(selectedFile)
-      
-      if (response.data?.data) {
-        setExtractedText(response.data.data)
-        setIsOcrModalOpen(true)
-        toast.success('Trích xuất văn bản thành công!')
+      // Gọi summarize qua API Gateway với multipart/form-data
+      const response = await aiProcessingAPI.summarizeFile(selectedFile, apiKey || undefined)
+      const body = response?.data
+      if (body && (body.statusCode === 200 || body.statusCode === 201)) {
+        setSummaryData(body.data || null)
+        toast.success('Đã trích xuất thành công, bạn muốn làm gì?')
+        setIsSummarizeChoiceOpen(true)
+      } else if (body && body.statusCode === 204) {
+        toast('Không có nội dung để tóm tắt (204).')
       } else {
-        toast.error('Không thể trích xuất văn bản từ file')
+        toast.error(body?.description || 'Không thể tóm tắt nội dung từ file')
       }
     } catch (error: any) {
-      console.error('OCR Error:', error)
-      toast.error(`Lỗi trích xuất: ${error.message || 'Có lỗi xảy ra'}`)
+      console.error('Summarize Error:', error)
+      toast.error(`Lỗi trích xuất: ${error?.response?.data?.description || error.message || 'Có lỗi xảy ra'}`)
     } finally {
       setOcrLoading(false)
     }
@@ -437,6 +444,17 @@ export default function CreateContractPage() {
                 >
                   <PlusIcon className="h-5 w-5 inline mr-2" />
                   Tạo hợp đồng mới
+                </button>
+                <button
+                  onClick={() => setActiveTab('summary')}
+                  className={`py-4 px-3 rounded-t-lg border-b-2 font-medium text-sm ${
+                    activeTab === 'summary'
+                      ? 'border-indigo-500 text-indigo-700 bg-indigo-50'
+                      : 'border-transparent text-gray-600 hover:text-gray-800 hover:border-gray-300 hover:bg-gray-50'
+                  }`}
+                >
+                  <DocumentTextIcon className="h-5 w-5 inline mr-2" />
+                  Tóm tắt hợp đồng
                 </button>
               </nav>
             </div>
@@ -1534,6 +1552,60 @@ export default function CreateContractPage() {
                   </form>
                 </div>
               )}
+
+              {/* Summary Tab Content */}
+              {activeTab === 'summary' && (
+                <div className="space-y-6">
+                  <div className="text-center">
+                    <h3 className="text-2xl font-bold text-gray-900 mb-2">Tóm tắt hợp đồng (AI)</h3>
+                    <p className="text-gray-600 text-lg mb-4">Hiển thị dữ liệu tóm tắt từ AI theo schema chuẩn</p>
+                  </div>
+                  {!summaryData ? (
+                    <div className="bg-amber-50 border border-amber-200 text-amber-800 rounded-xl p-4">
+                      Chưa có dữ liệu tóm tắt. Hãy tải file ở tab OCR và bấm "Trích xuất..." để lấy dữ liệu.
+                    </div>
+                  ) : (
+                    <div className="grid gap-6">
+                      <div className="bg-white border border-gray-200 rounded-xl p-4">
+                        <h4 className="font-semibold mb-2">Tiêu đề</h4>
+                        <div className="text-gray-800">{summaryData.title || '-'}</div>
+                      </div>
+                      <div className="grid gap-6 md:grid-cols-2">
+                        <div className="bg-white border border-gray-200 rounded-xl p-4">
+                          <h4 className="font-semibold mb-2">Số hợp đồng</h4>
+                          <div className="text-gray-800">{summaryData.contractNumber || '-'}</div>
+                        </div>
+                        <div className="bg-white border border-gray-200 rounded-xl p-4">
+                          <h4 className="font-semibold mb-2">Loại hợp đồng</h4>
+                          <div className="text-gray-800">{summaryData.contractType || '-'}</div>
+                        </div>
+                      </div>
+                      <div className="grid gap-6 md:grid-cols-2">
+                        <div className="bg-white border border-gray-200 rounded-xl p-4">
+                          <h4 className="font-semibold mb-2">Ngày hiệu lực</h4>
+                          <div className="text-gray-800">{summaryData.effectiveDate || '-'}</div>
+                        </div>
+                        <div className="bg-white border border-gray-200 rounded-xl p-4">
+                          <h4 className="font-semibold mb-2">Thời hạn</h4>
+                          <div className="text-gray-800">{summaryData.term || '-'}</div>
+                        </div>
+                      </div>
+                      <div className="bg-white border border-gray-200 rounded-xl p-4">
+                        <h4 className="font-semibold mb-2">Các bên tham gia</h4>
+                        <pre className="text-sm text-gray-800 whitespace-pre-wrap">{JSON.stringify(summaryData.parties, null, 2)}</pre>
+                      </div>
+                      <div className="bg-white border border-gray-200 rounded-xl p-4">
+                        <h4 className="font-semibold mb-2">Điều khoản chính</h4>
+                        <pre className="text-sm text-gray-800 whitespace-pre-wrap">{JSON.stringify(summaryData.keyClauses, null, 2)}</pre>
+                      </div>
+                      <div className="bg-white border border-gray-200 rounded-xl p-4">
+                        <h4 className="font-semibold mb-2">JSON đầy đủ</h4>
+                        <pre className="text-sm text-gray-800 overflow-x-auto">{JSON.stringify(summaryData, null, 2)}</pre>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -1556,6 +1628,42 @@ export default function CreateContractPage() {
             </div>
             <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-end gap-3">
               <button onClick={() => setIsOcrModalOpen(false)} className="btn-secondary">Đóng</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal lựa chọn sau khi summarize thành công */}
+      {isSummarizeChoiceOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/40" onClick={() => setIsSummarizeChoiceOpen(false)}></div>
+          <div className="relative bg-white w-full max-w-lg mx-4 rounded-2xl shadow-2xl border border-gray-200">
+            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-gray-900">Đã trích xuất thành công</h3>
+              <button onClick={() => setIsSummarizeChoiceOpen(false)} className="text-gray-500 hover:text-gray-700">✕</button>
+            </div>
+            <div className="p-6 space-y-4">
+              <p className="text-gray-700">Bạn muốn làm gì tiếp theo?</p>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <button
+                  onClick={() => {
+                    setIsSummarizeChoiceOpen(false)
+                    setActiveTab('summary')
+                  }}
+                  className="px-4 py-3 rounded-xl bg-indigo-600 text-white hover:bg-indigo-700 transition"
+                >
+                  Chuyển qua tóm tắt hợp đồng
+                </button>
+                <button
+                  onClick={() => {
+                    setIsSummarizeChoiceOpen(false)
+                    router.push('/contracts')
+                  }}
+                  className="px-4 py-3 rounded-xl border border-gray-200 text-gray-800 hover:bg-gray-50 transition"
+                >
+                  Chuyển đến danh sách hợp đồng
+                </button>
+              </div>
             </div>
           </div>
         </div>

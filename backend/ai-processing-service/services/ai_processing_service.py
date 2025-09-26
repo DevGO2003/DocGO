@@ -101,7 +101,7 @@ class AIProcessingService:
             '    "paymentMethod": "phương thức thanh toán"\n'
             '  },\n'
             '  "keyClauses": [\n'
-            '    {"name": "tên điều khoản", "description": "mô tả chi tiết nội dung", "source": "điều/số mục trong văn bản"}\n'
+            '    {"name": "điều khoản quan trọng", "description": "mô tả chi tiết nội dung quan trọng, ảnh hưởng lớn đến quyền/nghĩa vụ/giá/tiến độ/bảo hành/điều kiện thanh toán/chấm dứt", "source": "điều/số mục trong văn bản"}\n'
             '  ],\n'
             '  "favorableClauses": [\n'
             '    {"clauseName": "điều khoản có lợi trích từ văn bản", "description": "mô tả lợi ích có thật", "benefitTo": "bên được hưởng lợi"}\n'

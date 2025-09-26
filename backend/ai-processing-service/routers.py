@@ -511,7 +511,7 @@ async def summarize_api(
             '  "term": "string",\n'
             '  "paymentDetails": {"totalValue": "string", "schedule": "string", "currency": "string", "paymentMethod": "string"},\n'
             '  "keyClauses": [\n'
-            '    {"name": "string", "description": "string", "source": "string"}, ...\n'
+            '    {"name": "điều khoản quan trọng", "description": "mô tả nội dung quan trọng ảnh hưởng lớn (quyền/nghĩa vụ/giá/tiến độ/bảo hành/điều kiện thanh toán/chấm dứt)", "source": "điều/số mục trong văn bản"}, ...\n'
             '  ],\n'
             '  "favorableClauses": [\n'
             '    {"clauseName": "string", "description": "string", "benefitTo": "string"}, ...\n'
