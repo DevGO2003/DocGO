@@ -13,6 +13,8 @@ import com.devgo2003.docgo.contract_service.dto.ContractWithSummaryDto;
 import com.devgo2003.docgo.contract_service.dto.ContractDetailDto;
 import com.devgo2003.docgo.contract_service.dto.ContractResponseDto;
 import com.devgo2003.docgo.contract_service.dto.ContractCreateRequest;
+import com.devgo2003.docgo.contract_service.dto.BulkDeleteRequest;
+import com.devgo2003.docgo.contract_service.dto.BulkDeleteResponse;
 import com.devgo2003.docgo.contract_service.service.IContractService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -502,6 +504,66 @@ public class ContractController {
                 .shortMessage("Success")
                 .description("Hợp đồng đã được khôi phục thành công.")
                 .data(null)
+                .timestamp(ZonedDateTime.now())
+                .requestId(UUID.randomUUID().toString())
+                .path(request.getRequestURI())
+                .build();
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @Operation(
+        summary = "Xóa mềm hàng loạt hợp đồng", 
+        description = """
+        🔹 Đầu vào
+        
+        📦 bulkDeleteRequest (bắt buộc, body)
+        Loại: BulkDeleteRequest
+        Mô tả: Danh sách ID của các hợp đồng cần xóa mềm (tối đa 100 hợp đồng).
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: BulkDeleteResponse
+        Mô tả: Kết quả xóa hàng loạt với thống kê thành công/thất bại.
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1).
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: ma trạng thái HTTP (200: OK).
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả.
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý.
+        
+        🕒 timestamp
+        Loại: ZonedDateTime
+        Mô tả: Thời gian xử lý yêu cầu.
+        
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu.
+        
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi.
+        """
+    )
+    @DeleteMapping("/bulk")
+    public ResponseEntity<RestResponse<BulkDeleteResponse>> bulkSoftDeleteContracts(@Valid @RequestBody BulkDeleteRequest bulkDeleteRequest) {
+        BulkDeleteResponse result = contractService.bulkSoftDeleteContracts(bulkDeleteRequest.getIds());
+        RestResponse<BulkDeleteResponse> response = RestResponse.<BulkDeleteResponse>builder()
+                .apiVersion("v1")
+                .statusCode(HttpStatus.OK.value())
+                .shortMessage("Success")
+                .description(String.format("Xóa hàng loạt hoàn tất: %d thành công, %d thất bại", result.getSuccessCount(), result.getFailedCount()))
+                .data(result)
                 .timestamp(ZonedDateTime.now())
                 .requestId(UUID.randomUUID().toString())
                 .path(request.getRequestURI())

@@ -43,6 +43,9 @@ public interface ContractRepository extends MongoRepository<Contract, String> {
            "] }")
     Page<Contract> findBySearchTermAndIsDeletedFalse(String searchTerm, Pageable pageable);
     
+    // Migration methods
+    List<Contract> findByOrganizationIdIsNull();
+    
     // Validation methods
     boolean existsByContractNumber(String contractNumber);
     

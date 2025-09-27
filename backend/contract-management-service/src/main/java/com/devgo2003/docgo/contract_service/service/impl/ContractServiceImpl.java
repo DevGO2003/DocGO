@@ -36,6 +36,7 @@ import com.devgo2003.docgo.contract_service.dto.ContractDetailDto;
 import com.devgo2003.docgo.contract_service.dto.ContractPartyDto;
 import com.devgo2003.docgo.contract_service.dto.ContractResponseDto;
 import com.devgo2003.docgo.contract_service.dto.ContractDetailResponseDto;
+import com.devgo2003.docgo.contract_service.dto.BulkDeleteResponse;
 import com.devgo2003.docgo.contract_service.service.event.ContractEventPublisher;
 import com.devgo2003.docgo.contract_service.service.event.ContractEventPayload;
 import com.devgo2003.docgo.contract_service.service.event.ContractUpdatedEventPublisher;
@@ -355,6 +356,30 @@ public class ContractServiceImpl implements IContractService {
         eventRepository.save(event);
 
         eventPublisher.publishEvent(new ContractEventPayload(contract, "restored"));
+    }
+
+    @Override
+    @Transactional
+    public BulkDeleteResponse bulkSoftDeleteContracts(List<String> ids) {
+        List<String> successIds = new ArrayList<>();
+        List<BulkDeleteResponse.BulkDeleteError> errors = new ArrayList<>();
+        
+        for (String id : ids) {
+            try {
+                softDeleteContract(id);
+                successIds.add(id);
+            } catch (Exception e) {
+                errors.add(new BulkDeleteResponse.BulkDeleteError(id, e.getMessage()));
+            }
+        }
+        
+        return new BulkDeleteResponse(
+            ids.size(),
+            successIds.size(),
+            errors.size(),
+            successIds,
+            errors
+        );
     }
 
     @Transactional

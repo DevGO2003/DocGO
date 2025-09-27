@@ -191,6 +191,21 @@ class ContractService {
     }
   }
 
+  async bulkDeleteContracts(ids: string[], token?: string): Promise<ContractResponse> {
+    try {
+      const response: AxiosResponse<ContractResponse> = await this.client.delete(
+        `/api/v1/contract-management-service/contracts/bulk`,
+        {
+          data: { ids },
+          headers: this.getAuthHeaders(token),
+        }
+      );
+      return response.data;
+    } catch (error: any) {
+      throw this.handleError(error, 'Failed to bulk delete contracts');
+    }
+  }
+
   async approveContract(id: string, approval: ApprovalRequest, token?: string): Promise<ContractResponse> {
     try {
       const response: AxiosResponse<ContractResponse> = await this.client.post(

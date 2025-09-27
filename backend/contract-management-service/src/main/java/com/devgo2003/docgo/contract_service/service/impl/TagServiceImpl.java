@@ -31,7 +31,7 @@ public class TagServiceImpl implements ITagService {
     public List<TagDto> getPopularTags() {
         // Aggregation pipeline để đếm số lần xuất hiện của mỗi tag
         Aggregation aggregation = Aggregation.newAggregation(
-            Aggregation.match(Criteria.where("deleted").is(false)), // Chỉ lấy contracts chưa xóa
+            Aggregation.match(Criteria.where("isDeleted").is(false)), // Chỉ lấy contracts chưa xóa
             Aggregation.unwind("tags"), // Tách tags thành các document riêng biệt
             Aggregation.group("tags").count().as("count"), // Nhóm theo tag và đếm
             Aggregation.sort(org.springframework.data.domain.Sort.Direction.DESC, "count"), // Sắp xếp theo số lần xuất hiện
@@ -67,7 +67,7 @@ public class TagServiceImpl implements ITagService {
     public List<TagDto> getAllTags() {
         // Aggregation pipeline để lấy tất cả tags và đếm số lần xuất hiện
         Aggregation aggregation = Aggregation.newAggregation(
-            Aggregation.match(Criteria.where("deleted").is(false)), // Chỉ lấy contracts chưa xóa
+            Aggregation.match(Criteria.where("isDeleted").is(false)), // Chỉ lấy contracts chưa xóa
             Aggregation.unwind("tags"), // Tách tags thành các document riêng biệt
             Aggregation.group("tags").count().as("count"), // Nhóm theo tag và đếm
             Aggregation.sort(org.springframework.data.domain.Sort.Direction.ASC, "_id") // Sắp xếp theo tên tag
@@ -106,7 +106,7 @@ public class TagServiceImpl implements ITagService {
 
         // Aggregation pipeline để tìm kiếm tags
         Aggregation aggregation = Aggregation.newAggregation(
-            Aggregation.match(Criteria.where("deleted").is(false)), // Chỉ lấy contracts chưa xóa
+            Aggregation.match(Criteria.where("isDeleted").is(false)), // Chỉ lấy contracts chưa xóa
             Aggregation.unwind("tags"), // Tách tags thành các document riêng biệt
             Aggregation.match(Criteria.where("tags").regex(searchTerm, "i")), // Tìm kiếm không phân biệt hoa thường
             Aggregation.group("tags").count().as("count"), // Nhóm theo tag và đếm

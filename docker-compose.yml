@@ -171,7 +171,7 @@ services:
     mem_limit: 2g
     mem_reservation: 1g
     command: >
-      sh -c "chmod +x ./mvnw && ./mvnw --no-transfer-progress -T 2C -o -DskipTests clean spring-boot:run -Dspring-boot.run.jvmArguments='-Dserver.port=8000 -Dspring.devtools.restart.enabled=true -Dmaven.compiler.fork=true'"
+      sh -c "chmod +x ./mvnw && ./mvnw --no-transfer-progress -T 2C -DskipTests clean spring-boot:run -Dspring-boot.run.jvmArguments='-Dserver.port=8000 -Dspring.devtools.restart.enabled=true -Dmaven.compiler.fork=true'"
     depends_on:
       redis:
         condition: service_healthy
