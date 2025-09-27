@@ -315,12 +315,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     let serviceKey: string;
     let endpoint: string;
 
-    if (fullPath.startsWith('authentication-identity-service')) {
-      serviceKey = 'authentication';
-      // Remove service name from path and add proper API prefix
-      const pathWithoutService = fullPath.replace('authentication-identity-service/', '');
-      endpoint = `/api/v1/authentication-identity-service/${pathWithoutService}`;
-    } else if (fullPath.startsWith('user-management-service')) {
+    if (fullPath.startsWith('user-management-service')) {
       serviceKey = 'user-management';
       endpoint = `/api/v1/${fullPath}`;
     } else if (fullPath.startsWith('contract-management-service')) {
@@ -344,7 +339,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With')
       return res.status(404).json({
         error: 'Service not found',
-        message: `No service configured for path: ${fullPath}. Available services: authentication-identity-service, user-management-service, contract-management-service, ai-processing-service, file-storage-asset-service, general-file-management-service`
+        message: `No service configured for path: ${fullPath}. Available services: user-management-service, contract-management-service, ai-processing-service, file-storage-asset-service, general-file-management-service`
       });
     }
 
