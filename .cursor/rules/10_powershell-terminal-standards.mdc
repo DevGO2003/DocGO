@@ -31,6 +31,7 @@ language: vi
 - Chuẩn hóa việc sử dụng PowerShell commands trong Cursor AI agent
 - Tránh các lỗi cú pháp terminal thường gặp trên Windows
 - Đảm bảo tính nhất quán và ổn định khi chạy terminal commands
+- Hạn chế sử dụng PowerShell tối đa có thể; chỉ chạy lệnh khi thực sự cần thiết để hoàn thành tác vụ
 
 ## Quy tắc bắt buộc
 
@@ -55,6 +56,11 @@ Select-String pattern file.txt
 Get-ChildItem -Recurse -Filter "*.js"
 icacls script.sh /grant Everyone:F
 ```
+
+## Nguyên tắc HẠN CHẾ sử dụng PowerShell (rất quan trọng)
+- Chỉ sử dụng PowerShell khi không thể thực hiện bằng công cụ khác ( Cursor AI, API nội bộ, trình chỉnh sửa code, script ngôn ngữ bậc cao).
+- Chia nhỏ các bước, chạy lần lượt để dễ debug; dừng ngay khi đã đủ dữ liệu, không chạy thêm lệnh thừa.
+- Luôn thêm `--no-pager` cho git để tránh kẹt; tuyệt đối không dùng lệnh interactive.
 
 ### 2. Xử lý Path và Spaces
 
@@ -336,23 +342,6 @@ npm run build
 npm start
 ```
 
-### 12. Lợi ích của việc chạy từng dòng lệnh
-
-#### ✅ **Debug dễ dàng hơn:**
-- Xác định chính xác lệnh nào gây lỗi
-- Dễ dàng skip lệnh có vấn đề
-- Có thể chạy lại từ bước bị lỗi
-
-#### ✅ **Kiểm soát tốt hơn:**
-- Có thể dừng giữa chừng nếu cần
-- Kiểm tra kết quả từng bước
-- Điều chỉnh lệnh tiếp theo dựa trên kết quả
-
-#### ✅ **Ổn định hơn:**
-- Giảm thiểu lỗi parsing phức tạp
-- Tránh lỗi do special characters
-- Dễ handle error cho từng lệnh
-
 ### 13. Khi nào được phép gộp lệnh
 
 #### ✅ **Chỉ gộp khi:**
@@ -449,6 +438,32 @@ git status                 # Mở pager
 git show                   # Mở pager
 git blame                  # Mở pager
 git add -p                 # Interactive mode
+git rebase -i              # Mở editor
+git commit                 # Mở editor
+vim file.txt               # Mở Vim
+nano file.txt              # Mở Nano
+less file.txt              # Mở less
+more file.txt              # Mở more
+man command                # Mở manual
+```
+
+### ✅ **CÁC LỆNH AN TOÀN - LUÔN SỬ DỤNG:**
+```powershell
+# ✅ AN TOÀN - Không gây kẹt terminal
+git log --oneline -10 --no-pager
+git diff --no-pager
+git status --porcelain
+git show --no-pager
+git add -A
+git commit -m "message" --no-verify
+Get-Content file.txt
+Select-String pattern file.txt
+Get-ChildItem
+```
+
+---
+
+**Mục tiêu**: Đảm bảo 100% terminal commands chạy thành công trên Windows PowerShell environment của Cursor IDE mà không bị kẹt trong pager/editor.
 git rebase -i              # Mở editor
 git commit                 # Mở editor
 vim file.txt               # Mở Vim

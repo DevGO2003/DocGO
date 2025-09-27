@@ -8,6 +8,7 @@ import com.devgo2003.docgo.contract_service.dto.ContractDetailDto;
 import com.devgo2003.docgo.contract_service.dto.ContractDetailResponseDto;
 import com.devgo2003.docgo.contract_service.dto.ContractResponseDto;
 import com.devgo2003.docgo.contract_service.dto.ContractSummaryDto;
+import com.devgo2003.docgo.contract_service.dto.BulkDeleteResponse;
 import org.springframework.data.domain.Page;
 
 import java.math.BigDecimal;
@@ -19,6 +20,7 @@ public interface IContractService {
     Contract createContract(Contract contract);
     Contract updateContract(String id, Contract contract);
     void softDeleteContract(String id);
+    BulkDeleteResponse bulkSoftDeleteContracts(List<String> ids);
     void restoreContract(String id);
     
     // Get operations

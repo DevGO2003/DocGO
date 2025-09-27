@@ -1,11 +1,14 @@
 import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
+import '@/styles/animations.css'
 import { Toaster } from 'react-hot-toast'
 import { AuthProvider } from '@/hooks/useAuth'
 import { LoadingProvider } from '@/components/LoadingProvider'
 import { PageTransition } from '@/components/PageTransition'
 import { I18nProvider } from '@/components/I18nProvider'
+import StickyFixGlobal from '@/components/StickyFixGlobal'
+import GlobalErrorSummary from '@/components/GlobalErrorSummary'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -94,6 +97,8 @@ export default function RootLayout({
                   },
                 }}
               />
+              <GlobalErrorSummary />
+              <StickyFixGlobal />
             </AuthProvider>
           </LoadingProvider>
         </I18nProvider>

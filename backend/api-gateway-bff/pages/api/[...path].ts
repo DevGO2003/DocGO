@@ -1,5 +1,8 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import axios from 'axios';
+import Busboy from 'busboy';
+import FormData from 'form-data';
+import { Buffer } from 'buffer';
 import { applyMiddleware } from '@/lib/middleware';
 import serviceManager from '@/lib/services';
 import kafkaService from '@/lib/kafka';
@@ -368,39 +371,59 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const isMultipart = contentTypeHeader.startsWith('multipart/');
 
       if (isMultipart) {
-        const upstreamUrl = new URL(service.defaults.baseURL || '');
-        // Stream raw request to upstream to preserve multipart boundary
-        const upstreamResponse = await axios.request({
-          method,
-          url: `${upstreamUrl.origin}${endpoint}`,
-          params: queryParams,
-          headers: {
-            ...req.headers,
-          },
-          data: req as any,
-          maxContentLength: Infinity,
-          maxBodyLength: Infinity,
-          // Do not transform request body
-          transformRequest: [(data) => data],
-          // Important for streaming in Node
-          responseType: 'stream',
-          validateStatus: () => true
+        // Parse multipart with Busboy, rebuild a FormData, then forward via axios
+        const busboy = Busboy({ headers: req.headers });
+        const form = new FormData();
+
+        const fieldPromises: Promise<void>[] = [];
+
+        busboy.on('file', (fieldname, file, filename, encoding, mimetype) => {
+          const chunks: Buffer[] = [];
+          file.on('data', (data: Buffer) => chunks.push(data));
+          file.on('end', () => {
+            const buffer = Buffer.concat(chunks);
+            // Preserve original filename and content type
+            form.append(fieldname, buffer, { filename: filename, contentType: mimetype });
+          });
         });
 
-        // Pipe upstream response back to client
-        res.status(upstreamResponse.status);
-        for (const [key, value] of Object.entries(upstreamResponse.headers)) {
-          if (value !== undefined) {
-            res.setHeader(key, value as any);
+        busboy.on('field', (fieldname, val) => {
+          // Simple fields (e.g., gemini_api_key)
+          form.append(fieldname, val);
+        });
+
+        const done = new Promise<void>((resolve, reject) => {
+          busboy.on('finish', () => resolve());
+          busboy.on('error', (err) => reject(err));
+        });
+
+        req.pipe(busboy);
+        await done;
+
+        const upstreamUrl = new URL(service.defaults.baseURL || '');
+        const response = await axios.post(
+          `${upstreamUrl.origin}${endpoint}`,
+          form,
+          {
+            params: queryParams,
+            headers: {
+              ...form.getHeaders(),
+              ...(req.headers['authorization'] ? { Authorization: req.headers['authorization'] as string } : {}),
+            },
+            maxContentLength: Infinity,
+            maxBodyLength: Infinity,
+            validateStatus: () => true,
           }
+        );
+
+        // Ensure CORS then return JSON body (AI service returns JSON envelope)
+        if (typeof (res as any).setHeader === 'function') {
+          res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000')
+          res.setHeader('Access-Control-Allow-Credentials', 'true')
+          res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+          res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With')
         }
-        // Ensure correct CORS on proxied streaming response
-        res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000')
-        res.setHeader('Access-Control-Allow-Credentials', 'true')
-        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
-        res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With')
-        (upstreamResponse.data as any).pipe(res);
-        return;
+        return res.status(response.status).json(response.data);
       }
 
       // JSON/x-www-form-urlencoded flows

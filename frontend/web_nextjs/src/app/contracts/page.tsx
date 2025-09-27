@@ -331,14 +331,53 @@ export default function ContractsPage() {
     }
   }
 
-  const handleDeleteSelected = () => {
+  const handleDeleteSelected = async () => {
     if (selectedItems.length === 0) return
     
     const confirmed = confirm(`Bạn có chắc chắn muốn xóa ${selectedItems.length} hợp đồng đã chọn?`)
     if (confirmed) {
-      // TODO: Implement bulk delete
-      alert(`Chức năng xóa hàng loạt cho ${selectedItems.length} hợp đồng đang được phát triển`)
-      setSelectedItems([])
+      try {
+        setLoading(true)
+        
+        // Gọi API bulk delete
+        const response = await fetch('/api/contracts/bulk', {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            ids: selectedItems
+          })
+        })
+        
+        if (!response.ok) {
+          throw new Error('Không thể xóa hợp đồng')
+        }
+        
+        const result = await response.json()
+        
+        if (result.statusCode === 200) {
+          // Hiển thị kết quả
+          if (result.data.failedCount > 0) {
+            alert(`Xóa thành công ${result.data.successCount} hợp đồng. ${result.data.failedCount} hợp đồng không thể xóa.`)
+          } else {
+            alert(`Đã xóa thành công ${result.data.successCount} hợp đồng.`)
+          }
+          
+          // Refresh danh sách
+          setPage(0)
+          setSelectedItems([])
+          // Trigger refresh data
+          window.location.reload()
+        } else {
+          throw new Error(result.description || 'Có lỗi xảy ra khi xóa hợp đồng')
+        }
+      } catch (error) {
+        console.error('Error deleting contracts:', error)
+        alert(`Lỗi khi xóa hợp đồng: ${error.message}`)
+      } finally {
+        setLoading(false)
+      }
     }
   }
 

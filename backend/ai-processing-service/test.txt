@@ -1,0 +1,10 @@
+Đây là file test để kiểm tra API summarize.
+Nội dung hợp đồng thuê nhà:
+- Bên A: Nguyễn Văn A
+- Bên B: Trần Thị B  
+- Địa chỉ: 123 Đường ABC, Quận 1, TP.HCM
+- Giá thuê: 5,000,000 VNĐ/tháng
+- Thời hạn: 12 tháng
+- Ngày bắt đầu: 01/01/2024
+- Ngày kết thúc: 31/12/2024
+

@@ -7,6 +7,7 @@ import Sidebar from '../Sidebar'
 import { useAuth } from '@/hooks/useAuth'
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { PageTransition } from '../PageTransition'
 
 interface MainLayoutProps {
   children: React.ReactNode
@@ -38,7 +39,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className={`min-h-screen bg-gray-50 flex ${showSidebar ? (isCollapsed ? 'lg:pl-16' : 'lg:pl-64') : ''}`}>
       {/* Sidebar */}
       {showSidebar && (
         <>
@@ -53,7 +54,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({
           {/* Sidebar */}
           <div
             className={`
-              fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0
+              fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0
               ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
               ${isCollapsed ? 'lg:w-16' : 'lg:w-64'}
             `}
@@ -78,7 +79,9 @@ export const MainLayout: React.FC<MainLayoutProps> = ({
         {/* Page Content */}
         <main className="flex-1 overflow-auto" suppressHydrationWarning>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-            {children}
+            <PageTransition>
+              {children}
+            </PageTransition>
           </div>
         </main>
 

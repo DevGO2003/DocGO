@@ -1,5 +1,5 @@
 
-from fastapi import APIRouter, File, UploadFile, Header, HTTPException, Body, Request, Query
+from fastapi import APIRouter, File, UploadFile, Header, HTTPException, Body, Request, Query, Form
 import logging
 import asyncio
 import aiohttp
@@ -168,8 +168,6 @@ async def extract_api(
 @router.post("/classify", summary="Phân loại loại tài liệu (file đa định dạng hoặc text)", tags=["AI Processing Service"])
 async def classify_api(
     request: Request,
-    file: UploadFile = File(None, description="File cần phân loại (txt, md, html, json, csv, xlsx, pptx, rtf, doc, docx, pdf)"),
-    text: str = Body(None, description="Nội dung văn bản dạng chuỗi"),
     gemini_api_key: str = Header(None, description="Gemini API Key (tùy chọn)")
 ):
     """
@@ -223,10 +221,30 @@ async def classify_api(
     """
     # Chuẩn hóa nội dung đầu vào như summarize
     content = None
+    file = None
+    text = None
+    
+    # Parse request based on content type
+    content_type = request.headers.get('content-type', '')
+    
+    if 'multipart/form-data' in content_type:
+        # Handle multipart form data
+        form = await request.form()
+        file = form.get('file')
+        text = form.get('text')
+    elif 'application/json' in content_type:
+        # Handle JSON request
+        try:
+            body = await request.json()
+            text = body.get('text')
+        except Exception as e:
+            print(f"[DEBUG] JSON parse error: {e}")
+    
     if file:
         temp_path = os.path.join(RESULTS_DIR, file.filename)
+        file_content = await file.read()
         with open(temp_path, "wb") as f:
-            f.write(await file.read())
+            f.write(file_content)
 
         filename_lower = file.filename.lower()
         try:
@@ -378,8 +396,6 @@ async def classify_api(
 @router.post("/summarize", summary="Tóm tắt hợp đồng (nhiều định dạng văn bản hoặc chuỗi)", tags=["AI Processing Service"])
 async def summarize_api(
     request: Request,
-    file: UploadFile = File(None, description="File văn bản cần tóm tắt (txt, md, html, json, csv, xlsx, pptx, rtf, doc, docx, pdf)"),
-    text: str = Body(None, description="Nội dung văn bản dạng chuỗi"),
     gemini_api_key: str = Header(None, description="Gemini API Key (tùy chọn)")
 ):
     """
@@ -433,10 +449,72 @@ async def summarize_api(
     """
     # Summarize API logic
     content = None
+    file = None
+    text = None
+    
+    # Debug logging để trace request
+    print(f"[DEBUG] Request content type: {request.headers.get('content-type', 'unknown')}")
+    
+    # Parse request based on content type
+    content_type = request.headers.get('content-type', '')
+    
+    if 'multipart/form-data' in content_type:
+        # Handle multipart form data
+        form = await request.form()
+        file = form.get('file')
+        text = form.get('text')
+        print(f"[DEBUG] Multipart - File: {file}, Text: {text}")
+    elif 'application/json' in content_type:
+        # Handle JSON request
+        try:
+            body = await request.json()
+            text = body.get('text')
+            print(f"[DEBUG] JSON - Text: {text}")
+        except Exception as e:
+            print(f"[DEBUG] JSON parse error: {e}")
+    else:
+        print(f"[DEBUG] Unknown content type: {content_type}")
+    
     if file:
+        print(f"[DEBUG] File filename: {file.filename}")
+        print(f"[DEBUG] File content_type: {file.content_type}")
+        print(f"[DEBUG] File size: {file.size if hasattr(file, 'size') else 'unknown'}")
+    
+    if file:
+        # Validation file size (max 50MB)
+        MAX_FILE_SIZE = 50 * 1024 * 1024  # 50MB
+        file_content = await file.read()
+        if len(file_content) > MAX_FILE_SIZE:
+            raise HTTPException(
+                status_code=413, 
+                detail=f"File quá lớn. Kích thước tối đa cho phép: {MAX_FILE_SIZE // (1024*1024)}MB. File hiện tại: {len(file_content) // (1024*1024)}MB"
+            )
+        
+        # Validation content type
+        allowed_content_types = [
+            'application/pdf',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',  # .docx
+            'application/msword',  # .doc
+            'text/plain',
+            'text/markdown',
+            'text/html',
+            'application/json',
+            'text/csv',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',  # .xlsx
+            'application/vnd.ms-excel',  # .xls
+            'application/vnd.openxmlformats-officedocument.presentationml.presentation',  # .pptx
+            'application/vnd.ms-powerpoint',  # .ppt
+            'application/rtf',
+            'text/rtf'
+        ]
+        
+        if file.content_type and file.content_type not in allowed_content_types:
+            print(f"[DEBUG] Invalid content type: {file.content_type}")
+            # Không reject ngay, có thể filename extension sẽ override
+        
         temp_path = os.path.join(RESULTS_DIR, file.filename)
         with open(temp_path, "wb") as f:
-            f.write(await file.read())
+            f.write(file_content)
 
         filename_lower = file.filename.lower()
         try:
@@ -502,7 +580,21 @@ async def summarize_api(
     elif text:
         content = text
     else:
-        raise HTTPException(status_code=400, detail="Cần cung cấp file hợp lệ (txt, md, html, json, csv, xlsx, pptx, rtf, docx, pdf) hoặc nội dung chuỗi.")
+        # Debug thông tin chi tiết về request
+        print(f"[DEBUG] No file or text provided. File: {file}, Text: {text}")
+        print(f"[DEBUG] Request headers: {dict(request.headers)}")
+        print(f"[DEBUG] Request content type: {request.headers.get('content-type', 'unknown')}")
+        
+        # Cải thiện error message với thông tin debug
+        error_detail = "Cần cung cấp file hợp lệ (txt, md, html, json, csv, xlsx, pptx, rtf, docx, pdf) hoặc nội dung chuỗi."
+        if file is None and text is None:
+            error_detail += " Không có file hoặc text nào được cung cấp."
+        elif file is not None:
+            error_detail += f" File được cung cấp nhưng có vấn đề: {file.filename if file.filename else 'no filename'}"
+        elif text is not None:
+            error_detail += f" Text được cung cấp nhưng có vấn đề: {len(text) if text else 0} characters"
+            
+        raise HTTPException(status_code=400, detail=error_detail)
     
     if not content or not content.strip():
         raise HTTPException(status_code=204, detail="Không có nội dung để gửi cho AI.")
@@ -695,11 +787,21 @@ async def summarize_api(
         error_message = f"Lỗi AI/Summarize: {str(e)}"
         print(f"Error in summarize_api: {error_message}")
         
+        # Tạo preview nội dung an toàn để debug nếu có
+        preview = None
+        try:
+            if isinstance(content, str):
+                preview = content[:200]
+                if len(content) > 200:
+                    preview += "..."
+        except Exception:
+            preview = None
+
         return RestResponse(
             statusCode=500,
             shortMessage="Internal Server Error",
             description="Lỗi xảy ra khi gọi AI service. Vui lòng thử lại sau.",
-            data={"error": error_message, "raw_content": content[:200] + "..." if len(content) > 200 else content},
+            data={"error": error_message, "rawContent": preview},
             path=request.url.path,
             timestamp=datetime.now(),
             requestId=str(uuid.uuid4())
