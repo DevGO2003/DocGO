@@ -1,8 +1,8 @@
-package com.devgo2003.docgo.auth_service.service;
+package com.devgo2003.docgo.user_service.service;
 
-import com.devgo2003.docgo.auth_service.entity.SessionMongo;
-import com.devgo2003.docgo.auth_service.entity.SessionStatus;
-import com.devgo2003.docgo.auth_service.repository.SessionMongoRepository;
+import com.devgo2003.docgo.user_service.entity.SessionMongo;
+import com.devgo2003.docgo.user_service.entity.SessionStatus;
+import com.devgo2003.docgo.user_service.repository.SessionMongoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;

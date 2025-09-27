@@ -1,4 +1,4 @@
-package com.devgo2003.docgo.auth_service.config;
+package com.devgo2003.docgo.user_service.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

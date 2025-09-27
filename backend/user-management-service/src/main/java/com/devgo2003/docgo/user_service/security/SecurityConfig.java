@@ -1,4 +1,4 @@
-package com.devgo2003.docgo.auth_service.security;
+package com.devgo2003.docgo.user_service.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,9 +15,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import com.devgo2003.docgo.auth_service.repository.UserMongoRepository;
-import com.devgo2003.docgo.auth_service.security.JwtUtil;
-import com.devgo2003.docgo.auth_service.security.TokenBlacklist;
+import com.devgo2003.docgo.user_service.repository.UserMongoRepository;
+import com.devgo2003.docgo.user_service.security.JwtUtil;
+import com.devgo2003.docgo.user_service.security.TokenBlacklist;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 
 @Configuration

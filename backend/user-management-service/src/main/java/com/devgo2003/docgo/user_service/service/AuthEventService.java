@@ -1,7 +1,7 @@
-package com.devgo2003.docgo.auth_service.service;
+package com.devgo2003.docgo.user_service.service;
 
-import com.devgo2003.docgo.auth_service.event.AuthEvent;
-import com.devgo2003.docgo.auth_service.entity.User;
+import com.devgo2003.docgo.user_service.event.AuthEvent;
+import com.devgo2003.docgo.user_service.entity.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

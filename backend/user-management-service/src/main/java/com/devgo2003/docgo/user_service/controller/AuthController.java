@@ -1,8 +1,8 @@
-package com.devgo2003.docgo.auth_service.controller;
+package com.devgo2003.docgo.user_service.controller;
 
-import com.devgo2003.docgo.auth_service.common.response.RestResponse;
-import com.devgo2003.docgo.auth_service.model.AuthResponse;
-import com.devgo2003.docgo.auth_service.service.AuthService;
+import com.devgo2003.docgo.user_service.common.response.RestResponse;
+import com.devgo2003.docgo.user_service.model.AuthResponse;
+import com.devgo2003.docgo.user_service.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.NotBlank;
@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.*;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
-import com.devgo2003.docgo.auth_service.dto.LoginRequest;
-import com.devgo2003.docgo.auth_service.dto.RegisterRequest;
+import com.devgo2003.docgo.user_service.dto.LoginRequest;
+import com.devgo2003.docgo.user_service.dto.RegisterRequest;
 
 import java.time.ZonedDateTime;
 import java.util.Map;
@@ -22,7 +22,7 @@ import java.util.UUID;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/v1/authentication-identity-service/auth")
+@RequestMapping("/api/v1/user-management-service/auth")
 @RequiredArgsConstructor
 @Tag(name = "Authentication", description = "API xác thực: đăng nhập, đăng xuất, refresh token")
 public class AuthController {
@@ -45,7 +45,7 @@ public class AuthController {
                     .data(null)
                     .timestamp(ZonedDateTime.now())
                     .requestId(requestId)
-                    .path("/api/v1/authentication-identity-service/auth/login")
+                    .path("/api/v1/user-management-service/auth/login")
                     .build());
         }
 
@@ -59,7 +59,7 @@ public class AuthController {
                     .data(result)
                     .timestamp(ZonedDateTime.now())
                     .requestId(requestId)
-                    .path("/api/v1/authentication-identity-service/auth/login")
+                    .path("/api/v1/user-management-service/auth/login")
                     .build());
         }
 
@@ -71,7 +71,7 @@ public class AuthController {
                 .data(null)
                 .timestamp(ZonedDateTime.now())
                 .requestId(requestId)
-                .path("/api/v1/authentication-identity-service/auth/login")
+                .path("/api/v1/user-management-service/auth/login")
                 .build());
     }
 
@@ -92,7 +92,7 @@ public class AuthController {
                     .data(null)
                     .timestamp(ZonedDateTime.now())
                     .requestId(requestId)
-                    .path("/api/v1/authentication-identity-service/auth/register")
+                    .path("/api/v1/user-management-service/auth/register")
                     .build());
         }
 
@@ -106,7 +106,7 @@ public class AuthController {
                 .data(result.isSuccess() ? result : null)
                 .timestamp(ZonedDateTime.now())
                 .requestId(requestId)
-                .path("/api/v1/authentication-identity-service/auth/register")
+                .path("/api/v1/user-management-service/auth/register")
                 .build());
     }
 
@@ -124,7 +124,7 @@ public class AuthController {
                     .data(null)
                     .timestamp(ZonedDateTime.now())
                     .requestId(requestId)
-                    .path("/api/v1/authentication-identity-service/auth/refresh")
+                    .path("/api/v1/user-management-service/auth/refresh")
                     .build());
         }
 
@@ -138,7 +138,7 @@ public class AuthController {
                     .data(result)
                     .timestamp(ZonedDateTime.now())
                     .requestId(requestId)
-                    .path("/api/v1/authentication-identity-service/auth/refresh")
+                    .path("/api/v1/user-management-service/auth/refresh")
                     .build());
         }
 
@@ -150,7 +150,7 @@ public class AuthController {
                 .data(null)
                 .timestamp(ZonedDateTime.now())
                 .requestId(requestId)
-                .path("/api/v1/authentication-identity-service/auth/refresh")
+                .path("/api/v1/user-management-service/auth/refresh")
                 .build());
     }
 
@@ -168,7 +168,7 @@ public class AuthController {
                     .data(null)
                     .timestamp(ZonedDateTime.now())
                     .requestId(requestId)
-                    .path("/api/v1/authentication-identity-service/auth/logout")
+                    .path("/api/v1/user-management-service/auth/logout")
                     .build());
         }
 
@@ -181,7 +181,7 @@ public class AuthController {
                 .data(null)
                 .timestamp(ZonedDateTime.now())
                 .requestId(requestId)
-                .path("/api/v1/authentication-identity-service/auth/logout")
+                .path("/api/v1/user-management-service/auth/logout")
                 .build());
     }
 
@@ -197,7 +197,7 @@ public class AuthController {
                 .data(Map.of("status", "UP"))
                 .timestamp(ZonedDateTime.now())
                 .requestId(requestId)
-                .path("/api/v1/authentication-identity-service/auth/health")
+                .path("/api/v1/user-management-service/auth/health")
                 .build());
     }
 }

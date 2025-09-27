@@ -9,10 +9,10 @@
 		<version>3.5.4</version>
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.devgo2003.docgo.contract-management-service</groupId>
-	<artifactId>contract-service</artifactId>
+	<groupId>com.devgo2003.docgo.document-management-service</groupId>
+	<artifactId>document-service</artifactId>
 	<version>1.0.0</version>
-	<name>contract-management-service</name>
+	<name>document-management-service</name>
 	<description>Demo project for Spring Boot</description>
 
 	<properties>

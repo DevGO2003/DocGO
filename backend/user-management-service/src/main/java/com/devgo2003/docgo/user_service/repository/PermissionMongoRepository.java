@@ -1,6 +1,6 @@
-package com.devgo2003.docgo.auth_service.repository;
+package com.devgo2003.docgo.user_service.repository;
 
-import com.devgo2003.docgo.auth_service.entity.PermissionMongo;
+import com.devgo2003.docgo.user_service.entity.PermissionMongo;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;

@@ -1,6 +1,6 @@
-package com.devgo2003.docgo.auth_service.controller;
+package com.devgo2003.docgo.user_service.controller;
 
-import com.devgo2003.docgo.auth_service.common.response.RestResponse;
+import com.devgo2003.docgo.user_service.common.response.RestResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +18,7 @@ import java.util.UUID;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/v1/authentication-identity-service/auth/oauth2")
+@RequestMapping("/api/v1/user-management-service/auth/oauth2")
 @RequiredArgsConstructor
 @Tag(name = "OAuth2", description = "API liên quan đến OAuth2 (Google)")
 public class OAuth2Controller {
@@ -52,7 +52,7 @@ public class OAuth2Controller {
                 .data(data)
                 .timestamp(ZonedDateTime.now())
                 .requestId(requestId)
-                .path("/api/v1/authentication-identity-service/auth/oauth2/test")
+                .path("/api/v1/user-management-service/auth/oauth2/test")
                 .build());
     }
 
@@ -70,8 +70,8 @@ public class OAuth2Controller {
         config.put("endpoints", Map.of(
             "authorization", "/oauth2/authorization/google (handled by Spring Security)",
             "callback", "/login/oauth2/code/google (handled by Spring Security)",
-            "test", "/api/v1/authentication-identity-service/auth/oauth2/test",
-            "config", "/api/v1/authentication-identity-service/auth/oauth2/config"
+            "test", "/api/v1/user-management-service/auth/oauth2/test",
+            "config", "/api/v1/user-management-service/auth/oauth2/config"
         ));
 
         return ResponseEntity.ok(RestResponse.<Map<String, Object>>builder()
@@ -82,7 +82,7 @@ public class OAuth2Controller {
                 .data(config)
                 .timestamp(ZonedDateTime.now())
                 .requestId(requestId)
-                .path("/api/v1/authentication-identity-service/auth/oauth2/config")
+                .path("/api/v1/user-management-service/auth/oauth2/config")
                 .build());
     }
 }

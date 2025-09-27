@@ -1,9 +1,9 @@
-package com.devgo2003.docgo.auth_service.service;
+package com.devgo2003.docgo.user_service.service;
 
-import com.devgo2003.docgo.auth_service.entity.UserMongo;
-import com.devgo2003.docgo.auth_service.model.AuthResponse;
-import com.devgo2003.docgo.auth_service.repository.UserMongoRepository;
-import com.devgo2003.docgo.auth_service.security.JwtUtil;
+import com.devgo2003.docgo.user_service.entity.UserMongo;
+import com.devgo2003.docgo.user_service.model.AuthResponse;
+import com.devgo2003.docgo.user_service.repository.UserMongoRepository;
+import com.devgo2003.docgo.user_service.security.JwtUtil;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -42,7 +42,7 @@ public class AuthService {
                 .email(email)
                 .password(passwordEncoder.encode(password))
                 .roleIds(Set.of("employee")) // Default role
-                .status(com.devgo2003.docgo.auth_service.entity.UserStatus.ACTIVE)
+                .status(com.devgo2003.docgo.user_service.entity.UserStatus.ACTIVE)
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .build();

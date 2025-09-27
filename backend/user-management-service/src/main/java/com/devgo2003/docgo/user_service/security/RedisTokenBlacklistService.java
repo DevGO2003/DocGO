@@ -1,4 +1,4 @@
-package com.devgo2003.docgo.auth_service.security;
+package com.devgo2003.docgo.user_service.security;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.redis.core.StringRedisTemplate;

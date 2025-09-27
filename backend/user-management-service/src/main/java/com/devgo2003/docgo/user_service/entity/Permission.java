@@ -1,4 +1,4 @@
-package com.devgo2003.docgo.auth_service.entity;
+package com.devgo2003.docgo.user_service.entity;
 
 /**
  * Các quyền hạn cụ thể của người dùng trong hệ thống DocGO

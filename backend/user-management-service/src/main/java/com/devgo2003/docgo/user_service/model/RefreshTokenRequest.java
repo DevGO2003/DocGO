@@ -1,4 +1,4 @@
-package com.devgo2003.docgo.auth_service.model;
+package com.devgo2003.docgo.user_service.model;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

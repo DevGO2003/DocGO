@@ -1,6 +1,6 @@
-package com.devgo2003.docgo.auth_service.model;
+package com.devgo2003.docgo.user_service.model;
 
-import com.devgo2003.docgo.auth_service.entity.UserMongo;
+import com.devgo2003.docgo.user_service.entity.UserMongo;
 import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -118,7 +118,7 @@ public class AuthResponse {
         
         // Constructor for UserMongo
         public UserInfo(String id, String username, String email, String firstName, String lastName, 
-                       Set<String> roleIds, com.devgo2003.docgo.auth_service.entity.UserStatus status) {
+                       Set<String> roleIds, com.devgo2003.docgo.user_service.entity.UserStatus status) {
             this.id = id;
             this.userId = null; // Not applicable for MongoDB
             this.username = username;

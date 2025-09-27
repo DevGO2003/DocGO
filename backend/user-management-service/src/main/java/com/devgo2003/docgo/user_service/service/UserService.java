@@ -1,8 +1,8 @@
-package com.devgo2003.docgo.auth_service.service;
+package com.devgo2003.docgo.user_service.service;
 
-import com.devgo2003.docgo.auth_service.entity.UserMongo;
-import com.devgo2003.docgo.auth_service.entity.UserStatus;
-import com.devgo2003.docgo.auth_service.repository.UserMongoRepository;
+import com.devgo2003.docgo.user_service.entity.UserMongo;
+import com.devgo2003.docgo.user_service.entity.UserStatus;
+import com.devgo2003.docgo.user_service.repository.UserMongoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;

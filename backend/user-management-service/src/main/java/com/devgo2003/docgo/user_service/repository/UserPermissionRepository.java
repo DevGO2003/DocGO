@@ -1,7 +1,7 @@
-package com.devgo2003.docgo.auth_service.repository;
+package com.devgo2003.docgo.user_service.repository;
 
-import com.devgo2003.docgo.auth_service.entity.Permission;
-import com.devgo2003.docgo.auth_service.entity.UserPermission;
+import com.devgo2003.docgo.user_service.entity.Permission;
+import com.devgo2003.docgo.user_service.entity.UserPermission;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

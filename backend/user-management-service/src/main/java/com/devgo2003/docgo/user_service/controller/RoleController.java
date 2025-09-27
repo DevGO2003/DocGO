@@ -1,8 +1,8 @@
-package com.devgo2003.docgo.auth_service.controller;
+package com.devgo2003.docgo.user_service.controller;
 
-import com.devgo2003.docgo.auth_service.entity.RoleMongo;
-import com.devgo2003.docgo.auth_service.service.RoleService;
-import com.devgo2003.docgo.auth_service.common.response.RestResponse;
+import com.devgo2003.docgo.user_service.entity.RoleMongo;
+import com.devgo2003.docgo.user_service.service.RoleService;
+import com.devgo2003.docgo.user_service.common.response.RestResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -18,7 +18,7 @@ import java.util.Set;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/v1/authentication-identity-service/roles")
+@RequestMapping("/api/v1/user-management-service/roles")
 @RequiredArgsConstructor
 @Tag(name = "Role Management", description = "API quản lý vai trò")
 public class RoleController {

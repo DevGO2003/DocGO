@@ -1,8 +1,8 @@
-package com.devgo2003.docgo.auth_service.security;
+package com.devgo2003.docgo.user_service.security;
 
-import com.devgo2003.docgo.auth_service.entity.UserMongo;
-import com.devgo2003.docgo.auth_service.entity.UserStatus;
-import com.devgo2003.docgo.auth_service.repository.UserMongoRepository;
+import com.devgo2003.docgo.user_service.entity.UserMongo;
+import com.devgo2003.docgo.user_service.entity.UserStatus;
+import com.devgo2003.docgo.user_service.repository.UserMongoRepository;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

@@ -1,4 +1,4 @@
-package com.devgo2003.docgo.auth_service.common.response;
+package com.devgo2003.docgo.user_service.common.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;

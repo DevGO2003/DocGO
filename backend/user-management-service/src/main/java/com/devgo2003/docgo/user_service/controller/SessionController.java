@@ -1,9 +1,9 @@
-package com.devgo2003.docgo.auth_service.controller;
+package com.devgo2003.docgo.user_service.controller;
 
-import com.devgo2003.docgo.auth_service.entity.SessionMongo;
-import com.devgo2003.docgo.auth_service.entity.SessionStatus;
-import com.devgo2003.docgo.auth_service.service.SessionService;
-import com.devgo2003.docgo.auth_service.common.response.RestResponse;
+import com.devgo2003.docgo.user_service.entity.SessionMongo;
+import com.devgo2003.docgo.user_service.entity.SessionStatus;
+import com.devgo2003.docgo.user_service.service.SessionService;
+import com.devgo2003.docgo.user_service.common.response.RestResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -17,7 +17,7 @@ import java.util.List;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/v1/authentication-identity-service/sessions")
+@RequestMapping("/api/v1/user-management-service/sessions")
 @RequiredArgsConstructor
 @Tag(name = "Session Management", description = "API quản lý phiên đăng nhập")
 public class SessionController {

@@ -1,9 +1,9 @@
-package com.devgo2003.docgo.auth_service.common.handler;
+package com.devgo2003.docgo.user_service.common.handler;
 
-import com.devgo2003.docgo.auth_service.common.response.ErrorDetail;
-import com.devgo2003.docgo.auth_service.common.response.RestResponse;
-import com.devgo2003.docgo.auth_service.common.response.ValidationErrorResponse;
-import com.devgo2003.docgo.auth_service.common.util.ResponseBuilder;
+import com.devgo2003.docgo.user_service.common.response.ErrorDetail;
+import com.devgo2003.docgo.user_service.common.response.RestResponse;
+import com.devgo2003.docgo.user_service.common.response.ValidationErrorResponse;
+import com.devgo2003.docgo.user_service.common.util.ResponseBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;

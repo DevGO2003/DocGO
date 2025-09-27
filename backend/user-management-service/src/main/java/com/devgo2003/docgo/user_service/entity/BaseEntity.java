@@ -1,4 +1,4 @@
-package com.devgo2003.docgo.auth_service.entity;
+package com.devgo2003.docgo.user_service.entity;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;

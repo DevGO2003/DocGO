@@ -1,8 +1,8 @@
-package com.devgo2003.docgo.auth_service.service;
+package com.devgo2003.docgo.user_service.service;
 
-import com.devgo2003.docgo.auth_service.entity.Permission;
-import com.devgo2003.docgo.auth_service.entity.UserPermission;
-import com.devgo2003.docgo.auth_service.repository.UserPermissionRepository;
+import com.devgo2003.docgo.user_service.entity.Permission;
+import com.devgo2003.docgo.user_service.entity.UserPermission;
+import com.devgo2003.docgo.user_service.repository.UserPermissionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

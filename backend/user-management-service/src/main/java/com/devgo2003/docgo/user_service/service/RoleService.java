@@ -1,7 +1,7 @@
-package com.devgo2003.docgo.auth_service.service;
+package com.devgo2003.docgo.user_service.service;
 
-import com.devgo2003.docgo.auth_service.entity.RoleMongo;
-import com.devgo2003.docgo.auth_service.repository.RoleMongoRepository;
+import com.devgo2003.docgo.user_service.entity.RoleMongo;
+import com.devgo2003.docgo.user_service.repository.RoleMongoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;

@@ -33,7 +33,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/contract-management-service/contracts")
+@RequestMapping("/api/v1/document-management-service/documents")
 @Tag(name = "API Quản lý Hợp đồng", description = "Các API để tạo, đọc, cập nhật và xóa hợp đồng trong hệ thống DocGO")
 public class ContractController {
 
@@ -278,7 +278,7 @@ public class ContractController {
     @PostMapping
     public ResponseEntity<RestResponse<Contract>> createContract(@Valid @RequestBody ContractCreateRequest request) {
         if (request.getContractNumber() == null) {
-            throw new com.devgo2003.docgo.contract_service.common.exception.InvalidInputException("Không được gửi id khi tạo hợp đồng mới.");
+            throw new com.devgo2003.docgo.document_service.common.exception.InvalidInputException("Không được gửi id khi tạo hợp đồng mới.");
         }
         
         // Convert DTO to Entity

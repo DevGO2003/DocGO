@@ -1,4 +1,4 @@
-package com.devgo2003.docgo.auth_service.event;
+package com.devgo2003.docgo.user_service.event;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

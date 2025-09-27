@@ -1,6 +1,6 @@
-package com.devgo2003.docgo.auth_service.security;
+package com.devgo2003.docgo.user_service.security;
 
-import com.devgo2003.docgo.auth_service.repository.UserMongoRepository;
+import com.devgo2003.docgo.user_service.repository.UserMongoRepository;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

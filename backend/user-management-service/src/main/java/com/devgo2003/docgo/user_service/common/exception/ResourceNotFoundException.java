@@ -1,4 +1,4 @@
-package com.devgo2003.docgo.auth_service.common.exception;
+package com.devgo2003.docgo.user_service.common.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;

@@ -1,4 +1,4 @@
-package com.devgo2003.docgo.auth_service.security;
+package com.devgo2003.docgo.user_service.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

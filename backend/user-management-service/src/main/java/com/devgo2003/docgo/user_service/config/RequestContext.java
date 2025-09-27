@@ -1,4 +1,4 @@
-package com.devgo2003.docgo.auth_service.config;
+package com.devgo2003.docgo.user_service.config;
 
 public final class RequestContext {
     private static final ThreadLocal<String> ACTOR = new ThreadLocal<>();

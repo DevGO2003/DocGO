@@ -1,9 +1,9 @@
-package com.devgo2003.docgo.auth_service.controller;
+package com.devgo2003.docgo.user_service.controller;
 
-import com.devgo2003.docgo.auth_service.entity.UserMongo;
-import com.devgo2003.docgo.auth_service.entity.UserStatus;
-import com.devgo2003.docgo.auth_service.service.UserService;
-import com.devgo2003.docgo.auth_service.common.response.RestResponse;
+import com.devgo2003.docgo.user_service.entity.UserMongo;
+import com.devgo2003.docgo.user_service.entity.UserStatus;
+import com.devgo2003.docgo.user_service.service.UserService;
+import com.devgo2003.docgo.user_service.common.response.RestResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -19,7 +19,7 @@ import java.util.Set;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/v1/authentication-identity-service/users")
+@RequestMapping("/api/v1/user-management-service/users")
 @RequiredArgsConstructor
 @Tag(name = "User Management", description = "API quản lý người dùng")
 public class UserController {
