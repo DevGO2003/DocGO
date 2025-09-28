@@ -1,13 +1,17 @@
 package com.devgo2003.docgo.backend.user_service.entity;
 
-import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
+
+import java.time.LocalDateTime;
 
 /**
  * Entity để lưu trữ quyền hạn của người dùng
  */
-@Entity
-@Table(name = "user_permissions")
+@Document(collection = "user_permissions")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -15,25 +19,26 @@ import lombok.*;
 @Builder
 public class UserPermission extends BaseEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @org.springframework.data.annotation.Id
+    private String id;
 
-    @Column(name = "user_id", nullable = false)
-    private Long userId;
+    @Field("user_id")
+    private String userId;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "permission_name", nullable = false)
+    @Field("permission_name")
     private Permission permissionName;
 
-    @Column(name = "is_enabled", nullable = false)
-    @Builder.Default
-    private Boolean isEnabled = true;
+    @Field("permission_description")
+    private String permissionDescription;
 
-    // Unique constraint to prevent duplicate permissions for a user
-    @PrePersist
-    @PreUpdate
-    private void validateUniquePermission() {
-        // Logic for unique constraint might be better handled at DB level or service layer
-    }
+    @Field("is_granted")
+    private Boolean isGranted = true;
+
+    @Field("created_at")
+    @CreatedDate
+    private LocalDateTime createdAt;
+
+    @Field("updated_at")
+    @LastModifiedDate
+    private LocalDateTime updatedAt;
 }

@@ -1,15 +1,17 @@
 package com.devgo2003.docgo.backend.user_service.entity;
 
-import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.time.LocalDateTime;
 
 /**
  * Entity để theo dõi các sự kiện của người dùng (audit trail)
  */
-@Entity
-@Table(name = "user_events")
+@Document(collection = "user_events")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -17,71 +19,42 @@ import java.time.LocalDateTime;
 @Builder
 public class UserEvent extends BaseEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long eventId;
+    @org.springframework.data.annotation.Id
+    private String id;
 
-    /**
-     * ID của người dùng liên quan đến sự kiện
-     */
-    @Column(name = "user_id", nullable = false)
-    private Long userId;
+    @Field("user_id")
+    private String userId;
 
-    /**
-     * Loại sự kiện
-     */
-    @Enumerated(EnumType.STRING)
-    @Column(name = "event_type", nullable = false)
-    private UserEventType eventType;
+    @Field("event_type")
+    private EventType eventType;
 
-    /**
-     * Mô tả chi tiết sự kiện
-     */
-    @Column(name = "description", columnDefinition = "TEXT")
-    private String description;
+    @Field("event_description")
+    private String eventDescription;
 
-    /**
-     * Dữ liệu bổ sung của sự kiện (JSON)
-     */
-    @Column(name = "event_data", columnDefinition = "TEXT")
-    private String eventData;
-
-    /**
-     * IP address của người dùng khi thực hiện sự kiện
-     */
-    @Column(name = "ip_address")
+    @Field("ip_address")
     private String ipAddress;
 
-    /**
-     * User agent của trình duyệt
-     */
-    @Column(name = "user_agent")
+    @Field("user_agent")
     private String userAgent;
 
-    /**
-     * Thời gian xảy ra sự kiện
-     */
-    @Column(name = "event_timestamp", nullable = false)
-    private LocalDateTime eventTimestamp;
+    @Field("event_data")
+    private String eventData;
 
-    /**
-     * Kết quả của sự kiện
-     */
-    @Enumerated(EnumType.STRING)
-    @Column(name = "event_result")
-    private EventResult eventResult;
+    @Field("created_at")
+    @CreatedDate
+    private LocalDateTime createdAt;
 
-    /**
-     * Thông báo lỗi nếu có
-     */
-    @Column(name = "error_message")
-    private String errorMessage;
+    @Field("updated_at")
+    @LastModifiedDate
+    private LocalDateTime updatedAt;
 
-    @PrePersist
-    protected void onCreate() {
-        super.onCreate();
-        if (this.eventTimestamp == null) {
-            this.eventTimestamp = LocalDateTime.now();
-        }
+    public enum EventType {
+        LOGIN,
+        LOGOUT,
+        REGISTER,
+        UPDATE_PROFILE,
+        CHANGE_PASSWORD,
+        DELETE_ACCOUNT,
+        OTHER
     }
 }

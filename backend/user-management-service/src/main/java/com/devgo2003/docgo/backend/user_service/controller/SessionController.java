@@ -219,126 +219,6 @@ public class SessionController {
                 .orElse(ResponseEntity.notFound().build());
     }
     
-    @GetMapping("/user/{userId}")
-    @Operation(
-        summary = "Lấy phiên đăng nhập của người dùng", 
-        description = """
-        🔹 Đầu vào
-        
-        👤 userId (bắt buộc, path)
-        Loại: string
-        Mô tả: ID của người dùng
-        
-        🔹 Đầu ra
-        
-        📝 data
-        Loại: List<SessionMongo>
-        Mô tả: Danh sách phiên đăng nhập của người dùng
-        
-        📊 apiVersion
-        Loại: string
-        Mô tả: Phiên bản API (v1)
-        
-        🔢 statusCode
-        Loại: integer
-        Mô tả: Mã trạng thái HTTP (200: OK, 204: No Content)
-        
-        📋 shortMessage
-        Loại: string
-        Mô tả: Thông báo ngắn gọn về kết quả
-        
-        📖 description
-        Loại: string
-        Mô tả: Mô tả chi tiết về kết quả xử lý
-        
-        🕒 timestamp
-        Loại: string (ISO-8601)
-        Mô tả: Thời gian xử lý yêu cầu
-        
-        🆔 requestId
-        Loại: string (UUID)
-        Mô tả: Định danh duy nhất của yêu cầu
-        
-        🛣️ path
-        Loại: string
-        Mô tả: Đường dẫn API được gọi
-        """
-    )
-    public ResponseEntity<RestResponse<List<SessionMongo>>> getUserSessions(
-            @Parameter(description = "ID người dùng") @PathVariable String userId) {
-        
-        log.info("Getting sessions for user: {}", userId);
-        
-        List<SessionMongo> sessions = sessionService.getUserSessions(userId);
-        
-        return ResponseEntity.ok(RestResponse.<List<SessionMongo>>builder()
-                .statusCode(200)
-                .shortMessage("Success")
-                .description("Đã lấy danh sách phiên đăng nhập của người dùng thành công")
-                .data(sessions)
-                .build());
-    }
-    
-    @GetMapping("/user/{userId}/active")
-    @Operation(
-        summary = "Lấy phiên đăng nhập hoạt động của người dùng", 
-        description = """
-        🔹 Đầu vào
-        
-        👤 userId (bắt buộc, path)
-        Loại: string
-        Mô tả: ID của người dùng
-        
-        🔹 Đầu ra
-        
-        📝 data
-        Loại: List<SessionMongo>
-        Mô tả: Danh sách phiên đăng nhập đang hoạt động
-        
-        📊 apiVersion
-        Loại: string
-        Mô tả: Phiên bản API (v1)
-        
-        🔢 statusCode
-        Loại: integer
-        Mô tả: Mã trạng thái HTTP (200: OK, 204: No Content)
-        
-        📋 shortMessage
-        Loại: string
-        Mô tả: Thông báo ngắn gọn về kết quả
-        
-        📖 description
-        Loại: string
-        Mô tả: Mô tả chi tiết về kết quả xử lý
-        
-        🕒 timestamp
-        Loại: string (ISO-8601)
-        Mô tả: Thời gian xử lý yêu cầu
-        
-        🆔 requestId
-        Loại: string (UUID)
-        Mô tả: Định danh duy nhất của yêu cầu
-        
-        🛣️ path
-        Loại: string
-        Mô tả: Đường dẫn API được gọi
-        """
-    )
-    public ResponseEntity<RestResponse<List<SessionMongo>>> getActiveUserSessions(
-            @Parameter(description = "ID người dùng") @PathVariable String userId) {
-        
-        log.info("Getting active sessions for user: {}", userId);
-        
-        List<SessionMongo> sessions = sessionService.getActiveUserSessions(userId);
-        
-        return ResponseEntity.ok(RestResponse.<List<SessionMongo>>builder()
-                .statusCode(200)
-                .shortMessage("Success")
-                .description("Đã lấy danh sách phiên đăng nhập hoạt động của người dùng thành công")
-                .data(sessions)
-                .build());
-    }
-    
     @GetMapping("/status/{status}")
     @Operation(
         summary = "Lấy phiên đăng nhập theo trạng thái", 
@@ -591,6 +471,126 @@ public class SessionController {
                 .shortMessage("Created")
                 .description("Đã tạo phiên đăng nhập thành công")
                 .data(session)
+                .build());
+    }
+    
+    @GetMapping("/user/{userId}")
+    @Operation(
+        summary = "Lấy phiên đăng nhập của người dùng", 
+        description = """
+        🔹 Đầu vào
+        
+        👤 userId (bắt buộc, path)
+        Loại: string
+        Mô tả: ID của người dùng
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: List<SessionMongo>
+        Mô tả: Danh sách phiên đăng nhập của người dùng
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1)
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK, 204: No Content)
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý
+        
+        🕒 timestamp
+        Loại: string (ISO-8601)
+        Mô tả: Thời gian xử lý yêu cầu
+        
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu
+        
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi
+        """
+    )
+    public ResponseEntity<RestResponse<List<SessionMongo>>> getUserSessions(
+            @Parameter(description = "ID người dùng") @PathVariable String userId) {
+        
+        log.info("Getting sessions for user: {}", userId);
+        
+        List<SessionMongo> sessions = sessionService.getUserSessions(userId);
+        
+        return ResponseEntity.ok(RestResponse.<List<SessionMongo>>builder()
+                .statusCode(200)
+                .shortMessage("Success")
+                .description("Đã lấy danh sách phiên đăng nhập của người dùng thành công")
+                .data(sessions)
+                .build());
+    }
+    
+    @GetMapping("/user/{userId}/active")
+    @Operation(
+        summary = "Lấy phiên đăng nhập hoạt động của người dùng", 
+        description = """
+        🔹 Đầu vào
+        
+        👤 userId (bắt buộc, path)
+        Loại: string
+        Mô tả: ID của người dùng
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: List<SessionMongo>
+        Mô tả: Danh sách phiên đăng nhập đang hoạt động
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1)
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK, 204: No Content)
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý
+        
+        🕒 timestamp
+        Loại: string (ISO-8601)
+        Mô tả: Thời gian xử lý yêu cầu
+        
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu
+        
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi
+        """
+    )
+    public ResponseEntity<RestResponse<List<SessionMongo>>> getActiveUserSessions(
+            @Parameter(description = "ID người dùng") @PathVariable String userId) {
+        
+        log.info("Getting active sessions for user: {}", userId);
+        
+        List<SessionMongo> sessions = sessionService.getActiveUserSessions(userId);
+        
+        return ResponseEntity.ok(RestResponse.<List<SessionMongo>>builder()
+                .statusCode(200)
+                .shortMessage("Success")
+                .description("Đã lấy danh sách phiên đăng nhập hoạt động của người dùng thành công")
+                .data(sessions)
                 .build());
     }
     

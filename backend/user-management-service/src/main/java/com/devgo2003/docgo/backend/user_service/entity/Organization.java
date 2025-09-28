@@ -1,73 +1,68 @@
 package com.devgo2003.docgo.backend.user_service.entity;
 
-import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 import java.util.List;
 
-@Entity
-@Table(name = "organizations")
+@Document(collection = "organizations")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@EntityListeners(AuditingEntityListener.class)
 public class Organization {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @org.springframework.data.annotation.Id
     private String id;
 
-    @Column(nullable = false, unique = true)
+    @Field("name")
     private String name;
 
-    @Column(unique = true)
+    @Field("code")
     private String code;
 
-    @Column(length = 500)
+    @Field("description")
     private String description;
 
-    @Column(length = 500)
+    @Field("address")
     private String address;
 
-    @Column(length = 20)
+    @Field("phone")
     private String phone;
 
-    @Column(length = 100)
+    @Field("email")
     private String email;
 
-    @Column(length = 200)
+    @Field("website")
     private String website;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Field("status")
     private OrganizationStatus status = OrganizationStatus.ACTIVE;
 
-    @Column(name = "created_by")
+    @Field("created_by")
     private String createdBy;
 
-    @Column(name = "updated_by")
+    @Field("updated_by")
     private String updatedBy;
 
+    @Field("created_at")
     @CreatedDate
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private ZonedDateTime createdAt;
+    private LocalDateTime createdAt;
 
+    @Field("updated_at")
     @LastModifiedDate
-    @Column(name = "updated_at")
-    private ZonedDateTime updatedAt;
+    private LocalDateTime updatedAt;
 
-    @Column(name = "deleted_at")
-    private ZonedDateTime deletedAt;
+    @Field("deleted_at")
+    private LocalDateTime deletedAt;
 
-    // Quan hệ với User
-    @OneToMany(mappedBy = "organization", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<User> users;
+    @Field("user_ids")
+    private List<String> userIds;
 
     public enum OrganizationStatus {
         ACTIVE,

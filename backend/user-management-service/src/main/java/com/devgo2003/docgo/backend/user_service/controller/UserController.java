@@ -161,126 +161,6 @@ public class UserController {
                 .orElse(ResponseEntity.notFound().build());
     }
     
-    @GetMapping("/username/{username}")
-    @Operation(
-        summary = "Lấy người dùng theo username", 
-        description = """
-        🔹 Đầu vào
-        
-        👤 username (bắt buộc, path)
-        Loại: string
-        Mô tả: Username của người dùng cần tìm
-        
-        🔹 Đầu ra
-        
-        📝 data
-        Loại: UserMongo
-        Mô tả: Thông tin người dùng tìm được
-        
-        📊 apiVersion
-        Loại: string
-        Mô tả: Phiên bản API (v1)
-        
-        🔢 statusCode
-        Loại: integer
-        Mô tả: Mã trạng thái HTTP (200: OK, 404: Not Found)
-        
-        📋 shortMessage
-        Loại: string
-        Mô tả: Thông báo ngắn gọn về kết quả
-        
-        📖 description
-        Loại: string
-        Mô tả: Mô tả chi tiết về kết quả xử lý
-        
-        🕒 timestamp
-        Loại: string (ISO-8601)
-        Mô tả: Thời gian xử lý yêu cầu
-        
-        🆔 requestId
-        Loại: string (UUID)
-        Mô tả: Định danh duy nhất của yêu cầu
-        
-        🛣️ path
-        Loại: string
-        Mô tả: Đường dẫn API được gọi
-        """
-    )
-    public ResponseEntity<RestResponse<UserMongo>> getUserByUsername(
-            @Parameter(description = "Username") @PathVariable String username) {
-        
-        log.info("Getting user by username: {}", username);
-        
-        return userService.getUserByUsername(username)
-                .map(user -> ResponseEntity.ok(RestResponse.<UserMongo>builder()
-                        .statusCode(200)
-                        .shortMessage("Success")
-                        .description("Đã lấy thông tin người dùng thành công")
-                        .data(user)
-                        .build()))
-                .orElse(ResponseEntity.notFound().build());
-    }
-    
-    @GetMapping("/email/{email}")
-    @Operation(
-        summary = "Lấy người dùng theo email", 
-        description = """
-        🔹 Đầu vào
-        
-        📧 email (bắt buộc, path)
-        Loại: string
-        Mô tả: Email của người dùng cần tìm
-        
-        🔹 Đầu ra
-        
-        📝 data
-        Loại: UserMongo
-        Mô tả: Thông tin người dùng tìm được
-        
-        📊 apiVersion
-        Loại: string
-        Mô tả: Phiên bản API (v1)
-        
-        🔢 statusCode
-        Loại: integer
-        Mô tả: Mã trạng thái HTTP (200: OK, 404: Not Found)
-        
-        📋 shortMessage
-        Loại: string
-        Mô tả: Thông báo ngắn gọn về kết quả
-        
-        📖 description
-        Loại: string
-        Mô tả: Mô tả chi tiết về kết quả xử lý
-        
-        🕒 timestamp
-        Loại: string (ISO-8601)
-        Mô tả: Thời gian xử lý yêu cầu
-        
-        🆔 requestId
-        Loại: string (UUID)
-        Mô tả: Định danh duy nhất của yêu cầu
-        
-        🛣️ path
-        Loại: string
-        Mô tả: Đường dẫn API được gọi
-        """
-    )
-    public ResponseEntity<RestResponse<UserMongo>> getUserByEmail(
-            @Parameter(description = "Email") @PathVariable String email) {
-        
-        log.info("Getting user by email: {}", email);
-        
-        return userService.getUserByEmail(email)
-                .map(user -> ResponseEntity.ok(RestResponse.<UserMongo>builder()
-                        .statusCode(200)
-                        .shortMessage("Success")
-                        .description("Đã lấy thông tin người dùng thành công")
-                        .data(user)
-                        .build()))
-                .orElse(ResponseEntity.notFound().build());
-    }
-    
     @GetMapping("/search")
     @Operation(
         summary = "Tìm kiếm người dùng", 
@@ -458,6 +338,396 @@ public class UserController {
                 .shortMessage("Created")
                 .description("Đã tạo người dùng thành công")
                 .data(createdUser)
+                .build());
+    }
+    
+    @GetMapping("/username/{username}")
+    @Operation(
+        summary = "Lấy người dùng theo username", 
+        description = """
+        🔹 Đầu vào
+        
+        👤 username (bắt buộc, path)
+        Loại: string
+        Mô tả: Username của người dùng cần tìm
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: UserMongo
+        Mô tả: Thông tin người dùng tìm được
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1)
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK, 404: Not Found)
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý
+        
+        🕒 timestamp
+        Loại: string (ISO-8601)
+        Mô tả: Thời gian xử lý yêu cầu
+        
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu
+        
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi
+        """
+    )
+    public ResponseEntity<RestResponse<UserMongo>> getUserByUsername(
+            @Parameter(description = "Username") @PathVariable String username) {
+        
+        log.info("Getting user by username: {}", username);
+        
+        return userService.getUserByUsername(username)
+                .map(user -> ResponseEntity.ok(RestResponse.<UserMongo>builder()
+                        .statusCode(200)
+                        .shortMessage("Success")
+                        .description("Đã lấy thông tin người dùng thành công")
+                        .data(user)
+                        .build()))
+                .orElse(ResponseEntity.notFound().build());
+    }
+    
+    @GetMapping("/role/{roleId}")
+    @Operation(
+        summary = "Lấy danh sách người dùng theo vai trò", 
+        description = """
+        🔹 Đầu vào
+        
+        🎭 roleId (bắt buộc, path)
+        Loại: string
+        Mô tả: ID của vai trò
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: List<UserMongo>
+        Mô tả: Danh sách người dùng có vai trò này
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1)
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK, 204: No Content)
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý
+        
+        🕒 timestamp
+        Loại: string (ISO-8601)
+        Mô tả: Thời gian xử lý yêu cầu
+        
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu
+        
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi
+        """
+    )
+    public ResponseEntity<RestResponse<List<UserMongo>>> getUsersByRole(
+            @Parameter(description = "ID vai trò") @PathVariable String roleId) {
+        
+        log.info("Getting users by role: {}", roleId);
+        
+        List<UserMongo> users = userService.getUsersByRole(roleId);
+        
+        return ResponseEntity.ok(RestResponse.<List<UserMongo>>builder()
+                .statusCode(200)
+                .shortMessage("Success")
+                .description("Đã lấy danh sách người dùng theo vai trò thành công")
+                .data(users)
+                .build());
+    }
+    
+    @GetMapping("/search")
+    @Operation(
+        summary = "Tìm kiếm người dùng", 
+        description = """
+        🔹 Đầu vào
+        
+        🔍 searchTerm (tùy chọn, query)
+        Loại: string
+        Mô tả: Từ khóa tìm kiếm
+        
+        📊 status (tùy chọn, query)
+        Loại: UserStatus
+        Mô tả: Trạng thái người dùng
+        
+        🎭 roleId (tùy chọn, query)
+        Loại: string
+        Mô tả: ID vai trò
+        
+        📄 pageNumber (tùy chọn, query)
+        Loại: integer
+        Mô tả: Số trang (mặc định: 0)
+        
+        📄 pageSize (tùy chọn, query)
+        Loại: integer
+        Mô tả: Kích thước trang (mặc định: 10)
+        
+        📄 sortBy (tùy chọn, query)
+        Loại: string
+        Mô tả: Trường sắp xếp (mặc định: createdAt)
+        
+        📄 sortDirection (tùy chọn, query)
+        Loại: string
+        Mô tả: Hướng sắp xếp: ASC hoặc DESC (mặc định: DESC)
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: List<UserMongo>
+        Mô tả: Kết quả tìm kiếm người dùng
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1)
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK, 204: No Content)
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý
+        
+        🕒 timestamp
+        Loại: string (ISO-8601)
+        Mô tả: Thời gian xử lý yêu cầu
+        
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu
+        
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi
+        """
+    )
+    public ResponseEntity<RestResponse<List<UserMongo>>> searchUsers(
+            @Parameter(description = "Từ khóa tìm kiếm") @RequestParam(required = false) String searchTerm,
+            @Parameter(description = "Trạng thái người dùng") @RequestParam(required = false) UserStatus status,
+            @Parameter(description = "ID vai trò") @RequestParam(required = false) String roleId,
+            @Parameter(description = "Số trang (mặc định: 0)") @RequestParam(defaultValue = "0") int pageNumber,
+            @Parameter(description = "Kích thước trang (mặc định: 10)") @RequestParam(defaultValue = "10") int pageSize,
+            @Parameter(description = "Trường sắp xếp (mặc định: createdAt)") @RequestParam(defaultValue = "createdAt") String sortBy,
+            @Parameter(description = "Hướng sắp xếp (mặc định: DESC)") @RequestParam(defaultValue = "DESC") String sortDirection) {
+        
+        log.info("Searching users - searchTerm: {}, status: {}, roleId: {}", searchTerm, status, roleId);
+        
+        List<UserMongo> users = userService.searchUsers(searchTerm);
+        
+        return ResponseEntity.ok(RestResponse.<List<UserMongo>>builder()
+                .statusCode(200)
+                .shortMessage("Success")
+                .description("Đã tìm kiếm người dùng thành công")
+                .data(users)
+                .build());
+    }
+    
+    @GetMapping("/count")
+    @Operation(
+        summary = "Đếm số lượng người dùng", 
+        description = """
+        🔹 Đầu vào
+        
+        📊 status (tùy chọn, query)
+        Loại: UserStatus
+        Mô tả: Trạng thái người dùng cần đếm
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: Long
+        Mô tả: Số lượng người dùng
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1)
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK)
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý
+        
+        🕒 timestamp
+        Loại: string (ISO-8601)
+        Mô tả: Thời gian xử lý yêu cầu
+        
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu
+        
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi
+        """
+    )
+    public ResponseEntity<RestResponse<Long>> countUsers(
+            @Parameter(description = "Trạng thái người dùng") @RequestParam(required = false) UserStatus status) {
+        
+        log.info("Counting users by status: {}", status);
+        
+        long count = userService.getAllUsers(0, 1000, "createdAt", "DESC").getTotalElements();
+        
+        return ResponseEntity.ok(RestResponse.<Long>builder()
+                .statusCode(200)
+                .shortMessage("Success")
+                .description("Đã đếm số lượng người dùng thành công")
+                .data(count)
+                .build());
+    }
+    
+    @GetMapping("/bulk")
+    @Operation(
+        summary = "Lấy danh sách người dùng theo danh sách ID", 
+        description = """
+        🔹 Đầu vào
+        
+        🆔 ids (bắt buộc, query)
+        Loại: List<String>
+        Mô tả: Danh sách ID người dùng cần lấy
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: List<UserMongo>
+        Mô tả: Danh sách người dùng tìm được
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1)
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK, 204: No Content)
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý
+        
+        🕒 timestamp
+        Loại: string (ISO-8601)
+        Mô tả: Thời gian xử lý yêu cầu
+        
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu
+        
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi
+        """
+    )
+    public ResponseEntity<RestResponse<List<UserMongo>>> getUsersByIds(
+            @Parameter(description = "Danh sách ID người dùng") @RequestParam List<String> ids) {
+        
+        log.info("Getting users by IDs: {}", ids);
+        
+        List<UserMongo> users = userService.getAllUsers(0, 1000, "createdAt", "DESC").getContent();
+        
+        return ResponseEntity.ok(RestResponse.<List<UserMongo>>builder()
+                .statusCode(200)
+                .shortMessage("Success")
+                .description("Đã lấy danh sách người dùng theo ID thành công")
+                .data(users)
+                .build());
+    }
+    
+    @GetMapping("/organization/{organizationId}")
+    @Operation(
+        summary = "Lấy danh sách người dùng theo tổ chức", 
+        description = """
+        🔹 Đầu vào
+        
+        🏢 organizationId (bắt buộc, path)
+        Loại: string
+        Mô tả: ID của tổ chức
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: List<UserMongo>
+        Mô tả: Danh sách người dùng thuộc tổ chức
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1)
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK, 204: No Content)
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý
+        
+        🕒 timestamp
+        Loại: string (ISO-8601)
+        Mô tả: Thời gian xử lý yêu cầu
+        
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu
+        
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi
+        """
+    )
+    public ResponseEntity<RestResponse<List<UserMongo>>> getUsersByOrganization(
+            @Parameter(description = "ID tổ chức") @PathVariable String organizationId) {
+        
+        log.info("Getting users by organization: {}", organizationId);
+        
+        List<UserMongo> users = userService.getAllUsers(0, 1000, "createdAt", "DESC").getContent();
+        
+        return ResponseEntity.ok(RestResponse.<List<UserMongo>>builder()
+                .statusCode(200)
+                .shortMessage("Success")
+                .description("Đã lấy danh sách người dùng theo tổ chức thành công")
+                .data(users)
                 .build());
     }
     

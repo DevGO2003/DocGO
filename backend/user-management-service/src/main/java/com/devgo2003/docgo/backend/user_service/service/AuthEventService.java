@@ -31,7 +31,7 @@ public class AuthEventService {
             String sessionId = request.getSession().getId();
             
             AuthEvent event = AuthEvent.createLoginEvent(
-                user.getUserId(),
+                user.getId(),
                 user.getUsername(),
                 user.getEmail(),
                 ip,
@@ -58,7 +58,7 @@ public class AuthEventService {
             String sessionId = request.getSession().getId();
             
             AuthEvent event = AuthEvent.createLogoutEvent(
-                user.getUserId(),
+                user.getId(),
                 user.getUsername(),
                 user.getEmail(),
                 ip,
@@ -83,7 +83,7 @@ public class AuthEventService {
             String sessionId = request.getSession().getId();
             
             AuthEvent event = AuthEvent.createRegisterEvent(
-                user.getUserId(),
+                user.getId(),
                 user.getUsername(),
                 user.getEmail(),
                 ip,
@@ -110,7 +110,7 @@ public class AuthEventService {
             String sessionId = request.getSession().getId();
             
             AuthEvent event = AuthEvent.createRefreshTokenEvent(
-                user.getUserId(),
+                user.getId(),
                 user.getUsername(),
                 user.getEmail(),
                 ip,
@@ -137,7 +137,7 @@ public class AuthEventService {
             String sessionId = request.getSession().getId();
             
             AuthEvent event = AuthEvent.createOAuthLoginEvent(
-                user.getUserId(),
+                user.getId(),
                 user.getUsername(),
                 user.getEmail(),
                 provider,

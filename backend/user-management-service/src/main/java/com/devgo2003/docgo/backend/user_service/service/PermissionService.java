@@ -22,15 +22,15 @@ public class PermissionService {
     }
 
     @Transactional(readOnly = true)
-    public Set<Permission> getUserPermissions(Long userId) {
+    public Set<Permission> getUserPermissions(String userId) {
         return userPermissionRepository.findByUserId(userId).stream()
-                .filter(UserPermission::getIsEnabled)
+                .filter(UserPermission::getIsGranted)
                 .map(UserPermission::getPermissionName)
                 .collect(Collectors.toSet());
     }
 
     @Transactional
-    public void updatePermissionsForUser(Long userId, Set<Permission> newPermissions) {
+    public void updatePermissionsForUser(String userId, Set<Permission> newPermissions) {
         // Delete existing permissions not in newPermissions
         userPermissionRepository.findByUserId(userId).stream()
                 .filter(p -> !newPermissions.contains(p.getPermissionName()))
@@ -42,16 +42,16 @@ public class PermissionService {
                 userPermissionRepository.save(UserPermission.builder()
                         .userId(userId)
                         .permissionName(permission)
-                        .isEnabled(true)
+                        .isGranted(true)
                         .build());
             }
         });
     }
 
     @Transactional(readOnly = true)
-    public boolean hasPermission(Long userId, Permission permission) {
+    public boolean hasPermission(String userId, Permission permission) {
         return userPermissionRepository.findByUserIdAndPermissionName(userId, permission)
-                .map(UserPermission::getIsEnabled)
+                .map(UserPermission::getIsGranted)
                 .orElse(false);
     }
 }

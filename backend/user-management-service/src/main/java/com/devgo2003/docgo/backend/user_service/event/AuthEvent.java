@@ -35,7 +35,7 @@ public class AuthEvent {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class AuthEventData {
-        private Long userId;
+        private String userId;
         private String username;
         private String email;
         private String action; // LOGIN, LOGOUT, REGISTER, REFRESH_TOKEN, OAUTH_LOGIN
@@ -47,7 +47,7 @@ public class AuthEvent {
     }
 
     // Factory methods for common events
-    public static AuthEvent createLoginEvent(Long userId, String username, String email, String ip, String userAgent, String sessionId, boolean success, String reason) {
+    public static AuthEvent createLoginEvent(String userId, String username, String email, String ip, String userAgent, String sessionId, boolean success, String reason) {
         AuthEvent event = new AuthEvent();
         event.setEventVersion("v1");
         event.setEventType("UserLogin");
@@ -57,7 +57,7 @@ public class AuthEvent {
         event.setCorrelationId(UUID.randomUUID().toString());
         
         Actor actor = new Actor();
-        actor.setUserId(userId.toString());
+        actor.setUserId(userId);
         actor.setUserRole("USER");
         actor.setIp(ip);
         event.setActor(actor);
@@ -76,7 +76,7 @@ public class AuthEvent {
         return event;
     }
 
-    public static AuthEvent createLogoutEvent(Long userId, String username, String email, String ip, String userAgent, String sessionId) {
+    public static AuthEvent createLogoutEvent(String userId, String username, String email, String ip, String userAgent, String sessionId) {
         AuthEvent event = new AuthEvent();
         event.setEventVersion("v1");
         event.setEventType("UserLogout");
@@ -86,7 +86,7 @@ public class AuthEvent {
         event.setCorrelationId(UUID.randomUUID().toString());
         
         Actor actor = new Actor();
-        actor.setUserId(userId.toString());
+        actor.setUserId(userId);
         actor.setUserRole("USER");
         actor.setIp(ip);
         event.setActor(actor);
@@ -104,7 +104,7 @@ public class AuthEvent {
         return event;
     }
 
-    public static AuthEvent createRegisterEvent(Long userId, String username, String email, String ip, String userAgent, String sessionId, boolean success, String reason) {
+    public static AuthEvent createRegisterEvent(String userId, String username, String email, String ip, String userAgent, String sessionId, boolean success, String reason) {
         AuthEvent event = new AuthEvent();
         event.setEventVersion("v1");
         event.setEventType("UserRegistration");
@@ -114,7 +114,7 @@ public class AuthEvent {
         event.setCorrelationId(UUID.randomUUID().toString());
         
         Actor actor = new Actor();
-        actor.setUserId(userId != null ? userId.toString() : null);
+        actor.setUserId(userId);
         actor.setUserRole("USER");
         actor.setIp(ip);
         event.setActor(actor);
@@ -133,7 +133,7 @@ public class AuthEvent {
         return event;
     }
 
-    public static AuthEvent createRefreshTokenEvent(Long userId, String username, String email, String ip, String userAgent, String sessionId, boolean success, String reason) {
+    public static AuthEvent createRefreshTokenEvent(String userId, String username, String email, String ip, String userAgent, String sessionId, boolean success, String reason) {
         AuthEvent event = new AuthEvent();
         event.setEventVersion("v1");
         event.setEventType("TokenRefresh");
@@ -143,7 +143,7 @@ public class AuthEvent {
         event.setCorrelationId(UUID.randomUUID().toString());
         
         Actor actor = new Actor();
-        actor.setUserId(userId.toString());
+        actor.setUserId(userId);
         actor.setUserRole("USER");
         actor.setIp(ip);
         event.setActor(actor);
@@ -162,7 +162,7 @@ public class AuthEvent {
         return event;
     }
 
-    public static AuthEvent createOAuthLoginEvent(Long userId, String username, String email, String provider, String ip, String userAgent, String sessionId, boolean success, String reason) {
+    public static AuthEvent createOAuthLoginEvent(String userId, String username, String email, String provider, String ip, String userAgent, String sessionId, boolean success, String reason) {
         AuthEvent event = new AuthEvent();
         event.setEventVersion("v1");
         event.setEventType("OAuthLogin");
@@ -172,7 +172,7 @@ public class AuthEvent {
         event.setCorrelationId(UUID.randomUUID().toString());
         
         Actor actor = new Actor();
-        actor.setUserId(userId != null ? userId.toString() : null);
+        actor.setUserId(userId);
         actor.setUserRole("USER");
         actor.setIp(ip);
         event.setActor(actor);

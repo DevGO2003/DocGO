@@ -3,16 +3,15 @@ package com.devgo2003.docgo.backend.user_service.repository;
 import com.devgo2003.docgo.backend.user_service.entity.Organization;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
+import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface OrganizationRepository extends JpaRepository<Organization, String> {
+public interface OrganizationRepository extends MongoRepository<Organization, String> {
 
     // Tìm organization theo code
     Optional<Organization> findByCode(String code);
@@ -27,23 +26,21 @@ public interface OrganizationRepository extends JpaRepository<Organization, Stri
     Page<Organization> findByStatus(Organization.OrganizationStatus status, Pageable pageable);
 
     // Tìm kiếm organization theo tên (không phân biệt hoa thường)
-    @Query("SELECT o FROM Organization o WHERE LOWER(o.name) LIKE LOWER(CONCAT('%', :name, '%')) AND o.deletedAt IS NULL")
-    Page<Organization> findByNameContainingIgnoreCase(@Param("name") String name, Pageable pageable);
+    @Query("{'name': {$regex: ?0, $options: 'i'}, 'deletedAt': null}")
+    Page<Organization> findByNameContainingIgnoreCase(String name, Pageable pageable);
 
     // Tìm kiếm organization theo code (không phân biệt hoa thường)
-    @Query("SELECT o FROM Organization o WHERE LOWER(o.code) LIKE LOWER(CONCAT('%', :code, '%')) AND o.deletedAt IS NULL")
-    Page<Organization> findByCodeContainingIgnoreCase(@Param("code") String code, Pageable pageable);
+    @Query("{'code': {$regex: ?0, $options: 'i'}, 'deletedAt': null}")
+    Page<Organization> findByCodeContainingIgnoreCase(String code, Pageable pageable);
 
     // Tìm kiếm tổng hợp
-    @Query("SELECT o FROM Organization o WHERE " +
-           "(:name IS NULL OR LOWER(o.name) LIKE LOWER(CONCAT('%', :name, '%'))) AND " +
-           "(:code IS NULL OR LOWER(o.code) LIKE LOWER(CONCAT('%', :code, '%'))) AND " +
-           "(:status IS NULL OR o.status = :status) AND " +
-           "o.deletedAt IS NULL")
-    Page<Organization> findBySearchCriteria(@Param("name") String name, 
-                                          @Param("code") String code, 
-                                          @Param("status") Organization.OrganizationStatus status, 
-                                          Pageable pageable);
+    @Query("{'$and': [" +
+           "{'$or': [{'name': null}, {'name': {$regex: ?0, $options: 'i'}}]}," +
+           "{'$or': [{'code': null}, {'code': {$regex: ?1, $options: 'i'}}]}," +
+           "{'$or': [{'status': null}, {'status': ?2}]}," +
+           "{'deletedAt': null}" +
+           "]}")
+    Page<Organization> findBySearchCriteria(String name, String code, Organization.OrganizationStatus status, Pageable pageable);
 
     // Đếm số organization theo status
     long countByStatus(Organization.OrganizationStatus status);
@@ -55,10 +52,10 @@ public interface OrganizationRepository extends JpaRepository<Organization, Stri
     boolean existsByName(String name);
 
     // Tìm organization chưa bị xóa
-    @Query("SELECT o FROM Organization o WHERE o.deletedAt IS NULL")
+    @Query("{'deletedAt': null}")
     Page<Organization> findAllActive(Pageable pageable);
 
     // Tìm organization đã bị xóa
-    @Query("SELECT o FROM Organization o WHERE o.deletedAt IS NOT NULL")
+    @Query("{'deletedAt': {$ne: null}}")
     Page<Organization> findAllDeleted(Pageable pageable);
 }

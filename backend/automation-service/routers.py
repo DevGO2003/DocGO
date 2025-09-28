@@ -69,7 +69,7 @@ def ask_gemini(api_key: str, content: str, question: str) -> str:
 
 
 # API 1: EXTRACT (doc, pdf)
-@router.post("/extract", summary="Trích xuất toàn bộ nội dung file (doc/pdf)", tags=["Automation Service"])
+@router.post("/document/extract", summary="Trích xuất toàn bộ nội dung file (doc/pdf)", tags=["AI Processing"])
 async def extract_api(
     request: Request,
     file: UploadFile = File(..., description="File hợp đồng (docx, pdf)"),
@@ -165,7 +165,7 @@ async def extract_api(
 
 
 # API 4: CLASSIFY (nhận diện loại tài liệu: hợp đồng, đề cương, giáo trình, sách giáo khoa, ...)
-@router.post("/classify", summary="Phân loại loại tài liệu (file đa định dạng hoặc text)", tags=["Automation Service"])
+@router.post("/document/classify", summary="Phân loại loại tài liệu (file đa định dạng hoặc text)", tags=["AI Processing"])
 async def classify_api(
     request: Request,
     gemini_api_key: str = Header(None, description="Gemini API Key (tùy chọn)")
@@ -757,7 +757,7 @@ async def classify_api(
 
 
 # API Test: Kiểm tra GEMINI_API_KEY
-@router.get("/test/get-geminiapikey", summary="Kiểm tra GEMINI_API_KEY mà hệ thống đọc được", tags=["Test"])
+@router.get("/gemini/get-geminiapikey", summary="Kiểm tra GEMINI_API_KEY mà hệ thống đọc được", tags=["System Testing"])
 async def test_gemini_api_key_api(request: Request):
     """
     ## 🔹 Đầu vào
@@ -860,7 +860,7 @@ async def test_gemini_api_key_api(request: Request):
             path=str(request.url)
         )
 
-@router.post("/process-url", summary="Xử lý file từ URL với AI", tags=["Automation Service"])
+@router.post("/process-url", summary="Xử lý file từ URL với AI", tags=["AI Processing"])
 async def process_file_from_url(
     request: Request,
     file_url: str = Query(..., description="URL của file cần xử lý"),

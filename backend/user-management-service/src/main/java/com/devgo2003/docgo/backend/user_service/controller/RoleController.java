@@ -160,66 +160,6 @@ public class RoleController {
                 .orElse(ResponseEntity.notFound().build());
     }
     
-    @GetMapping("/name/{name}")
-    @Operation(
-        summary = "Lấy vai trò theo tên", 
-        description = """
-        🔹 Đầu vào
-        
-        📝 name (bắt buộc, path)
-        Loại: string
-        Mô tả: Tên vai trò cần tìm
-        
-        🔹 Đầu ra
-        
-        📝 data
-        Loại: RoleMongo
-        Mô tả: Thông tin vai trò tìm được
-        
-        📊 apiVersion
-        Loại: string
-        Mô tả: Phiên bản API (v1)
-        
-        🔢 statusCode
-        Loại: integer
-        Mô tả: Mã trạng thái HTTP (200: OK, 404: Not Found)
-        
-        📋 shortMessage
-        Loại: string
-        Mô tả: Thông báo ngắn gọn về kết quả
-        
-        📖 description
-        Loại: string
-        Mô tả: Mô tả chi tiết về kết quả xử lý
-        
-        🕒 timestamp
-        Loại: string (ISO-8601)
-        Mô tả: Thời gian xử lý yêu cầu
-        
-        🆔 requestId
-        Loại: string (UUID)
-        Mô tả: Định danh duy nhất của yêu cầu
-        
-        🛣️ path
-        Loại: string
-        Mô tả: Đường dẫn API được gọi
-        """
-    )
-    public ResponseEntity<RestResponse<RoleMongo>> getRoleByName(
-            @Parameter(description = "Tên vai trò") @PathVariable String name) {
-        
-        log.info("Getting role by name: {}", name);
-        
-        return roleService.getRoleByName(name)
-                .map(role -> ResponseEntity.ok(RestResponse.<RoleMongo>builder()
-                        .statusCode(200)
-                        .shortMessage("Success")
-                        .description("Đã lấy thông tin vai trò thành công")
-                        .data(role)
-                        .build()))
-                .orElse(ResponseEntity.notFound().build());
-    }
-    
     @GetMapping("/active")
     @Operation(
         summary = "Lấy danh sách vai trò hoạt động", 
@@ -273,63 +213,6 @@ public class RoleController {
                 .statusCode(200)
                 .shortMessage("Success")
                 .description("Đã lấy danh sách vai trò hoạt động thành công")
-                .data(roles)
-                .build());
-    }
-    
-    @GetMapping("/system")
-    @Operation(
-        summary = "Lấy danh sách vai trò hệ thống", 
-        description = """
-        🔹 Đầu vào
-        
-        Không có tham số đầu vào
-        
-        🔹 Đầu ra
-        
-        📝 data
-        Loại: List<RoleMongo>
-        Mô tả: Danh sách vai trò hệ thống
-        
-        📊 apiVersion
-        Loại: string
-        Mô tả: Phiên bản API (v1)
-        
-        🔢 statusCode
-        Loại: integer
-        Mô tả: Mã trạng thái HTTP (200: OK, 204: No Content)
-        
-        📋 shortMessage
-        Loại: string
-        Mô tả: Thông báo ngắn gọn về kết quả
-        
-        📖 description
-        Loại: string
-        Mô tả: Mô tả chi tiết về kết quả xử lý
-        
-        🕒 timestamp
-        Loại: string (ISO-8601)
-        Mô tả: Thời gian xử lý yêu cầu
-        
-        🆔 requestId
-        Loại: string (UUID)
-        Mô tả: Định danh duy nhất của yêu cầu
-        
-        🛣️ path
-        Loại: string
-        Mô tả: Đường dẫn API được gọi
-        """
-    )
-    public ResponseEntity<RestResponse<List<RoleMongo>>> getSystemRoles() {
-        
-        log.info("Getting system roles");
-        
-        List<RoleMongo> roles = roleService.getSystemRoles();
-        
-        return ResponseEntity.ok(RestResponse.<List<RoleMongo>>builder()
-                .statusCode(200)
-                .shortMessage("Success")
-                .description("Đã lấy danh sách vai trò hệ thống thành công")
                 .data(roles)
                 .build());
     }
@@ -631,6 +514,263 @@ public class RoleController {
                 .shortMessage("Created")
                 .description("Đã tạo vai trò thành công")
                 .data(createdRole)
+                .build());
+    }
+    
+    @GetMapping("/name/{name}")
+    @Operation(
+        summary = "Lấy vai trò theo tên", 
+        description = """
+        🔹 Đầu vào
+        
+        📝 name (bắt buộc, path)
+        Loại: string
+        Mô tả: Tên vai trò cần tìm
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: RoleMongo
+        Mô tả: Thông tin vai trò tìm được
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1)
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK, 404: Not Found)
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý
+        
+        🕒 timestamp
+        Loại: string (ISO-8601)
+        Mô tả: Thời gian xử lý yêu cầu
+        
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu
+        
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi
+        """
+    )
+    public ResponseEntity<RestResponse<RoleMongo>> getRoleByName(
+            @Parameter(description = "Tên vai trò") @PathVariable String name) {
+        
+        log.info("Getting role by name: {}", name);
+        
+        return roleService.getRoleByName(name)
+                .map(role -> ResponseEntity.ok(RestResponse.<RoleMongo>builder()
+                        .statusCode(200)
+                        .shortMessage("Success")
+                        .description("Đã lấy thông tin vai trò thành công")
+                        .data(role)
+                        .build()))
+                .orElse(ResponseEntity.notFound().build());
+    }
+    
+    @GetMapping("/parent/{parentRoleId}")
+    @Operation(
+        summary = "Lấy danh sách vai trò con", 
+        description = """
+        🔹 Đầu vào
+        
+        🎭 parentRoleId (bắt buộc, path)
+        Loại: string
+        Mô tả: ID của vai trò cha
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: List<RoleMongo>
+        Mô tả: Danh sách vai trò con
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1)
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK, 204: No Content)
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý
+        
+        🕒 timestamp
+        Loại: string (ISO-8601)
+        Mô tả: Thời gian xử lý yêu cầu
+        
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu
+        
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi
+        """
+    )
+    public ResponseEntity<RestResponse<List<RoleMongo>>> getChildRoles(
+            @Parameter(description = "ID vai trò cha") @PathVariable String parentRoleId) {
+        
+        log.info("Getting child roles for parent: {}", parentRoleId);
+        
+        List<RoleMongo> roles = roleService.getAllRoles(0, 1000, "createdAt", "DESC").getContent();
+        
+        return ResponseEntity.ok(RestResponse.<List<RoleMongo>>builder()
+                .statusCode(200)
+                .shortMessage("Success")
+                .description("Đã lấy danh sách vai trò con thành công")
+                .data(roles)
+                .build());
+    }
+    
+    @GetMapping("/search")
+    @Operation(
+        summary = "Tìm kiếm vai trò", 
+        description = """
+        🔹 Đầu vào
+        
+        🔍 searchTerm (tùy chọn, query)
+        Loại: string
+        Mô tả: Từ khóa tìm kiếm
+        
+        📄 pageNumber (tùy chọn, query)
+        Loại: integer
+        Mô tả: Số trang (mặc định: 0)
+        
+        📄 pageSize (tùy chọn, query)
+        Loại: integer
+        Mô tả: Kích thước trang (mặc định: 10)
+        
+        📄 sortBy (tùy chọn, query)
+        Loại: string
+        Mô tả: Trường sắp xếp (mặc định: createdAt)
+        
+        📄 sortDirection (tùy chọn, query)
+        Loại: string
+        Mô tả: Hướng sắp xếp: ASC hoặc DESC (mặc định: DESC)
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: List<RoleMongo>
+        Mô tả: Kết quả tìm kiếm vai trò
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1)
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK, 204: No Content)
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý
+        
+        🕒 timestamp
+        Loại: string (ISO-8601)
+        Mô tả: Thời gian xử lý yêu cầu
+        
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu
+        
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi
+        """
+    )
+    public ResponseEntity<RestResponse<List<RoleMongo>>> searchRoles(
+            @Parameter(description = "Từ khóa tìm kiếm") @RequestParam(required = false) String searchTerm,
+            @Parameter(description = "Số trang (mặc định: 0)") @RequestParam(defaultValue = "0") int pageNumber,
+            @Parameter(description = "Kích thước trang (mặc định: 10)") @RequestParam(defaultValue = "10") int pageSize,
+            @Parameter(description = "Trường sắp xếp (mặc định: createdAt)") @RequestParam(defaultValue = "createdAt") String sortBy,
+            @Parameter(description = "Hướng sắp xếp (mặc định: DESC)") @RequestParam(defaultValue = "DESC") String sortDirection) {
+        
+        log.info("Searching roles - searchTerm: {}", searchTerm);
+        
+        List<RoleMongo> roles = roleService.searchRoles(searchTerm);
+        
+        return ResponseEntity.ok(RestResponse.<List<RoleMongo>>builder()
+                .statusCode(200)
+                .shortMessage("Success")
+                .description("Đã tìm kiếm vai trò thành công")
+                .data(roles)
+                .build());
+    }
+    
+    @GetMapping("/count")
+    @Operation(
+        summary = "Đếm số lượng vai trò", 
+        description = """
+        🔹 Đầu vào
+        
+        Không có tham số đầu vào
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: Long
+        Mô tả: Số lượng vai trò
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1)
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK)
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý
+        
+        🕒 timestamp
+        Loại: string (ISO-8601)
+        Mô tả: Thời gian xử lý yêu cầu
+        
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu
+        
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi
+        """
+    )
+    public ResponseEntity<RestResponse<Long>> countRoles() {
+        
+        log.info("Counting all roles");
+        
+        long count = roleService.getAllRoles(0, 1000, "createdAt", "DESC").getTotalElements();
+        
+        return ResponseEntity.ok(RestResponse.<Long>builder()
+                .statusCode(200)
+                .shortMessage("Success")
+                .description("Đã đếm số lượng vai trò thành công")
+                .data(count)
                 .build());
     }
     

@@ -18,7 +18,7 @@ from services.event_service import EventService
 
 app = FastAPI(
     title="Automation Service",
-    description="Một dịch vụ tự động hóa nghiệp vụ với tích hợp thanh toán, promotion, notification, batch processing và event handling.",
+    description="AI Processing - Xử lý tài liệu và hợp đồng bằng AI, Batch Processing Service - Xử lý hàng loạt, Event Service - Quản lý sự kiện, System Testing - Kiểm tra hệ thống",
     version="2.0.0",
     docs_url="/docs",
     redoc_url="/redoc",
@@ -84,7 +84,7 @@ def custom_openapi():
 
 app.openapi = custom_openapi
 
-@app.get("/", tags=["Root"])
+@app.get("/", tags=["Root & Health"])
 async def read_root():
     """
     Root endpoint - tự động redirect sang /docs để hiển thị API documentation
@@ -99,7 +99,7 @@ async def swagger_ui_redirect():
     """
     return RedirectResponse(url="/docs", status_code=302)
 
-@app.get("/health", tags=["Health"])
+@app.get("/health", tags=["Root & Health"])
 async def health_check():
     """
     Health check endpoint - kiểm tra trạng thái service

@@ -8,7 +8,8 @@ from services.ai_processing_service import AIProcessingService
 
 router = APIRouter(prefix="/api/v1/automation-service")
 
-@router.post("/contract/summarize", summary="Tóm tắt hợp đồng (hỗ trợ file và text)", tags=["Contract Processing"])
+
+@router.post("/contracts/summarize", summary="Tóm tắt hợp đồng (hỗ trợ file và text)", tags=["AI Processing"])
 async def contract_summarize_api(
     file: UploadFile = File(None, description="File hợp đồng (pdf, docx, txt, html)"),
     text: str = Form(None, description="Nội dung hợp đồng dạng text"),
@@ -196,5 +197,5 @@ async def contract_summarize_api(
         data=result,
         timestamp=datetime.now(timezone.utc).isoformat(),
         requestId=str(uuid.uuid4()),
-        path="/api/v1/automation-service/contract/summarize"
+        path="/api/v1/automation-service/contracts/summarize"
     )
