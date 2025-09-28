@@ -54,9 +54,9 @@ Tất cả events giữa các services phải tuân thủ schema chuẩn sau đ�
 
 ### Quy tắc Event Types:
 - **File Events**: `FileUploaded`, `FileProcessed`, `FileDeleted`, `FileUpdated`
-- **Contract Events**: `ContractCreated`, `ContractUpdated`, `ContractDeleted`, `ContractProcessed`
-- **AI Events**: `AIProcessingStarted`, `AIProcessingCompleted`, `AIProcessingFailed`
 - **User Events**: `UserLoggedIn`, `UserCreated`, `UserUpdated`, `UserDeleted`
+- **Document Events**: `DocumentCreated`, `DocumentUpdated`, `DocumentDeleted`, `DocumentProcessed`
+- **Automation Events**: `AutomationStarted`, `AutomationCompleted`, `AutomationFailed`
 
 ### Quy tắc Implementation:
 - **Java (Spring)**: Sử dụng `@EventListener` và `ApplicationEventPublisher` với schema chuẩn
@@ -115,4 +115,4 @@ Mô tả: <giải thích ngắn gọn>
 
 **FastAPI**:
 - Dùng `tags`, `summary`, `description` trong decorator; viết docstring phần "Đầu vào/Đầu ra"; chỉ rõ `multipart/form-data` hoặc `application/json` và ví dụ.
-- Với input có 2 lựa chọn (ví dụ summarize), ghi rõ chỉ sử dụng 1 trong 2 và nêu ví dụ cho mỗi lựa chọn.
+- Với input có 2 lựa chọn (ví dụ automation process), ghi rõ chỉ sử dụng 1 trong 2 và nêu ví dụ cho mỗi lựa chọn.

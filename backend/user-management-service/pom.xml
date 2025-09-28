@@ -8,11 +8,11 @@
 		<version>3.5.4</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.devgo2003.docgo</groupId>
-	<artifactId>auth-service</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
-	<name>auth-service</name>
-	<description>Demo project for Spring Boot</description>
+	<groupId>com.devgo2003.docgo.backend</groupId>
+	<artifactId>user-service</artifactId>
+	<version>1.0.0</version>
+	<name>user-management-service</name>
+	<description>User Management Service for DocGO</description>
 	<url/>
 	<licenses>
 		<license/>

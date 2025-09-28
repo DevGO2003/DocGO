@@ -51,3 +51,5 @@ if __name__ == "__main__":
         print("❌ Service is not running or not accessible")
         print("💡 Try starting the service with: uvicorn main:app --host 127.0.0.1 --port 8017")
         sys.exit(1)
+
+

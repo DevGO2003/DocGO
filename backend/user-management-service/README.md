@@ -1,10 +1,10 @@
-# Authentication & Identity Service
+# User Management Service
 
-Dịch vụ Spring Boot quản lý xác thực, cấp token và phân quyền.
+Dịch vụ Spring Boot quản lý người dùng, xác thực, cấp token và phân quyền.
 
 Docs: http://localhost:8001/docs#/
 
-## How to run Authentication Identity Service
+## How to run User Management Service
 
 ### Prerequisites
 - Java 21+ (or matching your toolchain)
@@ -30,7 +30,7 @@ mvn spring-boot:run
 ```
 The service runs at (compose host): `http://localhost:8001` (container port 8000)
 
-- Base API: `http://localhost:8001/api/v1/authentication-identity-service/...`
+- Base API: `http://localhost:8001/api/v1/user-management-service/...`
 - Swagger UI: `http://localhost:8001/docs#/`
 
 ### Build Jar
@@ -81,28 +81,28 @@ java -jar target/auth-service-*.jar
 ## API Endpoints
 
 ### 🔹 Authentication
-- `POST /api/v1/authentication-identity-service/auth/login` - Đăng nhập
-- `POST /api/v1/authentication-identity-service/auth/logout` - Đăng xuất
-- `POST /api/v1/authentication-identity-service/auth/refresh` - Refresh token
+- `POST /api/v1/user-management-service/auth/login` - Đăng nhập
+- `POST /api/v1/user-management-service/auth/logout` - Đăng xuất
+- `POST /api/v1/user-management-service/auth/refresh` - Refresh token
 
 ### 🔹 User Management
-- `GET /api/v1/authentication-identity-service/users` - Danh sách người dùng
-- `POST /api/v1/authentication-identity-service/users` - Tạo người dùng
-- `GET /api/v1/authentication-identity-service/users/{id}` - Chi tiết người dùng
-- `PUT /api/v1/authentication-identity-service/users/{id}` - Cập nhật người dùng
-- `DELETE /api/v1/authentication-identity-service/users/{id}` - Xóa người dùng
+- `GET /api/v1/user-management-service/users` - Danh sách người dùng
+- `POST /api/v1/user-management-service/users` - Tạo người dùng
+- `GET /api/v1/user-management-service/users/{id}` - Chi tiết người dùng
+- `PUT /api/v1/user-management-service/users/{id}` - Cập nhật người dùng
+- `DELETE /api/v1/user-management-service/users/{id}` - Xóa người dùng
 
 ### 🔹 Role Management
-- `GET /api/v1/authentication-identity-service/roles` - Danh sách vai trò
-- `POST /api/v1/authentication-identity-service/roles` - Tạo vai trò
-- `GET /api/v1/authentication-identity-service/roles/{id}` - Chi tiết vai trò
-- `PUT /api/v1/authentication-identity-service/roles/{id}` - Cập nhật vai trò
-- `DELETE /api/v1/authentication-identity-service/roles/{id}` - Xóa vai trò
+- `GET /api/v1/user-management-service/roles` - Danh sách vai trò
+- `POST /api/v1/user-management-service/roles` - Tạo vai trò
+- `GET /api/v1/user-management-service/roles/{id}` - Chi tiết vai trò
+- `PUT /api/v1/user-management-service/roles/{id}` - Cập nhật vai trò
+- `DELETE /api/v1/user-management-service/roles/{id}` - Xóa vai trò
 
 ### 🔹 Session Management
-- `GET /api/v1/authentication-identity-service/sessions` - Danh sách phiên đăng nhập
-- `GET /api/v1/authentication-identity-service/sessions/{id}` - Chi tiết phiên đăng nhập
-- `PUT /api/v1/authentication-identity-service/sessions/{id}/terminate` - Kết thúc phiên đăng nhập
+- `GET /api/v1/user-management-service/sessions` - Danh sách phiên đăng nhập
+- `GET /api/v1/user-management-service/sessions/{id}` - Chi tiết phiên đăng nhập
+- `PUT /api/v1/user-management-service/sessions/{id}/terminate` - Kết thúc phiên đăng nhập
 
 ## Notes
 - Swagger UI must be at `/docs#/` per project convention.

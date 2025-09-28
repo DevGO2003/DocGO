@@ -27,7 +27,7 @@ language: vi
 
 ## Quy tắc cấu trúc dịch vụ (structure)
 
-### Python (FastAPI) – áp dụng cho `ai-processing-service` và các service Python khác:
+### Python (FastAPI) – áp dụng cho `automation-service` và các service Python khác:
 - Thư mục gốc service gồm: `main.py`, `routers.py` (hoặc thư mục `routers/`), `config.py`, `requirements.txt`, `README.md`, `How to run this microservice.md`, `__init__.py`, các thư mục dữ liệu phụ (`results/`, `models/`, `schemas/`, `services/` nếu phát sinh).
 - `main.py`: khởi tạo `FastAPI(...)`, include router(s), khai báo route root `/`.
 - `routers.py`: định nghĩa `APIRouter` với `tags`, `summary`, `description` và tuân thủ URL ở mục 1; các handler trả về `RestResponse` tương đồng.
@@ -36,7 +36,7 @@ language: vi
 - Dùng `pydantic` schema nếu cần validate input/output ở lớp router/service; đặt trong thư mục `schemas/`.
 - Module nghiệp vụ đặt trong `services/` (ví dụ: thao tác S3, parse tài liệu…), các hàm đặt tên theo động từ rõ ràng, snake_case.
 
-### Java (Spring Boot) – áp dụng cho `contract-management-service`:
+### Java (Spring Boot) – áp dụng cho `user-management-service` và `document-management-service`:
 - Cấu trúc gói chuẩn: `controller/`, `service/`, `repository/`, `entity/`, `common/exception`, `common/handler`, `common/response`, `config/`.
 - `GlobalExceptionHandler` gom map các exception → `RestResponse` và HTTP status tương ứng.
 - Controller dùng `@RequestMapping("/api/v1/...")`, `@Tag`, `@Operation` và trả `ResponseEntity<RestResponse<...>>`.
@@ -56,19 +56,17 @@ language: vi
 
 **QUY TẮC GROUP ID VÀ ARTIFACT ID**:
 - **Group ID**: `com.devgo2003.docgo.{service-name}` (dùng kebab-case cho service-name)
-  - Ví dụ: `com.devgo2003.docgo.contract-management-service`
-  - Ví dụ: `com.devgo2003.docgo.authentication-identity-service`
+  - Ví dụ: `com.devgo2003.docgo.user-management-service`
+  - Ví dụ: `com.devgo2003.docgo.document-management-service`
 - **Artifact ID**: Viết tắt từ tên microservice (dùng kebab-case)
-  - Ví dụ: `authentication-identity-service` → `auth-service`
-  - Ví dụ: `contract-management-service` → `contract-service`
   - Ví dụ: `user-management-service` → `user-service`
+  - Ví dụ: `document-management-service` → `document-service`
 - **Tên folder**: Đổi dấu `-` thành `_` trong package structure
-  - Ví dụ: `authentication-identity-service` → `src/main/java/com/devgo2003/docgo/auth_service`
-  - Ví dụ: `contract-management-service` → `src/main/java/com/devgo2003/docgo/contract_service`
   - Ví dụ: `user-management-service` → `src/main/java/com/devgo2003/docgo/user_service`
+  - Ví dụ: `document-management-service` → `src/main/java/com/devgo2003/docgo/document_service`
 - **Package declaration**: Sử dụng tên folder (với dấu `_`)
-  - Ví dụ: `package com.devgo2003.docgo.auth_service;`
-  - Ví dụ: `package com.devgo2003.docgo.contract_service;`
+  - Ví dụ: `package com.devgo2003.docgo.user_service;`
+  - Ví dụ: `package com.devgo2003.docgo.document_service;`
 - Version: `1.0.0` (khởi đầu), tăng theo semantic versioning
 - Parent POM: sử dụng `spring-boot-starter-parent` với version mới nhất stable
 - Packaging: `jar` cho microservice, `pom` cho parent project
@@ -88,25 +86,10 @@ language: vi
 - Ví dụ: `origin/backend-01/api-gateway-bff` → folder phải là `api-gateway-bff`
 - Điều này đảm bảo tính nhất quán giữa tên nhánh Git và cấu trúc thư mục workspace.
 
-### Port cố định cho toàn bộ microservice của DocGO (theo tên nhánh thực tế):
-- `api-gateway-bff` (Next.js): 8000 → Docs: `http://localhost:8000/docs#/`
-- `authentication-identity-service` (Spring Boot): 8001 → Docs: `http://localhost:8001/docs#/`
-- `user-management-service` (FastAPI): 8002 → Docs: `http://localhost:8002/docs#/`
-- `contract-management-service` (Spring Boot): 8003 → Docs: `http://localhost:8003/docs#/`
-- `versioning-document-history-service` (FastAPI): 8004 → Docs: `http://localhost:8004/docs#/`
-- `commenting-collaboration-service` (FastAPI): 8005 → Docs: `http://localhost:8005/docs#/`
-- `approval-workflow-service` (FastAPI): 8006 → Docs: `http://localhost:8006/docs#/`
-- `reminder-scheduler-service` (FastAPI): 8007 → Docs: `http://localhost:8007/docs#/`
-- `esignature-integration-service` (FastAPI): 8008 → Docs: `http://localhost:8008/docs#/`
-- `notification-service` (FastAPI): 8009 → Docs: `http://localhost:8009/docs#/`
-- `reporting-analytics-service` (FastAPI): 8010 → Docs: `http://localhost:8010/docs#/`
-- `ocr-document-extraction-service` (FastAPI): 8011 → Docs: `http://localhost:8011/docs#/`
-- `file-storage-asset-service` (FastAPI): 8012 → Docs: `http://localhost:8012/docs#/`
-- `audit-activity-log-service` (FastAPI): 8013 → Docs: `http://localhost:8013/docs#/`
-- `integration-connectors-service` (FastAPI): 8014 → Docs: `http://localhost:8014/docs#/`
-- `batch-etl-service` (FastAPI): 8015 → Docs: `http://localhost:8015/docs#/`
-- `health-monitoring-agent` (FastAPI): 8016 → Docs: `http://localhost:8016/docs#/`
-- `ai-processing-service` (FastAPI): 8017 → Docs: `http://localhost:8017/docs#/`
-- `general-file-management-service` (FastAPI): 8018 → Docs: `http://localhost:8018/docs#/`
+### Port cố định cho toàn bộ microservice của DocGO (kiến trúc mới 4 services):
+- `api-gateway` (Next.js): 8000 → Docs: `http://localhost:8000/docs#/`
+- `user-management-service` (Spring Boot): 8001 → Docs: `http://localhost:8001/docs#/`
+- `document-management-service` (Spring Boot): 8002 → Docs: `http://localhost:8002/docs#/`
+- `automation-service` (FastAPI): 8003 → Docs: `http://localhost:8003/docs#/`
 
 **Khi thêm microservice mới**, phải chọn cổng trống theo dãy 80xx, cập nhật mục này và README/How-to-run tương ứng.

@@ -25,36 +25,37 @@ notes: "Rule API cốt lõi, nên alwaysApply"
 language: vi
 ---
 
-### Chuẩn hóa API cho DocGO (áp dụng cho ai-processing-service và contract-management-service)
+### Chuẩn hóa API cho DocGO (áp dụng cho user-management-service, document-management-service và automation-service)
 
-Mục tiêu: Đồng bộ cách đặt URL, payload, xử lý lỗi (handler), và viết tài liệu API. Quy tắc này dựa trên hiện trạng `contract-management-service` (Spring Boot + GlobalExceptionHandler + RestResponse) và `ai-processing-service` (FastAPI) và hướng tới đồng nhất giữa các service.
+Mục tiêu: Đồng bộ cách đặt URL, payload, xử lý lỗi (handler), và viết tài liệu API. Quy tắc này dựa trên hiện trạng `user-management-service` và `document-management-service` (Spring Boot + GlobalExceptionHandler + RestResponse) và `automation-service` (FastAPI) và hướng tới đồng nhất giữa các service.
 
 ## 1) Quy tắc URL
 - Base path: `/api/v1/{service-name}/...`
 - `service-name` dùng kebab-case trùng tên service trong code:
-  - `ai-processing-service`
-  - `contract-management-service`
-- Tài nguyên (resource) dùng số nhiều, kebab-case: `contracts`, `events`, `attachments`.
+  - `user-management-service`
+  - `document-management-service`
+  - `automation-service`
+- Tài nguyên (resource) dùng số nhiều, kebab-case: `users`, `documents`, `automations`, `events`, `attachments`.
 - Hành động (sub-resource) dùng tiếp đầu ngữ theo REST; chỉ khi là hành động phi-CRUD rõ ràng thì dùng hậu tố dạng action:
-  - Chuẩn REST: `POST /contracts`, `GET /contracts`, `GET /contracts/{id}`, `PUT /contracts/{id}`, `DELETE /contracts/{id}`
-  - Sub-resource: `GET /contracts/{id}/events`, `GET /contracts/{id}/attachments`, `PUT /contracts/{id}/restore`
-  - Tác vụ AI chuyên biệt (file hoặc chuỗi):
-    - `POST /ai-processing-service/extract`
-    - `POST /ai-processing-service/summarize`
+  - Chuẩn REST: `POST /users`, `GET /users`, `GET /users/{id}`, `PUT /users/{id}`, `DELETE /users/{id}`
+  - Sub-resource: `GET /users/{id}/documents`, `GET /documents/{id}/attachments`, `PUT /users/{id}/restore`
+  - Tác vụ Automation chuyên biệt (file hoặc chuỗi):
+    - `POST /automation-service/process`
+    - `POST /automation-service/validate`
 - Query chuẩn phân trang, sắp xếp và lọc (giữ nguyên như trong controller):
   - `pageNumber`, `pageSize`, `sortBy`, `sortDirection`, `searchTerm`, `includeDeleted`
 
 ## 2) Tên hàm handler (Controller/Router)
-- Java (Spring): dùng động từ rõ ràng, hiện tại đơn và mô tả ngắn: `createContract`, `getAllContracts`, `getContract`, `updateContract`, `softDeleteContract`, `restoreContract`, `getContractEvents`, `getAttachments`.
-- Python (FastAPI): dùng snake_case tương đương: `extract_api`, `summarize_api`.
+- Java (Spring): dùng động từ rõ ràng, hiện tại đơn và mô tả ngắn: `createUser`, `getAllUsers`, `getUser`, `updateUser`, `softDeleteUser`, `restoreUser`, `getUserDocuments`, `getAttachments`.
+- Python (FastAPI): dùng snake_case tương đương: `process_api`, `validate_api`.
 - Tên biến path: dùng `{id}` cho định danh chính; sub-resource đặt sau `{id}`.
 
 ## 3) Payload và Content-Type
 - CRUD JSON: `application/json` với body là DTO/entity tương ứng.
 - Upload file: `multipart/form-data` với trường `file` (FastAPI) hoặc `@RequestPart`/`MultipartFile` (Spring) nếu có.
-- AI summarize cho phép 2 dạng đầu vào (chỉ 1 trong 2):
-  - `multipart/form-data`: `file` (txt)
-  - `application/json`: `{ "text": "..." }`
+- Automation process cho phép 2 dạng đầu vào (chỉ 1 trong 2):
+  - `multipart/form-data`: `file` (txt, pdf, docx)
+  - `application/json`: `{ "data": "..." }`
 - Phân trang: dùng query params như mục 1.
 
 ## 4) Chuẩn hóa Response Envelope (RestResponse)
@@ -99,35 +100,35 @@ Mục tiêu: Đồng bộ cách đặt URL, payload, xử lý lỗi (handler), v
 ```
 
 ## 5) Ví dụ mô hình hóa từ hiện trạng
-- Tạo hợp đồng (Java):
-  - `POST /api/v1/contract-management-service/contracts`
-  - Body: `Contract` JSON (không gửi `id` khi tạo)
-  - 201 + `RestResponse<Contract>`
+- Tạo người dùng (Java):
+  - `POST /api/v1/user-management-service/users`
+  - Body: `User` JSON (không gửi `id` khi tạo)
+  - 201 + `RestResponse<User>`
 
-- Danh sách hợp đồng (Java):
-  - `GET /api/v1/contract-management-service/contracts?pageNumber=0&pageSize=10&sortBy=...`
-  - 200 + `RestResponse<PaginatedResponse<Contract>>` hoặc 200 với `statusCode: 204` khi không có dữ liệu
+- Danh sách người dùng (Java):
+  - `GET /api/v1/user-management-service/users?pageNumber=0&pageSize=10&sortBy=...`
+  - 200 + `RestResponse<PaginatedResponse<User>>` hoặc 200 với `statusCode: 204` khi không có dữ liệu
 
-- Lấy chi tiết (Java):
-  - `GET /api/v1/contract-management-service/contracts/{id}` → 200 hoặc 404
+- Lấy chi tiết người dùng (Java):
+  - `GET /api/v1/user-management-service/users/{id}` → 200 hoặc 404
 
-- Khôi phục (Java):
-  - `PUT /api/v1/contract-management-service/contracts/{id}/restore` → 200
+- Khôi phục người dùng (Java):
+  - `PUT /api/v1/user-management-service/users/{id}/restore` → 200
 
-- AI Extract (Python):
-  - `POST /api/v1/ai-processing-service/extract`
-  - multipart: `file` (docx/pdf) + header `GEMINI_API_KEY` (tùy chọn)
-  - 200 + `RestResponse<string>` nội dung trích xuất
+- Automation Process (Python):
+  - `POST /api/v1/automation-service/process`
+  - multipart: `file` (txt/pdf/docx) + header `API_KEY` (tùy chọn)
+  - 200 + `RestResponse<string>` kết quả xử lý
 
-- AI Summarize (Python):
-  - `POST /api/v1/ai-processing-service/summarize`
-  - multipart `file` (txt) hoặc JSON `{ "text": "..." }`
+- Automation Validate (Python):
+  - `POST /api/v1/automation-service/validate`
+  - multipart `file` (txt) hoặc JSON `{ "data": "..." }`
   - 200 + `RestResponse<object|string>`; có làm sạch JSON trong handler
 
 ## 6) Quy ước đặt tên mã nguồn
-- Controller class (Java): `*Controller` theo tài nguyên chính, ví dụ `ContractController`.
-- Service class (Java): `*Service` với nghiệp vụ: `ContractService`.
-- Router (Python): nhóm theo `tags` và prefix chung; tên hàm ngắn, rõ mục đích (`extract_api`, `summarize_api`).
+- Controller class (Java): `*Controller` theo tài nguyên chính, ví dụ `UserController`, `DocumentController`.
+- Service class (Java): `*Service` với nghiệp vụ: `UserService`, `DocumentService`.
+- Router (Python): nhóm theo `tags` và prefix chung; tên hàm ngắn, rõ mục đích (`process_api`, `validate_api`).
 - Tên biến phản ánh ý nghĩa nghiệp vụ, tránh viết tắt.
 
 ## 7) Thứ tự API trong Controller
@@ -143,19 +144,184 @@ Mục tiêu: Đồng bộ cách đặt URL, payload, xử lý lỗi (handler), v
 - Ví dụ thứ tự đúng:
 ```java
 @GetMapping                    // getAll - Luôn ở trên
-public ResponseEntity<...> getAllContracts(...) { ... }
+public ResponseEntity<...> getAllUsers(...) { ... }
 
 @GetMapping("/{id}")          // getOne - Luôn ở dưới getAll
-public ResponseEntity<...> getContract(@PathVariable String id) { ... }
+public ResponseEntity<...> getUser(@PathVariable String id) { ... }
 
 @PostMapping                  // create
-public ResponseEntity<...> createContract(...) { ... }
+public ResponseEntity<...> createUser(...) { ... }
 ```
 
 ## 8) Bảo mật và versioning
 - Luôn đặt tiền tố `/api/v1/…`. Khi thay đổi lớn không tương thích, phát hành `/api/v2/…` song song.
 - Định nghĩa rõ header bảo mật (ví dụ JWT) ở tài liệu, ngay trong phần mô tả endpoint.
 
+## 9) Cấu trúc mô tả API Swagger
+
+### 9.1) Controller Level Annotations
+```java
+@RestController
+@RequestMapping("/api/v1/document-management-service/documents")
+@Tag(name = "Document Management", description = "API quản lý tài liệu")
+public class DocumentController {
+```
+
+### 9.2) Method Level Documentation
+```java
+@GetMapping
+@Operation(
+    summary = "Lấy danh sách tài liệu", 
+    description = """
+    🔹 Đầu vào
+    
+    📄 page (tùy chọn, query)
+    Loại: integer
+    Mô tả: Số trang (mặc định: 0)
+    
+    📄 size (tùy chọn, query)  
+    Loại: integer
+    Mô tả: Kích thước trang (mặc định: 10)
+    
+    📄 sortBy (tùy chọn, query)
+    Loại: string
+    Mô tả: Trường sắp xếp (mặc định: createdAt)
+    
+    📄 sortDirection (tùy chọn, query)
+    Loại: string
+    Mô tả: Hướng sắp xếp: ASC hoặc DESC (mặc định: DESC)
+    
+    🔹 Đầu ra
+    
+    📝 data
+    Loại: Page<Document>
+    Mô tả: Danh sách tài liệu với phân trang
+    
+    📊 apiVersion
+    Loại: string
+    Mô tả: Phiên bản API (v1)
+    
+    🔢 statusCode
+    Loại: integer
+    Mô tả: Mã trạng thái HTTP (200: OK, 204: No Content)
+    
+    📋 shortMessage
+    Loại: string
+    Mô tả: Thông báo ngắn gọn về kết quả
+    
+    📖 description
+    Loại: string
+    Mô tả: Mô tả chi tiết về kết quả xử lý
+    
+    🕒 timestamp
+    Loại: string (ISO-8601)
+    Mô tả: Thời gian xử lý yêu cầu
+    
+    🆔 requestId
+    Loại: string (UUID)
+    Mô tả: Định danh duy nhất của yêu cầu
+    
+    🛣️ path
+    Loại: string
+    Mô tả: Đường dẫn API được gọi
+    """
+)
+public ResponseEntity<RestResponse<Page<Document>>> getAllDocuments(
+    @Parameter(description = "Số trang (mặc định: 0)") 
+    @RequestParam(defaultValue = "0") int page,
+    
+    @Parameter(description = "Kích thước trang (mặc định: 10)") 
+    @RequestParam(defaultValue = "10") int size,
+    
+    @Parameter(description = "Trường sắp xếp (mặc định: createdAt)") 
+    @RequestParam(defaultValue = "createdAt") String sortBy,
+    
+    @Parameter(description = "Hướng sắp xếp (mặc định: DESC)") 
+    @RequestParam(defaultValue = "DESC") String sortDirection) {
+```
+
+### 9.3) Response Format (RestResponse)
+```java
+return ResponseEntity.ok(RestResponse.<Page<Document>>builder()
+    .statusCode(200)
+    .shortMessage("Success")
+    .description("Đã lấy danh sách tài liệu thành công")
+    .data(documents)
+    .build());
+```
+
+### 9.4) Cấu trúc Swagger UI hiển thị
+
+#### API Endpoint Structure:
+```
+GET /api/v1/document-management-service/documents
+├── 📋 Summary: "Lấy danh sách tài liệu"
+├── 📖 Description: [Chi tiết đầy đủ với emoji]
+├── 🔧 Parameters:
+│   ├── page (query, optional, integer)
+│   ├── size (query, optional, integer) 
+│   ├── sortBy (query, optional, string)
+│   └── sortDirection (query, optional, string)
+├── 📤 Responses:
+│   ├── 200: RestResponse<Page<Document>>
+│   └── 204: RestResponse<null> (No Content)
+└── 🏷️ Tags: "Document Management"
+```
+
+#### Response Schema:
+```json
+{
+  "apiVersion": "v1",
+  "statusCode": 200,
+  "shortMessage": "Success",
+  "description": "Đã lấy danh sách tài liệu thành công",
+  "data": {
+    "content": [Document objects],
+    "pageable": {...},
+    "totalElements": 100,
+    "totalPages": 10
+  },
+  "timestamp": "2024-01-01T00:00:00Z",
+  "requestId": "uuid-here",
+  "path": "/api/v1/document-management-service/documents"
+}
+```
+
+### 9.5) Các loại API Documentation cần có
+
+#### GET APIs (Read Operations)
+- **GET /documents** - Danh sách tài liệu
+- **GET /documents/{id}** - Chi tiết tài liệu
+- **GET /documents/{id}/attachments** - File đính kèm
+
+#### POST APIs (Create Operations)  
+- **POST /documents** - Tạo tài liệu mới
+- **POST /documents/upload** - Upload file
+
+#### PUT APIs (Update Operations)
+- **PUT /documents/{id}** - Cập nhật tài liệu
+- **PUT /documents/{id}/restore** - Khôi phục tài liệu
+
+#### DELETE APIs (Delete Operations)
+- **DELETE /documents/{id}** - Xóa tài liệu
+
+### 9.6) Cấu hình Swagger UI
+
+```properties
+# application.properties
+springdoc.swagger-ui.path=/docs
+springdoc.swagger-ui.enabled=true
+springdoc.swagger-ui.document-title=Document Management Service API
+springdoc.swagger-ui.page-title=DocGO - Document Management Service
+springdoc.swagger-ui.try-it-out-enabled=true
+springdoc.swagger-ui.display-request-duration=true
+```
+
+### 9.7) Truy cập Swagger UI
+- **URL**: `http://localhost:8002/docs`
+- **API Docs**: `http://localhost:8002/v3/api-docs`
+- **Security**: Cho phép truy cập công khai `/docs/**`
+
 ---
 
-**Lưu ý**: Khi thêm API mới vào 2 service trên, hãy tuân thủ các quy tắc này để đảm bảo tính nhất quán, dễ đọc và dễ tích hợp.
+**Lưu ý**: Khi thêm API mới vào 3 service trên, hãy tuân thủ các quy tắc này để đảm bảo tính nhất quán, dễ đọc và dễ tích hợp.

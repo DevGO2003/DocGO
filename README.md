@@ -2,27 +2,26 @@
 
 ## 🚀 Tổng quan
 
-DocGO là một hệ thống quản lý tài liệu thông minh với kiến trúc microservices, tích hợp AI để xử lý và phân tích tài liệu tự động.
+DocGO là một hệ thống quản lý tài liệu thông minh với kiến trúc microservices gồm 4 services chính, tích hợp AI để xử lý và phân tích tài liệu tự động.
 
 ## 🏗️ Kiến trúc Hệ thống
 
 ### Microservices Architecture
 
-Bảng dịch vụ đang chạy theo `docker-compose.yml` (host port → container 8000):
+Bảng dịch vụ đang chạy theo `docker-compose.yml` (kiến trúc mới 4 microservices):
 
-| Service | Host Port | Container | Docs/URL |
-|---|---|---|---|
-| API Gateway BFF | 8000 | 8000 | http://localhost:8000/docs#/ |
-| Web Next.js | 3000 | 3000 | http://localhost:3000 |
-| Authentication Identity Service | 8002 | 8000 | http://localhost:8002/docs#/ |
-| Contract Management Service | 8003 | 8000 | http://localhost:8003/docs#/ |
-| AI Processing Service | 8004 | 8000 | http://localhost:8004/docs#/ |
-| File Storage Service | 8005 | 8000 | http://localhost:8005/docs#/ |
-| Google Cloud MCP Server | 8006 | 3000 | http://localhost:8006 |
-| Redis | 6379 | 6379 | redis://localhost:6379 |
-| Kafka (PLAINTEXT) | 9092 | 9092 | PLAINTEXT://localhost:9092 |
+| Service | Host Port | Container | Docs/URL | Mô tả |
+|---|---|---|---|---|
+| API Gateway | 8000 | 8000 | http://localhost:8000/docs#/ | Next.js - API Gateway và BFF |
+| User Management Service | 8001 | 8000 | http://localhost:8001/docs#/ | Spring Boot - Quản lý người dùng |
+| Document Management Service | 8002 | 8000 | http://localhost:8002/docs#/ | Spring Boot - Quản lý tài liệu |
+| Automation Service | 8003 | 8000 | http://localhost:8003/docs#/ | FastAPI - Xử lý tự động và AI |
+| Web App | 3000 | 3000 | http://localhost:3000 | Next.js - Frontend application |
+| Redis | 6379 | 6379 | redis://localhost:6379 | Cache và session management |
+| Kafka (PLAINTEXT) | 9092 | 9092 | PLAINTEXT://localhost:9092 | Message queue |
+| MongoDB Atlas | - | - | Cloud | Database chính (Cloud) |
 
-Số lượng service ứng dụng: 6 (web-nextjs, api-gateway-bff, authentication-identity-service, contract-management-service, ai-processing-service, file-storage-service) + hạ tầng (Redis, Kafka, Google Cloud MCP) + MongoDB Atlas (Cloud).
+Số lượng service ứng dụng: 4 microservices chính (api-gateway, user-management-service, document-management-service, automation-service) + frontend (web-app) + hạ tầng (Redis, Kafka) + MongoDB Atlas (Cloud).
 
 ### Auto-Redirect & Docs
 - Các backend service đều phục vụ tài liệu tại `/docs#/` (SpringDoc/FastAPI).
@@ -31,9 +30,9 @@ Số lượng service ứng dụng: 6 (web-nextjs, api-gateway-bff, authenticati
 ## 🛠️ Công nghệ sử dụng
 
 ### Backend
-- **Spring Boot** (Java) - Authentication, Contract Management
-- **FastAPI** (Python) - User Management, AI Processing, File Storage
-- **Next.js** (TypeScript) - API Gateway BFF
+- **Spring Boot** (Java) - User Management, Document Management
+- **FastAPI** (Python) - Automation và AI Processing
+- **Next.js** (TypeScript) - API Gateway và BFF
 
 ### Database
 - **MongoDB Atlas** - Database chính (Cloud)
@@ -57,68 +56,65 @@ git clone https://github.com/DevGO2003/DocGO.git
 cd DocGO
 
 # Chạy toàn bộ hệ thống
-# cd autofiles (đã loại bỏ thư mục này)
-docker compose -f docker-compose.local.yml up -d
+docker compose -f docker-compose.yml up -d
 
 # Hoặc chạy từng service
-docker compose -f docker-compose.local.yml up redis kafka
-docker compose -f docker-compose.local.yml up web-nextjs
-docker compose -f docker-compose.local.yml up api-gateway-bff
-docker compose -f docker-compose.local.yml up authentication-identity-service
-docker compose -f docker-compose.local.yml up contract-management-service
-docker compose -f docker-compose.local.yml up ai-processing-service
-docker compose -f docker-compose.local.yml up file-storage-service
+docker compose -f docker-compose.yml up redis kafka
+docker compose -f docker-compose.yml up web-app
+docker compose -f docker-compose.yml up api-gateway
+docker compose -f docker-compose.yml up user-management-service
+docker compose -f docker-compose.yml up document-management-service
+docker compose -f docker-compose.yml up automation-service
 ```
 
 ### 2. Chạy từng service riêng lẻ
 
-#### API Gateway BFF
+#### API Gateway
 ```bash
-cd backend/api-gateway-bff
+cd backend/api-gateway
 npm install
 npm run dev
 # Truy cập: http://localhost:8000
 ```
 
-#### Authentication Identity Service
+#### User Management Service
 ```bash
-cd backend/authentication-identity-service
+cd backend/user-management-service
 ./mvnw spring-boot:run
 # Truy cập: http://localhost:8001/docs#/
 ```
 
-#### Contract Management Service
+#### Document Management Service
 ```bash
-cd backend/contract-management-service
+cd backend/document-management-service
 ./mvnw spring-boot:run
 # Truy cập: http://localhost:8002/docs#/
 ```
 
-#### AI Processing Service
+#### Automation Service
 ```bash
-cd backend/ai-processing-service
+cd backend/automation-service
 pip install -r requirements.txt
 python -m uvicorn main:app --host 0.0.0.0 --port 8000
-# Truy cập (qua compose): http://localhost:8003/docs#/
+# Truy cập: http://localhost:8003/docs#/
 ```
 
-#### File Storage Service
+#### Web App (Frontend)
 ```bash
-cd backend/file-storage-asset-service
-pip install -r requirements.txt
-python -m uvicorn main:app --host 0.0.0.0 --port 8000
-# Truy cập (qua compose): http://localhost:8004/docs#/
+cd frontend/web_nextjs
+npm install
+npm run dev
+# Truy cập: http://localhost:3000
 ```
 
 ## 📚 API Documentation
 
 Tất cả các microservices đều có API documentation tự động tại `/docs`:
 
-- **API Gateway BFF**: http://localhost:8000/docs
-- **Authentication Service**: http://localhost:8002/docs
-- **Contract Management Service**: http://localhost:8003/docs
-- **AI Processing Service**: http://localhost:8004/docs
-- **File Storage Service**: http://localhost:8005/docs
+- **API Gateway**: http://localhost:8000/docs#/
+- **User Management Service**: http://localhost:8001/docs#/
+- **Document Management Service**: http://localhost:8002/docs#/
+- **Automation Service**: http://localhost:8003/docs#/
 
 ## 🧪 Testing
 
@@ -137,10 +133,9 @@ Tất cả các microservices đều có API documentation tự động tại `/
 ```bash
 # Test docs/health
 curl http://localhost:8000/docs
+curl http://localhost:8001/docs
 curl http://localhost:8002/docs
 curl http://localhost:8003/docs
-curl http://localhost:8004/docs
-curl http://localhost:8005/docs
 ```
 
 ## 🔧 Cấu hình
@@ -161,10 +156,9 @@ MONGODB_ATLAS_URI=mongodb+srv://root:sapassword@devgo-docgo-cluster0.hsudzga.mon
 # Tất cả services đã được cấu hình để kết nối trực tiếp với MongoDB Atlas
 # Connection string: mongodb+srv://root:sapassword@devgo-docgo-cluster0.hsudzga.mongodb.net/
 # Databases được tạo tự động:
-# - docgo_auth_service (Authentication Identity Service)
-# - docgo_contract_service (Contract Management Service)  
-# - docgo_ai_service (AI Processing Service)
-# - docgo_file_service (File Storage Service)
+# - docgo_user_service (User Management Service)
+# - docgo_document_service (Document Management Service)  
+# - docgo_automation_service (Automation Service)
 
 # Không cần cài đặt database local, tất cả đều sử dụng MongoDB Atlas
 ```
@@ -173,16 +167,15 @@ MONGODB_ATLAS_URI=mongodb+srv://root:sapassword@devgo-docgo-cluster0.hsudzga.mon
 
 ```
 DocGO/
-# ├── autofiles/                    # (đã loại bỏ)
 ├── backend/                      # Backend microservices
-│   ├── api-gateway-bff/         # API Gateway (Next.js)
-│   ├── authentication-identity-service/  # Auth Service (Spring Boot)
-│   ├── contract-management-service/      # Contract Management (Spring Boot)
-│   ├── ai-processing-service/   # AI Processing (FastAPI)
-│   └── file-storage-asset-service/       # File Storage (FastAPI)
+│   ├── api-gateway/             # API Gateway (Next.js)
+│   ├── user-management-service/ # User Management (Spring Boot)
+│   ├── document-management-service/ # Document Management (Spring Boot)
+│   └── automation-service/      # Automation & AI Processing (FastAPI)
 ├── frontend/                     # Frontend applications
-├── database/                     # Database scripts
-└── document/                     # Tài liệu dự án
+│   └── web_nextjs/              # Web App (Next.js)
+├── documents/                    # Tài liệu dự án
+└── script/                       # Scripts và utilities
 ```
 
 ## 🤝 Đóng góp

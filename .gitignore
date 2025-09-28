@@ -129,7 +129,7 @@ ENV/
 
 # Python service lib/ directories (ignore only in Python services)
 backend/*/lib/
-!backend/api-gateway-bff/lib/
+!backend/api-gateway/lib/
 
 ###############################################################################
 # JAVA
@@ -261,7 +261,7 @@ document/**/*.xls
 document/**/*.xlsx
 document/**/*.ppt
 document/**/*.pptx
-**/contract_uploads/.git-backup/
+**/document_uploads/.git-backup/
 
 ###############################################################################
 # SCRIPTS TEMPORARY DIRECTORY

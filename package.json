@@ -1,4 +1,24 @@
 {
+  "name": "docgo",
+  "version": "1.0.0",
+  "description": "DocGO - Hệ thống Quản lý Tài liệu Thông minh với kiến trúc 4 microservices",
+  "scripts": {
+    "dev": "docker compose -f docker-compose.yml up -d",
+    "dev:build": "docker compose -f docker-compose.yml up -d --build",
+    "dev:down": "docker compose -f docker-compose.yml down",
+    "dev:logs": "docker compose -f docker-compose.yml logs -f",
+    "dev:status": "docker compose -f docker-compose.yml ps",
+    "dev:restart": "docker compose -f docker-compose.yml restart",
+    "dev:clean": "docker compose -f docker-compose.yml down -v --remove-orphans",
+    "test:api": "curl http://localhost:8000/docs && curl http://localhost:8001/docs && curl http://localhost:8002/docs && curl http://localhost:8003/docs",
+    "test:health": "curl http://localhost:8000/health && curl http://localhost:8001/actuator/health && curl http://localhost:8002/actuator/health && curl http://localhost:8003/health",
+    "build:all": "docker compose -f docker-compose.yml build",
+    "logs:api-gateway": "docker compose -f docker-compose.yml logs -f api-gateway",
+    "logs:user-management": "docker compose -f docker-compose.yml logs -f user-management-service",
+    "logs:document-management": "docker compose -f docker-compose.yml logs -f document-management-service",
+    "logs:automation": "docker compose -f docker-compose.yml logs -f automation-service",
+    "logs:web-app": "docker compose -f docker-compose.yml logs -f web-app"
+  },
   "dependencies": {
     "axios": "^1.12.2",
     "discord.js": "^14.22.1"
@@ -8,5 +28,25 @@
     "@missionsquad/mcp-discord": "^1.2.2",
     "@modelcontextprotocol/server-github": "^2025.4.8",
     "mongodb-mcp-server": "^1.0.1"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "keywords": [
+    "microservices",
+    "document-management",
+    "ai",
+    "automation",
+    "spring-boot",
+    "fastapi",
+    "nextjs",
+    "docker"
+  ],
+  "author": "DevGO2003",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DevGO2003/DocGO.git"
   }
 }

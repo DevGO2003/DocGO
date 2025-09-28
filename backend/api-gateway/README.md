@@ -1,6 +1,6 @@
-# 🚀 API Gateway BFF - DocGO
+# 🚀 API Gateway - DocGO
 
-API Gateway Backend for Frontend (BFF) sử dụng Next.js và Kafka để kết nối và quản lý các microservice của hệ thống DocGO.
+API Gateway sử dụng Next.js để kết nối và quản lý 4 microservices chính của hệ thống DocGO.
 
 ## ✨ Tính năng chính
 
@@ -36,7 +36,7 @@ API Gateway Backend for Frontend (BFF) sử dụng Next.js và Kafka để kết
 
 ### Cài đặt
 ```bash
-cd backend/api-gateway-bff
+cd backend/api-gateway
 npm install
 cp env_example.txt .env
 # Chỉnh sửa .env với các giá trị phù hợp
@@ -52,26 +52,24 @@ npm run dev
 ## 📚 Tài liệu chi tiết
 
 ## Mô tả
-API Gateway BFF (Backend for Frontend) sử dụng Next.js để kết nối và quản lý 4 microservices chính của DocGO (theo compose host → container:8000):
-- `authentication-identity-service` → 8001 → 8000
-- `contract-management-service` → 8002 → 8000  
-- `ai-processing-service` → 8003 → 8000
-- `file-storage-service` → 8004 → 8000
+API Gateway sử dụng Next.js để kết nối và quản lý 4 microservices chính của DocGO (kiến trúc mới):
+- `user-management-service` → 8001 → 8000
+- `document-management-service` → 8002 → 8000  
+- `automation-service` → 8003 → 8000
 
 ## Yêu cầu hệ thống
 - Node.js 18.0.0 trở lên
 - npm hoặc yarn
-- 4 microservice đang chạy:
-  - Authentication Service: http://localhost:8001
-  - Contract Management Service: http://localhost:8002
-  - AI Processing Service: http://localhost:8003
-  - File Storage Service: http://localhost:8004
+- 3 microservice đang chạy:
+  - User Management Service: http://localhost:8001
+  - Document Management Service: http://localhost:8002
+  - Automation Service: http://localhost:8003
 
 ## Cài đặt
 
 ### 1. Cài đặt dependencies
 ```bash
-cd backend/api-gateway-bff
+cd backend/api-gateway
 npm install
 ```
 
@@ -92,14 +90,13 @@ PORT=8000
 NODE_ENV=development
 
 # Service URLs
-AUTH_SERVICE_URL=http://authentication-identity-service:8000
-CONTRACT_SERVICE_URL=http://contract-management-service:8000
-AI_SERVICE_URL=http://ai-processing-service:8000
-FILE_SERVICE_URL=http://file-storage-service:8000
+USER_MANAGEMENT_SERVICE_URL=http://user-management-service:8000
+DOCUMENT_MANAGEMENT_SERVICE_URL=http://document-management-service:8000
+AUTOMATION_SERVICE_URL=http://automation-service:8000
 
 # Kafka Configuration
 KAFKA_BROKERS=localhost:9092
-KAFKA_CLIENT_ID=api-gateway-bff
+KAFKA_CLIENT_ID=api-gateway
 KAFKA_GROUP_ID=api-gateway-group
 
 # JWT Configuration
@@ -153,31 +150,28 @@ npm start
 
 ### 3. API Endpoints
 - Base URL: http://localhost:8000/api/
-- Authentication: `/api/auth/*`
-- Contract Management: `/api/contracts/*`
-- AI Processing: `/api/ai/*`
-- File Storage: `/api/files/*`
+- User Management: `/api/users/*`
+- Document Management: `/api/documents/*`
+- Automation: `/api/automation/*`
 - Health Check: `/api/health`
 
 ## Cấu trúc thư mục
 ```
-api-gateway-bff/
+api-gateway/
 ├── lib/                    # Thư viện và utilities
 │   ├── services/          # Service clients
-│   │   ├── authService.ts
-│   │   ├── contractService.ts
-│   │   ├── aiService.ts
-│   │   └── fileService.ts
+│   │   ├── userService.ts
+│   │   ├── documentService.ts
+│   │   └── automationService.ts
 │   └── utils/             # Utilities
 │       ├── apiClient.ts
 │       ├── errorHandler.ts
 │       └── circuitBreaker.ts
 ├── pages/                 # Next.js pages và API routes
 │   ├── api/              # API endpoints
-│   │   ├── auth/         # Authentication routes
-│   │   ├── contracts/    # Contract management routes
-│   │   ├── ai/           # AI processing routes
-│   │   ├── files/        # File storage routes
+│   │   ├── users/        # User management routes
+│   │   ├── documents/    # Document management routes
+│   │   └── automation/   # Automation routes
 │   │   └── health.ts     # Health check endpoint
 │   └── index.tsx         # Trang chủ
 ├── middleware.ts          # Next.js middleware
@@ -190,7 +184,7 @@ api-gateway-bff/
 ## Tính năng chính
 
 ### 1. API Gateway & Routing
-- Tự động định tuyến request đến 4 microservice
+- Tự động định tuyến request đến 3 microservice
 - Hỗ trợ tất cả HTTP methods (GET, POST, PUT, DELETE)
 - Xử lý query parameters và request body
 - Load balancing và failover
@@ -220,15 +214,13 @@ api-gateway-bff/
 ### Environment Variables
 ```env
 # Service URLs
-AUTHENTICATION_SERVICE_URL=http://localhost:8001
-USER_MANAGEMENT_SERVICE_URL=http://localhost:8002
-CONTRACT_MANAGEMENT_SERVICE_URL=http://localhost:8003
-AI_PROCESSING_SERVICE_URL=http://localhost:8017
-FILE_STORAGE_SERVICE_URL=http://localhost:8012
+USER_MANAGEMENT_SERVICE_URL=http://localhost:8001
+DOCUMENT_MANAGEMENT_SERVICE_URL=http://localhost:8002
+AUTOMATION_SERVICE_URL=http://localhost:8003
 
 # Kafka
 KAFKA_BROKERS=localhost:9092
-KAFKA_CLIENT_ID=api-gateway-bff
+KAFKA_CLIENT_ID=api-gateway
 
 # Security
 JWT_SECRET=your-secret-key
@@ -236,27 +228,35 @@ RATE_LIMIT_MAX_REQUESTS=100
 ```
 
 ### Port Mapping
-- **API Gateway BFF**: 8000
-- **Authentication Service**: 8001  
-- **User Management Service**: 8002
-- **Contract Management Service**: 8003
-- **AI Processing Service**: 8017
-- **File Storage Service**: 8012
+- **API Gateway**: 8000
+- **User Management Service**: 8001  
+- **Document Management Service**: 8002
+- **Automation Service**: 8003
 
 ## 📡 API Endpoints
 
-### Authentication Service
-```
-POST /api/v1/authentication-identity-service/auth/register
-GET  /api/v1/authentication-identity-service/auth/login
-PUT  /api/v1/authentication-identity-service/auth/{id}
-```
-
 ### User Management Service
 ```
+GET    /api/v1/user-management-service/users
+POST   /api/v1/user-management-service/users
 GET    /api/v1/user-management-service/users/{id}
 PUT    /api/v1/user-management-service/users/{id}
-GET    /api/v1/user-management-service/approvals/{id}
+DELETE /api/v1/user-management-service/users/{id}
+```
+
+### Document Management Service
+```
+GET    /api/v1/document-management-service/documents
+POST   /api/v1/document-management-service/documents
+GET    /api/v1/document-management-service/documents/{id}
+PUT    /api/v1/document-management-service/documents/{id}
+DELETE /api/v1/document-management-service/documents/{id}
+```
+
+### Automation Service
+```
+POST   /api/v1/automation-service/process
+POST   /api/v1/automation-service/validate
 ```
 
 ## Troubleshooting

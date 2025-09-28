@@ -1,7 +1,7 @@
 {
-  "name": "api-gateway-bff",
-  "version": "2.0.0",
-  "description": "API Gateway BFF cho DocGO - Tích hợp 5 microservices với Next.js",
+  "name": "api-gateway",
+  "version": "1.0.0",
+  "description": "API Gateway cho DocGO - Tích hợp 4 microservices với Next.js",
   "private": true,
   "scripts": {
     "dev": "next dev -p 8000",
