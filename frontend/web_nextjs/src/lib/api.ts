@@ -246,7 +246,7 @@ class ApiClient {
       try {
         const refreshToken = localStorage.getItem('refresh_token')
         if (refreshToken) {
-          const refreshResponse = await this.client.post(`${this.baseURL}/api/v1/authentication-identity-service/auth/refresh`, { refreshToken })
+          const refreshResponse = await this.client.post(`${this.baseURL}/api/v1/user-management-service/auth/refresh`, { refreshToken })
           const refreshData = refreshResponse.data?.data
           
           if (refreshData?.accessToken) {
@@ -428,9 +428,9 @@ export class UserAPI {
   }
 }
 
-// AI Processing API - Sử dụng API Gateway
-export class AIProcessingAPI {
-  private basePath = '/api/v1/ai-processing-service'
+// Automation API - Sử dụng API Gateway
+export class AutomationAPI {
+  private basePath = '/api/v1/automation-service'
 
   async extractText(file: File, apiKey?: string) {
     const formData = new FormData()
@@ -594,7 +594,7 @@ export class AuthAPI {
 // Export API instances
 export const contractAPI = new ContractAPI()
 export const userAPI = new UserAPI()
-export const aiProcessingAPI = new AIProcessingAPI()
+export const automationAPI = new AutomationAPI()
 export const fileStorageAPI = new FileStorageAPI()
 export const tagAPI = new TagAPI()
 export const authAPI = new AuthAPI()
