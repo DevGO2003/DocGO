@@ -140,21 +140,30 @@ export const Header: React.FC<HeaderProps> = ({
               <div className="relative">
                 {user ? (
                   <div className="flex items-center space-x-3">
-                    <div className="hidden sm:block text-right">
-                      <p className="text-sm font-medium text-gray-900">{user.fullName}</p>
+                    <div className="block text-right">
+                      <p className="text-sm font-medium text-gray-900">{user.fullName || user.email || user.username}</p>
                       <p className="text-xs text-gray-500">{user.role}</p>
                     </div>
                     
                     <div className="relative group">
                       <button className="flex items-center space-x-2 p-2 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500">
-                        {user.avatar ? (
+                        {(user as any).avatarUrl || (user as any).avatar ? (
                           <img
                             className="h-8 w-8 rounded-full object-cover"
-                            src={user.avatar}
-                            alt={user.fullName}
+                            src={(user as any).avatarUrl || (user as any).avatar}
+                            alt={user.fullName || user.email || user.username || 'avatar'}
                           />
                         ) : (
-                          <UserCircleIcon className="h-8 w-8 text-gray-400" />
+                          <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center">
+                            <span className="text-xs font-medium text-gray-700">
+                              {(user.fullName || user.email || user.username || '?')
+                                .toString()
+                                .trim()
+                                .split(/\s|@/)[0]
+                                .substring(0, 2)
+                                .toUpperCase()}
+                            </span>
+                          </div>
                         )}
                       </button>
                       

@@ -140,7 +140,7 @@ public class AuthService {
     }
 
     private AuthResponse.UserInfo createUserInfo(UserMongo user) {
-        return new AuthResponse.UserInfo(
+        AuthResponse.UserInfo info = new AuthResponse.UserInfo(
             user.getId(),
             user.getUsername(),
             user.getEmail(),
@@ -149,5 +149,19 @@ public class AuthService {
             user.getRoleIds(),
             user.getStatus()
         );
+        // Compute fullName and map avatarUrl for frontend display consistency
+        String first = user.getFirstName();
+        String last = user.getLastName();
+        String fullName = null;
+        if (first != null && !first.isBlank() && last != null && !last.isBlank()) {
+            fullName = (first + " " + last).trim();
+        } else if (first != null && !first.isBlank()) {
+            fullName = first.trim();
+        } else if (last != null && !last.isBlank()) {
+            fullName = last.trim();
+        }
+        info.setFullName(fullName);
+        info.setAvatarUrl(user.getAvatarUrl());
+        return info;
     }
 }

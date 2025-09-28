@@ -3,16 +3,13 @@ package com.devgo2003.docgo.auth_service.controller;
 import com.devgo2003.docgo.auth_service.common.response.RestResponse;
 import com.devgo2003.docgo.auth_service.model.AuthResponse;
 import com.devgo2003.docgo.auth_service.service.AuthService;
+import com.devgo2003.docgo.auth_service.security.JwtUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
-import io.swagger.v3.oas.annotations.media.Schema;
 import com.devgo2003.docgo.auth_service.dto.LoginRequest;
 import com.devgo2003.docgo.auth_service.dto.RegisterRequest;
 
@@ -28,6 +25,7 @@ import java.util.UUID;
 public class AuthController {
 
     private final AuthService authService;
+    private final JwtUtil jwtUtil;
 
     @PostMapping("/login")
     @Operation(summary = "Đăng nhập", description = "Đăng nhập bằng username và password, trả về accessToken và refreshToken")
@@ -183,6 +181,83 @@ public class AuthController {
                 .requestId(requestId)
                 .path("/api/v1/authentication-identity-service/auth/logout")
                 .build());
+    }
+
+    @GetMapping("/me")
+    @Operation(summary = "Thông tin người dùng hiện tại", description = "Lấy thông tin user từ access token hiện tại")
+    public ResponseEntity<RestResponse<AuthResponse>> me(@RequestHeader(name = "Authorization", required = false) String authorization) {
+        String requestId = UUID.randomUUID().toString();
+        if (authorization == null || !authorization.startsWith("Bearer ")) {
+            return ResponseEntity.status(401).body(RestResponse.<AuthResponse>builder()
+                    .apiVersion("v1")
+                    .statusCode(401)
+                    .shortMessage("Unauthorized")
+                    .description("Thiếu Authorization Bearer token")
+                    .data(null)
+                    .timestamp(ZonedDateTime.now())
+                    .requestId(requestId)
+                    .path("/api/v1/authentication-identity-service/auth/me")
+                    .build());
+        }
+
+        String token = authorization.substring(7);
+        try {
+            var claims = jwtUtil.parseClaims(token);
+            String username = claims.getSubject();
+            return authService.getUserByUsername(username)
+                    .map(user -> {
+                        AuthResponse.UserInfo userInfo = new AuthResponse.UserInfo(
+                                user.getId(),
+                                user.getUsername(),
+                                user.getEmail(),
+                                user.getFirstName(),
+                                user.getLastName(),
+                                user.getRoleIds(),
+                                user.getStatus()
+                        );
+                        Long expSeconds = null;
+                        try {
+                            Object exp = claims.get("exp");
+                            if (exp instanceof Number) {
+                                expSeconds = ((Number) exp).longValue() - (System.currentTimeMillis() / 1000);
+                                if (expSeconds < 0) expSeconds = 0L;
+                            }
+                        } catch (Exception ignored) {}
+
+                        AuthResponse data = new AuthResponse(true, "Lấy thông tin người dùng thành công", token, null, userInfo, expSeconds != null ? expSeconds : 900L, "Bearer");
+                        return ResponseEntity.ok(RestResponse.<AuthResponse>builder()
+                                .apiVersion("v1")
+                                .statusCode(200)
+                                .shortMessage("Success")
+                                .description("Thông tin người dùng hiện tại")
+                                .data(data)
+                                .timestamp(ZonedDateTime.now())
+                                .requestId(requestId)
+                                .path("/api/v1/authentication-identity-service/auth/me")
+                                .build());
+                    })
+                    .orElseGet(() -> ResponseEntity.status(404).body(RestResponse.<AuthResponse>builder()
+                            .apiVersion("v1")
+                            .statusCode(404)
+                            .shortMessage("Not Found")
+                            .description("Không tìm thấy người dùng")
+                            .data(null)
+                            .timestamp(ZonedDateTime.now())
+                            .requestId(requestId)
+                            .path("/api/v1/authentication-identity-service/auth/me")
+                            .build()));
+        } catch (Exception e) {
+            return ResponseEntity.status(401).body(RestResponse.<AuthResponse>builder()
+                    .apiVersion("v1")
+                    .statusCode(401)
+                    .shortMessage("Unauthorized")
+                    .description("Token không hợp lệ")
+                    .data(null)
+                    .timestamp(ZonedDateTime.now())
+                    .requestId(requestId)
+                    .path("/api/v1/authentication-identity-service/auth/me")
+                    .build());
+        }
     }
 
     @GetMapping("/health")
