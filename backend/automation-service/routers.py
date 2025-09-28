@@ -393,60 +393,7 @@ async def classify_api(
 
 
 # API 3: SUMMARIZE (đa định dạng văn bản hoặc chuỗi)
-@router.post("/summarize", summary="Tóm tắt hợp đồng (nhiều định dạng văn bản hoặc chuỗi)", tags=["Automation Service"])
-async def summarize_api(
-    request: Request,
-    gemini_api_key: str = Header(None, description="Gemini API Key (tùy chọn)")
-):
-    """
-    ## 🔹 Đầu vào
-    
-    📁 file (tùy chọn, multipart/form-data)
-    Loại: UploadFile (txt, md, html, json, csv, xlsx, pptx, rtf, docx, pdf)
-    Mô tả: Tệp văn bản cần tóm tắt. Chỉ cần cung cấp file HOẶC text, không cần cả hai
-    
-    📝 text (tùy chọn, application/json)
-    Loại: string
-    Mô tả: Nội dung văn bản dạng chuỗi cần tóm tắt. Chỉ cần cung cấp file HOẶC text, không cần cả hai
-    
-    🔑 gemini_api_key (tùy chọn, header)
-    Loại: string
-    Mô tả: API key để gọi Gemini AI. Nếu không cung cấp, sẽ sử dụng key từ biến môi trường
-    
-    ## 🔹 Đầu ra
-    
-    📄 data
-    Loại: object hoặc string
-    Mô tả: Nếu AI trả về JSON hợp lệ, data sẽ là object chứa các trường tóm tắt hợp đồng (title, parties, object, effective_date, ...). Nếu không parse được JSON, data sẽ là chuỗi text
-    
-    📊 apiVersion
-    Loại: string
-    Mô tả: Phiên bản API (v1)
-    
-    🔢 statusCode
-    Loại: integer
-    Mô tả: Mã trạng thái HTTP (200: thành công, 400: lỗi đầu vào, 204: không có nội dung, 500: lỗi server)
-    
-    📋 shortMessage
-    Loại: string
-    Mô tả: Thông báo ngắn gọn về kết quả
-    
-    📖 description
-    Loại: string
-    Mô tả: Mô tả chi tiết về kết quả xử lý
-    
-    🕒 timestamp
-    Loại: string (ISO-8601)
-    Mô tả: Thời gian xử lý yêu cầu
-    
-    🆔 requestId
-    Loại: string (UUID)
-    Mô tả: Định danh duy nhất của yêu cầu
-    
-    🛣️ path
-    Loại: string
-    Mô tả: Đường dẫn API được gọi
-    """
+# Endpoint đã được chuyển sang contract_router.py
     # Summarize API logic
     content = None
     file = None
@@ -490,22 +437,13 @@ async def summarize_api(
                 detail=f"File quá lớn. Kích thước tối đa cho phép: {MAX_FILE_SIZE // (1024*1024)}MB. File hiện tại: {len(file_content) // (1024*1024)}MB"
             )
         
-        # Validation content type
+        # Validation content type - chỉ hỗ trợ file hợp đồng
         allowed_content_types = [
-            'application/pdf',
+            'application/pdf',  # .pdf
             'application/vnd.openxmlformats-officedocument.wordprocessingml.document',  # .docx
             'application/msword',  # .doc
-            'text/plain',
-            'text/markdown',
-            'text/html',
-            'application/json',
-            'text/csv',
-            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',  # .xlsx
-            'application/vnd.ms-excel',  # .xls
-            'application/vnd.openxmlformats-officedocument.presentationml.presentation',  # .pptx
-            'application/vnd.ms-powerpoint',  # .ppt
-            'application/rtf',
-            'text/rtf'
+            'text/plain',  # .txt
+            'text/html'  # .html
         ]
         
         if file.content_type and file.content_type not in allowed_content_types:
@@ -573,7 +511,7 @@ async def summarize_api(
             elif filename_lower.endswith(".pdf"):
                 content = read_pdf(temp_path)
             else:
-                raise HTTPException(status_code=400, detail="Định dạng file không được hỗ trợ cho summarize.")
+                raise HTTPException(status_code=400, detail="Định dạng file không được hỗ trợ cho hợp đồng. Chỉ hỗ trợ: PDF, DOCX, DOC, TXT, HTML")
         finally:
             if os.path.exists(temp_path):
                 os.remove(temp_path)
@@ -586,7 +524,7 @@ async def summarize_api(
         print(f"[DEBUG] Request content type: {request.headers.get('content-type', 'unknown')}")
         
         # Cải thiện error message với thông tin debug
-        error_detail = "Cần cung cấp file hợp lệ (txt, md, html, json, csv, xlsx, pptx, rtf, docx, pdf) hoặc nội dung chuỗi."
+        error_detail = "Cần cung cấp file hợp đồng (pdf, docx, doc, txt, html) hoặc nội dung hợp đồng dạng text."
         if file is None and text is None:
             error_detail += " Không có file hoặc text nào được cung cấp."
         elif file is not None:

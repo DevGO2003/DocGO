@@ -49,8 +49,8 @@ public class ContractDetailResponseDto {
     
     // Static factory method to create from Contract entity
     public static ContractDetailResponseDto fromContract(
-            com.devgo2003.docgo.backend.contract_service.entity.Contract contract,
-            List<com.devgo2003.docgo.backend.contract_service.entity.ContractParty> parties) {
+            com.devgo2003.docgo.document_service.entity.Contract contract,
+            List<com.devgo2003.docgo.document_service.entity.ContractParty> parties) {
         
         List<ContractPartyDto> partyDtos = parties.stream()
                 .map(party -> ContractPartyDto.builder()

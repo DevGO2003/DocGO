@@ -141,11 +141,21 @@ export function requestIdMiddleware(request: NextRequest): void {
 export function healthCheckMiddleware(request: NextRequest): NextResponse | null {
   if (request.nextUrl.pathname === '/health') {
     return NextResponse.json({
-      status: 'healthy',
-      service: 'API Gateway BFF',
+      apiVersion: 'v1',
+      statusCode: 200,
+      shortMessage: 'Success',
+      description: 'Service đang hoạt động bình thường',
+      data: {
+        status: 'healthy',
+        service: 'API Gateway BFF',
+        version: '1.0.0',
+        kafka: kafkaService.isKafkaConnected(),
+        uptime: process.uptime(),
+        timestamp: new Date().toISOString()
+      },
       timestamp: new Date().toISOString(),
-      kafka: kafkaService.isKafkaConnected(),
-      uptime: process.uptime()
+      requestId: generateRequestId(),
+      path: '/health'
     });
   }
   return null;

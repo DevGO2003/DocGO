@@ -17,7 +17,7 @@ const publicRoutes = [
   '/oauth2',
   '/login/oauth2',
   // OpenAPI & health
-  '/api/health',
+  '/health',
   '/api/docs',
   '/api/swagger.json',
   '/api/oauth2/test',
@@ -61,6 +61,25 @@ export async function middleware(req: NextRequest) {
     const rateLimitResult = await handleRateLimit(req)
     if (rateLimitResult) return rateLimitResult
     
+    // Handle health check first
+    if (req.nextUrl.pathname === '/health') {
+      return NextResponse.json({
+        apiVersion: 'v1',
+        statusCode: 200,
+        shortMessage: 'Success',
+        description: 'Service đang hoạt động bình thường',
+        data: {
+          status: 'healthy',
+          service: 'API Gateway BFF',
+          version: '1.0.0',
+          timestamp: new Date().toISOString()
+        },
+        timestamp: new Date().toISOString(),
+        requestId: generateRequestId(),
+        path: '/health'
+      });
+    }
+
     // Execute middleware chain
     const handlers = [
       handleCORS,

@@ -47,7 +47,7 @@ public class ContractKafkaServiceImpl implements IContractKafkaService {
     private IContractService contractService;
 
     @Autowired
-    private com.devgo2003.docgo.backend.contract_service.repository.AuditEventRepository auditEventRepository;
+    private com.devgo2003.docgo.document_service.repository.AuditEventRepository auditEventRepository;
 
     /**
      * Consume SummaryCreated events từ AI Processing Service
@@ -729,7 +729,7 @@ public class ContractKafkaServiceImpl implements IContractKafkaService {
     }
 
     @Override
-    public void sendContractStatusChangedEvent(com.devgo2003.docgo.backend.contract_service.dto.AiEventDto eventDto) {
+    public void sendContractStatusChangedEvent(com.devgo2003.docgo.document_service.dto.AiEventDto eventDto) {
         try {
             Map<String, Object> event = new HashMap<>();
             event.put("eventType", "ContractStatusChanged");

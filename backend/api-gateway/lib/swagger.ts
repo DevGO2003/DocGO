@@ -40,22 +40,20 @@ API Gateway Backend for Frontend (BFF) sử dụng Next.js và Kafka để kết
 
 **Base URL**: \`/api/v1/{service-name}/...\`
 
-**Available Services (5 microservices đang chạy)**:
-- \`authentication-identity-service\` (Port 8001) - Spring Boot
-- \`contract-management-service\` (Port 8002) - Spring Boot
-- \`ai-processing-service\` (Port 8003) - FastAPI
-- \`file-storage-asset-service\` (Port 8004) - FastAPI
+**Available Services (4 microservices đang chạy)**:
+- \`user-management-service\` (Port 8001) - Spring Boot
+- \`document-management-service\` (Port 8002) - Spring Boot
+- \`automation-service\` (Port 8003) - FastAPI
 
 **Port Mapping**:
-- API Gateway BFF: 8000
-- Authentication Identity Service: 8001
-- Contract Management Service: 8002
-- AI Processing Service: 8003
-- File Storage Asset Service: 8004
+- API Gateway: 8000
+- User Management Service: 8001
+- Document Management Service: 8002
+- Automation Service: 8003
 
 **Technology Distribution**:
 - Spring Boot (Java): 2 services
-- FastAPI (Python): 2 services  
+- FastAPI (Python): 1 service  
 - Next.js (Node.js): 1 service
       `,
       contact: {
@@ -128,7 +126,7 @@ API Gateway Backend for Frontend (BFF) sử dụng Next.js và Kafka để kết
             },
             path: {
               type: 'string',
-              example: '/api/v1/authentication-identity-service/auth/login'
+              example: '/api/v1/user-management-service/users'
             }
           }
         },

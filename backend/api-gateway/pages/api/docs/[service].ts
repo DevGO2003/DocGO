@@ -6,8 +6,8 @@ import serviceManager from '@/lib/services';
 // FastAPI: /openapi.json
 
 const SPRING_SERVICES = new Set<string>([
-  'authentication',
-  'contract-management', // Đã có SpringDoc OpenAPI
+  'user-management',
+  'document-management', // Đã có SpringDoc OpenAPI
 ]);
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {

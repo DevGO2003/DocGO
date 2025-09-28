@@ -15,11 +15,19 @@ async def read_root():
 
 @app.get("/health")
 async def health_check():
-    return {
-        "status": "healthy",
-        "service": "Automation Service",
-        "version": "1.0.0"
-    }
+    from schemas.response import RestResponse
+    
+    return RestResponse(
+        statusCode=200,
+        shortMessage="Success",
+        description="Service đang hoạt động bình thường",
+        data={
+            "status": "healthy",
+            "service": "Automation Service",
+            "version": "2.0.0"
+        },
+        path="/health"
+    )
 
 if __name__ == "__main__":
     uvicorn.run(app, host="127.0.0.1", port=8017)

@@ -29,12 +29,12 @@ import 'swagger-ui-react/swagger-ui.css';
 export default function SwaggerPage() {
   const router = useRouter();
   
-  // Mapping giữa tên dịch vụ và thông tin kết nối (chỉ 5 services còn lại)
+  // Mapping giữa tên dịch vụ và thông tin kết nối (4 microservices chính)
   const serviceConnectionMapping = useMemo(() => ({
-    'API Gateway BFF': {
+    'API Gateway': {
       port: 8000,
-      container: 'api-gateway-bff',
-      description: 'API Gateway Backend for Frontend, tích hợp tất cả services',
+      container: 'api-gateway',
+      description: 'API Gateway, tích hợp tất cả services',
       technology: 'Next.js',
       icon: '🚀',
       color: '#667eea',
@@ -42,73 +42,58 @@ export default function SwaggerPage() {
         { method: 'GET', path: '/api/health', description: 'Health check' },
         { method: 'GET', path: '/api/swagger.json', description: 'Swagger spec' },
         { method: 'GET', path: '/swagger', description: 'Swagger UI' },
-        { method: 'POST', path: '/api/auth/login', description: 'Proxy to auth service' },
-        { method: 'GET', path: '/api/contracts', description: 'Proxy to contract service' }
+        { method: 'GET', path: '/api/users', description: 'Proxy to user service' },
+        { method: 'GET', path: '/api/documents', description: 'Proxy to document service' }
       ]
     },
-    'Authentication Identity Service': {
+    'User Management Service': {
       port: 8001,
-      container: 'authentication-identity-service',
-      description: 'Xác thực, phân quyền, JWT token management',
+      container: 'user-management-service',
+      description: 'Quản lý người dùng, xác thực, phân quyền',
       technology: 'Spring Boot',
-      icon: '🔐',
+      icon: '👥',
       color: '#f093fb',
       endpoints: [
-        { method: 'POST', path: '/api/v1/auth-service/login', description: 'User login' },
-        { method: 'POST', path: '/api/v1/auth-service/register', description: 'User registration' },
-        { method: 'GET', path: '/api/v1/auth-service/validate', description: 'Token validation' },
-        { method: 'POST', path: '/api/v1/auth-service/refresh', description: 'Refresh token' },
-        { method: 'GET', path: '/v3/api-docs', description: 'OpenAPI spec' }
-      ]
-    },
-    'Contract Management Service': {
-      port: 8002,
-      container: 'contract-management-service',
-      description: 'Quản lý hợp đồng, workflow, approval processes',
-      technology: 'Spring Boot',
-      icon: '📋',
-      color: '#4facfe',
-      endpoints: [
-        { method: 'GET', path: '/api/v1/contract-service/contracts', description: 'List contracts' },
-        { method: 'POST', path: '/api/v1/contract-service/contracts', description: 'Create contract' },
-        { method: 'GET', path: '/api/v1/contract-service/contracts/{id}', description: 'Get contract' },
-        { method: 'PUT', path: '/api/v1/contract-service/contracts/{id}', description: 'Update contract' },
+        { method: 'GET', path: '/api/v1/user-management-service/users', description: 'List users' },
+        { method: 'POST', path: '/api/v1/user-management-service/users', description: 'Create user' },
+        { method: 'GET', path: '/api/v1/user-management-service/users/{id}', description: 'Get user' },
+        { method: 'PUT', path: '/api/v1/user-management-service/users/{id}', description: 'Update user' },
         { method: 'GET', path: '/docs', description: 'Swagger UI' }
       ]
     },
-    'AI Processing Service': {
+    'Document Management Service': {
+      port: 8002,
+      container: 'document-management-service',
+      description: 'Quản lý tài liệu, workflow, approval processes',
+      technology: 'Spring Boot',
+      icon: '📄',
+      color: '#4facfe',
+      endpoints: [
+        { method: 'GET', path: '/api/v1/document-management-service/documents', description: 'List documents' },
+        { method: 'POST', path: '/api/v1/document-management-service/documents', description: 'Create document' },
+        { method: 'GET', path: '/api/v1/document-management-service/documents/{id}', description: 'Get document' },
+        { method: 'PUT', path: '/api/v1/document-management-service/documents/{id}', description: 'Update document' },
+        { method: 'GET', path: '/docs', description: 'Swagger UI' }
+      ]
+    },
+    'Automation Service': {
       port: 8003,
-      container: 'ai-processing-service',
-      description: 'Xử lý AI, machine learning, NLP, automation',
+      container: 'automation-service',
+      description: 'Xử lý tự động, AI, machine learning, NLP',
       technology: 'FastAPI',
       icon: '🤖',
       color: '#43e97b',
       endpoints: [
-        { method: 'POST', path: '/api/v1/ai-processing-service/extract', description: 'Extract text' },
-        { method: 'POST', path: '/api/v1/ai-processing-service/summarize', description: 'Summarize content' },
-        { method: 'GET', path: '/api/v1/ai-processing-service/health', description: 'Health check' },
+        { method: 'POST', path: '/api/v1/automation-service/process', description: 'Process document' },
+        { method: 'POST', path: '/api/v1/automation-service/validate', description: 'Validate document' },
+        { method: 'GET', path: '/api/v1/automation-service/health', description: 'Health check' },
         { method: 'GET', path: '/openapi.json', description: 'OpenAPI spec' },
         { method: 'GET', path: '/docs', description: 'Swagger UI' }
-      ]
-    },
-    'File Storage Asset Service': {
-      port: 8004,
-      container: 'file-storage-service',
-      description: 'Lưu trữ file, quản lý tài sản, malware scan',
-      technology: 'FastAPI',
-      icon: '💾',
-      color: '#fa709a',
-      endpoints: [
-        { method: 'POST', path: '/api/v1/file-storage-service/upload', description: 'Upload file' },
-        { method: 'GET', path: '/api/v1/file-storage-service/files', description: 'List files' },
-        { method: 'GET', path: '/api/v1/file-storage-service/files/{id}', description: 'Get file' },
-        { method: 'DELETE', path: '/api/v1/file-storage-service/files/{id}', description: 'Delete file' },
-        { method: 'GET', path: '/openapi.json', description: 'OpenAPI spec' }
       ]
     }
   }), []);
 
-  const [selectedService, setSelectedService] = useState<string>('API Gateway BFF');
+  const [selectedService, setSelectedService] = useState<string>('API Gateway');
   const [spec, setSpec] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoadingSpec, setIsLoadingSpec] = useState<boolean>(false);
@@ -143,18 +128,10 @@ export default function SwaggerPage() {
       
       if (isDocker) {
         // Nếu chạy trên Docker, sử dụng tên container
-        if (serviceName === 'Authentication Identity Service') {
-          targetUrl = `http://${serviceInfo.container}/swagger-ui/index.html`;
-        } else {
         targetUrl = `http://${serviceInfo.container}/docs`;
-        }
       } else {
         // Nếu chạy trên localhost, sử dụng port
-        if (serviceName === 'Authentication Identity Service') {
-          targetUrl = `http://localhost:${serviceInfo.port}/swagger-ui/index.html`;
-        } else {
         targetUrl = `http://localhost:${serviceInfo.port}/docs`;
-        }
       }
       
       // Mở trong tab mới
@@ -169,16 +146,14 @@ export default function SwaggerPage() {
 
     let specUrl: string;
     
-    if (selectedService === 'API Gateway BFF') {
+    if (selectedService === 'API Gateway') {
       specUrl = '/api/swagger.json';
-    } else if (selectedService === 'Authentication Identity Service') {
-      specUrl = '/api/docs/authentication';
-    } else if (selectedService === 'Contract Management Service') {
-      specUrl = '/api/docs/contract-management';
-    } else if (selectedService === 'AI Processing Service') {
-      specUrl = '/api/docs/ai-processing';
-    } else if (selectedService === 'File Storage Asset Service') {
-      specUrl = '/api/docs/file-storage';
+    } else if (selectedService === 'User Management Service') {
+      specUrl = '/api/docs/user-management';
+    } else if (selectedService === 'Document Management Service') {
+      specUrl = '/api/docs/document-management';
+    } else if (selectedService === 'Automation Service') {
+      specUrl = '/api/docs/automation';
     } else {
       return;
     }

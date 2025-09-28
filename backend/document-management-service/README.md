@@ -73,8 +73,8 @@ Frontend → Contract Service → Kafka → AI Processing Service
 ## Cấu hình
 
 ### Database
-- MariaDB 11.2+
-- Schema tự động cập nhật (Hibernate DDL)
+- MongoDB Atlas
+- Collections tự động tạo khi cần
 
 ### Kafka
 - Bootstrap servers: localhost:9092
@@ -91,7 +91,7 @@ Frontend → Contract Service → Kafka → AI Processing Service
 ### Yêu cầu
 - Java 17+
 - Maven 3.6+
-- MariaDB 11.2+
+- MongoDB Atlas
 - Kafka 3.0+
 
 ### Cách chạy
@@ -121,7 +121,7 @@ Contract Management Service là một microservice Spring Boot quản lý hợp 
 ## Yêu cầu hệ thống
 - Java 17 hoặc cao hơn
 - Maven 3.6+
-- MariaDB 11.2+
+- MongoDB Atlas
 - **Kafka 3.0+** (bắt buộc cho tính năng AI processing)
 - Docker (tùy chọn)
 
@@ -142,13 +142,9 @@ Copy-Item env/.env.example env/.env -Force
 cp env/.env.example env/.env
 ```
 
-Cập nhật thông tin database trong file `env/.env`:
+Cập nhật thông tin MongoDB Atlas trong file `env/.env`:
 ```properties
-DB_HOST=localhost
-DB_PORT=3306
-DB_NAME=docgo_contract_service
-DB_USERNAME=root
-DB_PASSWORD=your_password_here
+SPRING_DATA_MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/docgo_contract_service
 ```
 
 ### 3. Cấu hình Kafka
@@ -159,16 +155,10 @@ app.kafka.topic.contract-processing=contract-processing-requests
 app.kafka.topic.callback=contract-processing-results
 ```
 
-### 4. Khởi động MariaDB
+### 4. Cấu hình MongoDB Atlas
 ```bash
-# Sử dụng Docker
-docker run -d --name mariadb-contract \
-  -e MYSQL_ROOT_PASSWORD=your_password_here \
-  -e MYSQL_DATABASE=docgo_contract_service \
-  -p 3306:3306 \
-  mariadb:11.2
-
-# Hoặc cài đặt MariaDB locally
+# Cập nhật MongoDB Atlas connection string trong .env
+SPRING_DATA_MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/docgo_contract_service
 ```
 
 ### 5. Khởi động Kafka

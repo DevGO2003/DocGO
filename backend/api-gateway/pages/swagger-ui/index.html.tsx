@@ -9,6 +9,6 @@ export const getServerSideProps: GetServerSideProps = async () => {
   };
 };
 
-export default function DocsRedirect() {
+export default function SwaggerUIRedirect() {
   return null;
 }

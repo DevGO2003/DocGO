@@ -4,40 +4,27 @@ require('./lib/env-loader');
 
 const nextConfig = {
   experimental: {
-    serverComponentsExternalPackages: ['kafkajs', 'winston']
+    serverComponentsExternalPackages: ['kafkajs', 'winston', 'ioredis']
   },
   // output: 'standalone', // Comment out để tránh conflict trong development mode
   env: {
-    AUTH_SERVICE_URL: process.env.AUTH_SERVICE_URL || 'http://authentication-identity-service:8000',
-    CONTRACT_SERVICE_URL: process.env.CONTRACT_SERVICE_URL || 'http://contract-management-service:8000',
-    AI_SERVICE_URL: process.env.AI_SERVICE_URL || 'http://ai-processing-service:8000',
-    FILE_SERVICE_URL: process.env.FILE_SERVICE_URL || 'http://file-storage-service:8000',
+    USER_SERVICE_URL: process.env.USER_SERVICE_URL || 'http://user-management-service:8000',
+    DOCUMENT_SERVICE_URL: process.env.DOCUMENT_SERVICE_URL || 'http://document-management-service:8000',
+    AUTOMATION_SERVICE_URL: process.env.AUTOMATION_SERVICE_URL || 'http://automation-service:8000',
   },
   async rewrites() {
     return [
       {
-        source: '/api/auth/:path*',
-        destination: `${process.env.AUTH_SERVICE_URL || 'http://authentication-identity-service:8000'}/api/v1/authentication-identity-service/auth/:path*`,
+        source: '/api/users/:path*',
+        destination: `${process.env.USER_SERVICE_URL || 'http://user-management-service:8000'}/api/v1/user-management-service/users/:path*`,
       },
       {
-        source: '/oauth2/:path*',
-        destination: `${process.env.AUTH_SERVICE_URL || 'http://authentication-identity-service:8000'}/oauth2/:path*`,
+        source: '/api/documents/:path*',
+        destination: `${process.env.DOCUMENT_SERVICE_URL || 'http://document-management-service:8000'}/api/v1/document-management-service/documents/:path*`,
       },
       {
-        source: '/login/oauth2/:path*',
-        destination: `${process.env.AUTH_SERVICE_URL || 'http://authentication-identity-service:8000'}/login/oauth2/:path*`,
-      },
-      {
-        source: '/api/contracts/:path*',
-        destination: `${process.env.CONTRACT_SERVICE_URL || 'http://contract-management-service:8000'}/api/v1/contract-management-service/contracts/:path*`,
-      },
-      {
-        source: '/api/ai/:path*',
-        destination: `${process.env.AI_SERVICE_URL || 'http://ai-processing-service:8000'}/api/v1/ai-processing-service/:path*`,
-      },
-      {
-        source: '/api/files/:path*',
-        destination: `${process.env.FILE_SERVICE_URL || 'http://file-storage-service:8000'}/api/v1/file-storage-asset-service/:path*`,
+        source: '/api/automation/:path*',
+        destination: `${process.env.AUTOMATION_SERVICE_URL || 'http://automation-service:8000'}/api/v1/automation-service/:path*`,
       },
       {
         source: '/api/v1/:path*',

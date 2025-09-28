@@ -278,7 +278,7 @@ public class ContractController {
     @PostMapping
     public ResponseEntity<RestResponse<Contract>> createContract(@Valid @RequestBody ContractCreateRequest request) {
         if (request.getContractNumber() == null) {
-            throw new com.devgo2003.docgo.backend.contract_service.common.exception.InvalidInputException("Không được gửi id khi tạo hợp đồng mới.");
+            throw new com.devgo2003.docgo.document_service.common.exception.InvalidInputException("Không được gửi id khi tạo hợp đồng mới.");
         }
         
         // Convert DTO to Entity

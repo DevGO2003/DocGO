@@ -11,7 +11,7 @@ Docs: http://localhost:8001/docs#/
 - Maven 3.9+
 - MongoDB Atlas hoặc MongoDB local
 - Redis Cloud hoặc Redis local
-- MariaDB running locally (legacy support)
+- MongoDB Atlas (primary database)
 
 ### Setup
 1) Navigate to this folder
@@ -22,7 +22,7 @@ Copy-Item .env.example .env -Force
 3) Update database credentials in `.env` and/or `src/main/resources/application.properties`:
    - MongoDB: `spring.data.mongodb.uri`
    - Redis: `spring.data.redis.host`, `spring.data.redis.port`
-   - MariaDB: `spring.datasource.url` (legacy)
+   - MongoDB: `spring.data.mongodb.uri` (primary)
 
 ### Run (Dev)
 ```
@@ -44,9 +44,8 @@ java -jar target/auth-service-*.jar
 - `SPRING_DATA_MONGODB_URI` (MongoDB connection string)
 - `SPRING_DATA_REDIS_HOST` (Redis host)
 - `SPRING_DATA_REDIS_PORT` (Redis port)
-- `SPRING_DATASOURCE_URL` (MariaDB - legacy)
-- `SPRING_DATASOURCE_USERNAME` (MariaDB - legacy)
-- `SPRING_DATASOURCE_PASSWORD` (MariaDB - legacy)
+- `MONGODB_ATLAS_URI` (MongoDB Atlas - primary)
+- `MONGODB_DATABASE` (MongoDB database name)
 
 ## 🚀 Tính năng mới
 
@@ -108,4 +107,4 @@ java -jar target/auth-service-*.jar
 - Swagger UI must be at `/docs#/` per project convention.
 - MongoDB được sử dụng làm database chính cho user management
 - Redis được sử dụng cho session management và caching
-- MariaDB vẫn được hỗ trợ cho backward compatibility
+- MongoDB Atlas là database chính duy nhất

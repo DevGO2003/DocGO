@@ -87,4 +87,10 @@ public class UserMongo {
     
     @Field("updated_by")
     private String updatedBy;
+    
+    @Field("organization_id")
+    private String organizationId;
+    
+    @Field("organization_ids")
+    private List<String> organizationIds;
 }

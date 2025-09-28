@@ -6,6 +6,7 @@ from pydantic import ValidationError
 from fastapi.openapi.utils import get_openapi
 from starlette.middleware.base import BaseHTTPMiddleware
 import routers
+from contract_router import router as contract_router
 import os
 import asyncio
 from datetime import datetime
@@ -58,6 +59,7 @@ app.add_middleware(
 )
 
 app.include_router(routers.router)
+app.include_router(contract_router)
 
 # Initialize services
 # notification_service = NotificationService()
@@ -89,19 +91,35 @@ async def read_root():
     """
     return RedirectResponse(url="/docs", status_code=302)
 
+@app.get("/swagger-ui/index.html", tags=["Root"])
+async def swagger_ui_redirect():
+    """
+    Swagger UI redirect endpoint - tuân thủ SpringDoc standard
+    Redirect từ /swagger-ui/index.html đến /docs
+    """
+    return RedirectResponse(url="/docs", status_code=302)
+
 @app.get("/health", tags=["Health"])
 async def health_check():
     """
     Health check endpoint - kiểm tra trạng thái service
     """
-    return {
-        "status": "healthy",
-        "service": "Automation Service",
-        "version": "1.0.0",
-        "timestamp": datetime.now().isoformat(),
-        "ai_model": "Gemini 2.0 Flash",
-        "supported_formats": ["docx", "pdf", "txt"]
-    }
+    from schemas.response import RestResponse
+    
+    return RestResponse(
+        statusCode=200,
+        shortMessage="Success",
+        description="Service đang hoạt động bình thường",
+        data={
+            "status": "healthy",
+            "service": "Automation Service",
+            "version": "2.0.0",
+            "ai_model": "Gemini 2.0 Flash",
+            "supported_formats": ["docx", "pdf", "txt"],
+            "timestamp": datetime.now().isoformat()
+        },
+        path="/health"
+    )
 
 @app.on_event("startup")
 async def on_startup():
