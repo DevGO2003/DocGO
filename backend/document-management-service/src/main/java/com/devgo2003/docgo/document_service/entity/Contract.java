@@ -1,8 +1,14 @@
 package com.devgo2003.docgo.document_service.entity;
 
+<<<<<<< HEAD:backend/document-management-service/src/main/java/com/devgo2003/docgo/document_service/entity/Contract.java
 import com.devgo2003.docgo.document_service.enums.ContractCategory;
 import com.devgo2003.docgo.document_service.enums.ContractStatus;
 import com.devgo2003.docgo.document_service.enums.ContractType;
+=======
+import com.devgo2003.docgo.contract_service.enums.ContractCategory;
+import com.devgo2003.docgo.contract_service.enums.ContractStatus;
+import com.devgo2003.docgo.contract_service.enums.ContractType;
+>>>>>>> e4f9e590765b2a1b7ce2f3982eff8dae6ecb472e:backend/contract-management-service/src/main/java/com/devgo2003/docgo/contract_service/entity/Contract.java
 import com.fasterxml.jackson.annotation.JsonFormat;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.domain.Persistable;

@@ -20,7 +20,11 @@ references: []
 commands: []
 owners: ["devgo2003"]
 createdAt: "2025-09-23T00:00:00Z"
+<<<<<<< HEAD
 updatedAt: "2025-09-28T00:00:00Z"
+=======
+updatedAt: "2025-09-23T00:00:00Z"
+>>>>>>> e4f9e590765b2a1b7ce2f3982eff8dae6ecb472e
 notes: "Luôn nạp để định hướng tổng thể cho agent"
 language: vi
 ---
@@ -69,6 +73,7 @@ Dự án DocGO dùng kiến trúc microservices với các bộ quy tắc tách 
 - Tối ưu workflow phát triển/triển khai
 - Bảo mật thông tin nhạy cảm và quản lý Git
 
+<<<<<<< HEAD
 ## 🏗️ Cấu trúc Microservices
 
 ### Danh sách Services và Cấu hình
@@ -102,6 +107,14 @@ Dự án DocGO dùng kiến trúc microservices với các bộ quy tắc tách 
 3. Cấu hình môi trường: xem `environment-git-standards.mdc`
 4. Làm việc với Docker: xem `docker-local-standards.mdc`
 
+=======
+## 📚 Cách sử dụng
+1. Phát triển API mới: xem `api-standards.mdc` và `event-exception-standards.mdc`
+2. Tạo service mới: xem `service-structure-standards.mdc`
+3. Cấu hình môi trường: xem `environment-git-standards.mdc`
+4. Làm việc với Docker: xem `docker-local-standards.mdc`
+
+>>>>>>> e4f9e590765b2a1b7ce2f3982eff8dae6ecb472e
 ## 🔄 Cập nhật quy tắc
 1. Sửa file rule tương ứng
 2. Cập nhật file này nếu thay đổi cấu trúc

@@ -1,6 +1,12 @@
+<<<<<<< HEAD:backend/document-management-service/src/main/java/com/devgo2003/docgo/document_service/repository/TagRepository.java
 package com.devgo2003.docgo.document_service.repository;
 
 import com.devgo2003.docgo.document_service.entity.Tag;
+=======
+package com.devgo2003.docgo.contract_service.repository;
+
+import com.devgo2003.docgo.contract_service.entity.Tag;
+>>>>>>> e4f9e590765b2a1b7ce2f3982eff8dae6ecb472e:backend/contract-management-service/src/main/java/com/devgo2003/docgo/contract_service/repository/TagRepository.java
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;

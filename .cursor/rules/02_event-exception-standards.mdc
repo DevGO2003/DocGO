@@ -115,4 +115,8 @@ Mô tả: <giải thích ngắn gọn>
 
 **FastAPI**:
 - Dùng `tags`, `summary`, `description` trong decorator; viết docstring phần "Đầu vào/Đầu ra"; chỉ rõ `multipart/form-data` hoặc `application/json` và ví dụ.
+<<<<<<< HEAD
 - Với input có 2 lựa chọn (ví dụ automation process), ghi rõ chỉ sử dụng 1 trong 2 và nêu ví dụ cho mỗi lựa chọn.
+=======
+- Với input có 2 lựa chọn (ví dụ summarize), ghi rõ chỉ sử dụng 1 trong 2 và nêu ví dụ cho mỗi lựa chọn.
+>>>>>>> e4f9e590765b2a1b7ce2f3982eff8dae6ecb472e

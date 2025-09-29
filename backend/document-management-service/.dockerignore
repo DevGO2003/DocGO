@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Java
 target/
 *.class
@@ -19,13 +20,45 @@ dependency-reduced-pom.xml
 buildNumber.properties
 .mvn/timing.properties
 .mvn/wrapper/maven-wrapper.jar
+=======
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+>>>>>>> e4f9e590765b2a1b7ce2f3982eff8dae6ecb472e
 
 # IDE
 .vscode/
 .idea/
+<<<<<<< HEAD
 *.iws
 *.iml
 *.ipr
+=======
+>>>>>>> e4f9e590765b2a1b7ce2f3982eff8dae6ecb472e
 *.swp
 *.swo
 *~
@@ -57,4 +90,17 @@ Dockerfile
 !README.md
 
 # Test files
+<<<<<<< HEAD
 src/test/
+=======
+tests/
+test_*.py
+*_test.py
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Upload directories (will be created at runtime)
+uploads/
+temp/
+>>>>>>> e4f9e590765b2a1b7ce2f3982eff8dae6ecb472e

@@ -389,6 +389,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       serviceKey = 'general-file-management';
       endpoint = `/api/v1/${fullPath}`;
     } else {
+<<<<<<< HEAD
+=======
+      // CORS for early return
+>>>>>>> e4f9e590765b2a1b7ce2f3982eff8dae6ecb472e
       res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000')
       res.setHeader('Access-Control-Allow-Credentials', 'true')
       res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
@@ -400,15 +404,177 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     }
   }
 
+<<<<<<< HEAD
   const service = serviceManager.getService(serviceKey);
   if (!service) {
+=======
+    // Get service instance
+    const service = serviceManager.getService(serviceKey);
+    if (!service) {
+      // CORS for early return
+      res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000')
+      res.setHeader('Access-Control-Allow-Credentials', 'true')
+      res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With')
+      return res.status(503).json({
+        error: 'Service unavailable',
+        message: `Service ${serviceKey} is not available`
+      });
+    }
+
+    // Filter out path parameters from query params
+    const { path: pathParam, ...queryParams } = req.query;
+
+    // Make request to microservice
+    try {
+      const contentTypeHeader = (req.headers['content-type'] || '').toLowerCase();
+      const isMultipart = contentTypeHeader.startsWith('multipart/');
+
+      if (isMultipart) {
+        const upstreamUrl = new URL(service.defaults.baseURL || '');
+        // Stream raw request to upstream to preserve multipart boundary
+        const upstreamResponse = await axios.request({
+          method,
+          url: `${upstreamUrl.origin}${endpoint}`,
+          params: queryParams,
+          headers: {
+            ...req.headers,
+          },
+          data: req as any,
+          maxContentLength: Infinity,
+          maxBodyLength: Infinity,
+          // Do not transform request body
+          transformRequest: [(data) => data],
+          // Important for streaming in Node
+          responseType: 'stream',
+          validateStatus: () => true
+        });
+
+        // Pipe upstream response back to client
+        res.status(upstreamResponse.status);
+        for (const [key, value] of Object.entries(upstreamResponse.headers)) {
+          if (value !== undefined) {
+            res.setHeader(key, value as any);
+          }
+        }
+        // Ensure correct CORS on proxied streaming response
+        res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000')
+        res.setHeader('Access-Control-Allow-Credentials', 'true')
+        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+        res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With')
+        (upstreamResponse.data as any).pipe(res);
+        return;
+      }
+
+      // JSON/x-www-form-urlencoded flows
+      // Vì đã tắt bodyParser, cần tự đọc body đối với JSON/x-www-form-urlencoded
+      let parsedBody: any = undefined;
+      if (method !== 'GET' && method !== 'DELETE') {
+        const rawBody: string = await new Promise((resolve, reject) => {
+          let data = '';
+          req.on('data', (chunk) => { data += chunk; });
+          req.on('end', () => resolve(data));
+          req.on('error', (err) => reject(err));
+        });
+
+        if (rawBody && contentTypeHeader.includes('application/json')) {
+          try {
+            parsedBody = JSON.parse(rawBody);
+          } catch {
+            parsedBody = rawBody;
+          }
+        } else if (rawBody && contentTypeHeader.includes('application/x-www-form-urlencoded')) {
+          // Trường hợp form urlencoded
+          const params = new URLSearchParams(rawBody);
+          parsedBody = Object.fromEntries(params.entries());
+        } else if (rawBody) {
+          parsedBody = rawBody;
+        }
+      }
+
+      let response;
+      const fwdHeaders: any = {};
+      if (req.headers['authorization']) {
+        fwdHeaders['Authorization'] = req.headers['authorization'] as string;
+      }
+      switch (method.toUpperCase()) {
+        case 'GET':
+          response = await service.get(endpoint, { params: queryParams, headers: fwdHeaders });
+          break;
+        case 'POST':
+          response = await service.post(endpoint, parsedBody, {
+            params: queryParams,
+            headers: { 'Content-Type': req.headers['content-type'] as string, ...fwdHeaders }
+          });
+          break;
+        case 'PUT':
+          response = await service.put(endpoint, parsedBody, {
+            params: queryParams,
+            headers: { 'Content-Type': req.headers['content-type'] as string, ...fwdHeaders }
+          });
+          break;
+        case 'DELETE':
+          response = await service.delete(endpoint, { params: queryParams, headers: fwdHeaders });
+          break;
+        case 'OPTIONS':
+          // Handle CORS preflight requests
+          res.status(200);
+          res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
+          res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+          res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+          res.setHeader('Access-Control-Allow-Credentials', 'true');
+          res.setHeader('Access-Control-Max-Age', '86400');
+          return res.end();
+        default:
+          return res.status(405).json({
+            error: 'Method not allowed',
+            message: `HTTP method ${method} is not supported`
+          });
+      }
+
+      // Ensure CORS for success responses
+      res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000')
+      res.setHeader('Access-Control-Allow-Credentials', 'true')
+      res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With')
+      return res.status(response.status).json(response.data);
+
+    } catch (error: any) {
+      logger.error(`❌ Error calling ${serviceKey} service:`, error);
+
+      // Return error response with CORS
+      res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000')
+      res.setHeader('Access-Control-Allow-Credentials', 'true')
+      res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With')
+      if (error.response) {
+        return res.status(error.response.status).json(error.response.data);
+      } else {
+        return res.status(500).json({
+          error: 'Service error',
+          message: error.message || 'An error occurred while processing the request'
+        });
+      }
+    }
+
+  } catch (error: any) {
+    logger.error('❌ Unhandled error in API gateway:', error);
+
+    // Ensure CORS on unhandled error
+>>>>>>> e4f9e590765b2a1b7ce2f3982eff8dae6ecb472e
     res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000')
     res.setHeader('Access-Control-Allow-Credentials', 'true')
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With')
+<<<<<<< HEAD
     return res.status(503).json({
       error: 'Service unavailable',
       message: `Service ${serviceKey} is not available`
+=======
+    return res.status(500).json({
+      error: 'Internal server error',
+      message: process.env.NODE_ENV === 'development' ? error.message : 'Something went wrong'
+>>>>>>> e4f9e590765b2a1b7ce2f3982eff8dae6ecb472e
     });
   }
 

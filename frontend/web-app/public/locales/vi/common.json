@@ -1,0 +1,350 @@
+{
+    "app": {
+      "name": "DocGO",
+      "description": "Quản lý tài liệu và hợp đồng thông minh"
+    },
+    "navigation": {
+      "dashboard": "Bảng điều khiển",
+      "upload": "Tải lên",
+      "contracts": "Hợp đồng",
+      "importDocument": "Nhập tài liệu",
+      "quickCreate": "Tạo nhanh",
+      "eSignature": "Chữ ký điện tử",
+      "collaboration": "Bình luận & Cộng tác",
+      "versions": "Phiên bản hợp đồng",
+      "approval": "Luồng phê duyệt",
+      "permissions": "Phân quyền theo vai trò",
+      "approved": "Đã duyệt",
+      "analytics": "Thống kê",
+      "reports": "Báo cáo",
+      "users": "Quản lý người dùng",
+      "accountApproval": "Phê duyệt tài khoản",
+      "notifications": "Thông báo",
+      "calendar": "Lịch",
+      "settings": "Cài đặt",
+      "help": "Trợ giúp & Hỗ trợ",
+      "activity": "Lịch sử hoạt động",
+      "backup": "Sao lưu & Khôi phục",
+      "integrations": "Tích hợp",
+      "aiProcessing": "Xử lý AI"
+    },
+    "header": {
+      "search": {
+        "placeholder": "Tìm kiếm tài liệu, hợp đồng...",
+        "mobilePlaceholder": "Tìm kiếm..."
+      },
+      "user": {
+        "profile": "Hồ sơ cá nhân",
+        "settings": "Cài đặt",
+        "logout": "Đăng xuất",
+        "login": "Đăng nhập",
+        "register": "Đăng ký"
+      },
+      "language": {
+        "select": "Chọn ngôn ngữ",
+        "vietnamese": "Tiếng Việt",
+        "english": "English"
+      }
+    },
+    "auth": {
+      "login": "Đăng nhập",
+      "register": "Đăng ký",
+      "logout": "Đăng xuất",
+      "email": "Email",
+      "password": "Mật khẩu",
+      "confirmPassword": "Xác nhận mật khẩu",
+      "fullName": "Họ và tên",
+      "forgotPassword": "Quên mật khẩu?",
+      "rememberMe": "Ghi nhớ đăng nhập",
+      "noAccount": "Chưa có tài khoản?",
+      "hasAccount": "Đã có tài khoản?"
+    },
+    "dashboard": {
+      "title": "Bảng điều khiển",
+      "welcome": "Chào mừng trở lại",
+      "stats": {
+        "pending": "Chờ duyệt",
+        "approved": "Đã duyệt",
+        "rejected": "Từ chối",
+        "expiring": "Sắp hết hạn"
+      },
+      "charts": {
+        "uploadsByMonth": "Tải lên theo tháng",
+        "statusDistribution": "Phân bố trạng thái",
+        "rejectReasons": "Lý do từ chối"
+      }
+    },
+    "contracts": {
+      "title": "Hợp đồng",
+      "create": "Tạo hợp đồng",
+      "edit": "Chỉnh sửa",
+      "delete": "Xóa",
+      "view": "Xem chi tiết",
+      "status": "Trạng thái",
+      "value": "Giá trị",
+      "currency": "Đơn vị tiền tệ",
+      "createdAt": "Ngày tạo",
+      "expiresAt": "Ngày hết hạn",
+      "parties": "Các bên",
+      "description": "Mô tả",
+      "types": {
+        "all": "Tất cả loại",
+        "SERVICE_AGREEMENT": "Hợp đồng dịch vụ",
+        "PURCHASE_AGREEMENT": "Hợp đồng mua bán",
+        "PARTNERSHIP_AGREEMENT": "Hợp đồng đối tác",
+        "EMPLOYMENT_CONTRACT": "Hợp đồng lao động",
+        "CONFIDENTIALITY_AGREEMENT": "Hợp đồng bảo mật",
+        "LEASE_AGREEMENT": "Hợp đồng thuê",
+        "OTHER": "Khác"
+      },
+      "statuses": {
+        "DRAFT": "Nháp",
+        "PENDING_REVIEW": "Chờ duyệt",
+        "APPROVED": "Đã duyệt",
+        "ACTIVE": "Đang hiệu lực",
+        "EXPIRED": "Hết hạn",
+        "TERMINATED": "Đã chấm dứt",
+        "ARCHIVED": "Đã lưu trữ"
+      },
+      "tags": {
+        "LEASE_AGREEMENT": "Hợp đồng thuê",
+        "SERVICE_AGREEMENT": "Hợp đồng dịch vụ",
+        "PURCHASE_AGREEMENT": "Hợp đồng mua bán",
+        "PARTNERSHIP_AGREEMENT": "Hợp đồng đối tác",
+        "EMPLOYMENT_CONTRACT": "Hợp đồng lao động",
+        "CONFIDENTIALITY_AGREEMENT": "Hợp đồng bảo mật",
+        "OTHER": "Khác",
+        "Real Estate": "Bất động sản",
+        "Office Rental": "Thuê văn phòng",
+        "Landmark": "Tòa nhà Landmark",
+        "IT": "Công nghệ thông tin",
+        "Software Development": "Phát triển phần mềm",
+        "Maintenance": "Bảo trì",
+        "Logistics": "Hậu cần",
+        "Transportation": "Vận tải",
+        "Delivery": "Giao hàng"
+      }
+    },
+    "common": {
+      "save": "Lưu",
+      "cancel": "Hủy",
+      "delete": "Xóa",
+      "edit": "Chỉnh sửa",
+      "view": "Xem",
+      "create": "Tạo mới",
+      "update": "Cập nhật",
+      "search": "Tìm kiếm",
+      "filter": "Lọc",
+      "sort": "Sắp xếp",
+      "loading": "Đang tải...",
+      "error": "Có lỗi xảy ra",
+      "success": "Thành công",
+      "confirm": "Xác nhận",
+      "yes": "Có",
+      "no": "Không",
+      "close": "Đóng",
+      "back": "Quay lại",
+      "next": "Tiếp theo",
+      "previous": "Trước đó",
+      "submit": "Gửi",
+      "reset": "Đặt lại",
+      "clear": "Xóa",
+      "select": "Chọn",
+      "all": "Tất cả",
+      "none": "Không có",
+      "required": "Bắt buộc",
+      "optional": "Tùy chọn",
+      "total": "Tổng cộng",
+      "page": "Trang",
+      "of": "của",
+      "items": "mục",
+      "perPage": "mỗi trang",
+      "clickToViewDetails": "Nhấp để xem chi tiết"
+    },
+    "validation": {
+      "required": "Trường này là bắt buộc",
+      "email": "Email không hợp lệ",
+      "minLength": "Tối thiểu {{count}} ký tự",
+      "maxLength": "Tối đa {{count}} ký tự",
+      "passwordMatch": "Mật khẩu không khớp"
+    },
+    "profile": {
+      "title": "Hồ sơ cá nhân",
+      "subtitle": "Quản lý thông tin cá nhân và cài đặt tài khoản",
+      "tabs": {
+        "personal": "Thông tin cá nhân",
+        "avatar": "Ảnh đại diện",
+        "settings": "Cài đặt",
+        "stats": "Thống kê"
+      },
+      "personalInfo": {
+        "title": "Thông tin cá nhân",
+        "description": "Cập nhật thông tin cá nhân của bạn",
+        "form": {
+          "firstName": "Tên",
+          "lastName": "Họ",
+          "email": "Email",
+          "phone": "Số điện thoại",
+          "position": "Chức vụ",
+          "department": "Phòng ban",
+          "company": "Công ty",
+          "address": "Địa chỉ",
+          "bio": "Giới thiệu bản thân",
+          "birthDate": "Ngày sinh",
+          "gender": "Giới tính",
+          "nationality": "Quốc tịch",
+          "language": "Ngôn ngữ ưa thích",
+          "timezone": "Múi giờ"
+        },
+        "genders": {
+          "male": "Nam",
+          "female": "Nữ",
+          "other": "Khác",
+          "preferNotToSay": "Không muốn nói"
+        }
+      },
+      "avatar": {
+        "title": "Ảnh đại diện",
+        "description": "Tải lên và quản lý ảnh đại diện của bạn",
+        "current": "Ảnh hiện tại",
+        "upload": "Tải lên ảnh mới",
+        "remove": "Xóa ảnh",
+        "change": "Thay đổi ảnh",
+        "requirements": "Yêu cầu: JPG, PNG hoặc GIF. Tối đa 5MB. Kích thước khuyến nghị: 400x400px",
+        "preview": "Xem trước"
+      },
+      "settings": {
+        "title": "Cài đặt tài khoản",
+        "description": "Quản lý cài đặt bảo mật và thông báo",
+        "security": {
+          "title": "Bảo mật",
+          "changePassword": "Đổi mật khẩu",
+          "twoFactor": "Xác thực hai yếu tố",
+          "loginHistory": "Lịch sử đăng nhập",
+          "activeSessions": "Phiên đăng nhập hiện tại"
+        },
+        "notifications": {
+          "title": "Thông báo",
+          "email": "Email",
+          "push": "Thông báo đẩy",
+          "sms": "SMS",
+          "contractUpdates": "Cập nhật hợp đồng",
+          "approvalRequests": "Yêu cầu phê duyệt",
+          "systemAlerts": "Cảnh báo hệ thống",
+          "weeklyDigest": "Tóm tắt hàng tuần"
+        },
+        "privacy": {
+          "title": "Quyền riêng tư",
+          "profileVisibility": "Hiển thị hồ sơ",
+          "activityStatus": "Trạng thái hoạt động",
+          "dataSharing": "Chia sẻ dữ liệu"
+        }
+      },
+      "stats": {
+        "title": "Thống kê hoạt động",
+        "description": "Xem thống kê hoạt động và hiệu suất của bạn",
+        "overview": {
+          "title": "Tổng quan",
+          "totalContracts": "Tổng hợp đồng",
+          "pendingApprovals": "Chờ phê duyệt",
+          "completedTasks": "Nhiệm vụ hoàn thành",
+          "activeProjects": "Dự án đang hoạt động"
+        },
+        "activity": {
+          "title": "Hoạt động gần đây",
+          "lastLogin": "Đăng nhập cuối",
+          "documentsUploaded": "Tài liệu đã tải lên",
+          "contractsCreated": "Hợp đồng đã tạo",
+          "approvalsProcessed": "Phê duyệt đã xử lý"
+        },
+        "performance": {
+          "title": "Hiệu suất",
+          "responseTime": "Thời gian phản hồi",
+          "completionRate": "Tỷ lệ hoàn thành",
+          "accuracy": "Độ chính xác",
+          "efficiency": "Hiệu quả"
+        }
+      },
+      "actions": {
+        "save": "Lưu thay đổi",
+        "cancel": "Hủy",
+        "edit": "Chỉnh sửa",
+        "upload": "Tải lên",
+        "remove": "Xóa",
+        "change": "Thay đổi",
+        "update": "Cập nhật",
+        "reset": "Đặt lại",
+        "enable": "Bật",
+        "disable": "Tắt"
+      },
+      "messages": {
+        "saveSuccess": "Thông tin đã được cập nhật thành công",
+        "saveError": "Có lỗi xảy ra khi cập nhật thông tin",
+        "uploadSuccess": "Ảnh đã được tải lên thành công",
+        "uploadError": "Có lỗi xảy ra khi tải lên ảnh",
+        "removeSuccess": "Ảnh đã được xóa thành công",
+        "removeError": "Có lỗi xảy ra khi xóa ảnh",
+        "passwordChanged": "Mật khẩu đã được thay đổi thành công",
+        "passwordError": "Có lỗi xảy ra khi thay đổi mật khẩu",
+        "settingsUpdated": "Cài đặt đã được cập nhật thành công",
+        "settingsError": "Có lỗi xảy ra khi cập nhật cài đặt"
+      }
+    },
+    "userManagement": {
+      "title": "Quản lý người dùng",
+      "subtitle": "Tạo, chỉnh sửa, tạm dừng và quản lý quyền người dùng",
+      "searchAndFilter": "Tìm kiếm & Lọc",
+      "addUser": "Thêm người dùng",
+      "search": "Tìm",
+      "clearSelection": "Xóa lựa chọn",
+      "selected": "đã chọn",
+      "activate": "Kích hoạt",
+      "deactivate": "Vô hiệu hóa",
+      "delete": "Xóa",
+      "allRoles": "Tất cả vai trò",
+      "allStatuses": "Tất cả trạng thái",
+      "table": {
+        "name": "Tên",
+        "email": "Email",
+        "role": "Vai trò",
+        "status": "Trạng thái",
+        "createdAt": "Ngày tạo",
+        "lastLogin": "Lần đăng nhập cuối",
+        "actions": "Thao tác"
+      },
+      "roles": {
+        "ADMIN": "Quản trị viên",
+        "MANAGER": "Quản lý",
+        "STAFF": "Nhân viên",
+        "USER": "Người dùng",
+        "VIEWER": "Người xem"
+      },
+      "statuses": {
+        "ACTIVE": "Hoạt động",
+        "INACTIVE": "Không hoạt động",
+        "PENDING": "Chờ duyệt",
+        "SUSPENDED": "Tạm dừng"
+      },
+      "modals": {
+        "createUser": "Thêm người dùng mới",
+        "editUser": "Chỉnh sửa người dùng",
+        "createUserButton": "Tạo người dùng",
+        "updateButton": "Cập nhật",
+        "name": "Tên",
+        "email": "Email",
+        "role": "Vai trò",
+        "status": "Trạng thái",
+        "department": "Phòng ban"
+      },
+      "placeholders": {
+        "nameEmail": "Tên / Email",
+        "enterName": "Nhập tên người dùng",
+        "enterEmail": "Nhập email",
+        "enterDepartment": "Nhập phòng ban"
+      },
+      "messages": {
+        "loadError": "Lỗi tải người dùng",
+        "neverLoggedIn": "Chưa đăng nhập"
+      }
+    }
+  }

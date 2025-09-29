@@ -463,6 +463,7 @@ Get-ChildItem
 
 ---
 
+<<<<<<< HEAD
 **Mục tiêu**: Đảm bảo 100% terminal commands chạy thành công trên Windows PowerShell environment của Cursor IDE mà không bị kẹt trong pager/editor.
 git rebase -i              # Mở editor
 git commit                 # Mở editor
@@ -489,4 +490,6 @@ Get-ChildItem
 
 ---
 
+=======
+>>>>>>> e4f9e590765b2a1b7ce2f3982eff8dae6ecb472e
 **Mục tiêu**: Đảm bảo 100% terminal commands chạy thành công trên Windows PowerShell environment của Cursor IDE mà không bị kẹt trong pager/editor.

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Java Spring Boot .gitignore
 
 # Compiled class files
@@ -77,6 +78,73 @@ bin/
 .vscode/
 
 # OS generated files
+=======
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environment
+venv/
+env/
+ENV/
+.venv/
+.env
+
+# Environment Variables
+.env
+.env.local
+.env.production
+.env.staging
+
+# Logs
+*.log
+logs/
+*.out
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+
+# IDE/Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# OS
+>>>>>>> e4f9e590765b2a1b7ce2f3982eff8dae6ecb472e
 .DS_Store
 .DS_Store?
 ._*
@@ -85,6 +153,7 @@ bin/
 ehthumbs.db
 Thumbs.db
 
+<<<<<<< HEAD
 # Environment files
 .env
 .env.local
@@ -92,19 +161,55 @@ Thumbs.db
 .env.test.local
 .env.production.local
 
+=======
+>>>>>>> e4f9e590765b2a1b7ce2f3982eff8dae6ecb472e
 # Temporary files
 *.tmp
 *.temp
 *.bak
 *.backup
+<<<<<<< HEAD
 
 # Database files
+=======
+temp/
+tmp/
+
+# File Storage specific
+uploads/
+assets/
+storage/
+temp_files/
+cache/
+*.tmp
+*.temp
+
+# Database
+>>>>>>> e4f9e590765b2a1b7ce2f3982eff8dae6ecb472e
 *.db
 *.sqlite
 *.sqlite3
 
+<<<<<<< HEAD
 # Upload/temp directories
 uploads/
 temp/
 tmp/
 results/
+=======
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# pipenv
+Pipfile.lock
+
+# PEP 582
+__pypackages__/
+
+# S3/Filebase cache
+.s3_cache/
+.filebase_cache/
+>>>>>>> e4f9e590765b2a1b7ce2f3982eff8dae6ecb472e
