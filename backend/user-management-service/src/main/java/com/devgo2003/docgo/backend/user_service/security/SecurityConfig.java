@@ -54,6 +54,7 @@ public class SecurityConfig {
             permittedPaths = new String[]{
                 "/",
                 "/docs",
+                "/swagger-ui.html",
                 "/v3/api-docs/**",
                 "/swagger-ui/**",
                 "/api/v1/user-management-service/auth/login",
@@ -70,6 +71,7 @@ public class SecurityConfig {
             permittedPaths = new String[]{
                 "/",
                 "/docs",
+                "/swagger-ui.html",
                 "/v3/api-docs/**",
                 "/swagger-ui/**",
                 "/api/v1/user-management-service/auth/login",

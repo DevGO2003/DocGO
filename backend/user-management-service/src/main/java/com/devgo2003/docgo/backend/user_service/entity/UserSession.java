@@ -53,6 +53,9 @@ public class UserSession {
     @Field("status")
     private SessionStatus status = SessionStatus.ACTIVE;
 
+    @Field("active_organization_id")
+    private String activeOrganizationId;
+
     @Field("created_at")
     @CreatedDate
     private LocalDateTime createdAt;

@@ -150,9 +150,9 @@ export class LoadBalancer {
 
     // Fallback URLs based on service name
     const fallbackUrls: Record<string, string> = {
-      'user-management': 'http://user-management-service:8000',
-      'document-management': 'http://document-management-service:8000',
-      'automation': 'http://automation-service:8000'
+      'user-management': 'http://user-management-service:8001',
+      'document-management': 'http://document-management-service:8002',
+      'automation': 'http://automation-service:8003'
     };
 
     return fallbackUrls[serviceName] || 'http://localhost:8000';

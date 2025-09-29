@@ -2,7 +2,7 @@
 class SimpleLogger {
   private service: string;
 
-  constructor(service: string = 'api-gateway-bff') {
+  constructor(service: string = 'api-gateway') {
     this.service = service;
   }
 

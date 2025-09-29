@@ -10,7 +10,7 @@ class KafkaService {
 
   constructor() {
     const brokers = process.env.KAFKA_BROKERS?.split(',') || ['localhost:9092'];
-    const clientId = process.env.KAFKA_CLIENT_ID || 'api-gateway-bff';
+    const clientId = process.env.KAFKA_CLIENT_ID || 'api-gateway';
     const groupId = process.env.KAFKA_GROUP_ID || 'api-gateway-group';
 
     this.kafka = new Kafka({

@@ -70,6 +70,9 @@ public class User {
     @Field("organization_ids")
     private java.util.List<String> organizationIds;
 
+    @Field("active_organization_id")
+    private String activeOrganizationId;
+
     @Field("created_at")
     @CreatedDate
     private LocalDateTime createdAt;

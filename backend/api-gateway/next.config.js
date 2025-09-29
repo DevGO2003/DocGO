@@ -8,23 +8,23 @@ const nextConfig = {
   },
   // output: 'standalone', // Comment out để tránh conflict trong development mode
   env: {
-    USER_SERVICE_URL: process.env.USER_SERVICE_URL || 'http://user-management-service:8000',
-    DOCUMENT_SERVICE_URL: process.env.DOCUMENT_SERVICE_URL || 'http://document-management-service:8000',
-    AUTOMATION_SERVICE_URL: process.env.AUTOMATION_SERVICE_URL || 'http://automation-service:8000',
+    USER_SERVICE_URL: process.env.USER_MANAGEMENT_SERVICE_URL,
+    DOCUMENT_SERVICE_URL: process.env.DOCUMENT_MANAGEMENT_SERVICE_URL,
+    AUTOMATION_SERVICE_URL: process.env.AUTOMATION_SERVICE_URL,
   },
   async rewrites() {
     return [
       {
         source: '/api/users/:path*',
-        destination: `${process.env.USER_SERVICE_URL || 'http://user-management-service:8000'}/api/v1/user-management-service/users/:path*`,
+        destination: `${process.env.USER_SERVICE_URL || 'http://user-management-service:8001'}/api/v1/user-management-service/users/:path*`,
       },
       {
         source: '/api/documents/:path*',
-        destination: `${process.env.DOCUMENT_SERVICE_URL || 'http://document-management-service:8000'}/api/v1/document-management-service/documents/:path*`,
+        destination: `${process.env.DOCUMENT_SERVICE_URL || 'http://document-management-service:8002'}/api/v1/document-management-service/documents/:path*`,
       },
       {
         source: '/api/automation/:path*',
-        destination: `${process.env.AUTOMATION_SERVICE_URL || 'http://automation-service:8000'}/api/v1/automation-service/:path*`,
+        destination: `${process.env.AUTOMATION_SERVICE_URL || 'http://automation-service:8003'}/api/v1/automation-service/:path*`,
       },
       {
         source: '/api/v1/:path*',

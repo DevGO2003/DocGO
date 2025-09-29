@@ -52,7 +52,7 @@ class EnhancedServiceManager {
     loadBalancer.addService('user-management', [
       {
         id: 'user-mgmt-1',
-        url: process.env.USER_MANAGEMENT_SERVICE_URL || 'http://user-management-service:8000',
+        url: process.env.USER_MANAGEMENT_SERVICE_URL || 'http://user-management-service:8001',
         weight: 1
       }
     ]);
@@ -61,7 +61,7 @@ class EnhancedServiceManager {
     loadBalancer.addService('document-management', [
       {
         id: 'doc-mgmt-1',
-        url: process.env.DOCUMENT_MANAGEMENT_SERVICE_URL || 'http://document-management-service:8000',
+        url: process.env.DOCUMENT_MANAGEMENT_SERVICE_URL || 'http://document-management-service:8002',
         weight: 1
       }
     ]);
@@ -70,7 +70,7 @@ class EnhancedServiceManager {
     loadBalancer.addService('automation', [
       {
         id: 'automation-1',
-        url: process.env.AUTOMATION_SERVICE_URL || 'http://automation-service:8000',
+        url: process.env.AUTOMATION_SERVICE_URL || 'http://automation-service:8003',
         weight: 1
       }
     ]);
@@ -93,7 +93,7 @@ class EnhancedServiceManager {
     // User Management Service với Load Balancing
     this.addService('user-management', {
       name: 'user-management-service',
-      url: selectUrl(process.env.USER_MANAGEMENT_SERVICE_URL, 'http://user-management-service:8000', 'http://localhost:8001'),
+      url: selectUrl(process.env.USER_MANAGEMENT_SERVICE_URL, 'http://user-management-service:8001', 'http://localhost:8001'),
       healthCheck: '/api/v1/user-management-service/auth/health',
       timeout: 10000,
       enableCaching: true,

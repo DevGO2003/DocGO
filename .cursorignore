@@ -1,8 +1,9 @@
 # ===== Cursor bắt buộc theo dõi các thư mục và file cần thiết =====
 
-# Luôn include thư mục git-backup
-!**/.git-backup/
-
+# Luôn include toàn bộ thư mục git-backup và tất cả nội dung bên trong
+!/.git-backup/
+!**/.git-backup/**
+ 
 # Luôn include toàn bộ thư mục .cursor và nội dung bên trong
 !/.cursor
 !**/.cursor/**

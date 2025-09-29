@@ -68,7 +68,7 @@ services:
       - NODE_ENV=development
       - PORT=8000
       - KAFKA_BROKERS=kafka:9092
-      - KAFKA_CLIENT_ID=api-gateway-bff
+      - KAFKA_CLIENT_ID=api-gateway
       - KAFKA_GROUP_ID=api-gateway-group
       - USER_MANAGEMENT_SERVICE_URL=http://host.docker.internal:8002
       - AUTHENTICATION_SERVICE_URL=http://host.docker.internal:8001

@@ -2,6 +2,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { loadBalancer } from '@/lib/loadBalancer';
 import { enhancedServiceManager } from '@/lib/enhancedServiceManager';
 import logger from '@/lib/logger';
+import { withApiHandler } from '@/lib/http/withApiHandler';
 
 /**
  * @swagger
@@ -76,54 +77,39 @@ import logger from '@/lib/logger';
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  try {
-    logger.info('⚖️ Fetching load balancer statistics');
-    
-    const lbStats = loadBalancer.getStats();
-    const healthStatus = await enhancedServiceManager.checkAllServicesHealth();
-    
-    // Kết hợp thống kê load balancer với health status
-    const combinedStats = {
-      loadBalancer: lbStats,
-      healthStatus,
-      timestamp: new Date().toISOString()
-    };
-    
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-    
-    return res.status(200).json({
-      apiVersion: 'v1',
-      statusCode: 200,
-      shortMessage: 'Success',
-      description: 'Load balancer statistics retrieved successfully',
-      data: combinedStats,
-      timestamp: new Date().toISOString(),
-      requestId: `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      path: '/api/loadbalancer/stats'
-    });
-
-  } catch (error: any) {
-    logger.error('❌ Error fetching load balancer stats:', error);
-    
-    return res.status(500).json({
-      apiVersion: 'v1',
-      statusCode: 500,
-      shortMessage: 'Internal Server Error',
-      description: 'Failed to fetch load balancer statistics',
-      data: null,
-      timestamp: new Date().toISOString(),
-      requestId: `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      path: '/api/loadbalancer/stats'
-    });
-  }
+  logger.info('⚖️ Fetching load balancer statistics');
+  
+  const lbStats = loadBalancer.getStats();
+  const healthStatus = await enhancedServiceManager.checkAllServicesHealth();
+  
+  const combinedStats = {
+    loadBalancer: lbStats,
+    healthStatus,
+    timestamp: new Date().toISOString()
+  };
+  
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  
+  return res.status(200).json({
+    apiVersion: 'v1',
+    statusCode: 200,
+    shortMessage: 'Success',
+    description: 'Load balancer statistics retrieved successfully',
+    data: combinedStats,
+    timestamp: new Date().toISOString(),
+    requestId: `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+    path: '/api/loadbalancer/stats'
+  });
 }
+
+export default withApiHandler(handler);
 
 
 

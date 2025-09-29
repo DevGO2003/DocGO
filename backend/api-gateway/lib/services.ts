@@ -1,7 +1,7 @@
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
-import fs from 'fs';
 import { ServiceConfig, RestResponse } from '@/types/index';
 import logger from './logger';
+import { config, getServiceConfig } from './config';
 
 class ServiceManager {
   private services: Map<string, AxiosInstance> = new Map();
@@ -12,49 +12,9 @@ class ServiceManager {
   }
 
   private initializeServices(): void {
-    const isInDocker = (): boolean => {
-      try {
-        return fs.existsSync('/.dockerenv') || (process.env.DOCKERIZED === '1');
-      } catch {
-        return false;
-      }
-    };
-
-    const selectUrl = (envVar: string | undefined, dockerUrl: string, hostUrl: string): string => {
-      if (envVar && envVar.trim().length > 0) return envVar;
-      return isInDocker() ? dockerUrl : hostUrl;
-    };
-
-    // API Gateway (Next.js) - Port 8000
-    this.addService('api-gateway', {
-      name: 'api-gateway',
-      url: process.env.API_GATEWAY_URL || 'http://localhost:8000',
-      healthCheck: '/health',
-      timeout: 10000
-    });
-
-    // User Management Service (Spring Boot) - Port 8001
-    this.addService('user-management', {
-      name: 'user-management-service',
-      url: selectUrl(process.env.USER_MANAGEMENT_SERVICE_URL, 'http://user-management-service:8000', 'http://localhost:8001'),
-      healthCheck: '/api/v1/user-management-service/auth/health',
-      timeout: 10000
-    });
-
-    // Document Management Service (Spring Boot) - Port 8002
-    this.addService('document-management', {
-      name: 'document-management-service',
-      url: selectUrl(process.env.DOCUMENT_MANAGEMENT_SERVICE_URL, 'http://document-management-service:8000', 'http://localhost:8002'),
-      healthCheck: '/actuator/health',
-      timeout: 10000
-    });
-
-    // Automation Service (FastAPI) - Port 8003
-    this.addService('automation', {
-      name: 'automation-service',
-      url: selectUrl(process.env.AUTOMATION_SERVICE_URL, 'http://automation-service:8000', 'http://localhost:8003'),
-      healthCheck: '/health',
-      timeout: 10000
+    // Initialize services using centralized config
+    Object.entries(config.services).forEach(([key, serviceConfig]) => {
+      this.addService(key, serviceConfig);
     });
   }
 

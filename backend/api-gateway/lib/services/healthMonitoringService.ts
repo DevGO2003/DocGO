@@ -27,7 +27,7 @@ class HealthMonitoringService {
 
   private initializeServices(): void {
     // Service URLs - same as in services.ts
-    this.services.set('api-gateway-bff', process.env.API_GATEWAY_BFF_URL || 'http://localhost:8000');
+    this.services.set('api-gateway', process.env.API_GATEWAY_URL || 'http://localhost:8000');
     this.services.set('authentication-identity-service', process.env.AUTH_SERVICE_URL || 'http://localhost:8001');
     this.services.set('contract-management-service', process.env.CONTRACT_SERVICE_URL || 'http://localhost:8002');
     this.services.set('ai-processing-service', process.env.AI_SERVICE_URL || 'http://localhost:8017');
