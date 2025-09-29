@@ -1,32 +1,61 @@
 package com.devgo2003.docgo.backend.user_service.entity;
 
-/**
- * Vai trò người dùng trong hệ thống DocGO
- * Đồng bộ với frontend role system
- */
-public enum Role {
-    /**
-     * Quản trị viên - Có toàn quyền trong hệ thống
-     */
-    ADMIN,
-    /**
-     * Giám đốc - Lãnh đạo cấp cao phê duyệt hợp đồng giá trị lớn
-     */
-    DIRECTOR,
-    /**
-     * Quản lý - Quản lý và phê duyệt hợp đồng
-     */
-    MANAGER,
-    /**
-     * Pháp chế - Chuyên gia pháp lý kiểm tra hợp đồng
-     */
-    LEGAL,
-    /**
-     * Tài chính - Chuyên gia tài chính kiểm tra hợp đồng
-     */
-    FINANCE,
-    /**
-     * Nhân viên - Người dùng cơ bản tải lên hợp đồng
-     */
-    EMPLOYEE
+import lombok.*;
+import lombok.Builder;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
+
+import java.time.LocalDateTime;
+import java.util.Set;
+
+@Document(collection = "roles")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class Role {
+
+    @org.springframework.data.annotation.Id
+    private String id;
+
+    @Field("name")
+    private String name;
+
+    @Field("display_name")
+    private String displayName;
+
+    @Field("description")
+    private String description;
+
+    @Field("parent_role_id")
+    private String parentRoleId;
+
+    @Field("level")
+    private Integer level;
+
+    @Field("is_active")
+    private Boolean isActive = true;
+
+    @Field("is_system")
+    private Boolean isSystem = false;
+
+    @Field("permission_ids")
+    private Set<String> permissionIds;
+
+    @Field("created_at")
+    @CreatedDate
+    private LocalDateTime createdAt;
+
+    @Field("updated_at")
+    @LastModifiedDate
+    private LocalDateTime updatedAt;
+
+    @Field("created_by")
+    private String createdBy;
+
+    @Field("updated_by")
+    private String updatedBy;
 }

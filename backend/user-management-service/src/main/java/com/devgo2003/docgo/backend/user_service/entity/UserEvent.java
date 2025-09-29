@@ -1,6 +1,7 @@
 package com.devgo2003.docgo.backend.user_service.entity;
 
 import lombok.*;
+import lombok.Builder;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -17,7 +18,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class UserEvent extends BaseEntity {
+public class UserEvent {
 
     @org.springframework.data.annotation.Id
     private String id;

@@ -1,7 +1,0 @@
-This is a test contract for multipart form data testing.
-Contract Title: Test Contract
-Parties: Company A and Company B
-Effective Date: 2024-01-01
-Term: 1 year
-Payment: $10,000
-

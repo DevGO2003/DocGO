@@ -14,11 +14,11 @@ import java.util.List;
 public class SwaggerConfig {
 
     @Bean
-    public OpenAPI contractManagementServiceOpenAPI() {
+    public OpenAPI documentManagementServiceOpenAPI() {
         return new OpenAPI()
                 .info(new Info()
-                        .title("Contract Management Service API")
-                        .description("API quản lý hợp đồng - Dịch vụ quản lý hợp đồng của DocGO")
+                        .title("Document Management Service API")
+                        .description("API quản lý tài liệu - Dịch vụ quản lý tài liệu và hợp đồng của DocGO")
                         .version("1.0.0")
                         .contact(new Contact()
                                 .name("DevGO2003")
@@ -32,7 +32,7 @@ public class SwaggerConfig {
                                 .url("http://localhost:8002")
                                 .description("Local Development Server"),
                         new Server()
-                                .url("http://localhost:8002/api/v1/contract-management-service")
+                                .url("http://localhost:8002/api/v1/document-management-service")
                                 .description("API Base URL")
                 ));
     }

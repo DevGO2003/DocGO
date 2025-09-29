@@ -20,7 +20,7 @@ references: []
 commands: []
 owners: ["devgo2003"]
 createdAt: "2025-09-23T00:00:00Z"
-updatedAt: "2025-09-23T00:00:00Z"
+updatedAt: "2025-09-28T00:00:00Z"
 notes: "Luôn nạp để định hướng tổng thể cho agent"
 language: vi
 ---
@@ -68,6 +68,33 @@ Dự án DocGO dùng kiến trúc microservices với các bộ quy tắc tách 
 - Đồng nhất cách viết tài liệu API
 - Tối ưu workflow phát triển/triển khai
 - Bảo mật thông tin nhạy cảm và quản lý Git
+
+## 🏗️ Cấu trúc Microservices
+
+### Danh sách Services và Cấu hình
+
+| Service | Type | Group ID | Artifact ID | Package Structure | Port | Docs |
+|---------|------|----------|-------------|-------------------|------|------|
+| **API Gateway** | Next.js | N/A | `api-gateway` | N/A (Node.js) | 8000 | `/docs` |
+| **User Management** | Spring Boot | `com.devgo2003.docgo.backend` | `user-service` | `com.devgo2003.docgo.backend.user_service` | 8001 | `/docs` |
+| **Document Management** | Spring Boot | `com.devgo2003.docgo.document-management-service` | `document-service` | `com.devgo2003.docgo.document_service` | 8002 | `/docs` |
+| **Automation Service** | FastAPI | N/A | N/A | Python modules | 8003 | `/docs` |
+
+### Quy tắc đặt tên
+
+#### Java (Spring Boot)
+- **Group ID**: `com.devgo2003.docgo.{service-name}` (dùng kebab-case)
+- **Artifact ID**: Viết tắt từ tên microservice (dùng kebab-case)
+- **Package Structure**: Đổi dấu `-` thành `_` trong package structure
+- **Version**: `1.0.0` (khởi đầu), tăng theo semantic versioning
+
+#### Node.js (Next.js)
+- **Package Name**: Tên service (kebab-case)
+- **Version**: `1.0.0` (khởi đầu)
+
+#### Python (FastAPI)
+- **Module Structure**: Tên service (snake_case)
+- **Version**: Trong `requirements.txt` hoặc `pyproject.toml`
 
 ## 📚 Cách sử dụng
 1. Phát triển API mới: xem `api-standards.mdc` và `event-exception-standards.mdc`

@@ -1,5 +1,5 @@
 # Multi-stage build for Spring Boot application
-FROM openjdk:21-jdk-slim AS builder
+FROM eclipse-temurin:21-jdk AS builder
 
 # Thiết lập thư mục làm việc
 WORKDIR /app
@@ -20,7 +20,7 @@ COPY src ./src
 RUN mvn clean package -DskipTests
 
 # Production stage
-FROM openjdk:21-jre-slim AS runner
+FROM eclipse-temurin:21-jre AS runner
 
 # Thiết lập thư mục làm việc
 WORKDIR /app
@@ -29,7 +29,7 @@ WORKDIR /app
 RUN groupadd -r spring && useradd -r -g spring spring
 
 # Copy built JAR from builder stage
-COPY --from=builder /app/target/auth-service-0.0.1-SNAPSHOT.jar app.jar
+COPY --from=builder /app/target/user-service-1.0.0.jar app.jar
 
 # Change ownership to non-root user
 RUN chown spring:spring app.jar

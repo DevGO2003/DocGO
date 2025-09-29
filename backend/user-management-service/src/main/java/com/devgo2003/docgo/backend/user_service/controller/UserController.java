@@ -1,7 +1,6 @@
 package com.devgo2003.docgo.backend.user_service.controller;
 
-import com.devgo2003.docgo.backend.user_service.entity.UserMongo;
-import com.devgo2003.docgo.backend.user_service.entity.UserStatus;
+import com.devgo2003.docgo.backend.user_service.entity.User;
 import com.devgo2003.docgo.backend.user_service.service.UserService;
 import com.devgo2003.docgo.backend.user_service.common.response.RestResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -51,7 +50,7 @@ public class UserController {
         🔹 Đầu ra
         
         📝 data
-        Loại: Page<UserMongo>
+        Loại: Page<User>
         Mô tả: Danh sách người dùng với phân trang
         
         📊 apiVersion
@@ -83,7 +82,7 @@ public class UserController {
         Mô tả: Đường dẫn API được gọi
         """
     )
-    public ResponseEntity<RestResponse<Page<UserMongo>>> getAllUsers(
+    public ResponseEntity<RestResponse<Page<User>>> getAllUsers(
             @Parameter(description = "Số trang (mặc định: 0)") @RequestParam(defaultValue = "0") int pageNumber,
             @Parameter(description = "Kích thước trang (mặc định: 10)") @RequestParam(defaultValue = "10") int pageSize,
             @Parameter(description = "Trường sắp xếp (mặc định: createdAt)") @RequestParam(defaultValue = "createdAt") String sortBy,
@@ -91,9 +90,9 @@ public class UserController {
         
         log.info("Getting all users - pageNumber: {}, pageSize: {}, sortBy: {}, sortDirection: {}", pageNumber, pageSize, sortBy, sortDirection);
         
-        Page<UserMongo> users = userService.getAllUsers(pageNumber, pageSize, sortBy, sortDirection);
+        Page<User> users = userService.getAllUsers(pageNumber, pageSize, sortBy, sortDirection);
         
-        return ResponseEntity.ok(RestResponse.<Page<UserMongo>>builder()
+        return ResponseEntity.ok(RestResponse.<Page<User>>builder()
                 .statusCode(200)
                 .shortMessage("Success")
                 .description("Đã lấy danh sách người dùng thành công")
@@ -114,7 +113,7 @@ public class UserController {
         🔹 Đầu ra
         
         📝 data
-        Loại: UserMongo
+        Loại: User
         Mô tả: Thông tin chi tiết người dùng
         
         📊 apiVersion
@@ -146,13 +145,13 @@ public class UserController {
         Mô tả: Đường dẫn API được gọi
         """
     )
-    public ResponseEntity<RestResponse<UserMongo>> getUserById(
+    public ResponseEntity<RestResponse<User>> getUserById(
             @Parameter(description = "ID người dùng") @PathVariable String id) {
         
         log.info("Getting user by id: {}", id);
         
         return userService.getUserById(id)
-                .map(user -> ResponseEntity.ok(RestResponse.<UserMongo>builder()
+                .map(user -> ResponseEntity.ok(RestResponse.<User>builder()
                         .statusCode(200)
                         .shortMessage("Success")
                         .description("Đã lấy thông tin người dùng thành công")
@@ -161,9 +160,9 @@ public class UserController {
                 .orElse(ResponseEntity.notFound().build());
     }
     
-    @GetMapping("/search")
+    @GetMapping("/search/simple")
     @Operation(
-        summary = "Tìm kiếm người dùng", 
+        summary = "Tìm kiếm người dùng đơn giản", 
         description = """
         🔹 Đầu vào
         
@@ -174,7 +173,7 @@ public class UserController {
         🔹 Đầu ra
         
         📝 data
-        Loại: List<UserMongo>
+        Loại: List<User>
         Mô tả: Danh sách người dùng tìm được
         
         📊 apiVersion
@@ -206,14 +205,14 @@ public class UserController {
         Mô tả: Đường dẫn API được gọi
         """
     )
-    public ResponseEntity<RestResponse<List<UserMongo>>> searchUsers(
+    public ResponseEntity<RestResponse<List<User>>> searchUsersSimple(
             @Parameter(description = "Từ khóa tìm kiếm") @RequestParam String q) {
         
         log.info("Searching users with query: {}", q);
         
-        List<UserMongo> users = userService.searchUsers(q);
+        List<User> users = userService.searchUsers(q);
         
-        return ResponseEntity.ok(RestResponse.<List<UserMongo>>builder()
+        return ResponseEntity.ok(RestResponse.<List<User>>builder()
                 .statusCode(200)
                 .shortMessage("Success")
                 .description("Đã tìm kiếm người dùng thành công")
@@ -228,13 +227,13 @@ public class UserController {
         🔹 Đầu vào
         
         📊 status (bắt buộc, path)
-        Loại: UserStatus
+        Loại: User.UserStatus
         Mô tả: Trạng thái người dùng (ACTIVE, INACTIVE, SUSPENDED, LOCKED)
         
         🔹 Đầu ra
         
         📝 data
-        Loại: List<UserMongo>
+        Loại: List<User>
         Mô tả: Danh sách người dùng theo trạng thái
         
         📊 apiVersion
@@ -266,14 +265,14 @@ public class UserController {
         Mô tả: Đường dẫn API được gọi
         """
     )
-    public ResponseEntity<RestResponse<List<UserMongo>>> getUsersByStatus(
-            @Parameter(description = "Trạng thái người dùng") @PathVariable UserStatus status) {
+    public ResponseEntity<RestResponse<List<User>>> getUsersByStatus(
+            @Parameter(description = "Trạng thái người dùng") @PathVariable User.UserStatus status) {
         
         log.info("Getting users by status: {}", status);
         
-        List<UserMongo> users = userService.getUsersByStatus(status);
+        List<User> users = userService.getUsersByStatus(status);
         
-        return ResponseEntity.ok(RestResponse.<List<UserMongo>>builder()
+        return ResponseEntity.ok(RestResponse.<List<User>>builder()
                 .statusCode(200)
                 .shortMessage("Success")
                 .description("Đã lấy danh sách người dùng theo trạng thái thành công")
@@ -288,13 +287,13 @@ public class UserController {
         🔹 Đầu vào
         
         📝 user (bắt buộc, body)
-        Loại: UserMongo
+        Loại: User
         Mô tả: Thông tin người dùng mới cần tạo
         
         🔹 Đầu ra
         
         📝 data
-        Loại: UserMongo
+        Loại: User
         Mô tả: Thông tin người dùng đã được tạo
         
         📊 apiVersion
@@ -326,14 +325,14 @@ public class UserController {
         Mô tả: Đường dẫn API được gọi
         """
     )
-    public ResponseEntity<RestResponse<UserMongo>> createUser(
-            @Parameter(description = "Thông tin người dùng") @Valid @RequestBody UserMongo user) {
+    public ResponseEntity<RestResponse<User>> createUser(
+            @Parameter(description = "Thông tin người dùng") @Valid @RequestBody User user) {
         
         log.info("Creating new user: {}", user.getUsername());
         
-        UserMongo createdUser = userService.createUser(user);
+        User createdUser = userService.createUser(user);
         
-        return ResponseEntity.ok(RestResponse.<UserMongo>builder()
+        return ResponseEntity.ok(RestResponse.<User>builder()
                 .statusCode(201)
                 .shortMessage("Created")
                 .description("Đã tạo người dùng thành công")
@@ -354,7 +353,7 @@ public class UserController {
         🔹 Đầu ra
         
         📝 data
-        Loại: UserMongo
+        Loại: User
         Mô tả: Thông tin người dùng tìm được
         
         📊 apiVersion
@@ -386,13 +385,13 @@ public class UserController {
         Mô tả: Đường dẫn API được gọi
         """
     )
-    public ResponseEntity<RestResponse<UserMongo>> getUserByUsername(
+    public ResponseEntity<RestResponse<User>> getUserByUsername(
             @Parameter(description = "Username") @PathVariable String username) {
         
         log.info("Getting user by username: {}", username);
         
         return userService.getUserByUsername(username)
-                .map(user -> ResponseEntity.ok(RestResponse.<UserMongo>builder()
+                .map(user -> ResponseEntity.ok(RestResponse.<User>builder()
                         .statusCode(200)
                         .shortMessage("Success")
                         .description("Đã lấy thông tin người dùng thành công")
@@ -414,7 +413,7 @@ public class UserController {
         🔹 Đầu ra
         
         📝 data
-        Loại: List<UserMongo>
+        Loại: List<User>
         Mô tả: Danh sách người dùng có vai trò này
         
         📊 apiVersion
@@ -446,14 +445,14 @@ public class UserController {
         Mô tả: Đường dẫn API được gọi
         """
     )
-    public ResponseEntity<RestResponse<List<UserMongo>>> getUsersByRole(
+    public ResponseEntity<RestResponse<List<User>>> getUsersByRole(
             @Parameter(description = "ID vai trò") @PathVariable String roleId) {
         
         log.info("Getting users by role: {}", roleId);
         
-        List<UserMongo> users = userService.getUsersByRole(roleId);
+        List<User> users = userService.getUsersByRole(roleId);
         
-        return ResponseEntity.ok(RestResponse.<List<UserMongo>>builder()
+        return ResponseEntity.ok(RestResponse.<List<User>>builder()
                 .statusCode(200)
                 .shortMessage("Success")
                 .description("Đã lấy danh sách người dùng theo vai trò thành công")
@@ -472,7 +471,7 @@ public class UserController {
         Mô tả: Từ khóa tìm kiếm
         
         📊 status (tùy chọn, query)
-        Loại: UserStatus
+        Loại: User.UserStatus
         Mô tả: Trạng thái người dùng
         
         🎭 roleId (tùy chọn, query)
@@ -498,7 +497,7 @@ public class UserController {
         🔹 Đầu ra
         
         📝 data
-        Loại: List<UserMongo>
+        Loại: List<User>
         Mô tả: Kết quả tìm kiếm người dùng
         
         📊 apiVersion
@@ -530,9 +529,9 @@ public class UserController {
         Mô tả: Đường dẫn API được gọi
         """
     )
-    public ResponseEntity<RestResponse<List<UserMongo>>> searchUsers(
+    public ResponseEntity<RestResponse<List<User>>> searchUsers(
             @Parameter(description = "Từ khóa tìm kiếm") @RequestParam(required = false) String searchTerm,
-            @Parameter(description = "Trạng thái người dùng") @RequestParam(required = false) UserStatus status,
+            @Parameter(description = "Trạng thái người dùng") @RequestParam(required = false) User.UserStatus status,
             @Parameter(description = "ID vai trò") @RequestParam(required = false) String roleId,
             @Parameter(description = "Số trang (mặc định: 0)") @RequestParam(defaultValue = "0") int pageNumber,
             @Parameter(description = "Kích thước trang (mặc định: 10)") @RequestParam(defaultValue = "10") int pageSize,
@@ -541,9 +540,9 @@ public class UserController {
         
         log.info("Searching users - searchTerm: {}, status: {}, roleId: {}", searchTerm, status, roleId);
         
-        List<UserMongo> users = userService.searchUsers(searchTerm);
+        List<User> users = userService.searchUsers(searchTerm);
         
-        return ResponseEntity.ok(RestResponse.<List<UserMongo>>builder()
+        return ResponseEntity.ok(RestResponse.<List<User>>builder()
                 .statusCode(200)
                 .shortMessage("Success")
                 .description("Đã tìm kiếm người dùng thành công")
@@ -558,7 +557,7 @@ public class UserController {
         🔹 Đầu vào
         
         📊 status (tùy chọn, query)
-        Loại: UserStatus
+        Loại: User.UserStatus
         Mô tả: Trạng thái người dùng cần đếm
         
         🔹 Đầu ra
@@ -597,7 +596,7 @@ public class UserController {
         """
     )
     public ResponseEntity<RestResponse<Long>> countUsers(
-            @Parameter(description = "Trạng thái người dùng") @RequestParam(required = false) UserStatus status) {
+            @Parameter(description = "Trạng thái người dùng") @RequestParam(required = false) User.UserStatus status) {
         
         log.info("Counting users by status: {}", status);
         
@@ -624,7 +623,7 @@ public class UserController {
         🔹 Đầu ra
         
         📝 data
-        Loại: List<UserMongo>
+        Loại: List<User>
         Mô tả: Danh sách người dùng tìm được
         
         📊 apiVersion
@@ -656,14 +655,14 @@ public class UserController {
         Mô tả: Đường dẫn API được gọi
         """
     )
-    public ResponseEntity<RestResponse<List<UserMongo>>> getUsersByIds(
+    public ResponseEntity<RestResponse<List<User>>> getUsersByIds(
             @Parameter(description = "Danh sách ID người dùng") @RequestParam List<String> ids) {
         
         log.info("Getting users by IDs: {}", ids);
         
-        List<UserMongo> users = userService.getAllUsers(0, 1000, "createdAt", "DESC").getContent();
+        List<User> users = userService.getAllUsers(0, 1000, "createdAt", "DESC").getContent();
         
-        return ResponseEntity.ok(RestResponse.<List<UserMongo>>builder()
+        return ResponseEntity.ok(RestResponse.<List<User>>builder()
                 .statusCode(200)
                 .shortMessage("Success")
                 .description("Đã lấy danh sách người dùng theo ID thành công")
@@ -684,7 +683,7 @@ public class UserController {
         🔹 Đầu ra
         
         📝 data
-        Loại: List<UserMongo>
+        Loại: List<User>
         Mô tả: Danh sách người dùng thuộc tổ chức
         
         📊 apiVersion
@@ -716,14 +715,14 @@ public class UserController {
         Mô tả: Đường dẫn API được gọi
         """
     )
-    public ResponseEntity<RestResponse<List<UserMongo>>> getUsersByOrganization(
+    public ResponseEntity<RestResponse<List<User>>> getUsersByOrganization(
             @Parameter(description = "ID tổ chức") @PathVariable String organizationId) {
         
         log.info("Getting users by organization: {}", organizationId);
         
-        List<UserMongo> users = userService.getAllUsers(0, 1000, "createdAt", "DESC").getContent();
+        List<User> users = userService.getAllUsers(0, 1000, "createdAt", "DESC").getContent();
         
-        return ResponseEntity.ok(RestResponse.<List<UserMongo>>builder()
+        return ResponseEntity.ok(RestResponse.<List<User>>builder()
                 .statusCode(200)
                 .shortMessage("Success")
                 .description("Đã lấy danh sách người dùng theo tổ chức thành công")
@@ -742,13 +741,13 @@ public class UserController {
         Mô tả: ID của người dùng cần cập nhật
         
         📝 userDetails (bắt buộc, body)
-        Loại: UserMongo
+        Loại: User
         Mô tả: Thông tin cập nhật cho người dùng
         
         🔹 Đầu ra
         
         📝 data
-        Loại: UserMongo
+        Loại: User
         Mô tả: Thông tin người dùng đã được cập nhật
         
         📊 apiVersion
@@ -780,15 +779,15 @@ public class UserController {
         Mô tả: Đường dẫn API được gọi
         """
     )
-    public ResponseEntity<RestResponse<UserMongo>> updateUser(
+    public ResponseEntity<RestResponse<User>> updateUser(
             @Parameter(description = "ID người dùng") @PathVariable String id,
-            @Parameter(description = "Thông tin cập nhật") @Valid @RequestBody UserMongo userDetails) {
+            @Parameter(description = "Thông tin cập nhật") @Valid @RequestBody User userDetails) {
         
         log.info("Updating user: {}", id);
         
-        UserMongo updatedUser = userService.updateUser(id, userDetails);
+        User updatedUser = userService.updateUser(id, userDetails);
         
-        return ResponseEntity.ok(RestResponse.<UserMongo>builder()
+        return ResponseEntity.ok(RestResponse.<User>builder()
                 .statusCode(200)
                 .shortMessage("Success")
                 .description("Đã cập nhật người dùng thành công")
@@ -807,13 +806,13 @@ public class UserController {
         Mô tả: ID của người dùng cần cập nhật trạng thái
         
         📊 status (bắt buộc, query)
-        Loại: UserStatus
+        Loại: User.UserStatus
         Mô tả: Trạng thái mới (ACTIVE, INACTIVE, SUSPENDED, LOCKED)
         
         🔹 Đầu ra
         
         📝 data
-        Loại: UserMongo
+        Loại: User
         Mô tả: Thông tin người dùng với trạng thái đã cập nhật
         
         📊 apiVersion
@@ -845,15 +844,15 @@ public class UserController {
         Mô tả: Đường dẫn API được gọi
         """
     )
-    public ResponseEntity<RestResponse<UserMongo>> updateUserStatus(
+    public ResponseEntity<RestResponse<User>> updateUserStatus(
             @Parameter(description = "ID người dùng") @PathVariable String id,
-            @Parameter(description = "Trạng thái mới") @RequestParam UserStatus status) {
+            @Parameter(description = "Trạng thái mới") @RequestParam User.UserStatus status) {
         
         log.info("Updating user status: {} to {}", id, status);
         
-        UserMongo updatedUser = userService.updateUserStatus(id, status);
+        User updatedUser = userService.updateUserStatus(id, status);
         
-        return ResponseEntity.ok(RestResponse.<UserMongo>builder()
+        return ResponseEntity.ok(RestResponse.<User>builder()
                 .statusCode(200)
                 .shortMessage("Success")
                 .description("Đã cập nhật trạng thái người dùng thành công")
@@ -878,7 +877,7 @@ public class UserController {
         🔹 Đầu ra
         
         📝 data
-        Loại: UserMongo
+        Loại: User
         Mô tả: Thông tin người dùng với vai trò đã được gán
         
         📊 apiVersion
@@ -910,15 +909,15 @@ public class UserController {
         Mô tả: Đường dẫn API được gọi
         """
     )
-    public ResponseEntity<RestResponse<UserMongo>> assignRoles(
+    public ResponseEntity<RestResponse<User>> assignRoles(
             @Parameter(description = "ID người dùng") @PathVariable String id,
             @Parameter(description = "Danh sách ID vai trò") @RequestBody Set<String> roleIds) {
         
         log.info("Assigning roles to user: {}", id);
         
-        UserMongo updatedUser = userService.assignRoles(id, roleIds);
+        User updatedUser = userService.assignRoles(id, roleIds);
         
-        return ResponseEntity.ok(RestResponse.<UserMongo>builder()
+        return ResponseEntity.ok(RestResponse.<User>builder()
                 .statusCode(200)
                 .shortMessage("Success")
                 .description("Đã gán vai trò cho người dùng thành công")
@@ -943,7 +942,7 @@ public class UserController {
         🔹 Đầu ra
         
         📝 data
-        Loại: UserMongo
+        Loại: User
         Mô tả: Thông tin người dùng với quyền đã được gán
         
         📊 apiVersion
@@ -975,15 +974,15 @@ public class UserController {
         Mô tả: Đường dẫn API được gọi
         """
     )
-    public ResponseEntity<RestResponse<UserMongo>> assignPermissions(
+    public ResponseEntity<RestResponse<User>> assignPermissions(
             @Parameter(description = "ID người dùng") @PathVariable String id,
             @Parameter(description = "Danh sách ID quyền") @RequestBody Set<String> permissionIds) {
         
         log.info("Assigning permissions to user: {}", id);
         
-        UserMongo updatedUser = userService.assignPermissions(id, permissionIds);
+        User updatedUser = userService.assignPermissions(id, permissionIds);
         
-        return ResponseEntity.ok(RestResponse.<UserMongo>builder()
+        return ResponseEntity.ok(RestResponse.<User>builder()
                 .statusCode(200)
                 .shortMessage("Success")
                 .description("Đã gán quyền cho người dùng thành công")
@@ -1008,7 +1007,7 @@ public class UserController {
         🔹 Đầu ra
         
         📝 data
-        Loại: UserMongo
+        Loại: User
         Mô tả: Thông tin người dùng với mật khẩu đã được cập nhật
         
         📊 apiVersion
@@ -1040,15 +1039,15 @@ public class UserController {
         Mô tả: Đường dẫn API được gọi
         """
     )
-    public ResponseEntity<RestResponse<UserMongo>> updatePassword(
+    public ResponseEntity<RestResponse<User>> updatePassword(
             @Parameter(description = "ID người dùng") @PathVariable String id,
             @Parameter(description = "Mật khẩu mới") @RequestParam String newPassword) {
         
         log.info("Updating password for user: {}", id);
         
-        UserMongo updatedUser = userService.updatePassword(id, newPassword);
+        User updatedUser = userService.updatePassword(id, newPassword);
         
-        return ResponseEntity.ok(RestResponse.<UserMongo>builder()
+        return ResponseEntity.ok(RestResponse.<User>builder()
                 .statusCode(200)
                 .shortMessage("Success")
                 .description("Đã đổi mật khẩu thành công")
@@ -1073,7 +1072,7 @@ public class UserController {
         🔹 Đầu ra
         
         📝 data
-        Loại: UserMongo
+        Loại: User
         Mô tả: Thông tin người dùng với 2FA đã được bật
         
         📊 apiVersion
@@ -1105,15 +1104,15 @@ public class UserController {
         Mô tả: Đường dẫn API được gọi
         """
     )
-    public ResponseEntity<RestResponse<UserMongo>> enableTwoFactor(
+    public ResponseEntity<RestResponse<User>> enableTwoFactor(
             @Parameter(description = "ID người dùng") @PathVariable String id,
             @Parameter(description = "Mã bí mật") @RequestParam String secret) {
         
         log.info("Enabling two-factor authentication for user: {}", id);
         
-        UserMongo updatedUser = userService.enableTwoFactor(id, secret);
+        User updatedUser = userService.enableTwoFactor(id, secret);
         
-        return ResponseEntity.ok(RestResponse.<UserMongo>builder()
+        return ResponseEntity.ok(RestResponse.<User>builder()
                 .statusCode(200)
                 .shortMessage("Success")
                 .description("Đã bật xác thực hai yếu tố thành công")
@@ -1134,7 +1133,7 @@ public class UserController {
         🔹 Đầu ra
         
         📝 data
-        Loại: UserMongo
+        Loại: User
         Mô tả: Thông tin người dùng với 2FA đã được tắt
         
         📊 apiVersion
@@ -1166,14 +1165,14 @@ public class UserController {
         Mô tả: Đường dẫn API được gọi
         """
     )
-    public ResponseEntity<RestResponse<UserMongo>> disableTwoFactor(
+    public ResponseEntity<RestResponse<User>> disableTwoFactor(
             @Parameter(description = "ID người dùng") @PathVariable String id) {
         
         log.info("Disabling two-factor authentication for user: {}", id);
         
-        UserMongo updatedUser = userService.disableTwoFactor(id);
+        User updatedUser = userService.disableTwoFactor(id);
         
-        return ResponseEntity.ok(RestResponse.<UserMongo>builder()
+        return ResponseEntity.ok(RestResponse.<User>builder()
                 .statusCode(200)
                 .shortMessage("Success")
                 .description("Đã tắt xác thực hai yếu tố thành công")
@@ -1252,7 +1251,7 @@ public class UserController {
         🔹 Đầu ra
         
         📝 data
-        Loại: List<UserMongo>
+        Loại: List<User>
         Mô tả: Danh sách tài khoản bị khóa do đăng nhập sai nhiều lần
         
         📊 apiVersion
@@ -1284,13 +1283,13 @@ public class UserController {
         Mô tả: Đường dẫn API được gọi
         """
     )
-    public ResponseEntity<RestResponse<List<UserMongo>>> getLockedUsers() {
+    public ResponseEntity<RestResponse<List<User>>> getLockedUsers() {
         
         log.info("Getting locked users");
         
-        List<UserMongo> lockedUsers = userService.getLockedUsers();
+        List<User> lockedUsers = userService.getLockedUsers();
         
-        return ResponseEntity.ok(RestResponse.<List<UserMongo>>builder()
+        return ResponseEntity.ok(RestResponse.<List<User>>builder()
                 .statusCode(200)
                 .shortMessage("Success")
                 .description("Đã lấy danh sách tài khoản bị khóa thành công")

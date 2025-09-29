@@ -2,11 +2,8 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import { useTranslation } from '@/hooks/useTranslation'
-import { hasPageErrors } from '@/hooks/usePageErrors'
-import { LoadingSpinner } from './LoadingSpinner'
-import { AnimatedMenuItem } from './MenuItemAnimation'
 import {
   HomeIcon,
   DocumentTextIcon,
@@ -59,30 +56,6 @@ export default function Sidebar() {
   const { t } = useTranslation()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const pathname = usePathname()
-  const router = useRouter()
-  const [showAll, setShowAll] = useState(false)
-  const [clickedItem, setClickedItem] = useState<string | null>(null)
-  const visibleItems = showAll ? navigation : navigation.slice(0, 6)
-
-  const handleMenuClick = (href: string, nameKey: string) => {
-    // Nếu đang ở trang hiện tại, không làm gì
-    if (pathname === href) return
-    
-    // Set clicked item để hiển thị loading animation
-    setClickedItem(nameKey)
-    
-    // Đóng sidebar mobile nếu đang mở
-    setSidebarOpen(false)
-    
-    // Navigate sau một chút delay để animation kịp hiển thị
-    setTimeout(() => {
-      router.push(href)
-      // Reset clicked item sau khi navigate
-      setTimeout(() => {
-        setClickedItem(null)
-      }, 1000)
-    }, 100)
-  }
 
   return (
     <>
@@ -103,38 +76,22 @@ export default function Sidebar() {
               <XMarkIcon className="h-6 w-6" />
             </button>
           </div>
-          <nav className="flex-1 space-y-1 px-2 py-4 overflow-y-auto">
-            {visibleItems.map((item) => {
+          <nav className="flex-1 space-y-1 px-2 py-4">
+            {navigation.map((item) => {
               const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
-              const hasErrors = hasPageErrors(item.href)
-              const isClicked = clickedItem === item.nameKey
-              
               return (
-                <AnimatedMenuItem
+                <Link
                   key={item.nameKey}
-                  icon={item.icon}
-                  label={t(item.nameKey)}
-                  isLoading={isClicked}
-                  onClick={() => handleMenuClick(item.href, item.nameKey)}
-                  disabled={isClicked}
-                  isActive={isActive}
-                  hasError={hasErrors}
-                  className="sidebar-item"
-                />
+                  href={item.href}
+                  className={`sidebar-item ${isActive ? 'active' : ''}`}
+                  onClick={() => setSidebarOpen(false)}
+                >
+                  <item.icon className="h-5 w-5" />
+                  <span className="ml-3">{t(item.nameKey)}</span>
+                </Link>
               )
             })}
           </nav>
-          {navigation.length > 6 && (
-            <div className="px-2 py-3 border-t border-gray-100">
-              <button
-                type="button"
-                className="w-full text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md px-3 py-2"
-                onClick={() => setShowAll((v) => !v)}
-              >
-                {showAll ? 'Thu gọn' : 'Xem thêm'}
-              </button>
-            </div>
-          )}
         </div>
       </div>
 
@@ -145,38 +102,21 @@ export default function Sidebar() {
             <DocumentTextIcon className="h-8 w-8 text-primary-600" />
             <span className="ml-2 text-xl font-bold text-gray-900">DocGO</span>
           </div>
-          <nav className="flex-1 space-y-1 px-2 py-4 overflow-y-auto">
-            {visibleItems.map((item) => {
+          <nav className="flex-1 space-y-1 px-2 py-4">
+            {navigation.map((item) => {
               const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
-              const hasErrors = hasPageErrors(item.href)
-              const isClicked = clickedItem === item.nameKey
-              
               return (
-                <AnimatedMenuItem
+                <Link
                   key={item.nameKey}
-                  icon={item.icon}
-                  label={t(item.nameKey)}
-                  isLoading={isClicked}
-                  onClick={() => handleMenuClick(item.href, item.nameKey)}
-                  disabled={isClicked}
-                  isActive={isActive}
-                  hasError={hasErrors}
-                  className="sidebar-item"
-                />
+                  href={item.href}
+                  className={`sidebar-item ${isActive ? 'active' : ''}`}
+                >
+                  <item.icon className="h-5 w-5" />
+                  <span className="ml-3">{t(item.nameKey)}</span>
+                </Link>
               )
             })}
           </nav>
-          {navigation.length > 6 && (
-            <div className="px-2 py-3 border-t border-gray-100">
-              <button
-                type="button"
-                className="w-full text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md px-3 py-2"
-                onClick={() => setShowAll((v) => !v)}
-              >
-                {showAll ? 'Thu gọn' : 'Xem thêm'}
-              </button>
-            </div>
-          )}
         </div>
       </div>
 

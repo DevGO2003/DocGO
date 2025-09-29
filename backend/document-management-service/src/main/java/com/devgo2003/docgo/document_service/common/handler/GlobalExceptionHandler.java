@@ -13,6 +13,8 @@ import com.devgo2003.docgo.document_service.common.exception.ResourceNotFoundExc
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -21,6 +23,8 @@ import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+    
+    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
         @ExceptionHandler(NoContentException.class)
         public ResponseEntity<RestResponse<Void>> handleNoContentException(NoContentException ex,
@@ -121,11 +125,18 @@ public class GlobalExceptionHandler {
 
         @ExceptionHandler(Exception.class)
         public ResponseEntity<RestResponse<Void>> handleAllExceptions(Exception ex, HttpServletRequest request) {
+                // Sanitize error message to prevent information leakage
+                String sanitizedMessage = sanitizeErrorMessage(ex.getMessage());
+                
+                // Log full error details for debugging (with limited stacktrace)
+                log.error("Unexpected error occurred: {} - Request: {} {}", 
+                         sanitizedMessage, request.getMethod(), request.getRequestURI(), ex);
+                
                 RestResponse<Void> response = RestResponse.<Void>builder()
                                 .apiVersion("v1")
                                 .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
                                 .shortMessage("Internal Server Error")
-                                .description("An unexpected error occurred: " + ex.getMessage())
+                                .description("An unexpected error occurred. Please try again later.")
                                 .data(null)
                                 .timestamp(ZonedDateTime.now())
                                 .requestId(UUID.randomUUID().toString())
@@ -133,5 +144,30 @@ public class GlobalExceptionHandler {
                                 .build();
 
                 return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        
+        /**
+         * Sanitize error message to prevent sensitive information leakage
+         */
+        private String sanitizeErrorMessage(String message) {
+                if (message == null) {
+                        return "Unknown error";
+                }
+                
+                // Remove sensitive patterns
+                String sanitized = message
+                        .replaceAll("(?i)password[=:][^\\s,]+", "password=***")
+                        .replaceAll("(?i)token[=:][^\\s,]+", "token=***")
+                        .replaceAll("(?i)key[=:][^\\s,]+", "key=***")
+                        .replaceAll("(?i)secret[=:][^\\s,]+", "secret=***")
+                        .replaceAll("mongodb://[^@]+@", "mongodb://***:***@")
+                        .replaceAll("mongodb\\+srv://[^@]+@", "mongodb+srv://***:***@");
+                
+                // Limit message length
+                if (sanitized.length() > 200) {
+                        sanitized = sanitized.substring(0, 200) + "...";
+                }
+                
+                return sanitized;
         }
 }

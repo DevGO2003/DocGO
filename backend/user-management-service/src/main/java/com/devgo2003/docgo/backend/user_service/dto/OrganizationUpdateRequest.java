@@ -27,3 +27,9 @@ public class OrganizationUpdateRequest {
     @Size(max = 200, message = "Website không được vượt quá 200 ký tự")
     private String website;
 }
+
+
+
+
+
+

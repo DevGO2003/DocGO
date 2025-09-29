@@ -1,6 +1,6 @@
 package com.devgo2003.docgo.backend.user_service.security;
 
-import com.devgo2003.docgo.backend.user_service.repository.UserMongoRepository;
+import com.devgo2003.docgo.backend.user_service.repository.UserRepository;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -10,9 +10,9 @@ import java.util.Collections;
 
 public class CustomUserDetailsService implements UserDetailsService {
 
-    private final UserMongoRepository userRepository;
+    private final UserRepository userRepository;
 
-    public CustomUserDetailsService(UserMongoRepository userRepository) {
+    public CustomUserDetailsService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 

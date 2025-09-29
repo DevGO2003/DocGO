@@ -1,6 +1,7 @@
 package com.devgo2003.docgo.backend.user_service.entity;
 
 import lombok.*;
+import lombok.Builder;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -17,7 +18,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class UserSession extends BaseEntity {
+public class UserSession {
 
     @org.springframework.data.annotation.Id
     private String id;
@@ -46,6 +47,12 @@ public class UserSession extends BaseEntity {
     @Field("expires_at")
     private LocalDateTime expiresAt;
 
+    @Field("refresh_token")
+    private String refreshToken;
+
+    @Field("status")
+    private SessionStatus status = SessionStatus.ACTIVE;
+
     @Field("created_at")
     @CreatedDate
     private LocalDateTime createdAt;
@@ -53,4 +60,12 @@ public class UserSession extends BaseEntity {
     @Field("updated_at")
     @LastModifiedDate
     private LocalDateTime updatedAt;
+
+    public enum SessionStatus {
+        ACTIVE,
+        EXPIRED,
+        REVOKED,
+        INACTIVE,
+        TERMINATED
+    }
 }

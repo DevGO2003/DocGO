@@ -225,13 +225,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       console.log('[Auth] Fetching current user profile...')
       const res = await authAPI.getProfile()
-      const payload = res.data?.data as any
-      const current: User | null = payload?.user || null
+      const current = res.data?.data as unknown as User
       if (current) {
-        console.log('[Auth] Successfully fetched user profile:', current.email || current.username)
+        console.log('[Auth] Successfully fetched user profile:', current.email)
         setUser(current)
       } else {
-        console.log('[Auth] No user field in response, payload:', payload)
+        console.log('[Auth] No user data in response')
       }
     } catch (error) {
       console.error('[Auth] Error fetching current user:', error)
@@ -322,31 +321,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       setAccessToken(accessToken)
       setTokenData(newTokenData)
-
-      // Store tokens immediately (cookie + localStorage) for middleware compatibility
-      try {
-        TokenManager.storeTokens(newTokenData, user || null)
-      } catch {}
-
-      // Always fetch profile to normalize user fields like Google flow
-      try {
-        const me = await authAPI.getProfile()
-        const apiData = me.data?.data as any
-        if (apiData?.user) {
-          setUser(apiData.user as User)
-          return true
-        }
-      } catch (e) {
-        console.warn('Fetching profile after login failed:', e)
-      }
-
-      // Fallback to user from login response if present
+      // Prefer server user; if missing, fetch profile before considering success
       if (user) {
-        setUser(user as unknown as User)
+        setUser(user)
         return true
       }
 
-      // As a last resort, fail gracefully and clear
+      try {
+        const me = await authAPI.getProfile()
+        const current = me.data?.data as unknown as User
+        if (current) {
+          setUser(current)
+          return true
+        }
+      } catch (e) {
+        // fall through to failure handling below
+        console.warn('Login succeeded but fetching profile failed:', e)
+      }
+
+      // If we cannot obtain user info, treat as failed to prevent redirect loop
       setAccessToken(null)
       setTokenData(null)
       setUser(null)

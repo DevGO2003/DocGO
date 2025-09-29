@@ -1,7 +1,6 @@
 package com.devgo2003.docgo.backend.user_service.controller;
 
-import com.devgo2003.docgo.backend.user_service.entity.SessionMongo;
-import com.devgo2003.docgo.backend.user_service.entity.SessionStatus;
+import com.devgo2003.docgo.backend.user_service.entity.UserSession;
 import com.devgo2003.docgo.backend.user_service.service.SessionService;
 import com.devgo2003.docgo.backend.user_service.common.response.RestResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -49,7 +48,7 @@ public class SessionController {
         🔹 Đầu ra
         
         📝 data
-        Loại: Page<SessionMongo>
+        Loại: Page<UserSession>
         Mô tả: Danh sách phiên đăng nhập với phân trang
         
         📊 apiVersion
@@ -81,7 +80,7 @@ public class SessionController {
         Mô tả: Đường dẫn API được gọi
         """
     )
-    public ResponseEntity<RestResponse<Page<SessionMongo>>> getAllSessions(
+    public ResponseEntity<RestResponse<Page<UserSession>>> getAllSessions(
             @Parameter(description = "Số trang (mặc định: 0)") @RequestParam(defaultValue = "0") int pageNumber,
             @Parameter(description = "Kích thước trang (mặc định: 10)") @RequestParam(defaultValue = "10") int pageSize,
             @Parameter(description = "Trường sắp xếp (mặc định: createdAt)") @RequestParam(defaultValue = "createdAt") String sortBy,
@@ -89,9 +88,9 @@ public class SessionController {
         
         log.info("Getting all sessions - pageNumber: {}, pageSize: {}, sortBy: {}, sortDirection: {}", pageNumber, pageSize, sortBy, sortDirection);
         
-        Page<SessionMongo> sessions = sessionService.getAllSessions(pageNumber, pageSize, sortBy, sortDirection);
+        Page<UserSession> sessions = sessionService.getAllSessions(pageNumber, pageSize, sortBy, sortDirection);
         
-        return ResponseEntity.ok(RestResponse.<Page<SessionMongo>>builder()
+        return ResponseEntity.ok(RestResponse.<Page<UserSession>>builder()
                 .statusCode(200)
                 .shortMessage("Success")
                 .description("Đã lấy danh sách phiên đăng nhập thành công")
@@ -112,7 +111,7 @@ public class SessionController {
         🔹 Đầu ra
         
         📝 data
-        Loại: SessionMongo
+        Loại: UserSession
         Mô tả: Thông tin chi tiết phiên đăng nhập
         
         📊 apiVersion
@@ -144,13 +143,13 @@ public class SessionController {
         Mô tả: Đường dẫn API được gọi
         """
     )
-    public ResponseEntity<RestResponse<SessionMongo>> getSessionById(
+    public ResponseEntity<RestResponse<UserSession>> getSessionById(
             @Parameter(description = "ID phiên đăng nhập") @PathVariable String id) {
         
         log.info("Getting session by id: {}", id);
         
         return sessionService.getSessionById(id)
-                .map(session -> ResponseEntity.ok(RestResponse.<SessionMongo>builder()
+                .map(session -> ResponseEntity.ok(RestResponse.<UserSession>builder()
                         .statusCode(200)
                         .shortMessage("Success")
                         .description("Đã lấy thông tin phiên đăng nhập thành công")
@@ -172,7 +171,7 @@ public class SessionController {
         🔹 Đầu ra
         
         📝 data
-        Loại: SessionMongo
+        Loại: UserSession
         Mô tả: Thông tin phiên đăng nhập tìm được
         
         📊 apiVersion
@@ -204,13 +203,13 @@ public class SessionController {
         Mô tả: Đường dẫn API được gọi
         """
     )
-    public ResponseEntity<RestResponse<SessionMongo>> getSessionByToken(
+    public ResponseEntity<RestResponse<UserSession>> getSessionByToken(
             @Parameter(description = "Session token") @PathVariable String sessionToken) {
         
         log.info("Getting session by token: {}", sessionToken);
         
         return sessionService.getSessionByToken(sessionToken)
-                .map(session -> ResponseEntity.ok(RestResponse.<SessionMongo>builder()
+                .map(session -> ResponseEntity.ok(RestResponse.<UserSession>builder()
                         .statusCode(200)
                         .shortMessage("Success")
                         .description("Đã lấy thông tin phiên đăng nhập thành công")
@@ -226,13 +225,13 @@ public class SessionController {
         🔹 Đầu vào
         
         📊 status (bắt buộc, path)
-        Loại: SessionStatus
+        Loại: UserSession.SessionStatus
         Mô tả: Trạng thái phiên đăng nhập (ACTIVE, EXPIRED, TERMINATED)
         
         🔹 Đầu ra
         
         📝 data
-        Loại: List<SessionMongo>
+        Loại: List<UserSession>
         Mô tả: Danh sách phiên đăng nhập theo trạng thái
         
         📊 apiVersion
@@ -264,14 +263,14 @@ public class SessionController {
         Mô tả: Đường dẫn API được gọi
         """
     )
-    public ResponseEntity<RestResponse<List<SessionMongo>>> getSessionsByStatus(
-            @Parameter(description = "Trạng thái phiên đăng nhập") @PathVariable SessionStatus status) {
+    public ResponseEntity<RestResponse<List<UserSession>>> getSessionsByStatus(
+            @Parameter(description = "Trạng thái phiên đăng nhập") @PathVariable UserSession.SessionStatus status) {
         
         log.info("Getting sessions by status: {}", status);
         
-        List<SessionMongo> sessions = sessionService.getSessionsByStatus(status);
+        List<UserSession> sessions = sessionService.getSessionsByStatus(status);
         
-        return ResponseEntity.ok(RestResponse.<List<SessionMongo>>builder()
+        return ResponseEntity.ok(RestResponse.<List<UserSession>>builder()
                 .statusCode(200)
                 .shortMessage("Success")
                 .description("Đã lấy danh sách phiên đăng nhập theo trạng thái thành công")
@@ -292,7 +291,7 @@ public class SessionController {
         🔹 Đầu ra
         
         📝 data
-        Loại: List<SessionMongo>
+        Loại: List<UserSession>
         Mô tả: Danh sách phiên đăng nhập từ IP này
         
         📊 apiVersion
@@ -324,14 +323,14 @@ public class SessionController {
         Mô tả: Đường dẫn API được gọi
         """
     )
-    public ResponseEntity<RestResponse<List<SessionMongo>>> getSessionsByIp(
+    public ResponseEntity<RestResponse<List<UserSession>>> getSessionsByIp(
             @Parameter(description = "Địa chỉ IP") @PathVariable String ipAddress) {
         
         log.info("Getting sessions by IP: {}", ipAddress);
         
-        List<SessionMongo> sessions = sessionService.getSessionsByIpAddress(ipAddress);
+        List<UserSession> sessions = sessionService.getSessionsByIpAddress(ipAddress);
         
-        return ResponseEntity.ok(RestResponse.<List<SessionMongo>>builder()
+        return ResponseEntity.ok(RestResponse.<List<UserSession>>builder()
                 .statusCode(200)
                 .shortMessage("Success")
                 .description("Đã lấy danh sách phiên đăng nhập theo IP thành công")
@@ -352,7 +351,7 @@ public class SessionController {
         🔹 Đầu ra
         
         📝 data
-        Loại: List<SessionMongo>
+        Loại: List<UserSession>
         Mô tả: Danh sách phiên đăng nhập từ thiết bị này
         
         📊 apiVersion
@@ -384,14 +383,14 @@ public class SessionController {
         Mô tả: Đường dẫn API được gọi
         """
     )
-    public ResponseEntity<RestResponse<List<SessionMongo>>> getSessionsByDevice(
+    public ResponseEntity<RestResponse<List<UserSession>>> getSessionsByDevice(
             @Parameter(description = "Thông tin thiết bị") @RequestParam String deviceInfo) {
         
         log.info("Getting sessions by device: {}", deviceInfo);
         
-        List<SessionMongo> sessions = sessionService.getSessionsByDevice(deviceInfo);
+        List<UserSession> sessions = sessionService.getSessionsByDevice(deviceInfo);
         
-        return ResponseEntity.ok(RestResponse.<List<SessionMongo>>builder()
+        return ResponseEntity.ok(RestResponse.<List<UserSession>>builder()
                 .statusCode(200)
                 .shortMessage("Success")
                 .description("Đã lấy danh sách phiên đăng nhập theo thiết bị thành công")
@@ -424,7 +423,7 @@ public class SessionController {
         🔹 Đầu ra
         
         📝 data
-        Loại: SessionMongo
+        Loại: UserSession
         Mô tả: Thông tin phiên đăng nhập đã được tạo
         
         📊 apiVersion
@@ -456,7 +455,7 @@ public class SessionController {
         Mô tả: Đường dẫn API được gọi
         """
     )
-    public ResponseEntity<RestResponse<SessionMongo>> createSession(
+    public ResponseEntity<RestResponse<UserSession>> createSession(
             @Parameter(description = "ID người dùng") @RequestParam String userId,
             @Parameter(description = "Thông tin thiết bị") @RequestParam String deviceInfo,
             @Parameter(description = "Địa chỉ IP") @RequestParam String ipAddress,
@@ -464,9 +463,9 @@ public class SessionController {
         
         log.info("Creating new session for user: {}", userId);
         
-        SessionMongo session = sessionService.createSession(userId, deviceInfo, ipAddress, userAgent);
+        UserSession session = sessionService.createSession(userId, deviceInfo, ipAddress, userAgent);
         
-        return ResponseEntity.ok(RestResponse.<SessionMongo>builder()
+        return ResponseEntity.ok(RestResponse.<UserSession>builder()
                 .statusCode(201)
                 .shortMessage("Created")
                 .description("Đã tạo phiên đăng nhập thành công")
@@ -487,7 +486,7 @@ public class SessionController {
         🔹 Đầu ra
         
         📝 data
-        Loại: List<SessionMongo>
+        Loại: List<UserSession>
         Mô tả: Danh sách phiên đăng nhập của người dùng
         
         📊 apiVersion
@@ -519,14 +518,14 @@ public class SessionController {
         Mô tả: Đường dẫn API được gọi
         """
     )
-    public ResponseEntity<RestResponse<List<SessionMongo>>> getUserSessions(
+    public ResponseEntity<RestResponse<List<UserSession>>> getUserSessions(
             @Parameter(description = "ID người dùng") @PathVariable String userId) {
         
         log.info("Getting sessions for user: {}", userId);
         
-        List<SessionMongo> sessions = sessionService.getUserSessions(userId);
+        List<UserSession> sessions = sessionService.getUserSessions(userId);
         
-        return ResponseEntity.ok(RestResponse.<List<SessionMongo>>builder()
+        return ResponseEntity.ok(RestResponse.<List<UserSession>>builder()
                 .statusCode(200)
                 .shortMessage("Success")
                 .description("Đã lấy danh sách phiên đăng nhập của người dùng thành công")
@@ -547,7 +546,7 @@ public class SessionController {
         🔹 Đầu ra
         
         📝 data
-        Loại: List<SessionMongo>
+        Loại: List<UserSession>
         Mô tả: Danh sách phiên đăng nhập đang hoạt động
         
         📊 apiVersion
@@ -579,14 +578,14 @@ public class SessionController {
         Mô tả: Đường dẫn API được gọi
         """
     )
-    public ResponseEntity<RestResponse<List<SessionMongo>>> getActiveUserSessions(
+    public ResponseEntity<RestResponse<List<UserSession>>> getActiveUserSessions(
             @Parameter(description = "ID người dùng") @PathVariable String userId) {
         
         log.info("Getting active sessions for user: {}", userId);
         
-        List<SessionMongo> sessions = sessionService.getActiveUserSessions(userId);
+        List<UserSession> sessions = sessionService.getActiveUserSessions(userId);
         
-        return ResponseEntity.ok(RestResponse.<List<SessionMongo>>builder()
+        return ResponseEntity.ok(RestResponse.<List<UserSession>>builder()
                 .statusCode(200)
                 .shortMessage("Success")
                 .description("Đã lấy danh sách phiên đăng nhập hoạt động của người dùng thành công")
@@ -607,7 +606,7 @@ public class SessionController {
         🔹 Đầu ra
         
         📝 data
-        Loại: SessionMongo
+        Loại: UserSession
         Mô tả: Thông tin phiên đăng nhập đã được cập nhật
         
         📊 apiVersion
@@ -639,14 +638,14 @@ public class SessionController {
         Mô tả: Đường dẫn API được gọi
         """
     )
-    public ResponseEntity<RestResponse<SessionMongo>> updateSessionActivity(
+    public ResponseEntity<RestResponse<UserSession>> updateSessionActivity(
             @Parameter(description = "ID phiên đăng nhập") @PathVariable String id) {
         
         log.info("Updating session activity: {}", id);
         
-        SessionMongo updatedSession = sessionService.updateSessionActivity(id);
+        UserSession updatedSession = sessionService.updateSessionActivity(id);
         
-        return ResponseEntity.ok(RestResponse.<SessionMongo>builder()
+        return ResponseEntity.ok(RestResponse.<UserSession>builder()
                 .statusCode(200)
                 .shortMessage("Success")
                 .description("Đã cập nhật hoạt động phiên đăng nhập thành công")
@@ -665,13 +664,13 @@ public class SessionController {
         Mô tả: ID của phiên đăng nhập cần cập nhật
         
         📊 status (bắt buộc, query)
-        Loại: SessionStatus
+        Loại: UserSession.SessionStatus
         Mô tả: Trạng thái mới (ACTIVE, EXPIRED, TERMINATED)
         
         🔹 Đầu ra
         
         📝 data
-        Loại: SessionMongo
+        Loại: UserSession
         Mô tả: Thông tin phiên đăng nhập với trạng thái đã cập nhật
         
         📊 apiVersion
@@ -703,15 +702,15 @@ public class SessionController {
         Mô tả: Đường dẫn API được gọi
         """
     )
-    public ResponseEntity<RestResponse<SessionMongo>> updateSessionStatus(
+    public ResponseEntity<RestResponse<UserSession>> updateSessionStatus(
             @Parameter(description = "ID phiên đăng nhập") @PathVariable String id,
-            @Parameter(description = "Trạng thái mới") @RequestParam SessionStatus status) {
+            @Parameter(description = "Trạng thái mới") @RequestParam UserSession.SessionStatus status) {
         
         log.info("Updating session status: {} to {}", id, status);
         
-        SessionMongo updatedSession = sessionService.updateSessionStatus(id, status);
+        UserSession updatedSession = sessionService.updateSessionStatus(id, status);
         
-        return ResponseEntity.ok(RestResponse.<SessionMongo>builder()
+        return ResponseEntity.ok(RestResponse.<UserSession>builder()
                 .statusCode(200)
                 .shortMessage("Success")
                 .description("Đã cập nhật trạng thái phiên đăng nhập thành công")
@@ -736,7 +735,7 @@ public class SessionController {
         🔹 Đầu ra
         
         📝 data
-        Loại: SessionMongo
+        Loại: UserSession
         Mô tả: Thông tin phiên đăng nhập đã được gia hạn
         
         📊 apiVersion
@@ -768,15 +767,15 @@ public class SessionController {
         Mô tả: Đường dẫn API được gọi
         """
     )
-    public ResponseEntity<RestResponse<SessionMongo>> extendSession(
+    public ResponseEntity<RestResponse<UserSession>> extendSession(
             @Parameter(description = "ID phiên đăng nhập") @PathVariable String id,
             @Parameter(description = "Số giờ gia hạn") @RequestParam int hours) {
         
         log.info("Extending session: {} by {} hours", id, hours);
         
-        SessionMongo updatedSession = sessionService.extendSession(id, hours);
+        UserSession updatedSession = sessionService.extendSession(id, hours);
         
-        return ResponseEntity.ok(RestResponse.<SessionMongo>builder()
+        return ResponseEntity.ok(RestResponse.<UserSession>builder()
                 .statusCode(200)
                 .shortMessage("Success")
                 .description("Đã gia hạn phiên đăng nhập thành công")

@@ -33,8 +33,8 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/contract-management-service/contracts")
-@Tag(name = "API Quản lý Hợp đồng", description = "Các API để tạo, đọc, cập nhật và xóa hợp đồng trong hệ thống DocGO")
+@RequestMapping("/api/v1/document-management-service/contracts")
+@Tag(name = "APIs Contract Management", description = "APIs để quản lý hợp đồng trong hệ thống DocGO")
 public class ContractController {
 
     private final IContractService contractService;
@@ -46,68 +46,8 @@ public class ContractController {
     }
 
     @Operation(
-        summary = "Lấy danh sách tất cả hợp đồng với cấu trúc response mới", 
-        description = """
-        🔹 Đầu vào
-        
-        📄 pageNumber (tùy chọn, query)
-        Loại: integer
-        Mô tả: Số trang (mặc định: 0).
-        
-        📄 pageSize (tùy chọn, query)
-        Loại: integer
-        Mô tả: Kích thước trang (mặc định: 10).
-        
-        📄 sortBy (tùy chọn, query)
-        Loại: List<String>
-        Mô tả: Danh sách các trường để sắp xếp.
-        
-        📄 sortDirection (tùy chọn, query)
-        Loại: List<String>
-        Mô tả: Hướng sắp xếp (ASC/DESC).
-        
-        📄 searchTerm (tùy chọn, query)
-        Loại: string
-        Mô tả: Từ khóa tìm kiếm trong tiêu đề, tóm tắt, số hợp đồng (mặc định: null).
-        
-        📄 includeDeleted (tùy chọn, query)
-        Loại: boolean
-        Mô tả: Có bao gồm các bản ghi đã xóa hay không (mặc định: false).
-        
-        🔹 Đầu ra
-        
-        📝 data
-        Loại: PaginatedResponse<ContractResponseDto>
-        Mô tả: Danh sách hợp đồng với cấu trúc response mới.
-        
-        📊 apiVersion
-        Loại: string
-        Mô tả: Phiên bản API (v1).
-        
-        🔢 statusCode
-        Loại: integer
-        Mô tả: ma trạng thái HTTP (200: OK).
-        
-        📋 shortMessage
-        Loại: string
-        Mô tả: Thông báo ngắn gọn về kết quả.
-        
-        📖 description
-        Loại: string
-        Mô tả: Mô tả chi tiết về kết quả xử lý.
-        
-        🕒 timestamp
-        Loại: ZonedDateTime
-        Mô tả: Thời gian xử lý yêu cầu.
-        
-        🆔 requestId
-        Loại: string (UUID)
-        Mô tả: Định danh duy nhất của yêu cầu.
-        
-        🛣️ path
-        Loại: string
-        Mô tả: Đường dẫn API được gọi.
-        """
+        summary = "Lấy danh sách hợp đồng", 
+        description = "Lấy danh sách hợp đồng với phân trang, tìm kiếm và sắp xếp"
     )
     @GetMapping
     public ResponseEntity<RestResponse<PaginatedResponse<ContractResponseDto>>> getAllContracts(
@@ -162,48 +102,8 @@ public class ContractController {
     }
 
     @Operation(
-        summary = "Lấy hợp đồng theo ID với cấu trúc response mới", 
-        description = """
-        🔹 Đầu vào
-        
-        🆔 id (bắt buộc, path)
-        Loại: string
-        Mô tả: ID của hợp đồng cần lấy.
-        
-        🔹 Đầu ra
-        
-        📝 data
-        Loại: ContractResponseDto
-        Mô tả: Thông tin hợp đồng với cấu trúc response mới.
-        
-        📊 apiVersion
-        Loại: string
-        Mô tả: Phiên bản API (v1).
-        
-        🔢 statusCode
-        Loại: integer
-        Mô tả: ma trạng thái HTTP (200: OK).
-        
-        📋 shortMessage
-        Loại: string
-        Mô tả: Thông báo ngắn gọn về kết quả.
-        
-        📖 description
-        Loại: string
-        Mô tả: Mô tả chi tiết về kết quả xử lý.
-        
-        🕒 timestamp
-        Loại: ZonedDateTime
-        Mô tả: Thời gian xử lý yêu cầu.
-        
-        🆔 requestId
-        Loại: string (UUID)
-        Mô tả: Định danh duy nhất của yêu cầu.
-        
-        🛣️ path
-        Loại: string
-        Mô tả: Đường dẫn API được gọi.
-        """
+        summary = "Lấy hợp đồng theo ID", 
+        description = "Lấy thông tin chi tiết hợp đồng theo ID"
     )
     @GetMapping("/{id}")
     public ResponseEntity<RestResponse<ContractResponseDto>> getContract(@PathVariable String id) {
@@ -224,47 +124,7 @@ public class ContractController {
 
     @Operation(
         summary = "Tạo hợp đồng mới", 
-        description = """
-        🔹 Đầu vào
-        
-        📄 contract (bắt buộc, body)
-        Loại: ContractCreateRequest
-        Mô tả: Thông tin hợp đồng cần tạo (contractNumber, title, status, partiesJson, startDate, endDate, systemId).
-        
-        🔹 Đầu ra
-        
-        📝 data
-        Loại: Contract
-        Mô tả: Thông tin hợp đồng đã được tạo thành công.
-        
-        📊 apiVersion
-        Loại: string
-        Mô tả: Phiên bản API (v1).
-        
-        🔢 statusCode
-        Loại: integer
-        Mô tả: ma trạng thái HTTP (201: Created).
-        
-        📋 shortMessage
-        Loại: string
-        Mô tả: Thông báo ngắn gọn về kết quả.
-        
-        📖 description
-        Loại: string
-        Mô tả: Mô tả chi tiết về kết quả xử lý.
-        
-        🕒 timestamp
-        Loại: ZonedDateTime
-        Mô tả: Thời gian xử lý yêu cầu.
-        
-        🆔 requestId
-        Loại: string (UUID)
-        Mô tả: Định danh duy nhất của yêu cầu.
-        
-        🛣️ path
-        Loại: string
-        Mô tả: Đường dẫn API được gọi.
-        """,
+        description = "Tạo hợp đồng mới với thông tin được cung cấp",
         requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
             required = true,
             content = @Content(

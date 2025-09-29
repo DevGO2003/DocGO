@@ -1,11 +1,11 @@
 package com.devgo2003.docgo.backend.user_service.dto;
 
-import com.devgo2003.docgo.backend.user_service.entity.OrganizationMongo;
+import com.devgo2003.docgo.backend.user_service.entity.Organization;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -21,15 +21,15 @@ public class OrganizationResponse {
     private String phone;
     private String email;
     private String website;
-    private OrganizationMongo.OrganizationStatus status;
+    private Organization.OrganizationStatus status;
     private String createdBy;
     private String updatedBy;
-    private ZonedDateTime createdAt;
-    private ZonedDateTime updatedAt;
-    private ZonedDateTime deletedAt;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+    private LocalDateTime deletedAt;
     private List<String> userIds;
 
-    public static OrganizationResponse fromEntity(OrganizationMongo organization) {
+    public static OrganizationResponse fromEntity(Organization organization) {
         if (organization == null) {
             return null;
         }
@@ -53,3 +53,5 @@ public class OrganizationResponse {
         return response;
     }
 }
+
+

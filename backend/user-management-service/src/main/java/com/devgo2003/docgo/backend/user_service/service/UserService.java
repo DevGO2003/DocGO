@@ -1,8 +1,7 @@
 package com.devgo2003.docgo.backend.user_service.service;
 
-import com.devgo2003.docgo.backend.user_service.entity.UserMongo;
-import com.devgo2003.docgo.backend.user_service.entity.UserStatus;
-import com.devgo2003.docgo.backend.user_service.repository.UserMongoRepository;
+import com.devgo2003.docgo.backend.user_service.entity.User;
+import com.devgo2003.docgo.backend.user_service.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -22,65 +21,63 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class UserService {
     
-    private final UserMongoRepository userRepository;
+    private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     
-    public UserMongo createUser(UserMongo user) {
+    public User createUser(User user) {
         log.info("Creating new user: {}", user.getUsername());
         
         // Encode password
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         
         // Set default values
-        user.setStatus(UserStatus.ACTIVE);
+        user.setStatus(User.UserStatus.ACTIVE);
         user.setEmailVerified(false);
         user.setTwoFactorEnabled(false);
         user.setLoginAttempts(0);
-        user.setCreatedAt(LocalDateTime.now());
-        user.setUpdatedAt(LocalDateTime.now());
         
         return userRepository.save(user);
     }
     
-    public Optional<UserMongo> getUserById(String id) {
+    public Optional<User> getUserById(String id) {
         return userRepository.findById(id);
     }
     
-    public Optional<UserMongo> getUserByUsername(String username) {
+    public Optional<User> getUserByUsername(String username) {
         return userRepository.findByUsername(username);
     }
     
-    public Optional<UserMongo> getUserByEmail(String email) {
+    public Optional<User> getUserByEmail(String email) {
         return userRepository.findByEmail(email);
     }
     
-    public Optional<UserMongo> getUserByUsernameOrEmail(String usernameOrEmail) {
+    public Optional<User> getUserByUsernameOrEmail(String usernameOrEmail) {
         return userRepository.findByUsernameOrEmail(usernameOrEmail, usernameOrEmail);
     }
     
-    public Page<UserMongo> getAllUsers(int pageNumber, int pageSize, String sortBy, String sortDirection) {
+    public Page<User> getAllUsers(int pageNumber, int pageSize, String sortBy, String sortDirection) {
         Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortBy);
         Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
         return userRepository.findAll(pageable);
     }
     
-    public List<UserMongo> searchUsers(String searchTerm) {
+    public List<User> searchUsers(String searchTerm) {
         return userRepository.findBySearchTerm(searchTerm);
     }
     
-    public List<UserMongo> getUsersByStatus(UserStatus status) {
+    public List<User> getUsersByStatus(User.UserStatus status) {
         return userRepository.findByStatus(status);
     }
     
-    public List<UserMongo> getUsersByRole(String roleId) {
+    public List<User> getUsersByRole(String roleId) {
         return userRepository.findByRoleIdsContaining(roleId);
     }
     
-    public List<UserMongo> getUsersByGroup(String group) {
+    public List<User> getUsersByGroup(String group) {
         return userRepository.findByGroupsContaining(group);
     }
     
-    public UserMongo updateUser(String id, UserMongo userDetails) {
+    public User updateUser(String id, User userDetails) {
         log.info("Updating user: {}", id);
         
         return userRepository.findById(id)
@@ -92,7 +89,6 @@ public class UserService {
                     user.setAvatarUrl(userDetails.getAvatarUrl());
                     user.setStatus(userDetails.getStatus());
                     user.setGroups(userDetails.getGroups());
-                    user.setUpdatedAt(LocalDateTime.now());
                     user.setUpdatedBy(userDetails.getUpdatedBy());
                     
                     return userRepository.save(user);
@@ -100,66 +96,61 @@ public class UserService {
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
     }
     
-    public UserMongo updateUserStatus(String id, UserStatus status) {
+    public User updateUserStatus(String id, User.UserStatus status) {
         log.info("Updating user status: {} to {}", id, status);
         
         return userRepository.findById(id)
                 .map(user -> {
                     user.setStatus(status);
-                    user.setUpdatedAt(LocalDateTime.now());
                     return userRepository.save(user);
                 })
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
     }
     
-    public UserMongo assignRoles(String id, Set<String> roleIds) {
+    public User assignRoles(String id, Set<String> roleIds) {
         log.info("Assigning roles to user: {}", id);
         
         return userRepository.findById(id)
                 .map(user -> {
                     user.setRoleIds(roleIds);
-                    user.setUpdatedAt(LocalDateTime.now());
                     return userRepository.save(user);
                 })
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
     }
     
-    public UserMongo assignPermissions(String id, Set<String> permissionIds) {
+    public User assignPermissions(String id, Set<String> permissionIds) {
         log.info("Assigning permissions to user: {}", id);
         
         return userRepository.findById(id)
                 .map(user -> {
                     user.setPermissionIds(permissionIds);
-                    user.setUpdatedAt(LocalDateTime.now());
                     return userRepository.save(user);
                 })
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
     }
     
-    public UserMongo updatePassword(String id, String newPassword) {
+    public User updatePassword(String id, String newPassword) {
         log.info("Updating password for user: {}", id);
         
         return userRepository.findById(id)
                 .map(user -> {
                     user.setPassword(passwordEncoder.encode(newPassword));
-                    user.setUpdatedAt(LocalDateTime.now());
                     return userRepository.save(user);
                 })
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
     }
     
-    public UserMongo updateLastLogin(String id) {
+    public User updateLastLogin(String id) {
         return userRepository.findById(id)
                 .map(user -> {
                     user.setLastLogin(LocalDateTime.now());
                     user.setLoginAttempts(0);
-                    user.setUpdatedAt(LocalDateTime.now());
                     return userRepository.save(user);
                 })
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
     }
     
-    public UserMongo incrementLoginAttempts(String id) {
+    public User incrementLoginAttempts(String id) {
         return userRepository.findById(id)
                 .map(user -> {
                     int attempts = user.getLoginAttempts() != null ? user.getLoginAttempts() + 1 : 1;
@@ -170,29 +161,26 @@ public class UserService {
                         user.setLockedUntil(LocalDateTime.now().plusMinutes(30));
                     }
                     
-                    user.setUpdatedAt(LocalDateTime.now());
                     return userRepository.save(user);
                 })
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
     }
     
-    public UserMongo enableTwoFactor(String id, String secret) {
+    public User enableTwoFactor(String id, String secret) {
         return userRepository.findById(id)
                 .map(user -> {
                     user.setTwoFactorEnabled(true);
                     user.setTwoFactorSecret(secret);
-                    user.setUpdatedAt(LocalDateTime.now());
                     return userRepository.save(user);
                 })
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
     }
     
-    public UserMongo disableTwoFactor(String id) {
+    public User disableTwoFactor(String id) {
         return userRepository.findById(id)
                 .map(user -> {
                     user.setTwoFactorEnabled(false);
                     user.setTwoFactorSecret(null);
-                    user.setUpdatedAt(LocalDateTime.now());
                     return userRepository.save(user);
                 })
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
@@ -211,11 +199,11 @@ public class UserService {
         return userRepository.existsByEmail(email);
     }
     
-    public List<UserMongo> getLockedUsers() {
+    public List<User> getLockedUsers() {
         return userRepository.findLockedUsers(LocalDateTime.now());
     }
     
-    public List<UserMongo> getUsersByLastLoginBetween(LocalDateTime startDate, LocalDateTime endDate) {
+    public List<User> getUsersByLastLoginBetween(LocalDateTime startDate, LocalDateTime endDate) {
         return userRepository.findByLastLoginBetween(startDate, endDate);
     }
 }

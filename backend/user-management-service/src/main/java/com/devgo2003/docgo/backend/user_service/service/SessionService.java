@@ -1,8 +1,7 @@
 package com.devgo2003.docgo.backend.user_service.service;
 
-import com.devgo2003.docgo.backend.user_service.entity.SessionMongo;
-import com.devgo2003.docgo.backend.user_service.entity.SessionStatus;
-import com.devgo2003.docgo.backend.user_service.repository.SessionMongoRepository;
+import com.devgo2003.docgo.backend.user_service.entity.UserSession;
+import com.devgo2003.docgo.backend.user_service.repository.UserSessionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,7 +21,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class SessionService {
     
-    private final SessionMongoRepository sessionRepository;
+    private final UserSessionRepository sessionRepository;
     
     @Value("${security.jwt.access-ttl-seconds:3600}")
     private long accessTokenTtlSeconds;
@@ -30,98 +29,93 @@ public class SessionService {
     @Value("${security.jwt.refresh-ttl-seconds:2592000}")
     private long refreshTokenTtlSeconds;
     
-    public SessionMongo createSession(String userId, String deviceInfo, String ipAddress, String userAgent) {
+    public UserSession createSession(String userId, String deviceInfo, String ipAddress, String userAgent) {
         log.info("Creating new session for user: {}", userId);
         
         String sessionToken = UUID.randomUUID().toString();
         String refreshToken = UUID.randomUUID().toString();
         
-        SessionMongo session = SessionMongo.builder()
+        UserSession session = UserSession.builder()
                 .userId(userId)
                 .sessionToken(sessionToken)
                 .refreshToken(refreshToken)
                 .deviceInfo(deviceInfo)
                 .ipAddress(ipAddress)
                 .userAgent(userAgent)
-                .status(SessionStatus.ACTIVE)
+                .status(UserSession.SessionStatus.ACTIVE)
                 .expiresAt(LocalDateTime.now().plusSeconds(refreshTokenTtlSeconds)) // 30 days
                 .lastActivity(LocalDateTime.now())
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
                 .build();
         
         return sessionRepository.save(session);
     }
     
-    public Optional<SessionMongo> getSessionById(String id) {
+    public Optional<UserSession> getSessionById(String id) {
         return sessionRepository.findById(id);
     }
     
-    public Optional<SessionMongo> getSessionByToken(String sessionToken) {
+    public Optional<UserSession> getSessionByToken(String sessionToken) {
         return sessionRepository.findBySessionToken(sessionToken);
     }
     
-    public Optional<SessionMongo> getSessionByRefreshToken(String refreshToken) {
+    public Optional<UserSession> getSessionByRefreshToken(String refreshToken) {
         return sessionRepository.findByRefreshToken(refreshToken);
     }
     
-    public List<SessionMongo> getUserSessions(String userId) {
+    public List<UserSession> getUserSessions(String userId) {
         return sessionRepository.findByUserId(userId);
     }
     
-    public List<SessionMongo> getActiveUserSessions(String userId) {
-        return sessionRepository.findByUserIdAndStatus(userId, SessionStatus.ACTIVE);
+    public List<UserSession> getActiveUserSessions(String userId) {
+        return sessionRepository.findByUserIdAndStatus(userId, UserSession.SessionStatus.ACTIVE);
     }
     
-    public Page<SessionMongo> getAllSessions(int pageNumber, int pageSize, String sortBy, String sortDirection) {
+    public Page<UserSession> getAllSessions(int pageNumber, int pageSize, String sortBy, String sortDirection) {
         Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortBy);
         Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
         return sessionRepository.findAll(pageable);
     }
     
-    public List<SessionMongo> getSessionsByStatus(SessionStatus status) {
+    public List<UserSession> getSessionsByStatus(UserSession.SessionStatus status) {
         return sessionRepository.findByStatus(status);
     }
     
-    public List<SessionMongo> getSessionsByIpAddress(String ipAddress) {
-        return sessionRepository.findByIpAddressAndStatus(ipAddress, SessionStatus.ACTIVE);
+    public List<UserSession> getSessionsByIpAddress(String ipAddress) {
+        return sessionRepository.findByIpAddressAndStatus(ipAddress, UserSession.SessionStatus.ACTIVE);
     }
     
-    public List<SessionMongo> getSessionsByDevice(String deviceInfo) {
-        return sessionRepository.findByDeviceInfoAndStatus(deviceInfo, SessionStatus.ACTIVE);
+    public List<UserSession> getSessionsByDevice(String deviceInfo) {
+        return sessionRepository.findByDeviceInfoAndStatus(deviceInfo, UserSession.SessionStatus.ACTIVE);
     }
     
-    public SessionMongo updateSessionActivity(String sessionId) {
+    public UserSession updateSessionActivity(String sessionId) {
         log.info("Updating session activity: {}", sessionId);
         
         return sessionRepository.findById(sessionId)
                 .map(session -> {
                     session.setLastActivity(LocalDateTime.now());
-                    session.setUpdatedAt(LocalDateTime.now());
                     return sessionRepository.save(session);
                 })
                 .orElseThrow(() -> new RuntimeException("Session not found with id: " + sessionId));
     }
     
-    public SessionMongo updateSessionStatus(String sessionId, SessionStatus status) {
+    public UserSession updateSessionStatus(String sessionId, UserSession.SessionStatus status) {
         log.info("Updating session status: {} to {}", sessionId, status);
         
         return sessionRepository.findById(sessionId)
                 .map(session -> {
                     session.setStatus(status);
-                    session.setUpdatedAt(LocalDateTime.now());
                     return sessionRepository.save(session);
                 })
                 .orElseThrow(() -> new RuntimeException("Session not found with id: " + sessionId));
     }
     
-    public SessionMongo extendSession(String sessionId, int hours) {
+    public UserSession extendSession(String sessionId, int hours) {
         log.info("Extending session: {} by {} hours", sessionId, hours);
         
         return sessionRepository.findById(sessionId)
                 .map(session -> {
                     session.setExpiresAt(LocalDateTime.now().plusHours(hours));
-                    session.setUpdatedAt(LocalDateTime.now());
                     return sessionRepository.save(session);
                 })
                 .orElseThrow(() -> new RuntimeException("Session not found with id: " + sessionId));
@@ -132,24 +126,22 @@ public class SessionService {
         
         sessionRepository.findById(sessionId)
                 .ifPresent(session -> {
-                    session.setStatus(SessionStatus.TERMINATED);
-                    session.setUpdatedAt(LocalDateTime.now());
+                    session.setStatus(UserSession.SessionStatus.TERMINATED);
                     sessionRepository.save(session);
                 });
     }
     
     public void terminateUserSessions(String userId) {
         log.info("Terminating all sessions for user: {}", userId);
-        sessionRepository.deleteByUserIdAndStatus(userId, SessionStatus.ACTIVE);
+        sessionRepository.deleteByUserIdAndStatus(userId, UserSession.SessionStatus.ACTIVE);
     }
     
     public void terminateSessionsByIp(String ipAddress) {
         log.info("Terminating sessions by IP: {}", ipAddress);
         
-        List<SessionMongo> sessions = sessionRepository.findByIpAddressAndStatus(ipAddress, SessionStatus.ACTIVE);
+        List<UserSession> sessions = sessionRepository.findByIpAddressAndStatus(ipAddress, UserSession.SessionStatus.ACTIVE);
         sessions.forEach(session -> {
-            session.setStatus(SessionStatus.TERMINATED);
-            session.setUpdatedAt(LocalDateTime.now());
+            session.setStatus(UserSession.SessionStatus.TERMINATED);
             sessionRepository.save(session);
         });
     }
@@ -163,40 +155,39 @@ public class SessionService {
         log.info("Cleaning up inactive sessions older than {} hours", hours);
         
         LocalDateTime threshold = LocalDateTime.now().minusHours(hours);
-        List<SessionMongo> inactiveSessions = sessionRepository.findInactiveSessions(threshold);
+        List<UserSession> inactiveSessions = sessionRepository.findInactiveSessions(threshold);
         
         inactiveSessions.forEach(session -> {
-            session.setStatus(SessionStatus.EXPIRED);
-            session.setUpdatedAt(LocalDateTime.now());
+            session.setStatus(UserSession.SessionStatus.EXPIRED);
             sessionRepository.save(session);
         });
     }
     
     public boolean isSessionValid(String sessionToken) {
-        Optional<SessionMongo> session = sessionRepository.findBySessionToken(sessionToken);
+        Optional<UserSession> session = sessionRepository.findBySessionToken(sessionToken);
         
         if (session.isEmpty()) {
             return false;
         }
         
-        SessionMongo sessionData = session.get();
+        UserSession sessionData = session.get();
         
         // Check if session is active and not expired
-        return sessionData.getStatus() == SessionStatus.ACTIVE &&
+        return sessionData.getStatus() == UserSession.SessionStatus.ACTIVE &&
                sessionData.getExpiresAt().isAfter(LocalDateTime.now());
     }
     
     public boolean isRefreshTokenValid(String refreshToken) {
-        Optional<SessionMongo> session = sessionRepository.findByRefreshToken(refreshToken);
+        Optional<UserSession> session = sessionRepository.findByRefreshToken(refreshToken);
         
         if (session.isEmpty()) {
             return false;
         }
         
-        SessionMongo sessionData = session.get();
+        UserSession sessionData = session.get();
         
         // Check if session is active and not expired
-        return sessionData.getStatus() == SessionStatus.ACTIVE &&
+        return sessionData.getStatus() == UserSession.SessionStatus.ACTIVE &&
                sessionData.getExpiresAt().isAfter(LocalDateTime.now());
     }
     
@@ -205,11 +196,11 @@ public class SessionService {
         sessionRepository.deleteById(sessionId);
     }
     
-    public List<SessionMongo> getExpiredSessions() {
+    public List<UserSession> getExpiredSessions() {
         return sessionRepository.findExpiredSessions(LocalDateTime.now());
     }
     
-    public List<SessionMongo> getInactiveSessions(int hours) {
+    public List<UserSession> getInactiveSessions(int hours) {
         LocalDateTime threshold = LocalDateTime.now().minusHours(hours);
         return sessionRepository.findInactiveSessions(threshold);
     }

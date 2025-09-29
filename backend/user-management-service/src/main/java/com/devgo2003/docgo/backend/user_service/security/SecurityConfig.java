@@ -15,7 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import com.devgo2003.docgo.backend.user_service.repository.UserMongoRepository;
+import com.devgo2003.docgo.backend.user_service.repository.UserRepository;
 import com.devgo2003.docgo.backend.user_service.security.JwtUtil;
 import com.devgo2003.docgo.backend.user_service.security.TokenBlacklist;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -27,12 +27,12 @@ public class SecurityConfig {
 
     private final JwtUtil jwtUtil;
     private final TokenBlacklist tokenBlacklistService;
-    private final UserMongoRepository userRepository;
+    private final UserRepository userRepository;
 
     @Value("${spring.security.oauth2.client.registration.google.client-id:}")
     private String googleClientId;
 
-    public SecurityConfig(UserMongoRepository userRepository, JwtUtil jwtUtil, TokenBlacklist tokenBlacklistService) {
+    public SecurityConfig(UserRepository userRepository, JwtUtil jwtUtil, TokenBlacklist tokenBlacklistService) {
         this.userRepository = userRepository;
         this.jwtUtil = jwtUtil;
         this.tokenBlacklistService = tokenBlacklistService;

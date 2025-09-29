@@ -4,12 +4,15 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.*;
+import lombok.Builder;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Set;
 
 @Document(collection = "users")
 @Getter
@@ -80,6 +83,31 @@ public class User {
 
     @Field("updated_by")
     private String updatedBy;
+
+    // Additional fields for full functionality
+    @Field("role_ids")
+    private Set<String> roleIds;
+
+    @Field("permission_ids")
+    private Set<String> permissionIds;
+
+    @Field("login_attempts")
+    private Integer loginAttempts = 0;
+
+    @Field("two_factor_enabled")
+    private Boolean twoFactorEnabled = false;
+
+    @Field("two_factor_secret")
+    private String twoFactorSecret;
+
+    @Field("avatar_url")
+    private String avatarUrl;
+
+    @Field("groups")
+    private List<String> groups;
+
+    @Field("locked_until")
+    private LocalDateTime lockedUntil;
 
     public enum UserStatus {
         ACTIVE,

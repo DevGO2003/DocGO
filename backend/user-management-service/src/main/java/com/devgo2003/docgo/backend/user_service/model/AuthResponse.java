@@ -1,6 +1,6 @@
 package com.devgo2003.docgo.backend.user_service.model;
 
-import com.devgo2003.docgo.backend.user_service.entity.UserMongo;
+import com.devgo2003.docgo.backend.user_service.entity.User;
 import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -116,9 +116,9 @@ public class AuthResponse {
             this.maxContractValue = maxContractValue;
         }
         
-        // Constructor for UserMongo
+        // Constructor for User
         public UserInfo(String id, String username, String email, String firstName, String lastName, 
-                       Set<String> roleIds, com.devgo2003.docgo.backend.user_service.entity.UserStatus status) {
+                       Set<String> roleIds, User.UserStatus status) {
             this.id = id;
             this.userId = null; // Not applicable for MongoDB
             this.username = username;

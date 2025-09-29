@@ -2,17 +2,13 @@
 
 import React, { useState, useRef } from 'react'
 import { DashboardLayout } from '@/components/layout'
-import ContractSummaryRender from '@/components/ContractSummaryRender'
-import EditableArrayTable from '@/components/EditableArrayTable'
 import { DocumentTextIcon, DocumentMagnifyingGlassIcon, ArrowUpTrayIcon, PlusIcon } from '@heroicons/react/24/outline'
-import { useRouter } from 'next/navigation'
 import { aiProcessingAPI } from '@/lib/api'
 import toast from 'react-hot-toast'
 
 export default function CreateContractPage() {
   // Tab state
-  const [activeTab, setActiveTab] = useState<'ocr' | 'file' | 'manual' | 'summary'>('ocr')
-  const router = useRouter()
+  const [activeTab, setActiveTab] = useState<'ocr' | 'file' | 'manual'>('ocr')
   
   // OCR Tab states
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
@@ -27,9 +23,9 @@ export default function CreateContractPage() {
   
   // File Tab states
   const [selectedRegularFile, setSelectedRegularFile] = useState<File | null>(null)
-    const [fileUploading, setFileUploading] = useState(false)
-    const [dragActive, setDragActive] = useState(false)
-    const [ocrDragActive, setOcrDragActive] = useState(false)
+  const [fileUploading, setFileUploading] = useState(false)
+  const [dragActive, setDragActive] = useState(false)
+  const [ocrDragActive, setOcrDragActive] = useState(false)
   
   // Manual Tab states (existing form states)
   const [title, setTitle] = useState('')
@@ -63,50 +59,6 @@ export default function CreateContractPage() {
   const [responseData, setResponseData] = useState<any>(null)
   const [jsonErrors, setJsonErrors] = useState<{[key: string]: string}>({})
   const [success, setSuccess] = useState(false)
-
-  // Summary tab state (từ AI summarize)
-  const [summaryData, setSummaryData] = useState<any | null>(null)
-  const [summaryJsonText, setSummaryJsonText] = useState<string>('')
-  const [summaryJsonError, setSummaryJsonError] = useState<string>('')
-  const [summarySubmitting, setSummarySubmitting] = useState<boolean>(false)
-
-  const handleSummaryValidate = (value: string) => {
-    if (!value.trim()) {
-      setSummaryJsonError('')
-      return true
-    }
-    try {
-      JSON.parse(value)
-      setSummaryJsonError('')
-      return true
-    } catch (e) {
-      setSummaryJsonError('JSON không hợp lệ. Vui lòng kiểm tra lại cú pháp.')
-      return false
-    }
-  }
-
-  const handleSummarySubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!summaryJsonText.trim()) {
-      toast.error('Vui lòng nhập JSON tóm tắt')
-      return
-    }
-    if (!handleSummaryValidate(summaryJsonText)) {
-      toast.error('JSON tóm tắt không hợp lệ')
-      return
-    }
-
-    try {
-      setSummarySubmitting(true)
-      const parsed = JSON.parse(summaryJsonText)
-      setSummaryData(parsed)
-      toast.success('Đã cập nhật dữ liệu tóm tắt từ JSON')
-    } catch (err: any) {
-      toast.error(`Lỗi: ${err?.message || 'Không thể parse JSON'}`)
-    } finally {
-      setSummarySubmitting(false)
-    }
-  }
   
   // File input refs
   const ocrFileInputRef = useRef<HTMLInputElement>(null)
@@ -129,51 +81,18 @@ export default function CreateContractPage() {
 
     try {
       setOcrLoading(true)
-      // Gọi summarize qua API gateway (multipart/form-data)
-      const summarizeRes = await aiProcessingAPI.summarizeFile(selectedFile, apiKey || undefined)
-      const body = summarizeRes.data
-      const isOk = body && (body.statusCode === 200 || body.statusCode === 201)
-
-      if (isOk) {
-        const data = body.data
-        setSummaryData(data)
-        toast.success(
-          (t) => (
-            <div className="space-y-2">
-              <div className="font-semibold">Đã trích xuất thành công. Bạn muốn làm gì?</div>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => {
-                    toast.dismiss(t.id)
-                    setActiveTab('summary')
-                  }}
-                  className="px-3 py-1 rounded bg-blue-600 text-white text-sm hover:bg-blue-700"
-                >
-                  Chuyển qua tóm tắt hợp đồng
-                </button>
-                <button
-                  onClick={() => {
-                    toast.dismiss(t.id)
-                    router.push('/contracts')
-                  }}
-                  className="px-3 py-1 rounded border text-sm hover:bg-gray-50"
-                >
-                  Đến danh sách hợp đồng
-                </button>
-              </div>
-            </div>
-          ),
-          { duration: 8000 }
-        )
-      } else if (body?.statusCode === 204) {
-        toast('Không có nội dung để tóm tắt', { icon: 'ℹ️' })
+      const response = await aiProcessingAPI.extractText(selectedFile)
+      
+      if (response.data?.data) {
+        setExtractedText(response.data.data)
+        setIsOcrModalOpen(true)
+        toast.success('Trích xuất văn bản thành công!')
       } else {
-        const msg = body?.description || 'Tóm tắt thất bại'
-        toast.error(msg)
+        toast.error('Không thể trích xuất văn bản từ file')
       }
     } catch (error: any) {
       console.error('OCR Error:', error)
-      toast.error(`Lỗi trích xuất: ${error?.response?.data?.description || error.message || 'Có lỗi xảy ra'}`)
+      toast.error(`Lỗi trích xuất: ${error.message || 'Có lỗi xảy ra'}`)
     } finally {
       setOcrLoading(false)
     }
@@ -225,8 +144,8 @@ export default function CreateContractPage() {
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       const file = e.dataTransfer.files[0]
       
-      // Tab OCR nhận PDF, DOC, DOCX, TXT
-      const allowedTypes = ['pdf', 'doc', 'docx', 'txt']
+      // Tab OCR chỉ nhận PDF, DOCX, TXT
+      const allowedTypes = ['pdf', 'docx', 'txt']
       const fileExtension = file.name.split('.').pop()?.toLowerCase()
       
       if (fileExtension && allowedTypes.includes(fileExtension)) {
@@ -237,7 +156,6 @@ export default function CreateContractPage() {
       }
     }
   }
-
   const getFileIcon = (fileName: string) => {
     const extension = fileName.split('.').pop()?.toLowerCase()
     switch (extension) {
@@ -519,17 +437,6 @@ export default function CreateContractPage() {
                   <PlusIcon className="h-5 w-5 inline mr-2" />
                   Tạo hợp đồng mới
                 </button>
-                <button
-                  onClick={() => setActiveTab('summary')}
-                  className={`py-4 px-3 rounded-t-lg border-b-2 font-medium text-sm ${
-                    activeTab === 'summary'
-                      ? 'border-indigo-500 text-indigo-700 bg-indigo-50'
-                      : 'border-transparent text-gray-600 hover:text-gray-800 hover:border-gray-300 hover:bg-gray-50'
-                  }`}
-                >
-                  <DocumentTextIcon className="h-5 w-5 inline mr-2" />
-                  Tóm tắt hợp đồng (AI)
-                </button>
               </nav>
             </div>
 
@@ -758,6 +665,7 @@ export default function CreateContractPage() {
                                 </div>
                                 <h5 className="text-sm font-semibold text-gray-900">AI thông minh</h5>
                                 <p className="text-xs text-gray-600">Nhận diện văn bản chính xác 99%</p>
+<<<<<<< HEAD
                     </div>
 
                               <div className="flex flex-col items-center space-y-2">
@@ -766,6 +674,33 @@ export default function CreateContractPage() {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                                   </svg>
                   </div>
+                                <h5 className="text-sm font-semibold text-gray-900">Đa ngôn ngữ</h5>
+                                <p className="text-xs text-gray-600">Hỗ trợ tiếng Việt và tiếng Anh</p>
+                              </div>
+                              
+                              <div className="flex flex-col items-center space-y-2">
+                                <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center">
+                                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                  </svg>
+                                </div>
+                                <h5 className="text-sm font-semibold text-gray-900">Xử lý nhanh</h5>
+                                <p className="text-xs text-gray-600">Trích xuất trong vài giây</p>
+                              </div>
+                            </div>
+                          </div>
+                    </div>
+                      )}
+                    </div>
+=======
+                              </div>
+                              
+                              <div className="flex flex-col items-center space-y-2">
+                                <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center">
+                                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                                  </svg>
+                                </div>
                                 <h5 className="text-sm font-semibold text-gray-900">Đa ngôn ngữ</h5>
                                 <p className="text-xs text-gray-600">Hỗ trợ tiếng Việt và tiếng Anh</p>
                               </div>
@@ -945,7 +880,7 @@ export default function CreateContractPage() {
                             <>
                               <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                               </svg>
                               Đang tải lên...
                             </>
@@ -1626,268 +1561,6 @@ export default function CreateContractPage() {
                   </form>
                 </div>
               )}
-
-            {/* Summary Tab Content */}
-            {activeTab === 'summary' && (
-              <div className="space-y-8 pb-24">
-                <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-                  <div className="bg-gradient-to-r from-indigo-50 to-blue-50 px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 bg-indigo-500 rounded-lg flex items-center justify-center">
-                        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6M9 8h6M5 6h14a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2z" /></svg>
-                      </div>
-                      <div>
-                        <h3 className="text-lg font-semibold text-gray-900">Thông tin tóm tắt hợp đồng</h3>
-                        <p className="text-sm text-gray-600">Chỉnh sửa nhanh các nội dung chính trước khi lưu vào hệ thống</p>
-                      </div>
-                    </div>
-                    <span className="hidden md:inline px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-medium rounded-full">Tóm tắt</span>
-                  </div>
-                </div>
-
-                {/* Panel hiển thị file đã chọn */}
-                <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-                    <h2 className="text-lg font-semibold text-gray-900">Tệp được chọn</h2>
-                    <span className="px-3 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full">Nguồn dữ liệu</span>
-                  </div>
-                  <div className="p-6">
-                    {selectedFile ? (
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 bg-gray-50 border border-gray-200 rounded flex items-center justify-center">
-                            {getFileIcon(selectedFile.name)}
-                          </div>
-                          <div>
-                            <div className="font-medium text-gray-900">{selectedFile.name}</div>
-                            <div className="text-sm text-gray-500">{(selectedFile.size / 1024 / 1024).toFixed(2)} MB</div>
-                          </div>
-                        </div>
-                        <button onClick={() => setSelectedFile(null)} className="text-sm text-gray-600 hover:text-gray-800">Gỡ tệp</button>
-                      </div>
-                    ) : (
-                      <div className="text-sm text-gray-500">Chưa có tệp được chọn. Hãy chọn tệp ở tab OCR.</div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Khu vực nội dung chính, ưu tiên multi-line */}
-                <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-                  <div className="bg-gradient-to-r from-emerald-50 to-teal-50 px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-                    <h2 className="text-lg font-semibold text-gray-900">Thông tin chung</h2>
-                    <span className="px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-medium rounded-full">Cơ bản</span>
-                  </div>
-                  <div className="p-6 grid gap-6 md:grid-cols-2">
-                    <div className="grid gap-2">
-                      <label className="text-sm font-medium text-gray-700 flex items-center"><span className="w-3 h-3 bg-indigo-500 rounded-full mr-2"></span>Tiêu đề hợp đồng</label>
-                      <textarea rows={2} placeholder="VD: Hợp đồng DV IT Q4/2025" value={summaryData?.title ?? ''} onChange={(e) => setSummaryData((prev: any) => ({ ...(prev || {}), title: e.target.value }))} className="border border-gray-200 rounded-lg px-4 py-2" />
-                    </div>
-                    <div className="grid gap-2">
-                      <label className="text-sm font-medium text-gray-700 flex items-center"><span className="w-3 h-3 bg-purple-500 rounded-full mr-2"></span>Loại hợp đồng</label>
-                      <input placeholder="VD: Mua bán, Dịch vụ" value={summaryData?.contractType ?? ''} onChange={(e) => setSummaryData((prev: any) => ({ ...(prev || {}), contractType: e.target.value }))} className="border border-gray-200 rounded-lg px-4 py-2" />
-                    </div>
-                    <div className="grid gap-2">
-                      <label className="text-sm font-medium text-gray-700 flex items-center"><span className="w-3 h-3 bg-blue-500 rounded-full mr-2"></span>Số hợp đồng</label>
-                      <input placeholder="VD: MD-d3kj3" value={summaryData?.contractNumber ?? ''} onChange={(e) => setSummaryData((prev: any) => ({ ...(prev || {}), contractNumber: e.target.value }))} className="border border-gray-200 rounded-lg px-4 py-2" />
-                    </div>
-                    <div className="grid gap-2">
-                      <label className="text-sm font-medium text-gray-700 flex items-center"><span className="w-3 h-3 bg-teal-500 rounded-full mr-2"></span>Thời hạn</label>
-                      <input placeholder="VD: 12 tháng" value={summaryData?.term ?? ''} onChange={(e) => setSummaryData((prev: any) => ({ ...(prev || {}), term: e.target.value }))} className="border border-gray-200 rounded-lg px-4 py-2" />
-                    </div>
-                    <div className="grid gap-2 md:col-span-2">
-                      <label className="text-sm font-medium text-gray-700 flex items-center"><span className="w-3 h-3 bg-emerald-500 rounded-full mr-2"></span>Đối tượng hợp đồng</label>
-                      <textarea rows={3} placeholder="VD: Dịch vụ phát triển phần mềm, triển khai hệ thống" value={summaryData?.object ?? ''} onChange={(e) => setSummaryData((prev: any) => ({ ...(prev || {}), object: e.target.value }))} className="border border-gray-200 rounded-lg px-4 py-2" />
-                    </div>
-                    <div className="grid gap-2 md:col-span-2">
-                      <label className="text-sm font-medium text-gray-700 flex items-center"><span className="w-3 h-3 bg-orange-500 rounded-full mr-2"></span>Tags</label>
-                      <textarea rows={2} placeholder="VD: ưu tiên, SLA, bảo mật" value={(summaryData?.tags || []).join(', ')} onChange={(e) => setSummaryData((prev: any) => ({ ...(prev || {}), tags: e.target.value.split(',').map((t: string) => t.trim()).filter(Boolean) }))} className="border border-gray-200 rounded-lg px-4 py-2" />
-                    </div>
-                    <div className="grid gap-2 md:col-span-2">
-                      <label className="text-sm font-medium text-gray-700 flex items-center"><span className="w-3 h-3 bg-rose-500 rounded-full mr-2"></span>Điều kiện chấm dứt</label>
-                      <textarea rows={2} placeholder="VD: Vi phạm điều khoản, hết hạn, chấm dứt theo thỏa thuận" value={summaryData?.terminationConditions ?? ''} onChange={(e) => setSummaryData((prev: any) => ({ ...(prev || {}), terminationConditions: e.target.value }))} className="border border-gray-200 rounded-lg px-4 py-2" />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Thông tin thanh toán */}
-                <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-                  <div className="bg-gradient-to-r from-amber-50 to-orange-50 px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-                    <h2 className="text-lg font-semibold text-gray-900">Thông tin thanh toán</h2>
-                    <span className="px-3 py-1 bg-amber-100 text-amber-700 text-xs font-medium rounded-full">Tài chính</span>
-                  </div>
-                  <div className="p-6 grid gap-6 md:grid-cols-2">
-                    <div className="grid gap-2">
-                      <label className="text-sm font-medium text-gray-700 flex items-center"><span className="w-3 h-3 bg-amber-500 rounded-full mr-2"></span>Tổng giá trị</label>
-                      <input placeholder="VD: 150000000" value={summaryData?.paymentDetails?.totalValue ?? ''} onChange={(e) => setSummaryData((prev: any) => ({ ...(prev || {}), paymentDetails: { ...(prev?.paymentDetails || {}), totalValue: e.target.value } }))} className="border border-gray-200 rounded-lg px-4 py-2" />
-                    </div>
-                    <div className="grid gap-2">
-                      <label className="text-sm font-medium text-gray-700 flex items-center"><span className="w-3 h-3 bg-orange-500 rounded-full mr-2"></span>Tiền tệ</label>
-                      <input placeholder="VD: VND" value={summaryData?.paymentDetails?.currency ?? ''} onChange={(e) => setSummaryData((prev: any) => ({ ...(prev || {}), paymentDetails: { ...(prev?.paymentDetails || {}), currency: e.target.value } }))} className="border border-gray-200 rounded-lg px-4 py-2" />
-                    </div>
-                    <div className="grid gap-2 md:col-span-2">
-                      <label className="text-sm font-medium text-gray-700 flex items-center"><span className="w-3 h-3 bg-yellow-500 rounded-full mr-2"></span>Lịch thanh toán</label>
-                      <textarea rows={2} placeholder="VD: 30% khi ký, 70% nghiệm thu" value={summaryData?.paymentDetails?.schedule ?? ''} onChange={(e) => setSummaryData((prev: any) => ({ ...(prev || {}), paymentDetails: { ...(prev?.paymentDetails || {}), schedule: e.target.value } }))} className="border border-gray-200 rounded-lg px-4 py-2" />
-                    </div>
-                    <div className="grid gap-2 md:col-span-2">
-                      <label className="text-sm font-medium text-gray-700 flex items-center"><span className="w-3 h-3 bg-lime-500 rounded-full mr-2"></span>Phương thức thanh toán</label>
-                      <input placeholder="VD: Chuyển khoản" value={summaryData?.paymentDetails?.paymentMethod ?? ''} onChange={(e) => setSummaryData((prev: any) => ({ ...(prev || {}), paymentDetails: { ...(prev?.paymentDetails || {}), paymentMethod: e.target.value } }))} className="border border-gray-200 rounded-lg px-4 py-2" />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Các bên & điều khoản - dạng bảng chỉnh sửa, không hiển thị JSON thuần */}
-                <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-                  <div className="bg-gradient-to-r from-violet-50 to-purple-50 px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-                    <h2 className="text-lg font-semibold text-gray-900">Thông tin các bên</h2>
-                    <span className="px-3 py-1 bg-violet-100 text-violet-700 text-xs font-medium rounded-full">Các bên</span>
-                  </div>
-                  <div className="p-6">
-                    <EditableArrayTable
-                      data={summaryData?.parties || []}
-                      setData={(rows) => setSummaryData((prev: any) => ({ ...(prev || {}), parties: rows }))}
-                      columns={[
-                        { key: 'role', label: 'Vai trò' },
-                        { key: 'name', label: 'Tên' },
-                        { key: 'representative', label: 'Đại diện' },
-                        { key: 'taxCode', label: 'MST' },
-                        { key: 'contact', label: 'Liên hệ' },
-                        { key: 'address', label: 'Địa chỉ' }
-                      ]}
-                      addRowTemplate={{ role: '', name: '', representative: '', taxCode: '', contact: '', address: '' }}
-                    />
-                  </div>
-                </div>
-
-                <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-                  <div className="bg-gradient-to-r from-cyan-50 to-blue-50 px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-                    <h2 className="text-lg font-semibold text-gray-900">Các điều khoản nổi bật</h2>
-                    <span className="px-3 py-1 bg-cyan-100 text-cyan-700 text-xs font-medium rounded-full">Điều khoản</span>
-                  </div>
-                  <div className="p-6 grid gap-8">
-                    <EditableArrayTable
-                      title="Điều khoản chính"
-                      data={summaryData?.keyClauses || []}
-                      setData={(rows) => setSummaryData((prev: any) => ({ ...(prev || {}), keyClauses: rows }))}
-                      columns={[
-                        { key: 'name', label: 'Tên' },
-                        { key: 'description', label: 'Mô tả' },
-                        { key: 'source', label: 'Nguồn/Điều khoản' }
-                      ]}
-                      addRowTemplate={{ name: '', description: '', source: '' }}
-                    />
-                    <EditableArrayTable
-                      title="Điều khoản có lợi"
-                      data={summaryData?.favorableClauses || []}
-                      setData={(rows) => setSummaryData((prev: any) => ({ ...(prev || {}), favorableClauses: rows }))}
-                      columns={[
-                        { key: 'name', label: 'Tên' },
-                        { key: 'description', label: 'Mô tả' },
-                        { key: 'benefitTo', label: 'Có lợi cho' }
-                      ]}
-                      addRowTemplate={{ name: '', description: '', benefitTo: '' }}
-                    />
-                    <EditableArrayTable
-                      title="Điều khoản bất lợi"
-                      data={summaryData?.unfavorableClauses || []}
-                      setData={(rows) => setSummaryData((prev: any) => ({ ...(prev || {}), unfavorableClauses: rows }))}
-                      columns={[
-                        { key: 'name', label: 'Tên' },
-                        { key: 'description', label: 'Mô tả' },
-                        { key: 'riskTo', label: 'Bất lợi cho' }
-                      ]}
-                      addRowTemplate={{ name: '', description: '', riskTo: '' }}
-                    />
-                  </div>
-                </div>
-
-                {/* Rủi ro */}
-                <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-                  <div className="bg-gradient-to-r from-rose-50 to-pink-50 px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-                    <h2 className="text-lg font-semibold text-gray-900">Đánh giá rủi ro</h2>
-                    <span className="px-3 py-1 bg-rose-100 text-rose-700 text-xs font-medium rounded-full">Rủi ro</span>
-                  </div>
-                  <div className="p-6 grid gap-6">
-                    <div className="grid gap-2">
-                      <label className="text-sm font-medium text-gray-700 flex items-center"><span className="w-3 h-3 bg-rose-500 rounded-full mr-2"></span>Mức độ rủi ro</label>
-                      <select value={summaryData?.riskAssessment?.riskLevel ?? 'MEDIUM'} onChange={(e) => setSummaryData((prev: any) => ({ ...(prev || {}), riskAssessment: { ...(prev?.riskAssessment || {}), riskLevel: e.target.value } }))} className="border border-gray-200 rounded-lg px-4 py-2">
-                        <option value="LOW">LOW</option>
-                        <option value="MEDIUM">MEDIUM</option>
-                        <option value="HIGH">HIGH</option>
-                      </select>
-                    </div>
-                    <EditableArrayTable
-                      title="Yếu tố rủi ro"
-                      data={summaryData?.riskAssessment?.riskFactors || []}
-                      setData={(rows) => setSummaryData((prev: any) => ({ ...(prev || {}), riskAssessment: { ...(prev?.riskAssessment || {}), riskFactors: rows } }))}
-                      columns={[{ key: 'text', label: 'Nội dung' }]}
-                      addRowTemplate={{ text: '' }}
-                    />
-                    <EditableArrayTable
-                      title="Biện pháp giảm thiểu"
-                      data={summaryData?.riskAssessment?.mitigationMeasures || []}
-                      setData={(rows) => setSummaryData((prev: any) => ({ ...(prev || {}), riskAssessment: { ...(prev?.riskAssessment || {}), mitigationMeasures: rows } }))}
-                      columns={[{ key: 'text', label: 'Nội dung' }]}
-                      addRowTemplate={{ text: '' }}
-                    />
-                  </div>
-                </div>
-
-                {/* Tuân thủ */}
-                <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-                  <div className="bg-gradient-to-r from-slate-50 to-gray-50 px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-                    <h2 className="text-lg font-semibold text-gray-900">Trạng thái tuân thủ</h2>
-                    <span className="px-3 py-1 bg-gray-100 text-gray-700 text-xs font-medium rounded-full">Tuân thủ</span>
-                  </div>
-                  <div className="p-6 grid gap-6">
-                    <div className="grid gap-2">
-                      <label className="text-sm font-medium text-gray-700 flex items-center"><span className="w-3 h-3 bg-gray-500 rounded-full mr-2"></span>Trạng thái</label>
-                      <select value={summaryData?.complianceStatus?.status ?? 'REVIEW_REQUIRED'} onChange={(e) => setSummaryData((prev: any) => ({ ...(prev || {}), complianceStatus: { ...(prev?.complianceStatus || {}), status: e.target.value } }))} className="border border-gray-200 rounded-lg px-4 py-2">
-                        <option value="COMPLIANT">COMPLIANT</option>
-                        <option value="NON_COMPLIANT">NON_COMPLIANT</option>
-                        <option value="REVIEW_REQUIRED">REVIEW_REQUIRED</option>
-                      </select>
-                    </div>
-                    <EditableArrayTable
-                      title="Vấn đề"
-                      data={summaryData?.complianceStatus?.issues || []}
-                      setData={(rows) => setSummaryData((prev: any) => ({ ...(prev || {}), complianceStatus: { ...(prev?.complianceStatus || {}), issues: rows } }))}
-                      columns={[{ key: 'text', label: 'Mô tả' }]}
-                      addRowTemplate={{ text: '' }}
-                    />
-                    <EditableArrayTable
-                      title="Khuyến nghị"
-                      data={summaryData?.complianceStatus?.recommendations || []}
-                      setData={(rows) => setSummaryData((prev: any) => ({ ...(prev || {}), complianceStatus: { ...(prev?.complianceStatus || {}), recommendations: rows } }))}
-                      columns={[{ key: 'text', label: 'Mô tả' }]}
-                      addRowTemplate={{ text: '' }}
-                    />
-                  </div>
-                </div>
-
-                {/* Sticky control panel */}
-                <div className="fixed bottom-4 right-4 sm:right-6 lg:right-8 bg-white/90 backdrop-blur border border-gray-200 p-2 z-50 rounded-xl shadow-lg w-auto">
-                  <div className="flex items-center justify-end gap-3">
-                    <div className="flex gap-3">
-                      <button
-                        onClick={() => setSummaryData(null)
-                        }
-                        className="inline-flex items-center px-4 py-2 rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300 text-sm"
-                      >
-                        Làm trống dữ liệu
-                      </button>
-                      <button
-                        onClick={() => {
-                          toast.success('Đã lưu và tải lên hệ thống (demo)')
-                        }}
-                        className="inline-flex items-center px-4 py-2 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold shadow-md hover:from-blue-700 hover:to-indigo-700 text-sm"
-                      >
-                        Lưu và tải lên hệ thống
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
             </div>
           </div>
         </div>

@@ -7,6 +7,8 @@ from fastapi.openapi.utils import get_openapi
 from starlette.middleware.base import BaseHTTPMiddleware
 import routers
 from contract_router import router as contract_router
+from file_router import router as file_router
+from s3_router import router as s3_router
 import os
 import asyncio
 from datetime import datetime
@@ -17,12 +19,13 @@ from services.batch_service import BatchService
 from services.event_service import EventService
 
 app = FastAPI(
-    title="Automation Service",
-    description="AI Processing - Xử lý tài liệu và hợp đồng bằng AI, Batch Processing Service - Xử lý hàng loạt, Event Service - Quản lý sự kiện, System Testing - Kiểm tra hệ thống",
-    version="2.0.0",
+    title="Automation Service API",
+    description="API quản lý tài liệu - Dịch vụ quản lý tài liệu và hợp đồng của DocGO",
+    version="1.0.0",
     docs_url="/docs",
     redoc_url="/redoc",
-    openapi_version="3.0.3"
+    openapi_version="3.1.0",
+    openapi_url="/api-docs"
 )
 
 # Actor/Correlation middleware per MDC 06
@@ -60,6 +63,8 @@ app.add_middleware(
 
 app.include_router(routers.router)
 app.include_router(contract_router)
+app.include_router(file_router)
+app.include_router(s3_router)
 
 # Initialize services
 # notification_service = NotificationService()
@@ -76,22 +81,32 @@ def custom_openapi():
         version=app.version,
         description=app.description,
         routes=app.routes,
-        openapi_version="3.0.3"
+        openapi_version="3.1.0"
     )
+    # Tags metadata
+    tags_metadata = [
+        {
+            "name": "APIs Contract Management",
+            "description": "APIs để quản lý hợp đồng trong hệ thống DocGO (chú thích)."
+        }
+    ]
+    # Merge/override tags metadata
+    existing_tags = openapi_schema.get("tags") or []
+    openapi_schema["tags"] = tags_metadata + [t for t in existing_tags if t.get("name") not in {m["name"] for m in tags_metadata}]
     
     app.openapi_schema = openapi_schema
     return app.openapi_schema
 
 app.openapi = custom_openapi
 
-@app.get("/", tags=["Root & Health"])
+@app.get("/", tags=["🏠 API Gốc"])
 async def read_root():
     """
     Root endpoint - tự động redirect sang /docs để hiển thị API documentation
     """
     return RedirectResponse(url="/docs", status_code=302)
 
-@app.get("/swagger-ui/index.html", tags=["Root"])
+@app.get("/swagger-ui/index.html", tags=["🏠 API Gốc"])
 async def swagger_ui_redirect():
     """
     Swagger UI redirect endpoint - tuân thủ SpringDoc standard
@@ -99,7 +114,7 @@ async def swagger_ui_redirect():
     """
     return RedirectResponse(url="/docs", status_code=302)
 
-@app.get("/health", tags=["Root & Health"])
+@app.get("/health", tags=["🏠 API Gốc"])
 async def health_check():
     """
     Health check endpoint - kiểm tra trạng thái service

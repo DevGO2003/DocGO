@@ -12,9 +12,9 @@ openpyxl
 striprtf
 httpx
 aiohttp
-# MongoDB integration
-motor==3.3.2
-pymongo==4.6.0
+# MongoDB integration - REMOVED (Automation Service không cần database)
+# motor==3.3.2
+# pymongo==4.6.0
 # Redis integration
 redis==5.0.1
 aioredis==2.0.1
@@ -27,3 +27,6 @@ celery==5.3.4
 # Additional utilities
 pydantic>=2.0.0
 python-jose[cryptography]==3.3.0
+# AWS S3 integration
+boto3==1.34.0
+botocore==1.34.0

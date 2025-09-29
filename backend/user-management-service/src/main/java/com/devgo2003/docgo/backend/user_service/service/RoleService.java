@@ -1,7 +1,7 @@
 package com.devgo2003.docgo.backend.user_service.service;
 
-import com.devgo2003.docgo.backend.user_service.entity.RoleMongo;
-import com.devgo2003.docgo.backend.user_service.repository.RoleMongoRepository;
+import com.devgo2003.docgo.backend.user_service.entity.Role;
+import com.devgo2003.docgo.backend.user_service.repository.RoleRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -20,63 +20,61 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class RoleService {
     
-    private final RoleMongoRepository roleRepository;
+    private final RoleRepository roleRepository;
     
-    public RoleMongo createRole(RoleMongo role) {
+    public Role createRole(Role role) {
         log.info("Creating new role: {}", role.getName());
         
         // Set default values
         role.setIsActive(true);
         role.setIsSystem(false);
-        role.setCreatedAt(LocalDateTime.now());
-        role.setUpdatedAt(LocalDateTime.now());
         
         return roleRepository.save(role);
     }
     
-    public Optional<RoleMongo> getRoleById(String id) {
+    public Optional<Role> getRoleById(String id) {
         return roleRepository.findById(id);
     }
     
-    public Optional<RoleMongo> getRoleByName(String name) {
+    public Optional<Role> getRoleByName(String name) {
         return roleRepository.findByName(name);
     }
     
-    public Page<RoleMongo> getAllRoles(int pageNumber, int pageSize, String sortBy, String sortDirection) {
+    public Page<Role> getAllRoles(int pageNumber, int pageSize, String sortBy, String sortDirection) {
         Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortBy);
         Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
         return roleRepository.findAll(pageable);
     }
     
-    public List<RoleMongo> getActiveRoles() {
+    public List<Role> getActiveRoles() {
         return roleRepository.findByIsActive(true);
     }
     
-    public List<RoleMongo> getSystemRoles() {
+    public List<Role> getSystemRoles() {
         return roleRepository.findByIsSystem(true);
     }
     
-    public List<RoleMongo> getRolesByParent(String parentRoleId) {
+    public List<Role> getRolesByParent(String parentRoleId) {
         return roleRepository.findByParentRoleId(parentRoleId);
     }
     
-    public List<RoleMongo> getRolesByLevel(Integer level) {
+    public List<Role> getRolesByLevel(Integer level) {
         return roleRepository.findByLevel(level);
     }
     
-    public List<RoleMongo> searchRoles(String searchTerm) {
+    public List<Role> searchRoles(String searchTerm) {
         return roleRepository.findBySearchTerm(searchTerm);
     }
     
-    public List<RoleMongo> getRolesByPermission(String permissionId) {
+    public List<Role> getRolesByPermission(String permissionId) {
         return roleRepository.findByPermissionIdsContaining(permissionId);
     }
     
-    public List<RoleMongo> getActiveRolesWithLevelGreaterThanOrEqual(Integer level) {
+    public List<Role> getActiveRolesWithLevelGreaterThanOrEqual(Integer level) {
         return roleRepository.findActiveRolesWithLevelGreaterThanOrEqual(level);
     }
     
-    public RoleMongo updateRole(String id, RoleMongo roleDetails) {
+    public Role updateRole(String id, Role roleDetails) {
         log.info("Updating role: {}", id);
         
         return roleRepository.findById(id)
@@ -86,7 +84,6 @@ public class RoleService {
                     role.setParentRoleId(roleDetails.getParentRoleId());
                     role.setLevel(roleDetails.getLevel());
                     role.setIsActive(roleDetails.getIsActive());
-                    role.setUpdatedAt(LocalDateTime.now());
                     role.setUpdatedBy(roleDetails.getUpdatedBy());
                     
                     return roleRepository.save(role);
@@ -94,19 +91,18 @@ public class RoleService {
                 .orElseThrow(() -> new RuntimeException("Role not found with id: " + id));
     }
     
-    public RoleMongo assignPermissions(String id, Set<String> permissionIds) {
+    public Role assignPermissions(String id, Set<String> permissionIds) {
         log.info("Assigning permissions to role: {}", id);
         
         return roleRepository.findById(id)
                 .map(role -> {
                     role.setPermissionIds(permissionIds);
-                    role.setUpdatedAt(LocalDateTime.now());
                     return roleRepository.save(role);
                 })
                 .orElseThrow(() -> new RuntimeException("Role not found with id: " + id));
     }
     
-    public RoleMongo addPermission(String id, String permissionId) {
+    public Role addPermission(String id, String permissionId) {
         log.info("Adding permission to role: {}", id);
         
         return roleRepository.findById(id)
@@ -114,13 +110,12 @@ public class RoleService {
                     Set<String> permissions = role.getPermissionIds();
                     permissions.add(permissionId);
                     role.setPermissionIds(permissions);
-                    role.setUpdatedAt(LocalDateTime.now());
                     return roleRepository.save(role);
                 })
                 .orElseThrow(() -> new RuntimeException("Role not found with id: " + id));
     }
     
-    public RoleMongo removePermission(String id, String permissionId) {
+    public Role removePermission(String id, String permissionId) {
         log.info("Removing permission from role: {}", id);
         
         return roleRepository.findById(id)
@@ -128,19 +123,17 @@ public class RoleService {
                     Set<String> permissions = role.getPermissionIds();
                     permissions.remove(permissionId);
                     role.setPermissionIds(permissions);
-                    role.setUpdatedAt(LocalDateTime.now());
                     return roleRepository.save(role);
                 })
                 .orElseThrow(() -> new RuntimeException("Role not found with id: " + id));
     }
     
-    public RoleMongo updateRoleStatus(String id, Boolean isActive) {
+    public Role updateRoleStatus(String id, Boolean isActive) {
         log.info("Updating role status: {} to {}", id, isActive);
         
         return roleRepository.findById(id)
                 .map(role -> {
                     role.setIsActive(isActive);
-                    role.setUpdatedAt(LocalDateTime.now());
                     return roleRepository.save(role);
                 })
                 .orElseThrow(() -> new RuntimeException("Role not found with id: " + id));
@@ -150,7 +143,7 @@ public class RoleService {
         log.info("Deleting role: {}", id);
         
         // Check if role is system role
-        RoleMongo role = roleRepository.findById(id)
+        Role role = roleRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Role not found with id: " + id));
         
         if (role.getIsSystem()) {
@@ -158,7 +151,7 @@ public class RoleService {
         }
         
         // Check if role has child roles
-        List<RoleMongo> childRoles = roleRepository.findByParentRoleId(id);
+        List<Role> childRoles = roleRepository.findByParentRoleId(id);
         if (!childRoles.isEmpty()) {
             throw new RuntimeException("Cannot delete role with child roles");
         }
@@ -170,10 +163,10 @@ public class RoleService {
         return roleRepository.existsByName(name);
     }
     
-    public List<RoleMongo> getRoleHierarchy(String roleId) {
+    public List<Role> getRoleHierarchy(String roleId) {
         // This would implement a recursive hierarchy traversal
         // For now, return the role and its direct children
-        List<RoleMongo> hierarchy = roleRepository.findByParentRoleId(roleId);
+        List<Role> hierarchy = roleRepository.findByParentRoleId(roleId);
         roleRepository.findById(roleId).ifPresent(hierarchy::add);
         return hierarchy;
     }

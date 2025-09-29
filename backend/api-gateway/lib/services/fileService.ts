@@ -180,7 +180,7 @@ class FileService {
       }
 
       const response: AxiosResponse<FileUploadResponse> = await this.client.post(
-        '/api/v1/document-management-service/files',
+        '/api/v1/document-management-service/documents/upload',
         formData,
         {
           headers: {
@@ -198,7 +198,7 @@ class FileService {
   async getFile(fileId: string, token?: string): Promise<FileResponse> {
     try {
       const response: AxiosResponse<FileResponse> = await this.client.get(
-        `/api/v1/document-management-service/files/${fileId}`,
+        `/api/v1/document-management-service/documents/${fileId}/download`,
         {
           headers: this.getAuthHeaders(token),
         }
@@ -226,7 +226,7 @@ class FileService {
   async getFiles(params: FileQueryParams = {}, token?: string): Promise<FileListResponse> {
     try {
       const response: AxiosResponse<FileListResponse> = await this.client.get(
-        '/api/v1/document-management-service/files',
+        '/api/v1/document-management-service/documents',
         {
           params,
           headers: this.getAuthHeaders(token),

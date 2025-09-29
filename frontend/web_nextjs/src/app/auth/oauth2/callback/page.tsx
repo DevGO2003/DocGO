@@ -3,9 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
-import { authAPI } from '@/lib/api'
-import { UserRole, UserStatus, TokenData } from '@/types/auth'
-import TokenManager from '@/utils/token-manager'
+import { UserRole, UserStatus } from '@/types/auth'
 import { AuthLayout } from '@/components/layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
@@ -31,50 +29,32 @@ export default function OAuth2CallbackPage() {
         // Get the current URL to check for OAuth2 response
         const currentUrl = window.location.href
         
-        // Debug logging
-        console.log('[OAuth2 Callback] Current URL:', currentUrl)
-        console.log('[OAuth2 Callback] Search params:', {
-          token: searchParams.get('token'),
-          refreshToken: searchParams.get('refreshToken'),
-          success: searchParams.get('success'),
-          username: searchParams.get('username'),
-          code: searchParams.get('code'),
-          error: searchParams.get('error')
-        })
-        
-        // Accept both the Spring callback URL and the final frontend callback URL
-        const isSpringCallback = currentUrl.includes('/login/oauth2/code/google')
-        const isFrontendCallback = currentUrl.includes('/auth/oauth2/callback')
-        console.log('[OAuth2 Callback] URL check:', { isSpringCallback, isFrontendCallback })
-        
-        if (isSpringCallback || isFrontendCallback) {
-          // Only enforce presence of 'code' for Spring callback URL
-          if (isSpringCallback) {
-            // Extract parameters from URL
-            const code = searchParams.get('code')
-            const state = searchParams.get('state')
-            const error = searchParams.get('error')
-
-            if (error) {
-              setStatus('error')
-              setMessage('Đăng nhập Google thất bại')
-              setError({
-                code: error,
-                message: `Lỗi OAuth2: ${error}`,
-                details: searchParams.get('error_description') || undefined
-              })
-              return
-            }
-
-            if (!code) {
-              setStatus('error')
-              setMessage('Không nhận được authorization code từ Google')
-              setError({
-                message: 'Authorization code không được cung cấp',
-                details: 'Vui lòng thử đăng nhập lại'
-              })
-              return
-            }
+        // Check if this is a successful OAuth2 callback from Spring Security
+        if (currentUrl.includes('/login/oauth2/code/google')) {
+          // Extract parameters from URL
+          const code = searchParams.get('code')
+          const state = searchParams.get('state')
+          const error = searchParams.get('error')
+          
+          if (error) {
+            setStatus('error')
+            setMessage('Đăng nhập Google thất bại')
+            setError({
+              code: error,
+              message: `Lỗi OAuth2: ${error}`,
+              details: searchParams.get('error_description') || undefined
+            })
+            return
+          }
+          
+          if (!code) {
+            setStatus('error')
+            setMessage('Không nhận được authorization code từ Google')
+            setError({
+              message: 'Authorization code không được cung cấp',
+              details: 'Vui lòng thử đăng nhập lại'
+            })
+            return
           }
           
           // Extract tokens from URL parameters (sent by OAuth2LoginSuccessHandler)
@@ -83,15 +63,7 @@ export default function OAuth2CallbackPage() {
           const success = searchParams.get('success')
           const username = searchParams.get('username')
           
-          console.log('[OAuth2 Callback] Token validation:', {
-            hasToken: !!token,
-            tokenLength: token?.length,
-            hasRefreshToken: !!refreshToken,
-            success,
-            username
-          })
-          
-          if (token && token.length > 10) {
+          if (token && success === 'true' && username) {
             try {
               // Validate token format (basic check)
               if (token.length < 10) {
@@ -104,84 +76,34 @@ export default function OAuth2CallbackPage() {
                 localStorage.setItem('refresh_token', refreshToken)
               }
               
-              // Also store tokens via TokenManager to set cookies for middleware
-              const decodeJwtExp = (jwt: string): number | null => {
-                try {
-                  const parts = jwt.split('.')
-                  if (parts.length !== 3) return null
-                  const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')))
-                  if (payload && typeof payload.exp === 'number') {
-                    return payload.exp * 1000
-                  }
-                  return null
-                } catch {
-                  return null
-                }
+              // Create user object from OAuth2 data
+              const userData = {
+                id: username,
+                userId: username,
+                username: username,
+                email: username,
+                name: username,
+                role: 'USER' as UserRole,
+                status: 'ACTIVE' as UserStatus
               }
-              const expMs = decodeJwtExp(token) || (Date.now() + 24 * 60 * 60 * 1000)
-              const tokenData: TokenData = {
-                accessToken: token,
-                refreshToken: refreshToken || '',
-                expiresAt: expMs,
-                tokenType: 'Bearer'
-              }
-
-              // Store tokens immediately to ensure cookie is available for middleware
-              TokenManager.storeTokens(tokenData)
-              
-              // Try to fetch full profile from backend so it matches normal login
-              let userData: any = null
-              try {
-                // Bypass global axios interceptor to avoid auto-redirect on transient 401
-                const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
-                const resp = await fetch(`${baseUrl}/api/auth/me`, {
-                  method: 'GET',
-                  headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                  },
-                  credentials: 'include'
-                })
-                if (resp.ok) {
-                  const body = await resp.json()
-                  if (body?.data?.user) {
-                    userData = body.data.user
-                  }
-                }
-              } catch (e) {
-                // Fallback: construct minimal user from username
-                const userEmail = username || 'oauth-user@example.com'
-                userData = {
-                  id: userEmail,
-                  userId: userEmail,
-                  username: userEmail,
-                  email: userEmail,
-                  name: username || 'OAuth User',
-                  role: 'USER' as UserRole,
-                  status: 'ACTIVE' as UserStatus
-                }
-              }
-
               localStorage.setItem('user_data', JSON.stringify(userData))
-              TokenManager.storeTokens(tokenData, userData)
-
+              
               // Update auth context
               setAuthData(userData)
               
               setStatus('success')
-              setMessage('Đăng nhập Google thành công!')
+              setMessage(`Đăng nhập Google thành công! Chào mừng ${username}`)
               
               // If opened as a popup, notify opener and close
               try {
                 const opener = window.opener
                 if (opener && !opener.closed) {
                   const targetOrigin = window.location.origin
-                  const notifyUser = (userData?.email ?? userData?.username ?? username ?? 'oauth-user@example.com')
                   opener.postMessage({
                     type: 'oauth_success',
                     token,
                     refreshToken: refreshToken || null,
-                    username: notifyUser
+                    username
                   }, targetOrigin)
                   window.close()
                   return
@@ -190,8 +112,10 @@ export default function OAuth2CallbackPage() {
                 // ignore if cross-origin or no opener
               }
               
-              // Redirect to dashboard immediately
-              router.push('/dashboard')
+              // Redirect to dashboard after a short delay
+              setTimeout(() => {
+                router.push('/dashboard')
+              }, 2000)
               
             } catch (storageError) {
               console.error('Error storing OAuth2 data:', storageError)
@@ -204,7 +128,6 @@ export default function OAuth2CallbackPage() {
             }
           } else {
             // No tokens found, OAuth2LoginSuccessHandler might not have processed correctly
-            console.log('[OAuth2 Callback] No valid token found, showing warning')
             setStatus('warning')
             setMessage('Đăng nhập Google hoàn tất nhưng chưa nhận được thông tin người dùng')
             setError({
@@ -214,7 +137,6 @@ export default function OAuth2CallbackPage() {
           }
           
         } else {
-          console.log('[OAuth2 Callback] URL not recognized as OAuth2 callback')
           setStatus('error')
           setMessage('URL callback không hợp lệ')
           setError({

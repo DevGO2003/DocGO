@@ -9,13 +9,12 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.base import MIMEBase
 from email import encoders
 import aiohttp
-import motor.motor_asyncio
+# import motor.motor_asyncio  # MongoDB removed
 import redis.asyncio as redis
 from twilio.rest import Client as TwilioClient
 from twilio.base.exceptions import TwilioException
 
 from config import (
-    get_mongodb_uri, get_mongodb_database, get_mongodb_collections,
     get_redis_url, get_redis_password, get_redis_db,
     get_smtp_config, get_twilio_config, get_websocket_config
 )
@@ -28,9 +27,7 @@ from schemas.notification_schemas import (
 
 class NotificationService:
     def __init__(self):
-        self.mongodb_uri = get_mongodb_uri()
-        self.mongodb_db = get_mongodb_database()
-        self.collections = get_mongodb_collections()
+        # MongoDB removed - Automation Service không cần database
         self.redis_url = get_redis_url()
         self.redis_password = get_redis_password()
         self.redis_db = get_redis_db()
@@ -39,17 +36,14 @@ class NotificationService:
         self.websocket_config = get_websocket_config()
         
         # Initialize connections
-        self.mongodb_client = None
-        self.mongodb_db_instance = None
+        # MongoDB client removed
         self.redis_client = None
         self.twilio_client = None
         
     async def initialize(self):
         """Khởi tạo kết nối database và external services"""
         try:
-            # MongoDB connection
-            self.mongodb_client = motor.motor_asyncio.AsyncIOMotorClient(self.mongodb_uri)
-            self.mongodb_db_instance = self.mongodb_client[self.mongodb_db]
+            # MongoDB connection removed
             
             # Redis connection
             redis_params = {"url": self.redis_url, "db": self.redis_db}
@@ -71,8 +65,7 @@ class NotificationService:
 
     async def close(self):
         """Đóng kết nối"""
-        if self.mongodb_client:
-            self.mongodb_client.close()
+        # MongoDB client removed
         if self.redis_client:
             await self.redis_client.close()
 
@@ -95,8 +88,7 @@ class NotificationService:
         }
         
         try:
-            # Lưu vào MongoDB
-            await self.mongodb_db_instance[self.collections["notifications"]].insert_one(notification_data)
+            # MongoDB operations removed - Automation Service không cần database
             
             # Gửi notification theo loại
             if request.type == NotificationType.EMAIL:

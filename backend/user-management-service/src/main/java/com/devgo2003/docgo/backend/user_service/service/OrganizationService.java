@@ -3,8 +3,8 @@ package com.devgo2003.docgo.backend.user_service.service;
 import com.devgo2003.docgo.backend.user_service.dto.OrganizationCreateRequest;
 import com.devgo2003.docgo.backend.user_service.dto.OrganizationResponse;
 import com.devgo2003.docgo.backend.user_service.dto.OrganizationUpdateRequest;
-import com.devgo2003.docgo.backend.user_service.entity.OrganizationMongo;
-import com.devgo2003.docgo.backend.user_service.repository.OrganizationMongoRepository;
+import com.devgo2003.docgo.backend.user_service.entity.Organization;
+import com.devgo2003.docgo.backend.user_service.repository.OrganizationRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -14,7 +14,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -25,7 +25,7 @@ import java.util.UUID;
 @Transactional
 public class OrganizationService {
 
-    private final OrganizationMongoRepository organizationMongoRepository;
+    private final OrganizationRepository organizationRepository;
 
     public Page<OrganizationResponse> getAllOrganizations(int pageNumber, int pageSize, String sortBy, String sortDirection) {
         log.info("Getting all organizations - page: {}, size: {}, sortBy: {}, sortDirection: {}", 
@@ -34,7 +34,7 @@ public class OrganizationService {
         Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortBy);
         Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
         
-        Page<OrganizationMongo> organizations = organizationMongoRepository.findAllActive(pageable);
+        Page<Organization> organizations = organizationRepository.findAllActive(pageable);
         
         return organizations.map(OrganizationResponse::fromEntity);
     }
@@ -42,7 +42,7 @@ public class OrganizationService {
     public Optional<OrganizationResponse> getOrganizationById(String id) {
         log.info("Getting organization by id: {}", id);
         
-        return organizationMongoRepository.findById(id)
+        return organizationRepository.findById(id)
                 .filter(org -> org.getDeletedAt() == null)
                 .map(OrganizationResponse::fromEntity);
     }
@@ -50,7 +50,7 @@ public class OrganizationService {
     public Optional<OrganizationResponse> getOrganizationByCode(String code) {
         log.info("Getting organization by code: {}", code);
         
-        return organizationMongoRepository.findByCode(code)
+        return organizationRepository.findByCode(code)
                 .filter(org -> org.getDeletedAt() == null)
                 .map(OrganizationResponse::fromEntity);
     }
@@ -60,16 +60,16 @@ public class OrganizationService {
 
         // Kiểm tra trùng lặp
         if (request.getCode() != null && !request.getCode().trim().isEmpty()) {
-            if (organizationMongoRepository.existsByCode(request.getCode())) {
+            if (organizationRepository.existsByCode(request.getCode())) {
                 throw new IllegalArgumentException("Mã tổ chức đã tồn tại: " + request.getCode());
             }
         }
 
-        if (organizationMongoRepository.existsByName(request.getName())) {
+        if (organizationRepository.existsByName(request.getName())) {
             throw new IllegalArgumentException("Tên tổ chức đã tồn tại: " + request.getName());
         }
 
-        OrganizationMongo organization = new OrganizationMongo();
+        Organization organization = new Organization();
         organization.setId(UUID.randomUUID().toString());
         organization.setName(request.getName());
         organization.setCode(request.getCode());
@@ -78,11 +78,9 @@ public class OrganizationService {
         organization.setPhone(request.getPhone());
         organization.setEmail(request.getEmail());
         organization.setWebsite(request.getWebsite());
-        organization.setStatus(OrganizationMongo.OrganizationStatus.ACTIVE);
-        organization.setCreatedAt(ZonedDateTime.now());
-        organization.setUpdatedAt(ZonedDateTime.now());
+        organization.setStatus(Organization.OrganizationStatus.ACTIVE);
 
-        OrganizationMongo savedOrganization = organizationMongoRepository.save(organization);
+        Organization savedOrganization = organizationRepository.save(organization);
         log.info("Created organization with id: {}", savedOrganization.getId());
 
         return OrganizationResponse.fromEntity(savedOrganization);
@@ -91,19 +89,19 @@ public class OrganizationService {
     public Optional<OrganizationResponse> updateOrganization(String id, OrganizationUpdateRequest request) {
         log.info("Updating organization with id: {}", id);
 
-        return organizationMongoRepository.findById(id)
+        return organizationRepository.findById(id)
                 .filter(org -> org.getDeletedAt() == null)
                 .map(organization -> {
                     // Kiểm tra trùng lặp nếu có thay đổi
                     if (request.getName() != null && !request.getName().equals(organization.getName())) {
-                        if (organizationMongoRepository.existsByName(request.getName())) {
+                        if (organizationRepository.existsByName(request.getName())) {
                             throw new IllegalArgumentException("Tên tổ chức đã tồn tại: " + request.getName());
                         }
                         organization.setName(request.getName());
                     }
 
                     if (request.getCode() != null && !request.getCode().equals(organization.getCode())) {
-                        if (organizationMongoRepository.existsByCode(request.getCode())) {
+                        if (organizationRepository.existsByCode(request.getCode())) {
                             throw new IllegalArgumentException("Mã tổ chức đã tồn tại: " + request.getCode());
                         }
                         organization.setCode(request.getCode());
@@ -125,9 +123,8 @@ public class OrganizationService {
                         organization.setWebsite(request.getWebsite());
                     }
 
-                    organization.setUpdatedAt(ZonedDateTime.now());
 
-                    OrganizationMongo savedOrganization = organizationMongoRepository.save(organization);
+                    Organization savedOrganization = organizationRepository.save(organization);
                     log.info("Updated organization with id: {}", savedOrganization.getId());
 
                     return OrganizationResponse.fromEntity(savedOrganization);
@@ -137,14 +134,13 @@ public class OrganizationService {
     public boolean deleteOrganization(String id) {
         log.info("Soft deleting organization with id: {}", id);
 
-        return organizationMongoRepository.findById(id)
+        return organizationRepository.findById(id)
                 .filter(org -> org.getDeletedAt() == null)
                 .map(organization -> {
-                    organization.setStatus(OrganizationMongo.OrganizationStatus.DELETED);
-                    organization.setDeletedAt(ZonedDateTime.now());
-                    organization.setUpdatedAt(ZonedDateTime.now());
+                    organization.setStatus(Organization.OrganizationStatus.DELETED);
+                    organization.setDeletedAt(LocalDateTime.now());
                     
-                    organizationMongoRepository.save(organization);
+                    organizationRepository.save(organization);
                     log.info("Soft deleted organization with id: {}", id);
                     return true;
                 })
@@ -154,14 +150,13 @@ public class OrganizationService {
     public boolean restoreOrganization(String id) {
         log.info("Restoring organization with id: {}", id);
 
-        return organizationMongoRepository.findById(id)
+        return organizationRepository.findById(id)
                 .filter(org -> org.getDeletedAt() != null)
                 .map(organization -> {
-                    organization.setStatus(OrganizationMongo.OrganizationStatus.ACTIVE);
+                    organization.setStatus(Organization.OrganizationStatus.ACTIVE);
                     organization.setDeletedAt(null);
-                    organization.setUpdatedAt(ZonedDateTime.now());
                     
-                    organizationMongoRepository.save(organization);
+                    organizationRepository.save(organization);
                     log.info("Restored organization with id: {}", id);
                     return true;
                 })
@@ -176,16 +171,16 @@ public class OrganizationService {
         Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortBy);
         Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
 
-        OrganizationMongo.OrganizationStatus statusEnum = null;
+        Organization.OrganizationStatus statusEnum = null;
         if (status != null && !status.trim().isEmpty()) {
             try {
-                statusEnum = OrganizationMongo.OrganizationStatus.valueOf(status.toUpperCase());
+                statusEnum = Organization.OrganizationStatus.valueOf(status.toUpperCase());
             } catch (IllegalArgumentException e) {
                 log.warn("Invalid status: {}", status);
             }
         }
 
-        Page<OrganizationMongo> organizations = organizationMongoRepository.findBySearchCriteria(
+        Page<Organization> organizations = organizationRepository.findBySearchCriteria(
                 name, code, statusEnum, pageable);
 
         return organizations.map(OrganizationResponse::fromEntity);
@@ -194,7 +189,7 @@ public class OrganizationService {
     public List<OrganizationResponse> getOrganizationsByUserId(String userId) {
         log.info("Getting organizations by user id: {}", userId);
 
-        List<OrganizationMongo> organizations = organizationMongoRepository.findByUserId(userId);
+        List<Organization> organizations = organizationRepository.findByUserId(userId);
         return organizations.stream()
                 .map(OrganizationResponse::fromEntity)
                 .toList();
@@ -203,17 +198,19 @@ public class OrganizationService {
     public long countOrganizationsByStatus(String status) {
         log.info("Counting organizations by status: {}", status);
 
-        OrganizationMongo.OrganizationStatus statusEnum = null;
+        Organization.OrganizationStatus statusEnum = null;
         if (status != null && !status.trim().isEmpty()) {
             try {
-                statusEnum = OrganizationMongo.OrganizationStatus.valueOf(status.toUpperCase());
+                statusEnum = Organization.OrganizationStatus.valueOf(status.toUpperCase());
             } catch (IllegalArgumentException e) {
                 log.warn("Invalid status: {}", status);
             }
         }
 
         return statusEnum != null ? 
-                organizationMongoRepository.countByStatus(statusEnum) : 
-                organizationMongoRepository.count();
+                organizationRepository.countByStatus(statusEnum) : 
+                organizationRepository.count();
     }
 }
+
+

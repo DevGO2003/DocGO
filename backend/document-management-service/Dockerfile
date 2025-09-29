@@ -29,7 +29,7 @@ WORKDIR /app
 RUN groupadd -r spring && useradd -r -g spring spring
 
 # Copy built JAR from builder stage
-COPY --from=builder /app/target/contract-service-1.0.0.jar app.jar
+COPY --from=builder /app/target/document-service-1.0.0.jar app.jar
 
 # Change ownership to non-root user
 RUN chown spring:spring app.jar

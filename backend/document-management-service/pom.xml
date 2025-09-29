@@ -9,7 +9,7 @@
 		<version>3.5.4</version>
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.devgo2003.docgo.document-management-service</groupId>
+	<groupId>com.devgo2003.docgo.backend</groupId>
 	<artifactId>document-service</artifactId>
 	<version>1.0.0</version>
 	<name>document-management-service</name>

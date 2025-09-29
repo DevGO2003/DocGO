@@ -1,5 +1,8 @@
 package com.devgo2003.docgo.backend.user_service.entity;
 
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.mapping.Field;
@@ -10,6 +13,9 @@ import java.time.LocalDateTime;
  * Base entity chứa các trường audit cơ bản (created_at, created_by),
  * soft-delete và version. Các thay đổi/updates sẽ được lưu vào bảng audit riêng.
  */
+@SuperBuilder
+@NoArgsConstructor
+@AllArgsConstructor
 public abstract class BaseEntity {
 
     /**

@@ -10,12 +10,16 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+    
+    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<RestResponse<ValidationErrorResponse>> handleValidationExceptions(MethodArgumentNotValidException ex) {
@@ -29,12 +33,44 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<RestResponse<Object>> handleGenericException(Exception ex) {
+        // Sanitize error message to prevent information leakage
+        String sanitizedMessage = sanitizeErrorMessage(ex.getMessage());
+        
+        // Log full error details for debugging (with limited stacktrace)
+        log.error("Unexpected error occurred: {} - Request: {}", 
+                 sanitizedMessage, ex);
+        
         RestResponse<Object> response = ResponseBuilder.error(
                 500, 
                 "Internal Server Error", 
-                "Đã xảy ra lỗi hệ thống: " + ex.getMessage()
+                "Đã xảy ra lỗi hệ thống. Vui lòng thử lại sau."
         );
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+    }
+    
+    /**
+     * Sanitize error message to prevent sensitive information leakage
+     */
+    private String sanitizeErrorMessage(String message) {
+        if (message == null) {
+            return "Unknown error";
+        }
+        
+        // Remove sensitive patterns
+        String sanitized = message
+                .replaceAll("(?i)password[=:][^\\s,]+", "password=***")
+                .replaceAll("(?i)token[=:][^\\s,]+", "token=***")
+                .replaceAll("(?i)key[=:][^\\s,]+", "key=***")
+                .replaceAll("(?i)secret[=:][^\\s,]+", "secret=***")
+                .replaceAll("mongodb://[^@]+@", "mongodb://***:***@")
+                .replaceAll("mongodb\\+srv://[^@]+@", "mongodb+srv://***:***@");
+        
+        // Limit message length
+        if (sanitized.length() > 200) {
+            sanitized = sanitized.substring(0, 200) + "...";
+        }
+        
+        return sanitized;
     }
 
     private ErrorDetail mapToErrorDetail(FieldError fieldError) {

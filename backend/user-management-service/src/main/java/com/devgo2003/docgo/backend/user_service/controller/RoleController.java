@@ -1,6 +1,6 @@
 package com.devgo2003.docgo.backend.user_service.controller;
 
-import com.devgo2003.docgo.backend.user_service.entity.RoleMongo;
+import com.devgo2003.docgo.backend.user_service.entity.Role;
 import com.devgo2003.docgo.backend.user_service.service.RoleService;
 import com.devgo2003.docgo.backend.user_service.common.response.RestResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -50,7 +50,7 @@ public class RoleController {
         🔹 Đầu ra
         
         📝 data
-        Loại: Page<RoleMongo>
+        Loại: Page<Role>
         Mô tả: Danh sách vai trò với phân trang
         
         📊 apiVersion
@@ -82,7 +82,7 @@ public class RoleController {
         Mô tả: Đường dẫn API được gọi
         """
     )
-    public ResponseEntity<RestResponse<Page<RoleMongo>>> getAllRoles(
+    public ResponseEntity<RestResponse<Page<Role>>> getAllRoles(
             @Parameter(description = "Số trang (mặc định: 0)") @RequestParam(defaultValue = "0") int pageNumber,
             @Parameter(description = "Kích thước trang (mặc định: 10)") @RequestParam(defaultValue = "10") int pageSize,
             @Parameter(description = "Trường sắp xếp (mặc định: createdAt)") @RequestParam(defaultValue = "createdAt") String sortBy,
@@ -90,9 +90,9 @@ public class RoleController {
         
         log.info("Getting all roles - pageNumber: {}, pageSize: {}, sortBy: {}, sortDirection: {}", pageNumber, pageSize, sortBy, sortDirection);
         
-        Page<RoleMongo> roles = roleService.getAllRoles(pageNumber, pageSize, sortBy, sortDirection);
+        Page<Role> roles = roleService.getAllRoles(pageNumber, pageSize, sortBy, sortDirection);
         
-        return ResponseEntity.ok(RestResponse.<Page<RoleMongo>>builder()
+        return ResponseEntity.ok(RestResponse.<Page<Role>>builder()
                 .statusCode(200)
                 .shortMessage("Success")
                 .description("Đã lấy danh sách vai trò thành công")
@@ -113,7 +113,7 @@ public class RoleController {
         🔹 Đầu ra
         
         📝 data
-        Loại: RoleMongo
+        Loại: Role
         Mô tả: Thông tin chi tiết vai trò
         
         📊 apiVersion
@@ -145,13 +145,13 @@ public class RoleController {
         Mô tả: Đường dẫn API được gọi
         """
     )
-    public ResponseEntity<RestResponse<RoleMongo>> getRoleById(
+    public ResponseEntity<RestResponse<Role>> getRoleById(
             @Parameter(description = "ID vai trò") @PathVariable String id) {
         
         log.info("Getting role by id: {}", id);
         
         return roleService.getRoleById(id)
-                .map(role -> ResponseEntity.ok(RestResponse.<RoleMongo>builder()
+                .map(role -> ResponseEntity.ok(RestResponse.<Role>builder()
                         .statusCode(200)
                         .shortMessage("Success")
                         .description("Đã lấy thông tin vai trò thành công")
@@ -171,7 +171,7 @@ public class RoleController {
         🔹 Đầu ra
         
         📝 data
-        Loại: List<RoleMongo>
+        Loại: List<Role>
         Mô tả: Danh sách vai trò đang hoạt động
         
         📊 apiVersion
@@ -203,13 +203,13 @@ public class RoleController {
         Mô tả: Đường dẫn API được gọi
         """
     )
-    public ResponseEntity<RestResponse<List<RoleMongo>>> getActiveRoles() {
+    public ResponseEntity<RestResponse<List<Role>>> getActiveRoles() {
         
         log.info("Getting active roles");
         
-        List<RoleMongo> roles = roleService.getActiveRoles();
+        List<Role> roles = roleService.getActiveRoles();
         
-        return ResponseEntity.ok(RestResponse.<List<RoleMongo>>builder()
+        return ResponseEntity.ok(RestResponse.<List<Role>>builder()
                 .statusCode(200)
                 .shortMessage("Success")
                 .description("Đã lấy danh sách vai trò hoạt động thành công")
@@ -230,7 +230,7 @@ public class RoleController {
         🔹 Đầu ra
         
         📝 data
-        Loại: List<RoleMongo>
+        Loại: List<Role>
         Mô tả: Danh sách vai trò con
         
         📊 apiVersion
@@ -262,14 +262,14 @@ public class RoleController {
         Mô tả: Đường dẫn API được gọi
         """
     )
-    public ResponseEntity<RestResponse<List<RoleMongo>>> getRolesByParent(
+    public ResponseEntity<RestResponse<List<Role>>> getRolesByParent(
             @Parameter(description = "ID vai trò cha") @PathVariable String parentRoleId) {
         
         log.info("Getting roles by parent: {}", parentRoleId);
         
-        List<RoleMongo> roles = roleService.getRolesByParent(parentRoleId);
+        List<Role> roles = roleService.getRolesByParent(parentRoleId);
         
-        return ResponseEntity.ok(RestResponse.<List<RoleMongo>>builder()
+        return ResponseEntity.ok(RestResponse.<List<Role>>builder()
                 .statusCode(200)
                 .shortMessage("Success")
                 .description("Đã lấy danh sách vai trò con thành công")
@@ -290,7 +290,7 @@ public class RoleController {
         🔹 Đầu ra
         
         📝 data
-        Loại: List<RoleMongo>
+        Loại: List<Role>
         Mô tả: Danh sách vai trò theo cấp độ
         
         📊 apiVersion
@@ -322,14 +322,14 @@ public class RoleController {
         Mô tả: Đường dẫn API được gọi
         """
     )
-    public ResponseEntity<RestResponse<List<RoleMongo>>> getRolesByLevel(
+    public ResponseEntity<RestResponse<List<Role>>> getRolesByLevel(
             @Parameter(description = "Cấp độ vai trò") @PathVariable Integer level) {
         
         log.info("Getting roles by level: {}", level);
         
-        List<RoleMongo> roles = roleService.getRolesByLevel(level);
+        List<Role> roles = roleService.getRolesByLevel(level);
         
-        return ResponseEntity.ok(RestResponse.<List<RoleMongo>>builder()
+        return ResponseEntity.ok(RestResponse.<List<Role>>builder()
                 .statusCode(200)
                 .shortMessage("Success")
                 .description("Đã lấy danh sách vai trò theo cấp độ thành công")
@@ -337,9 +337,9 @@ public class RoleController {
                 .build());
     }
     
-    @GetMapping("/search")
+    @GetMapping("/search/simple")
     @Operation(
-        summary = "Tìm kiếm vai trò", 
+        summary = "Tìm kiếm vai trò đơn giản", 
         description = """
         🔹 Đầu vào
         
@@ -350,7 +350,7 @@ public class RoleController {
         🔹 Đầu ra
         
         📝 data
-        Loại: List<RoleMongo>
+        Loại: List<Role>
         Mô tả: Danh sách vai trò tìm được
         
         📊 apiVersion
@@ -382,14 +382,14 @@ public class RoleController {
         Mô tả: Đường dẫn API được gọi
         """
     )
-    public ResponseEntity<RestResponse<List<RoleMongo>>> searchRoles(
+    public ResponseEntity<RestResponse<List<Role>>> searchRolesSimple(
             @Parameter(description = "Từ khóa tìm kiếm") @RequestParam String q) {
         
         log.info("Searching roles with query: {}", q);
         
-        List<RoleMongo> roles = roleService.searchRoles(q);
+        List<Role> roles = roleService.searchRoles(q);
         
-        return ResponseEntity.ok(RestResponse.<List<RoleMongo>>builder()
+        return ResponseEntity.ok(RestResponse.<List<Role>>builder()
                 .statusCode(200)
                 .shortMessage("Success")
                 .description("Đã tìm kiếm vai trò thành công")
@@ -410,7 +410,7 @@ public class RoleController {
         🔹 Đầu ra
         
         📝 data
-        Loại: List<RoleMongo>
+        Loại: List<Role>
         Mô tả: Danh sách vai trò có quyền này
         
         📊 apiVersion
@@ -442,14 +442,14 @@ public class RoleController {
         Mô tả: Đường dẫn API được gọi
         """
     )
-    public ResponseEntity<RestResponse<List<RoleMongo>>> getRolesByPermission(
+    public ResponseEntity<RestResponse<List<Role>>> getRolesByPermission(
             @Parameter(description = "ID quyền") @PathVariable String permissionId) {
         
         log.info("Getting roles by permission: {}", permissionId);
         
-        List<RoleMongo> roles = roleService.getRolesByPermission(permissionId);
+        List<Role> roles = roleService.getRolesByPermission(permissionId);
         
-        return ResponseEntity.ok(RestResponse.<List<RoleMongo>>builder()
+        return ResponseEntity.ok(RestResponse.<List<Role>>builder()
                 .statusCode(200)
                 .shortMessage("Success")
                 .description("Đã lấy danh sách vai trò theo quyền thành công")
@@ -464,13 +464,13 @@ public class RoleController {
         🔹 Đầu vào
         
         📝 role (bắt buộc, body)
-        Loại: RoleMongo
+        Loại: Role
         Mô tả: Thông tin vai trò mới cần tạo
         
         🔹 Đầu ra
         
         📝 data
-        Loại: RoleMongo
+        Loại: Role
         Mô tả: Thông tin vai trò đã được tạo
         
         📊 apiVersion
@@ -502,14 +502,14 @@ public class RoleController {
         Mô tả: Đường dẫn API được gọi
         """
     )
-    public ResponseEntity<RestResponse<RoleMongo>> createRole(
-            @Parameter(description = "Thông tin vai trò") @Valid @RequestBody RoleMongo role) {
+    public ResponseEntity<RestResponse<Role>> createRole(
+            @Parameter(description = "Thông tin vai trò") @Valid @RequestBody Role role) {
         
         log.info("Creating new role: {}", role.getName());
         
-        RoleMongo createdRole = roleService.createRole(role);
+        Role createdRole = roleService.createRole(role);
         
-        return ResponseEntity.ok(RestResponse.<RoleMongo>builder()
+        return ResponseEntity.ok(RestResponse.<Role>builder()
                 .statusCode(201)
                 .shortMessage("Created")
                 .description("Đã tạo vai trò thành công")
@@ -530,7 +530,7 @@ public class RoleController {
         🔹 Đầu ra
         
         📝 data
-        Loại: RoleMongo
+        Loại: Role
         Mô tả: Thông tin vai trò tìm được
         
         📊 apiVersion
@@ -562,13 +562,13 @@ public class RoleController {
         Mô tả: Đường dẫn API được gọi
         """
     )
-    public ResponseEntity<RestResponse<RoleMongo>> getRoleByName(
+    public ResponseEntity<RestResponse<Role>> getRoleByName(
             @Parameter(description = "Tên vai trò") @PathVariable String name) {
         
         log.info("Getting role by name: {}", name);
         
         return roleService.getRoleByName(name)
-                .map(role -> ResponseEntity.ok(RestResponse.<RoleMongo>builder()
+                .map(role -> ResponseEntity.ok(RestResponse.<Role>builder()
                         .statusCode(200)
                         .shortMessage("Success")
                         .description("Đã lấy thông tin vai trò thành công")
@@ -577,7 +577,7 @@ public class RoleController {
                 .orElse(ResponseEntity.notFound().build());
     }
     
-    @GetMapping("/parent/{parentRoleId}")
+    @GetMapping("/children/{parentRoleId}")
     @Operation(
         summary = "Lấy danh sách vai trò con", 
         description = """
@@ -590,7 +590,7 @@ public class RoleController {
         🔹 Đầu ra
         
         📝 data
-        Loại: List<RoleMongo>
+        Loại: List<Role>
         Mô tả: Danh sách vai trò con
         
         📊 apiVersion
@@ -622,14 +622,14 @@ public class RoleController {
         Mô tả: Đường dẫn API được gọi
         """
     )
-    public ResponseEntity<RestResponse<List<RoleMongo>>> getChildRoles(
+    public ResponseEntity<RestResponse<List<Role>>> getChildRoles(
             @Parameter(description = "ID vai trò cha") @PathVariable String parentRoleId) {
         
         log.info("Getting child roles for parent: {}", parentRoleId);
         
-        List<RoleMongo> roles = roleService.getAllRoles(0, 1000, "createdAt", "DESC").getContent();
+        List<Role> roles = roleService.getAllRoles(0, 1000, "createdAt", "DESC").getContent();
         
-        return ResponseEntity.ok(RestResponse.<List<RoleMongo>>builder()
+        return ResponseEntity.ok(RestResponse.<List<Role>>builder()
                 .statusCode(200)
                 .shortMessage("Success")
                 .description("Đã lấy danh sách vai trò con thành công")
@@ -666,7 +666,7 @@ public class RoleController {
         🔹 Đầu ra
         
         📝 data
-        Loại: List<RoleMongo>
+        Loại: List<Role>
         Mô tả: Kết quả tìm kiếm vai trò
         
         📊 apiVersion
@@ -698,7 +698,7 @@ public class RoleController {
         Mô tả: Đường dẫn API được gọi
         """
     )
-    public ResponseEntity<RestResponse<List<RoleMongo>>> searchRoles(
+    public ResponseEntity<RestResponse<List<Role>>> searchRoles(
             @Parameter(description = "Từ khóa tìm kiếm") @RequestParam(required = false) String searchTerm,
             @Parameter(description = "Số trang (mặc định: 0)") @RequestParam(defaultValue = "0") int pageNumber,
             @Parameter(description = "Kích thước trang (mặc định: 10)") @RequestParam(defaultValue = "10") int pageSize,
@@ -707,9 +707,9 @@ public class RoleController {
         
         log.info("Searching roles - searchTerm: {}", searchTerm);
         
-        List<RoleMongo> roles = roleService.searchRoles(searchTerm);
+        List<Role> roles = roleService.searchRoles(searchTerm);
         
-        return ResponseEntity.ok(RestResponse.<List<RoleMongo>>builder()
+        return ResponseEntity.ok(RestResponse.<List<Role>>builder()
                 .statusCode(200)
                 .shortMessage("Success")
                 .description("Đã tìm kiếm vai trò thành công")
@@ -785,13 +785,13 @@ public class RoleController {
         Mô tả: ID của vai trò cần cập nhật
         
         📝 roleDetails (bắt buộc, body)
-        Loại: RoleMongo
+        Loại: Role
         Mô tả: Thông tin cập nhật cho vai trò
         
         🔹 Đầu ra
         
         📝 data
-        Loại: RoleMongo
+        Loại: Role
         Mô tả: Thông tin vai trò đã được cập nhật
         
         📊 apiVersion
@@ -823,15 +823,15 @@ public class RoleController {
         Mô tả: Đường dẫn API được gọi
         """
     )
-    public ResponseEntity<RestResponse<RoleMongo>> updateRole(
+    public ResponseEntity<RestResponse<Role>> updateRole(
             @Parameter(description = "ID vai trò") @PathVariable String id,
-            @Parameter(description = "Thông tin cập nhật") @Valid @RequestBody RoleMongo roleDetails) {
+            @Parameter(description = "Thông tin cập nhật") @Valid @RequestBody Role roleDetails) {
         
         log.info("Updating role: {}", id);
         
-        RoleMongo updatedRole = roleService.updateRole(id, roleDetails);
+        Role updatedRole = roleService.updateRole(id, roleDetails);
         
-        return ResponseEntity.ok(RestResponse.<RoleMongo>builder()
+        return ResponseEntity.ok(RestResponse.<Role>builder()
                 .statusCode(200)
                 .shortMessage("Success")
                 .description("Đã cập nhật vai trò thành công")
@@ -856,7 +856,7 @@ public class RoleController {
         🔹 Đầu ra
         
         📝 data
-        Loại: RoleMongo
+        Loại: Role
         Mô tả: Thông tin vai trò với quyền đã được gán
         
         📊 apiVersion
@@ -888,15 +888,15 @@ public class RoleController {
         Mô tả: Đường dẫn API được gọi
         """
     )
-    public ResponseEntity<RestResponse<RoleMongo>> assignPermissions(
+    public ResponseEntity<RestResponse<Role>> assignPermissions(
             @Parameter(description = "ID vai trò") @PathVariable String id,
             @Parameter(description = "Danh sách ID quyền") @RequestBody Set<String> permissionIds) {
         
         log.info("Assigning permissions to role: {}", id);
         
-        RoleMongo updatedRole = roleService.assignPermissions(id, permissionIds);
+        Role updatedRole = roleService.assignPermissions(id, permissionIds);
         
-        return ResponseEntity.ok(RestResponse.<RoleMongo>builder()
+        return ResponseEntity.ok(RestResponse.<Role>builder()
                 .statusCode(200)
                 .shortMessage("Success")
                 .description("Đã gán quyền cho vai trò thành công")
@@ -921,7 +921,7 @@ public class RoleController {
         🔹 Đầu ra
         
         📝 data
-        Loại: RoleMongo
+        Loại: Role
         Mô tả: Thông tin vai trò với quyền đã được thêm
         
         📊 apiVersion
@@ -953,15 +953,15 @@ public class RoleController {
         Mô tả: Đường dẫn API được gọi
         """
     )
-    public ResponseEntity<RestResponse<RoleMongo>> addPermission(
+    public ResponseEntity<RestResponse<Role>> addPermission(
             @Parameter(description = "ID vai trò") @PathVariable String id,
             @Parameter(description = "ID quyền") @RequestParam String permissionId) {
         
         log.info("Adding permission to role: {}", id);
         
-        RoleMongo updatedRole = roleService.addPermission(id, permissionId);
+        Role updatedRole = roleService.addPermission(id, permissionId);
         
-        return ResponseEntity.ok(RestResponse.<RoleMongo>builder()
+        return ResponseEntity.ok(RestResponse.<Role>builder()
                 .statusCode(200)
                 .shortMessage("Success")
                 .description("Đã thêm quyền cho vai trò thành công")
@@ -986,7 +986,7 @@ public class RoleController {
         🔹 Đầu ra
         
         📝 data
-        Loại: RoleMongo
+        Loại: Role
         Mô tả: Thông tin vai trò với quyền đã được xóa
         
         📊 apiVersion
@@ -1018,15 +1018,15 @@ public class RoleController {
         Mô tả: Đường dẫn API được gọi
         """
     )
-    public ResponseEntity<RestResponse<RoleMongo>> removePermission(
+    public ResponseEntity<RestResponse<Role>> removePermission(
             @Parameter(description = "ID vai trò") @PathVariable String id,
             @Parameter(description = "ID quyền") @RequestParam String permissionId) {
         
         log.info("Removing permission from role: {}", id);
         
-        RoleMongo updatedRole = roleService.removePermission(id, permissionId);
+        Role updatedRole = roleService.removePermission(id, permissionId);
         
-        return ResponseEntity.ok(RestResponse.<RoleMongo>builder()
+        return ResponseEntity.ok(RestResponse.<Role>builder()
                 .statusCode(200)
                 .shortMessage("Success")
                 .description("Đã xóa quyền khỏi vai trò thành công")
@@ -1051,7 +1051,7 @@ public class RoleController {
         🔹 Đầu ra
         
         📝 data
-        Loại: RoleMongo
+        Loại: Role
         Mô tả: Thông tin vai trò với trạng thái đã cập nhật
         
         📊 apiVersion
@@ -1083,15 +1083,15 @@ public class RoleController {
         Mô tả: Đường dẫn API được gọi
         """
     )
-    public ResponseEntity<RestResponse<RoleMongo>> updateRoleStatus(
+    public ResponseEntity<RestResponse<Role>> updateRoleStatus(
             @Parameter(description = "ID vai trò") @PathVariable String id,
             @Parameter(description = "Trạng thái mới") @RequestParam Boolean isActive) {
         
         log.info("Updating role status: {} to {}", id, isActive);
         
-        RoleMongo updatedRole = roleService.updateRoleStatus(id, isActive);
+        Role updatedRole = roleService.updateRoleStatus(id, isActive);
         
-        return ResponseEntity.ok(RestResponse.<RoleMongo>builder()
+        return ResponseEntity.ok(RestResponse.<Role>builder()
                 .statusCode(200)
                 .shortMessage("Success")
                 .description("Đã cập nhật trạng thái vai trò thành công")
@@ -1112,7 +1112,7 @@ public class RoleController {
         🔹 Đầu ra
         
         📝 data
-        Loại: List<RoleMongo>
+        Loại: List<Role>
         Mô tả: Cây phân cấp vai trò từ vai trò gốc
         
         📊 apiVersion
@@ -1144,14 +1144,14 @@ public class RoleController {
         Mô tả: Đường dẫn API được gọi
         """
     )
-    public ResponseEntity<RestResponse<List<RoleMongo>>> getRoleHierarchy(
+    public ResponseEntity<RestResponse<List<Role>>> getRoleHierarchy(
             @Parameter(description = "ID vai trò") @PathVariable String id) {
         
         log.info("Getting role hierarchy for: {}", id);
         
-        List<RoleMongo> hierarchy = roleService.getRoleHierarchy(id);
+        List<Role> hierarchy = roleService.getRoleHierarchy(id);
         
-        return ResponseEntity.ok(RestResponse.<List<RoleMongo>>builder()
+        return ResponseEntity.ok(RestResponse.<List<Role>>builder()
                 .statusCode(200)
                 .shortMessage("Success")
                 .description("Đã lấy cây phân cấp vai trò thành công")

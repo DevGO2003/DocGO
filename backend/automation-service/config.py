@@ -25,23 +25,23 @@ def get_gemini_api_key():
         raise ValueError("Biến môi trường GEMINI_API_KEY chưa được thiết lập.")
     return api_key
 
-# MongoDB Atlas configuration
-def get_mongodb_uri():
-    """Lấy MongoDB Atlas connection string"""
-    return os.getenv("MONGODB_ATLAS_URI", os.getenv("MONGODB_URI", "mongodb://localhost:27017"))
+# MongoDB Atlas configuration - REMOVED (Automation Service không cần database)
+# def get_mongodb_uri():
+#     """Lấy MongoDB Atlas connection string"""
+#     return os.getenv("MONGODB_ATLAS_URI", os.getenv("MONGODB_URI", "mongodb://localhost:27017"))
 
-def get_mongodb_database():
-    """Lấy tên database MongoDB"""
-    return os.getenv("MONGODB_DATABASE", "docgo_ai")
+# def get_mongodb_database():
+#     """Lấy tên database MongoDB"""
+#     return os.getenv("MONGODB_DATABASE", "docgo_ai")
 
-def get_mongodb_collections():
-    """Lấy tên các collections MongoDB"""
-    return {
-        "notifications": os.getenv("MONGODB_NOTIFICATIONS_COLLECTION", "notifications"),
-        "batch_jobs": os.getenv("MONGODB_BATCH_JOBS_COLLECTION", "batch_jobs"),
-        "notification_templates": os.getenv("MONGODB_TEMPLATES_COLLECTION", "notification_templates"),
-        "events": os.getenv("MONGODB_EVENTS_COLLECTION", "events")
-    }
+# def get_mongodb_collections():
+#     """Lấy tên các collections MongoDB"""
+#     return {
+#         "notifications": os.getenv("MONGODB_NOTIFICATIONS_COLLECTION", "notifications"),
+#         "batch_jobs": os.getenv("MONGODB_BATCH_JOBS_COLLECTION", "batch_jobs"),
+#         "notification_templates": os.getenv("MONGODB_TEMPLATES_COLLECTION", "notification_templates"),
+#         "events": os.getenv("MONGODB_EVENTS_COLLECTION", "events")
+#     }
 
 # Redis Cloud configuration
 def get_redis_url():

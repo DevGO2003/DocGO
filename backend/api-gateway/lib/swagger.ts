@@ -12,50 +12,22 @@ const swaggerOptions = {
       title: 'DocGO - API Gateway BFF',
       version: '1.0.0',
       description: `
-## 🚀 API Gateway BFF - DocGO
+      ## 🚀 API Gateway BFF - DocGO
 
-API Gateway Backend for Frontend (BFF) sử dụng Next.js và Kafka để kết nối và quản lý các microservice của hệ thống DocGO.
+      API Gateway Backend for Frontend (BFF) sử dụng Next.js để kết nối và quản lý các microservice của hệ thống DocGO.
 
-### 🔗 **Service Discovery & Routing**
-- Tự động định tuyến request đến microservice phù hợp
-- Hỗ trợ tất cả HTTP methods (GET, POST, PUT, DELETE)
-- Xử lý query parameters và request body
+      ### 🔗 **Service Discovery & Routing**
+      - Tự động định tuyến request đến microservice phù hợp
+      - Hỗ trợ tất cả HTTP methods (GET, POST, PUT, DELETE)
+      - Load balancing và caching
 
-### 📡 **Kafka Integration**
-- Publish events khi có thay đổi từ các service
-- Subscribe và xử lý events từ các topic
-- Logging và monitoring real-time
+      ### 📊 **Available Services**
+      - \`user-management-service\` (Port 8001) - Spring Boot
+      - \`document-management-service\` (Port 8002) - Spring Boot  
+      - \`automation-service\` (Port 8003) - FastAPI
 
-### 🔐 **Authentication & Authorization**
-- JWT-based security với middleware
-- Rate limiting (100 requests/15 minutes)
-- CORS handling và security headers
-
-### 📊 **Health Monitoring**
-- Kiểm tra trạng thái tất cả microservice
-- Monitoring Kafka connection
-- Uptime tracking và performance metrics
-
----
-
-**Base URL**: \`/api/v1/{service-name}/...\`
-
-**Available Services (4 microservices đang chạy)**:
-- \`user-management-service\` (Port 8001) - Spring Boot
-- \`document-management-service\` (Port 8002) - Spring Boot
-- \`automation-service\` (Port 8003) - FastAPI
-
-**Port Mapping**:
-- API Gateway: 8000
-- User Management Service: 8001
-- Document Management Service: 8002
-- Automation Service: 8003
-
-**Technology Distribution**:
-- Spring Boot (Java): 2 services
-- FastAPI (Python): 1 service  
-- Next.js (Node.js): 1 service
-      `,
+      **Base URL**: \`/api/v1/{service-name}/...\`
+            `,
       contact: {
         name: 'devgo2003',
         email: 'devgo2003@gmail.com'

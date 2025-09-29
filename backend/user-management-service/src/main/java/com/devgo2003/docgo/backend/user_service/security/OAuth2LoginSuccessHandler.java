@@ -1,8 +1,8 @@
 package com.devgo2003.docgo.backend.user_service.security;
 
-import com.devgo2003.docgo.backend.user_service.entity.UserMongo;
-import com.devgo2003.docgo.backend.user_service.entity.UserStatus;
-import com.devgo2003.docgo.backend.user_service.repository.UserMongoRepository;
+import com.devgo2003.docgo.backend.user_service.entity.User;
+import com.devgo2003.docgo.backend.user_service.entity.User.UserStatus;
+import com.devgo2003.docgo.backend.user_service.repository.UserRepository;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -21,10 +21,10 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(OAuth2LoginSuccessHandler.class);
     
-    private final UserMongoRepository userRepository;
+    private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
 
-    public OAuth2LoginSuccessHandler(UserMongoRepository userRepository, JwtUtil jwtUtil) {
+    public OAuth2LoginSuccessHandler(UserRepository userRepository, JwtUtil jwtUtil) {
         this.userRepository = userRepository;
         this.jwtUtil = jwtUtil;
     }
@@ -83,7 +83,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
             logger.debug("[{}] OAuth2 All attributes: {}", requestId, attributes);
 
             // Find or create user with error handling
-            UserMongo user = findOrCreateUser(username, email, givenName, familyName, pictureUrl, requestId);
+            User user = findOrCreateUser(username, email, givenName, familyName, pictureUrl, requestId);
             if (user == null) {
                 logger.error("[{}] Failed to find or create user: {}", requestId, username);
                 redirectToError(response, "user_creation_failed", requestId);
@@ -131,7 +131,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
     // kept: helper removed as logic now handled inline
 
-    private UserMongo findOrCreateUser(String username, String email, String firstName, String lastName, String avatarUrl, String requestId) {
+    private User findOrCreateUser(String username, String email, String firstName, String lastName, String avatarUrl, String requestId) {
         try {
             return userRepository.findByUsername(username)
                     .map(existing -> {
@@ -160,16 +160,16 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
                     .orElseGet(() -> {
                         logger.info("[{}] Creating new OAuth2 user: {}", requestId, username);
                         try {
-                            UserMongo newUser = UserMongo.builder()
+                            User newUser = User.builder()
                                     .username(username)
                                     .email(email)
                                     .firstName((firstName != null && !firstName.isBlank()) ? firstName : null)
                                     .lastName((lastName != null && !lastName.isBlank()) ? lastName : null)
                                     .avatarUrl((avatarUrl != null && !avatarUrl.isBlank()) ? avatarUrl : null)
                                     .password("") // OAuth2 users don't need password
-                                    .status(UserStatus.ACTIVE)
+                                    .status(User.UserStatus.ACTIVE)
                                     .build();
-                            UserMongo savedUser = userRepository.save(newUser);
+                            User savedUser = userRepository.save(newUser);
                             logger.info("[{}] Successfully created new OAuth2 user: {}", requestId, username);
                             return savedUser;
                         } catch (Exception e) {
@@ -183,7 +183,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         }
     }
 
-    private String generateAccessToken(UserMongo user, String requestId) {
+    private String generateAccessToken(User user, String requestId) {
         try {
             return jwtUtil.generateAccessToken(user.getUsername(), Map.of(
                     "userId", user.getId(),
@@ -195,7 +195,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         }
     }
 
-    private String generateRefreshToken(UserMongo user, String requestId) {
+    private String generateRefreshToken(User user, String requestId) {
         try {
             return jwtUtil.generateRefreshToken(user.getUsername());
         } catch (Exception e) {

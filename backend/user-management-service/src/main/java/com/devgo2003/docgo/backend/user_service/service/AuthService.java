@@ -1,8 +1,8 @@
 package com.devgo2003.docgo.backend.user_service.service;
 
-import com.devgo2003.docgo.backend.user_service.entity.UserMongo;
+import com.devgo2003.docgo.backend.user_service.entity.User;
 import com.devgo2003.docgo.backend.user_service.model.AuthResponse;
-import com.devgo2003.docgo.backend.user_service.repository.UserMongoRepository;
+import com.devgo2003.docgo.backend.user_service.repository.UserRepository;
 import com.devgo2003.docgo.backend.user_service.security.JwtUtil;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -15,12 +15,12 @@ import io.jsonwebtoken.Claims;
 
 @Service
 public class AuthService {
-    private final UserMongoRepository userRepository;
+    private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final long accessTokenTtlSeconds;
 
-    public AuthService(UserMongoRepository userRepository, BCryptPasswordEncoder passwordEncoder, JwtUtil jwtUtil) {
+    public AuthService(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder, JwtUtil jwtUtil) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
@@ -37,17 +37,15 @@ public class AuthService {
             return new AuthResponse(false, "Email already exists", null, null, null);
         }
 
-        UserMongo user = UserMongo.builder()
+        User user = User.builder()
                 .username(username)
                 .email(email)
                 .password(passwordEncoder.encode(password))
                 .roleIds(Set.of("employee")) // Default role
-                .status(com.devgo2003.docgo.backend.user_service.entity.UserStatus.ACTIVE)
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
+                .status(com.devgo2003.docgo.backend.user_service.entity.User.UserStatus.ACTIVE)
                 .build();
         
-        UserMongo savedUser = userRepository.save(user);
+        User savedUser = userRepository.save(user);
         
         AuthResponse.UserInfo userInfo = createUserInfo(savedUser);
         
@@ -131,15 +129,15 @@ public class AuthService {
         }
     }
 
-    public Optional<UserMongo> getUserByUsername(String username) {
+    public Optional<User> getUserByUsername(String username) {
         return userRepository.findByUsername(username);
     }
 
-    public Optional<UserMongo> getUserByEmail(String email) {
+    public Optional<User> getUserByEmail(String email) {
         return userRepository.findByEmail(email);
     }
 
-    private AuthResponse.UserInfo createUserInfo(UserMongo user) {
+    private AuthResponse.UserInfo createUserInfo(User user) {
         AuthResponse.UserInfo info = new AuthResponse.UserInfo(
             user.getId(),
             user.getUsername(),

@@ -3,11 +3,10 @@ import json
 import uuid
 from datetime import datetime, timezone
 from typing import List, Dict, Any, Optional, Callable
-import motor.motor_asyncio
+# import motor.motor_asyncio  # MongoDB removed
 import redis.asyncio as redis
 
 from config import (
-    get_mongodb_uri, get_mongodb_database, get_mongodb_collections,
     get_redis_url, get_redis_password, get_redis_db, get_event_config
 )
 from schemas.event_schemas import (
@@ -19,17 +18,14 @@ from schemas.event_schemas import (
 
 class EventService:
     def __init__(self):
-        self.mongodb_uri = get_mongodb_uri()
-        self.mongodb_db = get_mongodb_database()
-        self.collections = get_mongodb_collections()
+        # MongoDB removed - Automation Service không cần database
         self.redis_url = get_redis_url()
         self.redis_password = get_redis_password()
         self.redis_db = get_redis_db()
         self.event_config = get_event_config()
         
         # Initialize connections
-        self.mongodb_client = None
-        self.mongodb_db_instance = None
+        # MongoDB client removed
         self.redis_client = None
         self.pubsub = None
         
@@ -40,9 +36,7 @@ class EventService:
     async def initialize(self):
         """Khởi tạo kết nối database và Redis"""
         try:
-            # MongoDB connection
-            self.mongodb_client = motor.motor_asyncio.AsyncIOMotorClient(self.mongodb_uri)
-            self.mongodb_db_instance = self.mongodb_client[self.mongodb_db]
+            # MongoDB connection removed
             
             # Redis connection
             redis_params = {"url": self.redis_url, "db": self.redis_db}
@@ -62,8 +56,7 @@ class EventService:
         """Đóng kết nối"""
         if self.pubsub:
             await self.pubsub.close()
-        if self.mongodb_client:
-            self.mongodb_client.close()
+        # MongoDB client removed
         if self.redis_client:
             await self.redis_client.close()
 
@@ -76,7 +69,7 @@ class EventService:
                 json.dumps(request.event.model_dump(), default=str)
             )
             
-            # Lưu event vào MongoDB để tracking
+            # MongoDB operations removed - Automation Service không cần database
             await self._save_event(request.event)
             
             return EventPublishResponse(

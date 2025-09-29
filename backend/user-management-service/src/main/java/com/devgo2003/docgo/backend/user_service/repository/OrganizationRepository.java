@@ -58,4 +58,8 @@ public interface OrganizationRepository extends MongoRepository<Organization, St
     // Tìm organization đã bị xóa
     @Query("{'deletedAt': {$ne: null}}")
     Page<Organization> findAllDeleted(Pageable pageable);
+
+    // Tìm organization theo userId
+    @Query("{'userIds': {$in: [?0]}}")
+    List<Organization> findByUserId(String userId);
 }

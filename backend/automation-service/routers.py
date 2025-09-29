@@ -69,7 +69,7 @@ def ask_gemini(api_key: str, content: str, question: str) -> str:
 
 
 # API 1: EXTRACT (doc, pdf)
-@router.post("/document/extract", summary="Trích xuất toàn bộ nội dung file (doc/pdf)", tags=["AI Processing"])
+@router.post("/document/extract", summary="Trích xuất toàn bộ nội dung file (doc/pdf)", tags=["🤖 API Xử lý AI"])
 async def extract_api(
     request: Request,
     file: UploadFile = File(..., description="File hợp đồng (docx, pdf)"),
@@ -165,7 +165,7 @@ async def extract_api(
 
 
 # API 4: CLASSIFY (nhận diện loại tài liệu: hợp đồng, đề cương, giáo trình, sách giáo khoa, ...)
-@router.post("/document/classify", summary="Phân loại loại tài liệu (file đa định dạng hoặc text)", tags=["AI Processing"])
+@router.post("/document/classify", summary="Phân loại loại tài liệu (file đa định dạng hoặc text)", tags=["🤖 API Xử lý AI"])
 async def classify_api(
     request: Request,
     gemini_api_key: str = Header(None, description="Gemini API Key (tùy chọn)")
@@ -756,19 +756,21 @@ async def classify_api(
     )
 
 
-# API Test: Kiểm tra GEMINI_API_KEY
-@router.get("/gemini/get-geminiapikey", summary="Kiểm tra GEMINI_API_KEY mà hệ thống đọc được", tags=["System Testing"])
-async def test_gemini_api_key_api(request: Request):
+# API Test: Lấy cấu hình Gemini
+@router.get("/gemini/get-config", summary="Lấy cấu hình Gemini AI", tags=["⚙️ API Kiểm tra Hệ thống"])
+async def get_gemini_config(request: Request):
     """
-    ## 🔹 Đầu vào
+    Lấy thông tin cấu hình Gemini AI và trạng thái hệ thống
+    
+    🔹 Đầu vào
     
     Không có tham số đầu vào
     
-    ## 🔹 Đầu ra
+    🔹 Đầu ra
     
     📄 data
     Loại: object
-    Mô tả: Thông tin về GEMINI_API_KEY và trạng thái hệ thống
+    Mô tả: Thông tin cấu hình Gemini AI và trạng thái hệ thống
     
     📊 apiVersion
     Loại: string
@@ -799,40 +801,62 @@ async def test_gemini_api_key_api(request: Request):
     Mô tả: Đường dẫn API được gọi
     """
     try:
-        # Lấy GEMINI_API_KEY từ biến môi trường
+        # Lấy cấu hình Gemini
         api_key = os.getenv("GEMINI_API_KEY")
+        model = os.getenv("GEMINI_MODEL", "gemini-1.5-flash")
         
-        # Kiểm tra các biến môi trường khác
+        # Lấy cấu hình service
+        service_name = os.getenv("SERVICE_NAME", "automation-service")
+        host = os.getenv("HOST", "0.0.0.0")
+        port = os.getenv("PORT", "8003")
+        debug = os.getenv("DEBUG", "false")
+        
+        # Lấy cấu hình Kafka
         kafka_servers = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092")
-        kafka_file_topic = os.getenv("KAFKA_FILE_UPLOADED_TOPIC", "file.uploaded")
-        kafka_text_topic = os.getenv("KAFKA_TEXT_EXTRACTED_TOPIC", "ai.text.extracted")
-        kafka_doc_topic = os.getenv("KAFKA_DOCUMENT_CLASSIFIED_TOPIC", "ai.document.classified")
-        kafka_contract_topic = os.getenv("KAFKA_CONTRACT_SUMMARY_TOPIC", "contract.summary.updated")
+        kafka_group_id = os.getenv("KAFKA_GROUP_ID", "automation-service")
+        
+        # Lấy cấu hình Redis
+        redis_host = os.getenv("REDIS_HOST", "localhost")
+        redis_port = os.getenv("REDIS_PORT", "6379")
+        redis_db = os.getenv("REDIS_DB", "0")
         
         # Tạo response data
-        test_data = {
-            "geminiApiKey": {
-                "exists": api_key is not None,
-                "length": len(api_key) if api_key else 0,
-                "masked": f"{api_key[:8]}...{api_key[-4:]}" if api_key and len(api_key) > 12 else "N/A" if not api_key else api_key,
-                "status": "CONFIGURED" if api_key else "NOT_CONFIGURED"
+        config_data = {
+            "gemini": {
+                "api_key": {
+                    "exists": api_key is not None,
+                    "length": len(api_key) if api_key else 0,
+                    "masked": f"{api_key[:8]}...{api_key[-4:]}" if api_key and len(api_key) > 12 else "N/A" if not api_key else api_key,
+                    "status": "CONFIGURED" if api_key else "NOT_CONFIGURED"
+                },
+                "model": model,
+                "status": "READY" if api_key else "NOT_CONFIGURED"
             },
-            "environment": {
-                "kafkaBootstrapServers": kafka_servers,
-                "kafkaFileUploadedTopic": kafka_file_topic,
-                "kafkaTextExtractedTopic": kafka_text_topic,
-                "kafkaDocumentClassifiedTopic": kafka_doc_topic,
-                "kafkaContractSummaryTopic": kafka_contract_topic,
-                "host": os.getenv("HOST", "0.0.0.0"),
-                "port": os.getenv("PORT", "8017"),
-                "debug": os.getenv("DEBUG", "false")
+            "service": {
+                "name": service_name,
+                "host": host,
+                "port": port,
+                "debug": debug.lower() == "true",
+                "version": "2.0.0"
             },
-            "systemInfo": {
-                "pythonPath": os.getcwd(),
-                "envFiles": {
-                    "dotenvLoaded": True,
-                    "envExists": os.path.exists("env/.env"),
-                    "envExampleExists": os.path.exists("env/.env.example")
+            "kafka": {
+                "bootstrap_servers": kafka_servers,
+                "group_id": kafka_group_id,
+                "status": "CONFIGURED"
+            },
+            "redis": {
+                "host": redis_host,
+                "port": redis_port,
+                "database": redis_db,
+                "status": "CONFIGURED"
+            },
+            "system": {
+                "python_path": os.getcwd(),
+                "environment": os.getenv("NODE_ENV", "development"),
+                "env_files": {
+                    "dotenv_loaded": True,
+                    "env_exists": os.path.exists("env/.env"),
+                    "env_example_exists": os.path.exists("env/.env.example")
                 }
             }
         }
@@ -841,8 +865,8 @@ async def test_gemini_api_key_api(request: Request):
             apiVersion="v1",
             statusCode=200,
             shortMessage="Success",
-            description="Kiểm tra GEMINI_API_KEY thành công",
-            data=test_data,
+            description="Đã lấy cấu hình Gemini thành công",
+            data=config_data,
             timestamp=datetime.now(timezone.utc).isoformat(),
             requestId=str(uuid.uuid4()),
             path=str(request.url)
@@ -853,144 +877,13 @@ async def test_gemini_api_key_api(request: Request):
             apiVersion="v1",
             statusCode=500,
             shortMessage="Internal Server Error",
-            description=f"Lỗi khi kiểm tra GEMINI_API_KEY: {str(e)}",
+            description=f"Lỗi khi lấy cấu hình Gemini: {str(e)}",
             data=None,
             timestamp=datetime.now(timezone.utc).isoformat(),
             requestId=str(uuid.uuid4()),
             path=str(request.url)
         )
 
-@router.post("/process-url", summary="Xử lý file từ URL với AI", tags=["AI Processing"])
-async def process_file_from_url(
-    request: Request,
-    file_url: str = Query(..., description="URL của file cần xử lý"),
-    filename: str = Query(..., description="Tên file"),
-    content_type: str = Query("application/pdf", description="Loại file"),
-    file_id: str = Query(None, description="ID của file (tùy chọn)")
-):
-    """
-    ## 🔹 Đầu vào
-    
-    🌐 file_url (bắt buộc, query)
-    Loại: string
-    Mô tả: URL của file cần xử lý (PDF, DOCX, TXT, etc.)
-    
-    📄 filename (bắt buộc, query)
-    Loại: string
-    Mô tả: Tên file để xử lý
-    
-    📋 content_type (tùy chọn, query)
-    Loại: string
-    Mô tả: Loại file (mặc định: application/pdf)
-    
-    🆔 file_id (tùy chọn, query)
-    Loại: string
-    Mô tả: ID của file (tùy chọn, nếu không có sẽ tự tạo)
-    
-    ## 🔹 Đầu ra
-    
-    📄 data
-    Loại: object
-    Mô tả: Kết quả xử lý file bao gồm extracted_text, classification, summary
-    
-    📊 apiVersion
-    Loại: string
-    Mô tả: Phiên bản API (v1)
-    
-    🔢 statusCode
-    Loại: integer
-    Mô tả: Mã trạng thái HTTP (200: thành công, 400: lỗi đầu vào, 500: lỗi server)
-    
-    📋 shortMessage
-    Loại: string
-    Mô tả: Thông báo ngắn gọn về kết quả
-    
-    📖 description
-    Loại: string
-    Mô tả: Mô tả chi tiết về kết quả xử lý
-    
-    🕒 timestamp
-    Loại: string (ISO-8601)
-    Mô tả: Thời gian xử lý yêu cầu
-    
-    🆔 requestId
-    Loại: string (UUID)
-    Mô tả: Định danh duy nhất của yêu cầu
-    
-    🛣️ path
-    Loại: string
-    Mô tả: Đường dẫn API được gọi
-    """
-    try:
-        # Download file from URL
-        async with aiohttp.ClientSession() as session:
-            async with session.get(file_url) as response:
-                if response.status != 200:
-                    raise HTTPException(status_code=400, detail=f"Không thể tải file từ URL: HTTP {response.status}")
-                
-                file_content = await response.read()
-                logging.info(f"[AI_URL_PROCESS] Downloaded {len(file_content)} bytes from {file_url}")
-        
-        # Extract text from content
-        extracted_text = ""
-        if content_type == "application/pdf":
-            extracted_text = f"[PDF_CONTENT_PLACEHOLDER] Content from {filename} (PDF text extraction not implemented yet)"
-        elif content_type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
-            extracted_text = f"[DOCX_CONTENT_PLACEHOLDER] Content from {filename} (DOCX text extraction not implemented yet)"
-        elif content_type.startswith("text/"):
-            extracted_text = file_content.decode('utf-8', errors='ignore')
-        else:
-            extracted_text = file_content.decode('utf-8', errors='ignore')
-        
-        # Use shared AI service
-        ai_service = AIProcessingService()
-        
-        # Classify document
-        classification_result = ai_service.classify_document(extracted_text, filename)
-        
-        # Generate summary if it's a contract
-        summary_result = None
-        if classification_result.get("classification") == "CONTRACT":
-            summary_result = ai_service.generate_contract_summary(extracted_text, filename)
-        
-        # Prepare result
-        result = {
-            "file_id": file_id or str(uuid.uuid4()),
-            "filename": filename,
-            "content_type": content_type,
-            "file_url": file_url,
-            "file_size": len(file_content),
-            "extracted_text": extracted_text[:500] + "..." if len(extracted_text) > 500 else extracted_text,
-            "classification": classification_result,
-            "summary": summary_result,
-            "processing_time": datetime.now(timezone.utc).isoformat()
-        }
-        
-        return RestResponse(
-            apiVersion="v1",
-            statusCode=200,
-            shortMessage="Success",
-            description=f"Đã xử lý file '{filename}' từ URL thành công",
-            data=result,
-            timestamp=datetime.now(timezone.utc).isoformat(),
-            requestId=str(uuid.uuid4()),
-            path=str(request.url)
-        )
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        logging.error(f"[AI_URL_PROCESS_ERROR] Error processing file from URL: {e}", exc_info=True)
-        return RestResponse(
-            apiVersion="v1",
-            statusCode=500,
-            shortMessage="Internal Server Error",
-            description=f"Lỗi khi xử lý file từ URL: {str(e)}",
-            data=None,
-            timestamp=datetime.now(timezone.utc).isoformat(),
-            requestId=str(uuid.uuid4()),
-            path=str(request.url)
-        )
 
 # ==================== NOTIFICATION APIs ====================
 # TEMPORARILY DISABLED - Missing twilio dependency
@@ -1000,7 +893,7 @@ async def process_file_from_url(
 batch_service = BatchService()
 event_service = EventService()
 
-# @router.post("/notifications/send", summary="Gửi notification", tags=["Notification Service"])
+# @router.post("/notifications/send", summary="Gửi notification", tags=["📧 API Thông báo"])
 # async def send_notification_api(
 #     request: Request,
 #     notification_request: NotificationRequest
@@ -1043,7 +936,7 @@ event_service = EventService()
 #             requestId=str(uuid.uuid4())
 #         )
 
-# @router.get("/notifications/history", summary="Lịch sử notification", tags=["Notification Service"])
+# @router.get("/notifications/history", summary="Lịch sử notification", tags=["📧 API Thông báo"])
 # async def get_notification_history_api(
 #     request: Request,
 #     page: int = Query(1, ge=1, description="Số trang"),
@@ -1111,7 +1004,7 @@ event_service = EventService()
 #             requestId=str(uuid.uuid4())
 #         )
 
-# @router.post("/notifications/templates", summary="Tạo notification template", tags=["Notification Service"])
+# @router.post("/notifications/templates", summary="Tạo notification template", tags=["📧 API Thông báo"])
 # async def create_notification_template_api(
 #     request: Request,
 #     template: NotificationTemplate
@@ -1156,7 +1049,7 @@ event_service = EventService()
 
 # ==================== BATCH PROCESSING APIs ====================
 
-@router.post("/batch/process", summary="Xử lý hàng loạt", tags=["Batch Processing Service"])
+@router.post("/batch/process", summary="Xử lý hàng loạt", tags=["📦 API Xử lý Batch"])
 async def process_batch_api(
     request: Request,
     batch_request: BatchProcessingRequest
@@ -1223,7 +1116,7 @@ async def process_batch_api(
             requestId=str(uuid.uuid4())
         )
 
-@router.get("/batch/status/{job_id}", summary="Trạng thái batch job", tags=["Batch Processing Service"])
+@router.get("/batch/status/{job_id}", summary="Trạng thái batch job", tags=["📦 API Xử lý Batch"])
 async def get_batch_job_status_api(
     request: Request,
     job_id: str
@@ -1276,7 +1169,7 @@ async def get_batch_job_status_api(
             requestId=str(uuid.uuid4())
         )
 
-@router.get("/batch/jobs", summary="Danh sách batch jobs", tags=["Batch Processing Service"])
+@router.get("/batch/jobs", summary="Danh sách batch jobs", tags=["📦 API Xử lý Batch"])
 async def get_batch_jobs_api(
     request: Request,
     page: int = Query(1, ge=1, description="Số trang"),
@@ -1333,162 +1226,4 @@ async def get_batch_jobs_api(
             requestId=str(uuid.uuid4())
         )
 
-# ==================== EVENT HANDLING APIs ====================
-
-@router.post("/events/handle", summary="Xử lý events", tags=["Event Service"])
-async def handle_event_api(
-    request: Request,
-    event_request: EventHandlerRequest
-):
-    """
-    🔹 Đầu vào
-    
-    📧 event_request (bắt buộc, body)
-    Loại: EventHandlerRequest
-    Mô tả: Event cần xử lý
-    
-    🔹 Đầu ra
-    
-    📝 data
-    Loại: EventHandlerResponse
-    Mô tả: Kết quả xử lý event
-    """
-    try:
-        await event_service.initialize()
-        
-        # Handle event based on type
-        if event_request.event.eventType == "file.uploaded":
-            result = await event_service.handle_file_uploaded_event(event_request)
-        elif event_request.event.eventType == "ai.processing.completed":
-            result = await event_service.handle_ai_processing_completed_event(event_request)
-        elif event_request.event.eventType == "notification.sent":
-            result = await event_service.handle_notification_sent_event(event_request)
-        else:
-            result = EventHandlerResponse(
-                success=False,
-                message=f"Unsupported event type: {event_request.event.eventType}",
-                processed_at=datetime.now(timezone.utc),
-                retry_count=event_request.retry_count
-            )
-        
-        return RestResponse(
-            statusCode=200,
-            shortMessage="Success",
-            description="Xử lý event thành công",
-            data=result.model_dump(),
-            path=request.url.path,
-            timestamp=datetime.now(timezone.utc),
-            requestId=str(uuid.uuid4())
-        )
-        
-    except Exception as e:
-        return RestResponse(
-            statusCode=500,
-            shortMessage="Internal Server Error",
-            description=f"Lỗi khi xử lý event: {str(e)}",
-            data=None,
-            path=request.url.path,
-            timestamp=datetime.now(timezone.utc),
-            requestId=str(uuid.uuid4())
-        )
-
-@router.post("/events/publish", summary="Publish event", tags=["Event Service"])
-async def publish_event_api(
-    request: Request,
-    event_request: EventPublishRequest
-):
-    """
-    🔹 Đầu vào
-    
-    📧 event_request (bắt buộc, body)
-    Loại: EventPublishRequest
-    Mô tả: Event cần publish
-    
-    🔹 Đầu ra
-    
-    📝 data
-    Loại: EventPublishResponse
-    Mô tả: Kết quả publish event
-    """
-    try:
-        await event_service.initialize()
-        result = await event_service.publish_event(event_request)
-        
-        return RestResponse(
-            statusCode=200,
-            shortMessage="Success",
-            description="Publish event thành công",
-            data=result.model_dump(),
-            path=request.url.path,
-            timestamp=datetime.now(timezone.utc),
-            requestId=str(uuid.uuid4())
-        )
-        
-    except Exception as e:
-        return RestResponse(
-            statusCode=500,
-            shortMessage="Internal Server Error",
-            description=f"Lỗi khi publish event: {str(e)}",
-            data=None,
-            path=request.url.path,
-            timestamp=datetime.now(timezone.utc),
-            requestId=str(uuid.uuid4())
-        )
-
-@router.get("/events/history", summary="Lịch sử events", tags=["Event Service"])
-async def get_event_history_api(
-    request: Request,
-    page: int = Query(1, ge=1, description="Số trang"),
-    limit: int = Query(10, ge=1, le=100, description="Số lượng mỗi trang"),
-    event_type: str = Query(None, description="Loại event"),
-    source: str = Query(None, description="Nguồn event"),
-    status: str = Query(None, description="Trạng thái event")
-):
-    """
-    🔹 Đầu vào
-    
-    📄 page (tùy chọn, query)
-    Loại: integer
-    Mô tả: Số trang (mặc định: 1)
-    
-    📄 limit (tùy chọn, query)
-    Loại: integer
-    Mô tả: Số lượng mỗi trang (mặc định: 10, tối đa: 100)
-    
-    🔹 Đầu ra
-    
-    📝 data
-    Loại: EventHistoryResponse
-    Mô tả: Danh sách events với phân trang
-    """
-    try:
-        await event_service.initialize()
-        result = await event_service.get_event_history(
-            page=page,
-            limit=limit,
-            event_type=event_type,
-            source=source,
-            status=status
-        )
-        
-        return RestResponse(
-            statusCode=200,
-            shortMessage="Success",
-            description="Lấy lịch sử events thành công",
-            data=result.model_dump(),
-            path=request.url.path,
-            timestamp=datetime.now(timezone.utc),
-            requestId=str(uuid.uuid4())
-        )
-        
-    except Exception as e:
-        return RestResponse(
-            statusCode=500,
-            shortMessage="Internal Server Error",
-            description=f"Lỗi khi lấy lịch sử events: {str(e)}",
-            data=None,
-            path=request.url.path,
-            timestamp=datetime.now(timezone.utc),
-            requestId=str(uuid.uuid4())
-        )
 

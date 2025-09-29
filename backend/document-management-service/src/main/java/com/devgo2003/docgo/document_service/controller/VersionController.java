@@ -20,7 +20,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/contract-management-service/versions")
-@Tag(name = "API Quản lý Phiên bản", description = "Các API để quản lý phiên bản hợp đồng trong hệ thống DocGO")
+@Tag(name = "APIs Quản lý Phiên bản", description = "Các API để quản lý phiên bản hợp đồng trong hệ thống DocGO")
 public class VersionController {
 
     private final VersionService versionService;

@@ -3,6 +3,7 @@ package com.devgo2003.docgo.backend.user_service.entity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.Builder;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -13,6 +14,7 @@ import java.util.List;
 
 @Document(collection = "organizations")
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class Organization {
@@ -44,12 +46,6 @@ public class Organization {
     @Field("status")
     private OrganizationStatus status = OrganizationStatus.ACTIVE;
 
-    @Field("created_by")
-    private String createdBy;
-
-    @Field("updated_by")
-    private String updatedBy;
-
     @Field("created_at")
     @CreatedDate
     private LocalDateTime createdAt;
@@ -57,6 +53,12 @@ public class Organization {
     @Field("updated_at")
     @LastModifiedDate
     private LocalDateTime updatedAt;
+
+    @Field("created_by")
+    private String createdBy;
+
+    @Field("updated_by")
+    private String updatedBy;
 
     @Field("deleted_at")
     private LocalDateTime deletedAt;

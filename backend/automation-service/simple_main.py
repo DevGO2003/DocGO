@@ -9,11 +9,11 @@ app = FastAPI(
     redoc_url="/redoc"
 )
 
-@app.get("/")
+@app.get("/", tags=["🏠 API Gốc"])
 async def read_root():
     return {"message": "Automation Service is running!"}
 
-@app.get("/health")
+@app.get("/health", tags=["🏠 API Gốc"])
 async def health_check():
     from schemas.response import RestResponse
     

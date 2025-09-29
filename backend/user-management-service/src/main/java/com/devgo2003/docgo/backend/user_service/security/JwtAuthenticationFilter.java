@@ -11,7 +11,7 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.web.filter.OncePerRequestFilter;
-import com.devgo2003.docgo.backend.user_service.repository.UserMongoRepository;
+import com.devgo2003.docgo.backend.user_service.repository.UserRepository;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -20,9 +20,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
     private final TokenBlacklist blacklistService;
-    private final UserMongoRepository userRepository;
+    private final UserRepository userRepository;
 
-    public JwtAuthenticationFilter(JwtUtil jwtUtil, TokenBlacklist blacklistService, UserMongoRepository userRepository) {
+    public JwtAuthenticationFilter(JwtUtil jwtUtil, TokenBlacklist blacklistService, UserRepository userRepository) {
         this.jwtUtil = jwtUtil;
         this.blacklistService = blacklistService;
         this.userRepository = userRepository;
