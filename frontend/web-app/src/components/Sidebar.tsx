@@ -203,7 +203,7 @@ export default function Sidebar() {
       {/* Mobile sidebar */}
       <div className={`fixed inset-0 z-50 lg:hidden ${sidebarOpen ? 'block' : 'hidden'}`}>
         <div className="fixed inset-0 bg-gray-600 bg-opacity-75" onClick={() => setSidebarOpen(false)} />
-        <div className="fixed inset-y-0 left-0 flex w-64 flex-col bg-white h-[80vh] overflow-hidden">
+		<div className="fixed inset-y-0 left-0 flex w-64 flex-col bg-white h-[50vh] overflow-hidden">
           <div className="flex h-16 items-center justify-between px-4">
             <div className="flex items-center">
               <DocumentTextIcon className="h-8 w-8 text-primary-600" />
@@ -244,9 +244,9 @@ export default function Sidebar() {
         </div>
       </div>
 
-      {/* Desktop sidebar */}
-      <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col">
-        <div className="flex flex-col flex-grow bg-white border-r border-gray-200 h-[80vh] overflow-hidden">
+		{/* Desktop sidebar */}
+		<div className="hidden lg:block lg:w-64 lg:flex-shrink-0">
+			<div className="sticky top-16 flex flex-col bg-white border-r border-gray-200 max-h-[calc(100vh-6rem)] overflow-hidden">
           <div className="flex h-16 items-center px-4 justify-between">
             <DocumentTextIcon className="h-8 w-8 text-primary-600" />
             <span className="ml-2 text-xl font-bold text-gray-900">DocGO</span>
