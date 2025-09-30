@@ -44,3 +44,4 @@ export function handleServiceError(err: any, req: NextApiRequest, preferredDesc?
   const httpStatus = success204ToHttp200(mapped.bodyStatus, mapped.httpStatus);
   return { httpStatus, body };
 }
+

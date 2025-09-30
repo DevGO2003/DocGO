@@ -2,6 +2,7 @@
 
 ## Mục đích
 Khi người dùng gặp vấn đề, command này sẽ:
+- **TỰ ĐỘNG tóm tắt** cuộc trò chuyện trước khi phân tích
 - **KHÔNG thực hiện** bất kỳ thay đổi code nào
 - **Chỉ phân tích** và đưa ra giải pháp
 - **Điều tra nguyên nhân** gốc rễ
@@ -9,7 +10,15 @@ Khi người dùng gặp vấn đề, command này sẽ:
 
 ## Quy trình thực hiện
 
+### 0. 📊 TÓM TẮT CUỘC TRÒ CHUYỆN (BẮT BUỘC ĐẦU TIÊN)
+- **Tự động thực hiện** `/summarize-chat` trước khi phân tích
+- **Gom ý chính** và file quan trọng từ cuộc trò chuyện
+- **Xác định context** và vấn đề đã được thảo luận
+- **Chuẩn bị thông tin** đầy đủ cho việc điều tra
+- **Tăng hiệu quả** phân tích vấn đề
+
 ### 1. 🔍 Điều tra nguyên nhân (BẮT BUỘC)
+- **Sử dụng thông tin** từ bước tóm tắt cuộc trò chuyện
 - **Đọc Docker logs chi tiết** để xác định lỗi container
 - **Phân tích error messages** và stack traces
 - **Kiểm tra network requests** và responses
@@ -110,7 +119,8 @@ ask: Docker service bị restart liên tục
 ```
 
 ## Kết quả mong đợi
-- 📊 **Phân tích chi tiết** nguyên nhân
+- 📊 **Tóm tắt cuộc trò chuyện** (tự động thực hiện)
+- 🔍 **Phân tích chi tiết** nguyên nhân
 - 🐳 **Docker logs analysis** (nếu có container liên quan)
 - 📍 **Xác định vị trí** vấn đề cụ thể
 - 💡 **Bảng so sánh** các phương án
@@ -198,7 +208,14 @@ Bối cảnh:
 - Chuẩn phản hồi: Ngắn gọn, có bảng phương án, đề xuất Best Choice.
 
 Yêu cầu thực hiện:
+0) **BẮT BUỘC tóm tắt cuộc trò chuyện** trước khi phân tích:
+   - Tự động thực hiện /summarize-chat
+   - Gom ý chính và file quan trọng
+   - Xác định context và vấn đề đã thảo luận
+   - Chuẩn bị thông tin đầy đủ cho việc điều tra
+
 1) **BẮT BUỘC điều tra kỹ** trước khi đưa ra phương án:
+   - Sử dụng thông tin từ bước tóm tắt
    - Đọc Docker logs chi tiết
    - Phân tích error messages và stack traces
    - Kiểm tra network requests/responses
@@ -232,6 +249,7 @@ Yêu cầu thực hiện:
 <dán lỗi/triệu chứng/ngữ cảnh ở đây>
 
 Đầu ra bắt buộc:
+- **Tóm tắt cuộc trò chuyện** (từ bước 0)
 - **Điều tra chi tiết** nguyên nhân gốc rễ
 - **Docker logs analysis** (nếu có container liên quan)
 - Vị trí lỗi (file/hàm/endpoint/dòng nếu xác định được)

@@ -54,3 +54,4 @@ export function mapErrorToStatus(err: any): MappedStatus {
 export function success204ToHttp200(bodyStatus: number, httpStatus: number): number {
   return bodyStatus === 204 ? 200 : httpStatus;
 }
+
