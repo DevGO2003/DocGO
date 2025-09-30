@@ -1,5 +1,5 @@
 # Multi-stage build for Spring Boot application
-FROM eclipse-temurin:17-jdk AS builder
+FROM eclipse-temurin:25-jdk AS builder
 
 # Thiết lập thư mục làm việc
 WORKDIR /app
@@ -20,7 +20,7 @@ COPY src ./src
 RUN mvn clean package -DskipTests
 
 # Production stage
-FROM eclipse-temurin:17-jre AS runner
+FROM eclipse-temurin:25-jre AS runner
 
 # Thiết lập thư mục làm việc
 WORKDIR /app

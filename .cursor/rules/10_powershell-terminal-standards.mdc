@@ -463,33 +463,4 @@ Get-ChildItem
 
 ---
 
-<<<<<<< HEAD
-**Mục tiêu**: Đảm bảo 100% terminal commands chạy thành công trên Windows PowerShell environment của Cursor IDE mà không bị kẹt trong pager/editor.
-git rebase -i              # Mở editor
-git commit                 # Mở editor
-vim file.txt               # Mở Vim
-nano file.txt              # Mở Nano
-less file.txt              # Mở less
-more file.txt              # Mở more
-man command                # Mở manual
-```
-
-### ✅ **CÁC LỆNH AN TOÀN - LUÔN SỬ DỤNG:**
-```powershell
-# ✅ AN TOÀN - Không gây kẹt terminal
-git log --oneline -10 --no-pager
-git diff --no-pager
-git status --porcelain
-git show --no-pager
-git add -A
-git commit -m "message" --no-verify
-Get-Content file.txt
-Select-String pattern file.txt
-Get-ChildItem
-```
-
----
-
-=======
->>>>>>> e4f9e590765b2a1b7ce2f3982eff8dae6ecb472e
 **Mục tiêu**: Đảm bảo 100% terminal commands chạy thành công trên Windows PowerShell environment của Cursor IDE mà không bị kẹt trong pager/editor.

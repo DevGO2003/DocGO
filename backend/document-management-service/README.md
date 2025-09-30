@@ -115,7 +115,6 @@ Tất cả API đều trả về response theo format chuẩn:
   "apiVersion": "v1",
   "statusCode": 200,
   "shortMessage": "Success",
-<<<<<<< HEAD
   "description": "Mô tả kết quả",
   "data": {...},
   "timestamp": "2025-08-23T10:00:00Z",
@@ -255,58 +254,3 @@ GET /actuator/metrics
 - **Port**: 8003
 - **Base URL**: `/api/v1/document-management-service`
 - **Documentation**: `/docs`
-=======
-  "description": "Đã lấy 10 files từ S3",
-  "data": {
-    "files": [
-      {
-        "key": "documents/contract.pdf",
-        "size": 1024000,
-        "last_modified": "2024-01-15T10:30:00.000Z",
-        "etag": "abc123def456",
-        "storage_class": "STANDARD",
-        "url": "https://bucket.s3.filebase.com/documents/contract.pdf"
-      }
-    ],
-    "is_truncated": false,
-    "next_continuation_token": null,
-    "total_count": 10,
-    "prefix": "documents/"
-  }
-}
-```
-
-## 🚀 Tính năng mới
-
-### File Processing
-- **Chuyển đổi file**: Hỗ trợ chuyển đổi giữa các định dạng (PDF, DOCX, TXT, JPG, PNG)
-- **Nén file**: Nén file với mức độ nén tùy chọn (1-9)
-- **Giải nén file**: Hỗ trợ ZIP, RAR và các định dạng archive khác
-- **Kiểm tra file**: Validation file và phát hiện lỗi
-
-### Asset Management
-- **Quản lý asset**: Tạo, cập nhật, xóa asset từ file
-- **Phân loại asset**: Hỗ trợ các danh mục (document, image, video, audio, archive)
-- **Versioning**: Quản lý phiên bản asset
-- **Tìm kiếm**: Tìm kiếm asset theo tên, mô tả, tags
-
-### General File Management
-- **Tổ chức file**: Sắp xếp file vào thư mục
-- **Chia sẻ file**: Chia sẻ file với quyền truy cập
-- **Backup**: Sao lưu nhiều file cùng lúc
-- **Metadata**: Lấy thông tin chi tiết file
-
-### Database Integration
-- **MongoDB**: Lưu trữ metadata file và asset
-- **Redis**: Cache và session management
-- **S3/Filebase**: Lưu trữ file thực tế
-
-**Lưu ý quan trọng:**
-- Đảm bảo bucket `docgo-assets` đã được tạo trong S3/Filebase trước khi chạy service
-- Cấu hình MongoDB và Redis trước khi chạy service
-- Nếu không có ClamAV, set `USE_CLAMD=false` trong file `.env`
-- Service sẽ tự động tạo thư mục `uploads/` và `temp/` nếu chưa tồn tại
-- Tất cả API đều trả về format `RestResponse` chuẩn hóa
-- Port qua compose: Host 8004 → Container 8000 (theo quy tắc DocGO)
-- Tích hợp đầy đủ MongoDB và Redis cho quản lý file nâng cao
->>>>>>> e4f9e590765b2a1b7ce2f3982eff8dae6ecb472e

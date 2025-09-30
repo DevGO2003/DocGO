@@ -463,6 +463,18 @@ export class AutomationAPI {
       },
     })
   }
+
+  async uploadFile(file: File, apiKey?: string) {
+    const formData = new FormData()
+    formData.append('file', file)
+
+    return apiClient.post<any>(`${this.basePath}/files/upload`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        ...(apiKey && { 'GEMINI_API_KEY': apiKey }),
+      },
+    })
+  }
 }
 
 // File Storage API - Sử dụng API Gateway

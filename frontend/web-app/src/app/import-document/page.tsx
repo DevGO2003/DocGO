@@ -124,57 +124,27 @@ export default function CreateContractPage() {
 
   const handleOcrExtract = async () => {
     if (!selectedFile) {
-      toast.error('Vui lòng chọn file để trích xuất')
+      toast.error('Vui lòng chọn file để upload')
       return
     }
 
     try {
       setOcrLoading(true)
-      // Gọi summarize qua API gateway (multipart/form-data)
-      const summarizeRes = await automationAPI.summarizeFile(selectedFile, apiKey || undefined)
-      const body = summarizeRes.data
+      const uploadRes = await automationAPI.uploadFile(selectedFile, apiKey || undefined)
+      const body = uploadRes.data
       const isOk = body && (body.statusCode === 200 || body.statusCode === 201)
 
       if (isOk) {
-        const data = body.data
-        setSummaryData(data)
-        toast.success(
-          (t) => (
-            <div className="space-y-2">
-              <div className="font-semibold">Đã trích xuất thành công. Bạn muốn làm gì?</div>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => {
-                    toast.dismiss(t.id)
-                    setActiveTab('summary')
-                  }}
-                  className="px-3 py-1 rounded bg-blue-600 text-white text-sm hover:bg-blue-700"
-                >
-                  Chuyển qua tóm tắt hợp đồng
-                </button>
-                <button
-                  onClick={() => {
-                    toast.dismiss(t.id)
-                    router.push('/contracts')
-                  }}
-                  className="px-3 py-1 rounded border text-sm hover:bg-gray-50"
-                >
-                  Đến danh sách hợp đồng
-                </button>
-              </div>
-            </div>
-          ),
-          { duration: 8000 }
-        )
+        toast.success('Upload file thành công')
       } else if (body?.statusCode === 204) {
-        toast('Không có nội dung để tóm tắt', { icon: 'ℹ️' })
+        toast('Upload thành công nhưng không có dữ liệu trả về', { icon: 'ℹ️' })
       } else {
-        const msg = body?.description || 'Tóm tắt thất bại'
-        toast.error(msg)
+        toast.error(body?.description || 'Upload thất bại')
       }
     } catch (error: any) {
-      console.error('OCR Error:', error)
-      toast.error(`Lỗi trích xuất: ${error?.response?.data?.description || error.message || 'Có lỗi xảy ra'}`)
+      console.error('Upload failed:', error)
+      const msg = error?.response?.data?.description || error?.message || 'Lỗi upload file'
+      toast.error(msg)
     } finally {
       setOcrLoading(false)
     }
@@ -718,17 +688,17 @@ export default function CreateContractPage() {
                               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                             </svg>
-                            Đang trích xuất...
+                            Đang upload...
                           </>
                         ) : (
                               <>
-                                <DocumentMagnifyingGlassIcon className="w-5 h-5 mr-2" />
-                                Trích xuất văn bản
+                                <ArrowUpTrayIcon className="w-5 h-5 mr-2" />
+                                Xác nhận upload file
                               </>
                         )}
                       </button>
                           <p className="text-sm text-gray-500 mt-3">
-                            Hệ thống sẽ sử dụng AI để trích xuất nội dung từ file
+                            Upload file của bạn lên Automation Service để xử lý
                           </p>
                           
                           {/* Additional Features Info */}
