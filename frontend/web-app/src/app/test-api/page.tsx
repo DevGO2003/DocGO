@@ -194,7 +194,7 @@ export default function TestAPIPage() {
                     <ul className="text-sm text-gray-600 space-y-1">
                       <li>• authentication-identity-service (Port 8001)</li>
                       <li>• user-management-service (Port 8002)</li>
-                      <li>• contract-management-service (Port 8003)</li>
+                      <li>• document-management-service (Port 8003)</li>
                       <li>• ai-processing-service (Port 8017)</li>
                       <li>• file-storage-asset-service (Port 8012)</li>
                     </ul>
@@ -206,7 +206,7 @@ export default function TestAPIPage() {
                       <li>• GET /api/health - Health check</li>
                       <li>• POST /api/v1/authentication-identity-service/auth/login - Login</li>
                       <li>• POST /api/v1/authentication-identity-service/auth/register - Register</li>
-                      <li>• GET /api/v1/contract-management-service/contracts - Get contracts</li>
+                      <li>• GET /api/v1/document-management-service/contracts - Get contracts</li>
                     </ul>
                   </div>
                 </div>

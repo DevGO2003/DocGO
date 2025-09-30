@@ -15,15 +15,12 @@ export default function ProfilePage() {
     <DashboardLayout>
       <div className="max-w-6xl">
         {/* Page Title */}
-        <div className="space-y-2 mb-8">
-          <div className="flex items-center gap-3">
-            <UserIcon className="h-6 w-6 text-gray-600" />
-            <h1 className="text-xl font-semibold text-gray-900 tracking-tight">
-              {t('profile.title')}
-            </h1>
-          </div>
-          <p className="text-sm text-gray-600 leading-relaxed">
-            {t('profile.subtitle')}
+        <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-4 border border-green-100 mb-6">
+          <h1 className="text-lg font-bold text-gray-900 mb-1">
+            👤 THÔNG TIN CÁ NHÂN
+          </h1>
+          <p className="text-sm text-gray-600">
+            Quản lý thông tin tài khoản và cài đặt cá nhân
           </p>
         </div>
 

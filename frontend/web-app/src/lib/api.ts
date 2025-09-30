@@ -332,7 +332,7 @@ const apiClient = new ApiClient()
 
 // Contract Management API - Sử dụng API Gateway
 export class ContractAPI {
-  private basePath = '/api/v1/contract-management-service'
+  private basePath = '/api/v1/document-management-service'
 
   async getContracts(params?: {
     pageNumber?: number
@@ -503,7 +503,7 @@ export class FileStorageAPI {
 
 // Tag Management API - Sử dụng API Gateway
 export class TagAPI {
-  private basePath = '/api/v1/contract-management-service'
+  private basePath = '/api/v1/document-management-service'
 
   async getPopularTags() {
     return apiClient.get<any[]>(`${this.basePath}/tags/popular`)

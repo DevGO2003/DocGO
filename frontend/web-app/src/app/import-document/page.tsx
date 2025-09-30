@@ -465,10 +465,10 @@ export default function CreateContractPage() {
               <div className="relative bg-white rounded-3xl shadow-xl border border-gray-100 p-8">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                      Import Document
+                    <h1 className="text-lg font-bold text-gray-900 mb-1">
+                      📤 IMPORT DOCUMENT
                     </h1>
-                    <p className="mt-2 text-gray-600 text-lg">Tải lên và xử lý tài liệu hợp đồng hoặc tạo hợp đồng mới</p>
+                    <p className="text-sm text-gray-600">Tải lên và xử lý tài liệu hợp đồng hoặc tạo hợp đồng mới</p>
                   </div>
                   <div className="hidden md:flex items-center space-x-4">
                     <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-xl flex items-center justify-center">

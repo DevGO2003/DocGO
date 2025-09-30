@@ -18,7 +18,7 @@ from pptx import Presentation
 from openpyxl import load_workbook
 from striprtf.striprtf import rtf_to_text
 import csv
-from services.ai_processing_service import AIProcessingService
+from services.ai_processing_service import AutomationService
 # from services.notification_service import NotificationService
 from services.batch_service import BatchService
 from services.event_service import EventService
@@ -610,7 +610,7 @@ async def classify_api(
         )
         
         # Use shared AI service instead of creating new Gemini configuration
-        ai_service = AIProcessingService()
+        ai_service = AutomationService()
         try:
             answer = ai_service.generate_contract_summary(content, file.filename if file else "text_input")
         except Exception as e:

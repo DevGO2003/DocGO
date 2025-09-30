@@ -38,14 +38,14 @@ Frontend (Port 3001) → API Gateway BFF (Port 8000) → Microservices
 ### Microservices được hỗ trợ
 - **authentication-identity-service** (Port 8001) - Xác thực và quản lý danh tính
 - **user-management-service** (Port 8002) - Quản lý người dùng
-- **contract-management-service** (Port 8003) - Quản lý hợp đồng
+- **document-management-service** (Port 8003) - Quản lý hợp đồng
 - **ai-processing-service** (Port 8017) - Xử lý AI
 - **file-storage-asset-service** (Port 8012) - Lưu trữ tài liệu
 
 ### API Endpoints
 - `POST /api/v1/authentication-identity-service/auth/login` - Đăng nhập
 - `POST /api/v1/authentication-identity-service/auth/register` - Đăng ký
-- `GET /api/v1/contract-management-service/contracts` - Lấy danh sách hợp đồng
+- `GET /api/v1/document-management-service/contracts` - Lấy danh sách hợp đồng
 - `POST /api/v1/ai-processing-service/extract` - Trích xuất văn bản
 - `POST /api/v1/ai-processing-service/summarize` - Tóm tắt văn bản
 
@@ -134,7 +134,7 @@ npm run dev
 Đảm bảo các microservices cần thiết đang chạy:
 - authentication-identity-service (Port 8001)
 - user-management-service (Port 8002)
-- contract-management-service (Port 8003)
+- document-management-service (Port 8003)
 - ai-processing-service (Port 8017)
 - file-storage-asset-service (Port 8012)
 

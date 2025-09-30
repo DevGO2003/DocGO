@@ -10,7 +10,7 @@ import google.generativeai as genai
 from config import get_gemini_api_key
 
 
-class AIProcessingService:
+class AutomationService:
     """Service xử lý AI chung cho cả API và Event handler - Singleton pattern"""
     
     _instance = None
@@ -40,7 +40,7 @@ class AIProcessingService:
             for model_name in models_to_try:
                 try:
                     self.model = genai.GenerativeModel(model_name)
-                    logging.info(f"[AI_SERVICE_SINGLETON] AIProcessingService initialized with {model_name}")
+                    logging.info(f"[AUTOMATION_SERVICE_SINGLETON] AutomationService initialized with {model_name}")
                     model_initialized = True
                     break
                 except Exception as e:

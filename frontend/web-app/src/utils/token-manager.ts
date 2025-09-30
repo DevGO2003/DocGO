@@ -16,7 +16,7 @@ export class TokenManager {
   private static readonly COOKIE_USER_KEY = 'user_data'
 
   // Store tokens with expiration (both localStorage and cookies)
-  static storeTokens(tokenData: TokenData, user?: any): void {
+  static storeTokens(tokenData: TokenData, user?: any, rememberMe: boolean = false): void {
     if (typeof window === 'undefined') return
 
     try {
@@ -24,6 +24,7 @@ export class TokenManager {
         accessToken: tokenData.accessToken,
         user: user,
         tokenData: tokenData,
+        rememberMe: rememberMe,
         timestamp: Date.now()
       }
 
@@ -37,9 +38,14 @@ export class TokenManager {
         window.localStorage.setItem(this.LEGACY_USER_KEY, JSON.stringify(user))
       }
 
+      // Calculate maxAge based on rememberMe
+      const defaultMaxAge = rememberMe ? 30 * 24 * 60 * 60 : 24 * 60 * 60 // 30 days vs 1 day
+      const tokenMaxAge = tokenData.expiresAt ? Math.floor((tokenData.expiresAt - Date.now()) / 1000) : defaultMaxAge
+      const refreshMaxAge = rememberMe ? 30 * 24 * 60 * 60 : 7 * 24 * 60 * 60 // 30 days vs 7 days
+
       // Store in cookies (for Next.js middleware access)
       this.setCookie(this.COOKIE_TOKEN_KEY, tokenData.accessToken, {
-        maxAge: tokenData.expiresAt ? Math.floor((tokenData.expiresAt - Date.now()) / 1000) : 24 * 60 * 60, // 24 hours default
+        maxAge: tokenMaxAge,
         httpOnly: false, // Allow client-side access for refresh logic
         secure: window.location.protocol === 'https:',
         sameSite: 'lax'
@@ -47,7 +53,7 @@ export class TokenManager {
       
       if (tokenData.refreshToken) {
         this.setCookie(this.COOKIE_REFRESH_KEY, tokenData.refreshToken, {
-          maxAge: 7 * 24 * 60 * 60, // 7 days
+          maxAge: refreshMaxAge,
           httpOnly: false,
           secure: window.location.protocol === 'https:',
           sameSite: 'lax'
@@ -56,7 +62,7 @@ export class TokenManager {
       
       if (user) {
         this.setCookie(this.COOKIE_USER_KEY, JSON.stringify(user), {
-          maxAge: 24 * 60 * 60, // 24 hours
+          maxAge: rememberMe ? 30 * 24 * 60 * 60 : 24 * 60 * 60, // 30 days vs 24 hours
           httpOnly: false,
           secure: window.location.protocol === 'https:',
           sameSite: 'lax'
@@ -107,11 +113,24 @@ export class TokenManager {
   static validateToken(): TokenValidationResult {
     try {
       const { accessToken, tokenData } = this.getTokens()
+      
+      // Get rememberMe flag from localStorage
+      let rememberMe = false
+      try {
+        const authData = window.localStorage.getItem(this.STORAGE_KEY)
+        if (authData) {
+          const parsed = JSON.parse(authData)
+          rememberMe = parsed.rememberMe || false
+        }
+      } catch (e) {
+        // Ignore parsing errors
+      }
 
       console.log('[TokenManager] Validating token:', {
         hasAccessToken: !!accessToken,
         hasTokenData: !!tokenData,
-        tokenLength: accessToken?.length
+        tokenLength: accessToken?.length,
+        rememberMe: rememberMe
       })
 
       if (!accessToken) {
@@ -130,7 +149,9 @@ export class TokenManager {
 
       const now = Date.now()
       const expiresAt = tokenData.expiresAt
-      const bufferTime = 5 * 60 * 1000 // 5 minutes buffer
+      
+      // Adjust buffer time based on rememberMe
+      const bufferTime = rememberMe ? 30 * 60 * 1000 : 5 * 60 * 1000 // 30 minutes vs 5 minutes
       const isExpired = expiresAt ? now >= (expiresAt - bufferTime) : false
       const timeUntilExpiry = expiresAt ? Math.max(0, expiresAt - now) : 0
 

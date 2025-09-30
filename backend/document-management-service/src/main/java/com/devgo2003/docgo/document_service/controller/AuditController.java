@@ -18,7 +18,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1/document-management-service/audit-logs")
-@Tag(name = "API Quản lý Audit Log", description = "Các API để quản lý nhật ký kiểm toán trong hệ thống DocGO")
+@Tag(name = "🔍 APIs Quản lý Audit Log", description = "Các API để quản lý nhật ký kiểm toán trong hệ thống DocGO")
 public class AuditController {
 
     private final AuditService auditService;

@@ -130,15 +130,12 @@ export default function UserManagementPage() {
     <DashboardLayout>
       <div className="space-y-8 max-w-6xl mx-auto px-2 sm:px-4">
         {/* Page Title */}
-        <div className="space-y-2">
-          <div className="flex items-center gap-3">
-            <UserGroupIcon className="h-6 w-6 text-gray-600" />
-            <h1 className="text-xl font-semibold text-gray-900 tracking-tight">
-              {t('userManagement.title')}
-            </h1>
-          </div>
-          <p className="text-sm text-gray-600 leading-relaxed">
-            {t('userManagement.subtitle')}
+        <div className="bg-gradient-to-r from-orange-50 to-red-50 rounded-xl p-4 border border-orange-100">
+          <h1 className="text-lg font-bold text-gray-900 mb-1">
+            👥 QUẢN LÝ NGƯỜI DÙNG
+          </h1>
+          <p className="text-sm text-gray-600">
+            Quản lý tài khoản, phân quyền và cài đặt hệ thống
           </p>
         </div>
 

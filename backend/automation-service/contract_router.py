@@ -4,7 +4,7 @@ import os
 import uuid
 from datetime import datetime, timezone
 from schemas.response import RestResponse
-from services.ai_processing_service import AIProcessingService
+from services.ai_processing_service import AutomationService
 
 router = APIRouter(prefix="/api/v1/automation-service")
 
@@ -150,7 +150,7 @@ async def contract_summarize_api(
     # Sử dụng AI Processing Service để tóm tắt hợp đồng
     result = None
     try:
-        ai_service = AIProcessingService()
+        ai_service = AutomationService()
         
         # Gọi AI để tạo tóm tắt hợp đồng
         filename = file.filename if file else "text_input"

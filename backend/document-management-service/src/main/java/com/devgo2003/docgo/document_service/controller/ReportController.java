@@ -15,7 +15,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/document-management-service/reports")
-@Tag(name = "APIs Quản lý Báo cáo", description = "Các API để quản lý báo cáo trong hệ thống DocGO")
+@Tag(name = "📊 APIs Quản lý Báo cáo", description = "Các API để quản lý báo cáo trong hệ thống DocGO")
 public class ReportController {
 
     private final ReportService reportService;

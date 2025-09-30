@@ -18,7 +18,7 @@ from config import (
 	get_kafka_contract_summary_topic,
 	get_kafka_client_id,
 )
-from services.ai_processing_service import AIProcessingService
+from services.ai_processing_service import AutomationService
 from schemas.contract_summary import ContractSummary
 import google.generativeai as genai
 from config import get_gemini_api_key
@@ -39,7 +39,7 @@ class AIKafkaWorker:
 		self._file_cache = {}  # In-memory cache for file content
 		
 		# Initialize shared AI service to avoid multiple Gemini API configurations
-		self.ai_service = AIProcessingService()
+		self.ai_service = AutomationService()
 
 	async def start(self) -> None:
 		if self.consumer is None:

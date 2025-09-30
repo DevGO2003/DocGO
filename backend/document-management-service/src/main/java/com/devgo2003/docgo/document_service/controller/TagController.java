@@ -18,7 +18,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/document-management-service/tags")
-@Tag(name = "APIs Quản lý Tags", description = "Các API để quản lý tags của hợp đồng trong hệ thống DocGO")
+@Tag(name = "🏷️ APIs Quản lý Tags", description = "Các API để quản lý tags của hợp đồng trong hệ thống DocGO")
 public class TagController {
 
     private final ITagService tagService;

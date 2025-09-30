@@ -58,12 +58,12 @@ export default function DashboardPage() {
     <DashboardLayout>
       <div className="space-y-8">
         {/* Page Title */}
-        <div className="space-y-2">
-          <h1 className="text-xl font-semibold text-gray-900 tracking-tight">
-            Tổng quan Dashboard
+        <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-4 border border-indigo-100">
+          <h1 className="text-lg font-bold text-gray-900 mb-1">
+            📊 THỐNG KÊ
           </h1>
-          <p className="text-sm text-gray-600 leading-relaxed">
-            Xem tổng quan về tình hình hợp đồng và thống kê quan trọng
+          <p className="text-sm text-gray-600">
+            Tổng quan hoạt động và số liệu chính
           </p>
         </div>
         {/* 4 Ô thống kê trên cùng */}

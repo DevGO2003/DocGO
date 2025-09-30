@@ -24,7 +24,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/document-management-service/documents")
-@Tag(name = "APIs Document Management", description = "APIs for document and file management")
+@Tag(name = "📄 APIs Document Management", description = "APIs for document and file management")
 public class DocumentController {
 
     private final FileStorageService fileStorageService;

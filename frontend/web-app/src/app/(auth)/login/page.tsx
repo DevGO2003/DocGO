@@ -75,7 +75,7 @@ export default function LoginPage() {
         password: data.password
       }
       
-      const success = await login(credentials)
+      const success = await login(credentials, data.rememberMe || false)
       if (success) {
         router.push('/dashboard')
       } else {
@@ -296,12 +296,12 @@ export default function LoginPage() {
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
                     <div className="flex items-center">
                       <input
-                        id="remember-me"
-                        name="remember-me"
+                        id="rememberMe"
                         type="checkbox"
                         className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                        {...register('rememberMe')}
                       />
-                      <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
+                      <label htmlFor="rememberMe" className="ml-2 block text-sm text-gray-700">
                         Ghi nhớ đăng nhập
                       </label>
                     </div>

@@ -292,7 +292,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [accessToken, user, fetchCurrentUser, isTokenExpired, needsRefresh, tokenData?.refreshToken, loading])
 
-  const login = useCallback(async (credentials: LoginCredentials): Promise<boolean> => {
+  const login = useCallback(async (credentials: LoginCredentials, rememberMe: boolean = false): Promise<boolean> => {
     setLoading(true)
     try {
       const res = await authAPI.login(credentials)
@@ -325,7 +325,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       // Store tokens immediately (cookie + localStorage) for middleware compatibility
       try {
-        TokenManager.storeTokens(newTokenData, user || null)
+        TokenManager.storeTokens(newTokenData, user || null, rememberMe)
       } catch {}
 
       // Always fetch profile to normalize user fields like Google flow

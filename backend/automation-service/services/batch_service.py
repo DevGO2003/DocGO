@@ -14,7 +14,7 @@ from schemas.batch_schemas import (
     BatchJobRequest, BatchJobResponse, BatchJobStatus, BatchJobType,
     BatchJobPriority, BatchProcessingRequest, BatchProcessingResponse
 )
-from services.ai_processing_service import AIProcessingService
+from services.ai_processing_service import AutomationService
 
 class BatchService:
     def __init__(self):
@@ -174,7 +174,7 @@ class BatchService:
             results = []
             total_files = len(files)
             
-            ai_service = AIProcessingService()
+            ai_service = AutomationService()
             
             for i, file_data in enumerate(files):
                 try:
@@ -270,17 +270,17 @@ class BatchService:
             print(f"Error executing file processing job: {e}")
             raise
 
-    async def _extract_file_content(self, file_data: Dict[str, Any], ai_service: AIProcessingService) -> Dict[str, Any]:
+    async def _extract_file_content(self, file_data: Dict[str, Any], ai_service: AutomationService) -> Dict[str, Any]:
         """Extract nội dung file"""
         # Implement file extraction logic
         return {"extracted_text": "Sample extracted text"}
 
-    async def _summarize_file_content(self, file_data: Dict[str, Any], ai_service: AIProcessingService) -> Dict[str, Any]:
+    async def _summarize_file_content(self, file_data: Dict[str, Any], ai_service: AutomationService) -> Dict[str, Any]:
         """Summarize nội dung file"""
         # Implement file summarization logic
         return {"summary": "Sample summary"}
 
-    async def _classify_file_content(self, file_data: Dict[str, Any], ai_service: AIProcessingService) -> Dict[str, Any]:
+    async def _classify_file_content(self, file_data: Dict[str, Any], ai_service: AutomationService) -> Dict[str, Any]:
         """Classify nội dung file"""
         # Implement file classification logic
         return {"classification": "contract", "confidence": 0.95}

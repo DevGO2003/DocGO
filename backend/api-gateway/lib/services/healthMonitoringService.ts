@@ -26,14 +26,11 @@ class HealthMonitoringService {
   }
 
   private initializeServices(): void {
-    // Service URLs - same as in services.ts
+    // Service URLs - only existing services
     this.services.set('api-gateway', process.env.API_GATEWAY_URL || 'http://localhost:8000');
-    this.services.set('user-management-service', process.env.AUTH_SERVICE_URL || 'http://localhost:8001');
-    this.services.set('document-management-service', process.env.CONTRACT_SERVICE_URL || 'http://localhost:8002');
-    this.services.set('automation-service', process.env.AI_SERVICE_URL || 'http://localhost:8017');
-    this.services.set('file-storage-asset-service', process.env.FILE_SERVICE_URL || 'http://localhost:8012');
-    this.services.set('health-monitoring-agent', process.env.HEALTH_MONITORING_URL || 'http://localhost:8016');
-    this.services.set('integration-connectors-service', process.env.INTEGRATION_SERVICE_URL || 'http://localhost:8014');
+    this.services.set('user-management-service', process.env.USER_MANAGEMENT_SERVICE_URL || 'http://localhost:8001');
+    this.services.set('document-management-service', process.env.DOCUMENT_MANAGEMENT_SERVICE_URL || 'http://localhost:8002');
+    this.services.set('automation-service', process.env.AUTOMATION_SERVICE_URL || 'http://localhost:8003');
   }
 
   async checkServiceHealth(serviceName: string): Promise<HealthStatus> {
