@@ -7,7 +7,7 @@ import ContractSummaryRender from '@/components/ContractSummaryRender'
 import EditableArrayTable from '@/components/EditableArrayTable'
 import { DocumentTextIcon, DocumentMagnifyingGlassIcon, ArrowUpTrayIcon, PlusIcon } from '@heroicons/react/24/outline'
 import { useRouter } from 'next/navigation'
-import { aiProcessingAPI } from '@/lib/api'
+import { automationAPI } from '@/lib/api'
 import toast from 'react-hot-toast'
 
 export default function CreateContractPage() {
@@ -131,7 +131,7 @@ export default function CreateContractPage() {
     try {
       setOcrLoading(true)
       // Gọi summarize qua API gateway (multipart/form-data)
-      const summarizeRes = await aiProcessingAPI.summarizeFile(selectedFile, apiKey || undefined)
+      const summarizeRes = await automationAPI.summarizeFile(selectedFile, apiKey || undefined)
       const body = summarizeRes.data
       const isOk = body && (body.statusCode === 200 || body.statusCode === 201)
 

@@ -146,8 +146,8 @@ export default function LoginPage() {
     const checkOauth = async () => {
       try {
         const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
-        // Call auth service test endpoint via BFF proxy
-        const url = `${baseUrl}/api/v1/authentication-identity-service/auth/oauth2/test`
+        // Call auth service test endpoint via BFF proxy (standardized)
+        const url = `${baseUrl}/api/oauth2/test`
         const res = await fetch(url, {
           method: 'GET',
           headers: {

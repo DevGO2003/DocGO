@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { DashboardLayout } from '@/components/layout'
+import { TitlePanel } from '@/components/ui'
 import { MagnifyingGlassIcon, TagIcon } from '@heroicons/react/24/outline'
 import { contractAPI } from '@/lib/api'
 import { InlineLoading } from '@/components/ui/LoadingSpinner'
@@ -372,9 +373,9 @@ export default function ContractsPage() {
         } else {
           throw new Error(result.description || 'Có lỗi xảy ra khi xóa hợp đồng')
         }
-      } catch (error) {
-        console.error('Error deleting contracts:', error)
-        alert(`Lỗi khi xóa hợp đồng: ${error.message}`)
+      } catch (e: any) {
+        console.error('Error deleting contracts:', e)
+        alert(`Lỗi khi xóa hợp đồng: ${e?.message || 'Không rõ lỗi'}`)
       } finally {
         setLoading(false)
       }
@@ -447,16 +448,11 @@ export default function ContractsPage() {
     <DashboardLayout>
       <div className="space-y-6">
         {/* Page Header */}
-        <div className="relative overflow-hidden rounded-2xl border border-indigo-100 bg-gradient-to-br from-indigo-50 via-white to-purple-50 p-6 shadow-sm">
-          <div className="relative z-10">
-              <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600">
-                Quản lý Hợp đồng
-              </h1>
-              <p className="text-gray-600">Tìm kiếm, lọc trạng thái/loại và gắn thẻ nhanh</p>
-          </div>
-          <div className="pointer-events-none absolute -top-16 -right-16 h-56 w-56 rounded-full bg-indigo-200/30 blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-16 -left-16 h-56 w-56 rounded-full bg-purple-200/30 blur-3xl" />
-        </div>
+        <TitlePanel
+          title="QUẢN LÝ HỢP ĐỒNG"
+          description="Tìm kiếm, lọc trạng thái/loại và gắn thẻ nhanh"
+          variant="primary"
+        />
 
         {/* Control Panel */}
         <ContractControlPanel

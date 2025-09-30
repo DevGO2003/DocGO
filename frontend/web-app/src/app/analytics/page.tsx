@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react'
 import { DashboardLayout } from '@/components/layout'
+import { TitlePanel } from '@/components/ui'
 import dynamic from 'next/dynamic'
 
 const ResponsiveContainer = dynamic(() => import('recharts').then(m => m.ResponsiveContainer), { ssr: false })
@@ -43,14 +44,11 @@ export default function AnalyticsPage() {
   return (
     <DashboardLayout>
       <div className="space-y-8 max-w-6xl mx-auto px-2 sm:px-4">
-        <div className="relative overflow-hidden rounded-2xl border bg-white shadow-sm ring-1 ring-gray-100">
-          <div className="absolute inset-0 bg-gradient-to-r from-sky-50 via-blue-50 to-indigo-50 opacity-50" />
-          <div className="relative px-6 py-6">
-        <h1 className="text-2xl font-bold text-gray-900">Thống kê</h1>
-            <p className="mt-1 text-gray-600">Tổng quan hoạt động và số liệu chính.</p>
-          </div>
-          <div className="absolute bottom-0 inset-x-0 h-1 bg-gradient-to-r from-sky-500 via-blue-500 to-indigo-500" />
-        </div>
+        <TitlePanel
+          title="THỐNG KÊ"
+          description="Tổng quan hoạt động và số liệu chính"
+          variant="primary"
+        />
 
         {error && <div className="rounded-xl border p-4 text-sm text-rose-700 bg-rose-50">{error}</div>}
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">

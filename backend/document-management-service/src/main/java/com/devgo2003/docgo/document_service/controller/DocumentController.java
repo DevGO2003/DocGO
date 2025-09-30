@@ -24,7 +24,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/document-management-service/documents")
-@Tag(name = "📄 APIs Document Management", description = "APIs for document and file management")
+@Tag(name = "📄 APIs Quản lý Tài liệu", description = "APIs quản lý tài liệu và tệp tin trong hệ thống DocGO")
 public class DocumentController {
 
     private final FileStorageService fileStorageService;
@@ -35,10 +35,13 @@ public class DocumentController {
     }
 
     @Operation(
-            summary = "Upload document file",
+            summary = "Upload tài liệu",
             description = """
-            🔹 Đầu vào
-            
+            ## 📖 Mô tả
+            Tải lên tệp tài liệu và lưu trữ kèm metadata người dùng.
+
+            ## 🔹 Đầu vào
+
             📄 file (bắt buộc, multipart/form-data)
             Loại: MultipartFile
             Mô tả: File tài liệu cần upload (txt, pdf, docx, etc.)
@@ -51,7 +54,7 @@ public class DocumentController {
             Loại: string
             Mô tả: Thư mục lưu trữ file
             
-            🔹 Đầu ra
+            ## 🔹 Đầu ra
             
             📝 data
             Loại: FileUploadResponse
@@ -103,10 +106,13 @@ public class DocumentController {
     }
 
     @Operation(
-            summary = "Download document file",
+            summary = "Tải xuống tài liệu",
             description = """
-            🔹 Đầu vào
-            
+            ## 📖 Mô tả
+            Tải xuống tệp tài liệu theo định danh file đã lưu trữ.
+
+            ## 🔹 Đầu vào
+
             📄 fileId (bắt buộc, path)
             Loại: string
             Mô tả: ID của file cần download
@@ -115,7 +121,7 @@ public class DocumentController {
             Loại: string
             Mô tả: ID của người dùng yêu cầu download
             
-            🔹 Đầu ra
+            ## 🔹 Đầu ra
             
             📝 data
             Loại: FileDownloadResponse
@@ -169,10 +175,13 @@ public class DocumentController {
     }
 
     @Operation(
-            summary = "Get all documents",
+            summary = "Lấy danh sách tài liệu",
             description = """
-            🔹 Đầu vào
-            
+            ## 📖 Mô tả
+            Lấy danh sách tài liệu với phân trang, cho phép lọc theo người dùng.
+
+            ## 🔹 Đầu vào
+
             📄 page (tùy chọn, query)
             Loại: integer
             Mô tả: Số trang (mặc định: 0)
@@ -185,7 +194,7 @@ public class DocumentController {
             Loại: string
             Mô tả: ID của người dùng để lọc documents
             
-            🔹 Đầu ra
+            ## 🔹 Đầu ra
             
             📝 data
             Loại: FileListResponse
