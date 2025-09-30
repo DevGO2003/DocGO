@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useTranslation } from '@/hooks/useTranslation'
 import { ProfileForm, ProfileAvatar, ProfileSettings, ProfileStats } from '@/components/profile'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card'
+import { TitlePanel } from '@/components/ui'
 import { UserIcon, CogIcon, ChartBarIcon, ShieldCheckIcon } from '@heroicons/react/24/outline'
 import { DashboardLayout } from '@/components/layout'
 
@@ -15,14 +16,11 @@ export default function ProfilePage() {
     <DashboardLayout>
       <div className="max-w-6xl">
         {/* Page Title */}
-        <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-4 border border-green-100 mb-6">
-          <h1 className="text-lg font-bold text-gray-900 mb-1">
-            👤 THÔNG TIN CÁ NHÂN
-          </h1>
-          <p className="text-sm text-gray-600">
-            Quản lý thông tin tài khoản và cài đặt cá nhân
-          </p>
-        </div>
+        <TitlePanel
+          title="THÔNG TIN CÁ NHÂN"
+          description="Quản lý thông tin tài khoản và cài đặt cá nhân"
+          variant="success"
+        />
 
       {/* Profile Tabs */}
       <div className="space-y-6">

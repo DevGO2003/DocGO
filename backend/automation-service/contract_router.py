@@ -9,7 +9,7 @@ from services.ai_processing_service import AutomationService
 router = APIRouter(prefix="/api/v1/automation-service")
 
 
-@router.post("/contracts/summarize", summary="Tóm tắt hợp đồng", tags=["🤖 API Xử lý AI"])
+@router.post("/contracts/summarize", summary="Tóm tắt hợp đồng", tags=["🤖 APIs Xử lý AI"])
 async def contract_summarize_api(
     file: UploadFile = File(None, description="File hợp đồng cần tóm tắt (pdf, docx, txt, html)"),
     text: str = Form(None, description="Nội dung hợp đồng dạng văn bản"),

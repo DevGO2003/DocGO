@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react'
 import { DashboardLayout } from '@/components/layout'
+import { TitlePanel } from '@/components/ui'
 import { useTranslation } from '@/hooks/useTranslation'
 import { UserGroupIcon } from '@heroicons/react/24/outline'
 
@@ -130,14 +131,11 @@ export default function UserManagementPage() {
     <DashboardLayout>
       <div className="space-y-8 max-w-6xl mx-auto px-2 sm:px-4">
         {/* Page Title */}
-        <div className="bg-gradient-to-r from-orange-50 to-red-50 rounded-xl p-4 border border-orange-100">
-          <h1 className="text-lg font-bold text-gray-900 mb-1">
-            👥 QUẢN LÝ NGƯỜI DÙNG
-          </h1>
-          <p className="text-sm text-gray-600">
-            Quản lý tài khoản, phân quyền và cài đặt hệ thống
-          </p>
-        </div>
+        <TitlePanel
+          title="QUẢN LÝ NGƯỜI DÙNG"
+          description="Quản lý tài khoản, phân quyền và cài đặt hệ thống"
+          variant="warning"
+        />
 
         {/* Search and Actions */}
         <div className="rounded-2xl border bg-white shadow-sm ring-1 ring-gray-100">

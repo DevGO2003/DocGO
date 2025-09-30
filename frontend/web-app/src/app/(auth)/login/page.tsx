@@ -75,7 +75,7 @@ export default function LoginPage() {
         password: data.password
       }
       
-      const success = await login(credentials, data.rememberMe || false)
+      const success = await (login as any)(credentials, data.rememberMe ?? false)
       if (success) {
         router.push('/dashboard')
       } else {

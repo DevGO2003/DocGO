@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { DashboardLayout } from '@/components/layout'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card'
+import { TitlePanel } from '@/components/ui'
 import { useRouter } from 'next/navigation'
 import { useTranslation } from '@/hooks/useTranslation'
 
@@ -58,14 +59,11 @@ export default function DashboardPage() {
     <DashboardLayout>
       <div className="space-y-8">
         {/* Page Title */}
-        <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-4 border border-indigo-100">
-          <h1 className="text-lg font-bold text-gray-900 mb-1">
-            📊 THỐNG KÊ
-          </h1>
-          <p className="text-sm text-gray-600">
-            Tổng quan hoạt động và số liệu chính
-          </p>
-        </div>
+        <TitlePanel
+          title="THỐNG KÊ"
+          description="Tổng quan hoạt động và số liệu chính"
+          variant="primary"
+        />
         {/* 4 Ô thống kê trên cùng */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {statusStats.map((s, idx) => (

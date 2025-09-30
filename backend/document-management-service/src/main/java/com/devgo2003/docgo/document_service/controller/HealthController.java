@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.UUID;
 
 @RestController
-@Tag(name = "Health", description = "Health check endpoints")
+@Tag(name = "🏥 APIs Gốc", description = "Health check và root endpoints")
 public class HealthController {
 
     @GetMapping("/health")

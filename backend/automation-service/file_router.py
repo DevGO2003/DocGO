@@ -15,7 +15,7 @@ from schemas.response import RestResponse
 from services.file_service import FileStorageService
 
 # Create router
-router = APIRouter(prefix="/api/v1/automation-service/files", tags=["📁 API Quản lý File"])
+router = APIRouter(prefix="/api/v1/automation-service/files", tags=["📁 APIs Quản lý File"])
 
 # Initialize file service
 file_service = FileStorageService()

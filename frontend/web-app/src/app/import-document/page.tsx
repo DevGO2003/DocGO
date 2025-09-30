@@ -2,6 +2,7 @@
 
 import React, { useState, useRef } from 'react'
 import { DashboardLayout } from '@/components/layout'
+import { TitlePanel } from '@/components/ui'
 import ContractSummaryRender from '@/components/ContractSummaryRender'
 import EditableArrayTable from '@/components/EditableArrayTable'
 import { DocumentTextIcon, DocumentMagnifyingGlassIcon, ArrowUpTrayIcon, PlusIcon } from '@heroicons/react/24/outline'
@@ -463,19 +464,17 @@ export default function CreateContractPage() {
             <div className="relative">
               <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-3xl shadow-2xl transform rotate-1"></div>
               <div className="relative bg-white rounded-3xl shadow-xl border border-gray-100 p-8">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h1 className="text-lg font-bold text-gray-900 mb-1">
-                      📤 IMPORT DOCUMENT
-                    </h1>
-                    <p className="text-sm text-gray-600">Tải lên và xử lý tài liệu hợp đồng hoặc tạo hợp đồng mới</p>
-                  </div>
-                  <div className="hidden md:flex items-center space-x-4">
-                    <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-xl flex items-center justify-center">
-                      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                      </svg>
-                    </div>
+                <TitlePanel
+                  title="IMPORT DOCUMENT"
+                  description="Tải lên và xử lý tài liệu hợp đồng hoặc tạo hợp đồng mới"
+                  variant="info"
+                  className="mb-6"
+                />
+                <div className="hidden md:flex items-center space-x-4">
+                  <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-xl flex items-center justify-center">
+                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
                   </div>
                 </div>
               </div>

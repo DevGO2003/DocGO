@@ -6,6 +6,7 @@ import { DashboardLayout } from '@/components/layout'
 import { MagnifyingGlassIcon, TagIcon, DocumentTextIcon } from '@heroicons/react/24/outline'
 import { contractAPI } from '@/lib/api'
 import { InlineLoading } from '@/components/ui/LoadingSpinner'
+import { TitlePanel } from '@/components/ui'
 
 type ContractItem = {
   id: number
@@ -166,21 +167,16 @@ export default function ContractsPage() {
     <DashboardLayout>
       <div className="space-y-6">
         {/* Page Title */}
-        <div className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl p-4 border border-blue-100">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-lg font-bold text-gray-900 mb-1">
-                📄 QUẢN LÝ HỢP ĐỒNG
-              </h1>
-              <p className="text-sm text-gray-600">
-                Tìm kiếm, lọc trạng thái/loại và gắn thẻ nhanh
-              </p>
-            </div>
+        <TitlePanel
+          title="QUẢN LÝ HỢP ĐỒNG"
+          description="Tìm kiếm, lọc trạng thái/loại và gắn thẻ nhanh"
+          variant="secondary"
+          actionButton={
             <Link href="/dashboard/import-document" className="px-4 py-2 rounded-lg bg-white text-indigo-700 border border-indigo-200 hover:bg-indigo-50 shadow-sm transition-colors">
               + Tạo hợp đồng
             </Link>
-          </div>
-        </div>
+          }
+        />
 
         {/* Filters */}
         <div className="bg-white/80 backdrop-blur rounded-2xl border border-gray-200 p-4 shadow-sm">

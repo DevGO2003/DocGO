@@ -86,23 +86,23 @@ def custom_openapi():
     # Tags metadata với icon và mô tả tiếng Việt
     tags_metadata = [
         {
-            "name": "🤖 API Xử lý AI",
+            "name": "🤖 APIs Xử lý AI",
             "description": "APIs xử lý trí tuệ nhân tạo - Trích xuất nội dung, phân loại tài liệu, tóm tắt hợp đồng, xử lý ngôn ngữ tự nhiên"
         },
         {
-            "name": "📁 API Quản lý File",
+            "name": "📁 APIs Quản lý File",
             "description": "APIs quản lý file và lưu trữ - Upload, download, quản lý file đính kèm và tài liệu"
         },
         {
-            "name": "📦 API Xử lý Batch",
+            "name": "📦 APIs Xử lý Batch",
             "description": "APIs xử lý hàng loạt - Xử lý nhiều tài liệu cùng lúc, quản lý job và tiến trình"
         },
         {
-            "name": "⚙️ API Kiểm tra Hệ thống",
+            "name": "⚙️ APIs Kiểm tra Hệ thống",
             "description": "APIs kiểm tra và cấu hình hệ thống - Health check, cấu hình S3, kiểm tra kết nối"
         },
         {
-            "name": "🏠 API Gốc",
+            "name": "🏠 APIs Gốc",
             "description": "APIs gốc của service - Health check, thông tin service, chuyển hướng"
         }
     ]
@@ -115,7 +115,7 @@ def custom_openapi():
 
 app.openapi = custom_openapi
 
-@app.get("/", summary="Trang chủ", tags=["🏠 API Gốc"])
+@app.get("/", summary="Trang chủ", tags=["🏠 APIs Gốc"])
 async def read_root():
     """
     ## 📖 Mô tả
@@ -134,7 +134,7 @@ async def read_root():
     """
     return RedirectResponse(url="/docs", status_code=302)
 
-@app.get("/swagger-ui/index.html", summary="Swagger UI", tags=["🏠 API Gốc"])
+@app.get("/swagger-ui/index.html", summary="Swagger UI", tags=["🏠 APIs Gốc"])
 async def swagger_ui_redirect():
     """
     ## 📖 Mô tả
@@ -153,7 +153,7 @@ async def swagger_ui_redirect():
     """
     return RedirectResponse(url="/docs", status_code=302)
 
-@app.get("/health", summary="Health check", tags=["🏠 API Gốc"])
+@app.get("/health", summary="Health check", tags=["🏠 APIs Gốc"])
 async def health_check():
     """
     ## 📖 Mô tả
