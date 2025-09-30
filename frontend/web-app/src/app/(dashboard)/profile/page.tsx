@@ -19,7 +19,7 @@ export default function ProfilePage() {
         <TitlePanel
           title="THÔNG TIN CÁ NHÂN"
           description="Quản lý thông tin tài khoản và cài đặt cá nhân"
-          variant="success"
+          variant="primary"
         />
 
       {/* Profile Tabs */}

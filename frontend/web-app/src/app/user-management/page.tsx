@@ -134,7 +134,7 @@ export default function UserManagementPage() {
         <TitlePanel
           title="QUẢN LÝ NGƯỜI DÙNG"
           description="Quản lý tài khoản, phân quyền và cài đặt hệ thống"
-          variant="warning"
+          variant="primary"
         />
 
         {/* Search and Actions */}

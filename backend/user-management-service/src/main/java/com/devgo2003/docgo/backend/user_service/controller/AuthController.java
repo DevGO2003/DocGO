@@ -39,7 +39,57 @@ public class AuthController {
     private String googleProjectId;
 
     @PostMapping("/login")
-    @Operation(summary = "Đăng nhập", description = "Đăng nhập bằng username và password, trả về accessToken và refreshToken")
+    @Operation(
+        summary = "Đăng nhập",
+        description = """
+        ## 📖 Mô tả
+        API đăng nhập người dùng vào hệ thống bằng username và password.
+        Trả về accessToken và refreshToken để xác thực các request tiếp theo.
+        
+        ## 🔹 Đầu vào
+        
+        📝 **request** (bắt buộc, body)
+        - **Loại**: LoginRequest
+        - **Mô tả**: Thông tin đăng nhập của người dùng
+        - **Bao gồm**: username, password
+        - **Ví dụ**: {"username": "john_doe", "password": "123456"}
+        
+        ## 🔹 Đầu ra
+        
+        📄 **data** (AuthResponse)
+        - **Mô tả**: Thông tin xác thực và người dùng
+        - **Bao gồm**: accessToken, refreshToken, userInfo, expiresIn
+        - **Ví dụ**: {"accessToken": "eyJ...", "refreshToken": "eyJ...", "userInfo": {...}}
+        
+        📊 **apiVersion** (string)
+        - **Mô tả**: Phiên bản API hiện tại
+        - **Giá trị**: "v1"
+        
+        🔢 **statusCode** (integer)
+        - **Mô tả**: Mã trạng thái xử lý
+        - **Các giá trị**: 200 (thành công), 400 (thông tin đăng nhập sai), 500 (lỗi server)
+        
+        📋 **shortMessage** (string)
+        - **Mô tả**: Thông báo ngắn gọn về kết quả
+        - **Ví dụ**: "Success", "Bad Request", "Internal Server Error"
+        
+        📖 **description** (string)
+        - **Mô tả**: Mô tả chi tiết về kết quả xử lý
+        - **Ví dụ**: "Đăng nhập thành công"
+        
+        🕒 **timestamp** (string, ISO-8601)
+        - **Mô tả**: Thời gian xử lý yêu cầu
+        - **Ví dụ**: "2024-01-15T10:30:00Z"
+        
+        🆔 **requestId** (string, UUID)
+        - **Mô tả**: Định danh duy nhất của yêu cầu để theo dõi
+        - **Ví dụ**: "123e4567-e89b-12d3-a456-426614174000"
+        
+        🛣️ **path** (string)
+        - **Mô tả**: Đường dẫn API được gọi
+        - **Ví dụ**: "/api/v1/user-management-service/auth/login"
+        """
+    )
     public ResponseEntity<RestResponse<AuthResponse>> login(@RequestBody LoginRequest request) {
         String requestId = UUID.randomUUID().toString();
         String username = request.getUsername();
@@ -85,7 +135,57 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    @Operation(summary = "Đăng ký", description = "Tạo tài khoản mới")
+    @Operation(
+        summary = "Đăng ký",
+        description = """
+        ## 📖 Mô tả
+        API đăng ký tài khoản người dùng mới trong hệ thống.
+        Tạo tài khoản với thông tin cơ bản và trả về thông tin xác thực.
+        
+        ## 🔹 Đầu vào
+        
+        📝 **request** (bắt buộc, body)
+        - **Loại**: RegisterRequest
+        - **Mô tả**: Thông tin đăng ký tài khoản mới
+        - **Bao gồm**: username, email, password, fullName, phone
+        - **Ví dụ**: {"username": "john_doe", "email": "john@example.com", "password": "123456"}
+        
+        ## 🔹 Đầu ra
+        
+        📄 **data** (AuthResponse)
+        - **Mô tả**: Thông tin xác thực và người dùng đã tạo
+        - **Bao gồm**: accessToken, refreshToken, userInfo, expiresIn
+        - **Ví dụ**: {"accessToken": "eyJ...", "refreshToken": "eyJ...", "userInfo": {...}}
+        
+        📊 **apiVersion** (string)
+        - **Mô tả**: Phiên bản API hiện tại
+        - **Giá trị**: "v1"
+        
+        🔢 **statusCode** (integer)
+        - **Mô tả**: Mã trạng thái xử lý
+        - **Các giá trị**: 201 (tạo thành công), 400 (dữ liệu không hợp lệ), 409 (tài khoản đã tồn tại)
+        
+        📋 **shortMessage** (string)
+        - **Mô tả**: Thông báo ngắn gọn về kết quả
+        - **Ví dụ**: "Success", "Bad Request", "Conflict"
+        
+        📖 **description** (string)
+        - **Mô tả**: Mô tả chi tiết về kết quả xử lý
+        - **Ví dụ**: "Đăng ký tài khoản thành công"
+        
+        🕒 **timestamp** (string, ISO-8601)
+        - **Mô tả**: Thời gian xử lý yêu cầu
+        - **Ví dụ**: "2024-01-15T10:30:00Z"
+        
+        🆔 **requestId** (string, UUID)
+        - **Mô tả**: Định danh duy nhất của yêu cầu để theo dõi
+        - **Ví dụ**: "123e4567-e89b-12d3-a456-426614174000"
+        
+        🛣️ **path** (string)
+        - **Mô tả**: Đường dẫn API được gọi
+        - **Ví dụ**: "/api/v1/user-management-service/auth/register"
+        """
+    )
     public ResponseEntity<RestResponse<AuthResponse>> register(@RequestBody RegisterRequest request) {
         String requestId = UUID.randomUUID().toString();
         String username = request.getUsername();
@@ -120,7 +220,57 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
-    @Operation(summary = "Refresh token", description = "Tạo access token mới từ refresh token")
+    @Operation(
+        summary = "Refresh token",
+        description = """
+        ## 📖 Mô tả
+        API tạo access token mới từ refresh token hiện có.
+        Sử dụng khi access token hết hạn để tiếp tục xác thực.
+        
+        ## 🔹 Đầu vào
+        
+        📝 **body** (bắt buộc, body)
+        - **Loại**: Map<String, String>
+        - **Mô tả**: Chứa refresh token để tạo access token mới
+        - **Bao gồm**: refreshToken
+        - **Ví dụ**: {"refreshToken": "eyJ..."}
+        
+        ## 🔹 Đầu ra
+        
+        📄 **data** (AuthResponse)
+        - **Mô tả**: Thông tin xác thực mới
+        - **Bao gồm**: accessToken, refreshToken, userInfo, expiresIn
+        - **Ví dụ**: {"accessToken": "eyJ...", "refreshToken": "eyJ...", "userInfo": {...}}
+        
+        📊 **apiVersion** (string)
+        - **Mô tả**: Phiên bản API hiện tại
+        - **Giá trị**: "v1"
+        
+        🔢 **statusCode** (integer)
+        - **Mô tả**: Mã trạng thái xử lý
+        - **Các giá trị**: 200 (thành công), 400 (refresh token không hợp lệ), 401 (refresh token hết hạn)
+        
+        📋 **shortMessage** (string)
+        - **Mô tả**: Thông báo ngắn gọn về kết quả
+        - **Ví dụ**: "Success", "Bad Request", "Unauthorized"
+        
+        📖 **description** (string)
+        - **Mô tả**: Mô tả chi tiết về kết quả xử lý
+        - **Ví dụ**: "Tạo access token mới thành công"
+        
+        🕒 **timestamp** (string, ISO-8601)
+        - **Mô tả**: Thời gian xử lý yêu cầu
+        - **Ví dụ**: "2024-01-15T10:30:00Z"
+        
+        🆔 **requestId** (string, UUID)
+        - **Mô tả**: Định danh duy nhất của yêu cầu để theo dõi
+        - **Ví dụ**: "123e4567-e89b-12d3-a456-426614174000"
+        
+        🛣️ **path** (string)
+        - **Mô tả**: Đường dẫn API được gọi
+        - **Ví dụ**: "/api/v1/user-management-service/auth/refresh"
+        """
+    )
     public ResponseEntity<RestResponse<AuthResponse>> refresh(@RequestBody Map<String, String> body) {
         String requestId = UUID.randomUUID().toString();
         String refreshToken = body.getOrDefault("refreshToken", "");

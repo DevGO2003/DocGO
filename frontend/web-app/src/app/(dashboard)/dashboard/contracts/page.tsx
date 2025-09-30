@@ -170,7 +170,7 @@ export default function ContractsPage() {
         <TitlePanel
           title="QUẢN LÝ HỢP ĐỒNG"
           description="Tìm kiếm, lọc trạng thái/loại và gắn thẻ nhanh"
-          variant="secondary"
+          variant="primary"
           actionButton={
             <Link href="/dashboard/import-document" className="px-4 py-2 rounded-lg bg-white text-indigo-700 border border-indigo-200 hover:bg-indigo-50 shadow-sm transition-colors">
               + Tạo hợp đồng
