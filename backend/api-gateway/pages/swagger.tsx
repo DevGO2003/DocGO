@@ -300,43 +300,43 @@ export default function SwaggerPage() {
         
         .swagger-header {
           text-align: center;
-          margin-bottom: 40px;
-          padding: 40px;
+          margin-bottom: 30px;
+          padding: 25px;
           background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
           color: white;
-          border-radius: 20px;
-          box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+          border-radius: 15px;
+          box-shadow: 0 10px 25px rgba(0,0,0,0.1);
         }
         
         .swagger-header h1 {
-          margin: 0 0 15px 0;
-          font-size: 3rem;
+          margin: 0 0 10px 0;
+          font-size: 2.2rem;
           font-weight: bold;
           text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         }
         
         .swagger-header p {
-          margin: 0 0 30px 0;
-          font-size: 1.3rem;
+          margin: 0 0 20px 0;
+          font-size: 1.1rem;
           opacity: 0.9;
         }
         
         /* Service Cards Navigation */
         .service-cards-nav {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-          gap: 20px;
-          margin-top: 30px;
+          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+          gap: 15px;
+          margin-top: 20px;
         }
 
         .service-card {
           background: rgba(255, 255, 255, 0.95);
-          border-radius: 15px;
-          padding: 20px;
+          border-radius: 12px;
+          padding: 15px;
           cursor: pointer;
           transition: all 0.3s ease;
-          border: 3px solid transparent;
-          box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+          border: 2px solid transparent;
+          box-shadow: 0 3px 10px rgba(0,0,0,0.1);
           position: relative;
           overflow: hidden;
         }
@@ -375,43 +375,43 @@ export default function SwaggerPage() {
         .service-card-header {
           display: flex;
           align-items: center;
-          margin-bottom: 15px;
+          margin-bottom: 10px;
         }
 
         .service-icon {
-          font-size: 2rem;
-          margin-right: 15px;
+          font-size: 1.5rem;
+          margin-right: 10px;
         }
         
         .service-card h3 {
           margin: 0;
           color: #333;
-          font-size: 1.2rem;
+          font-size: 1rem;
           font-weight: 600;
         }
 
         .service-card-body {
-          margin-bottom: 15px;
+          margin-bottom: 10px;
         }
 
         .service-description {
           color: #666;
-          font-size: 0.9rem;
-          line-height: 1.4;
-          margin: 0 0 10px 0;
+          font-size: 0.8rem;
+          line-height: 1.3;
+          margin: 0 0 8px 0;
         }
 
         .service-meta {
           display: flex;
-          gap: 10px;
+          gap: 8px;
           flex-wrap: wrap;
         }
 
         .service-tech, .service-port {
           background: #f0f0f0;
-          padding: 4px 8px;
-          border-radius: 12px;
-          font-size: 0.8rem;
+          padding: 3px 6px;
+          border-radius: 8px;
+          font-size: 0.7rem;
           color: #555;
         }
 
@@ -424,10 +424,10 @@ export default function SwaggerPage() {
           background: var(--card-color);
           color: white;
           border: none;
-          padding: 8px 16px;
-          border-radius: 20px;
+          padding: 6px 12px;
+          border-radius: 15px;
           cursor: pointer;
-          font-size: 0.9rem;
+          font-size: 0.8rem;
           font-weight: 500;
           transition: all 0.3s ease;
         }
@@ -449,29 +449,29 @@ export default function SwaggerPage() {
         /* API Documentation Section */
         .api-documentation-section {
           background: white;
-          border-radius: 20px;
-          padding: 30px;
-          box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-          margin-bottom: 30px;
+          border-radius: 15px;
+          padding: 20px;
+          box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+          margin-bottom: 20px;
         }
 
         .api-section-header {
           text-align: center;
-          margin-bottom: 30px;
-          padding-bottom: 20px;
+          margin-bottom: 20px;
+          padding-bottom: 15px;
           border-bottom: 2px solid #f0f0f0;
         }
 
         .api-section-header h2 {
           color: #333;
-          margin: 0 0 10px 0;
-          font-size: 2rem;
+          margin: 0 0 8px 0;
+          font-size: 1.5rem;
         }
 
         .api-section-header p {
           color: #666;
           margin: 0;
-          font-size: 1.1rem;
+          font-size: 1rem;
         }
 
         /* API Endpoints Preview */

@@ -17,36 +17,41 @@ from schemas.response import RestResponse
 router = APIRouter(prefix="/api/v1/automation-service/s3", tags=["⚙️ API Kiểm tra Hệ thống"])
 
 
-@router.get("/get-config", response_model=RestResponse[dict])
+@router.get("/get-config", summary="Cấu hình S3", response_model=RestResponse[dict])
 async def get_s3_config():
     """
-    Lấy thông tin cấu hình S3 và trạng thái hệ thống
+    ## 📖 Mô tả
+    API lấy thông tin cấu hình S3 và trạng thái hệ thống lưu trữ.
+    Kiểm tra kết nối, cấu hình và hiển thị thông tin chi tiết về hệ thống file storage.
     
-    🔹 Đầu vào
+    ## 🔹 Đầu vào
     
-    Không có tham số đầu vào
+    Không có tham số đầu vào - API này chỉ trả về thông tin cấu hình hiện tại.
     
-    🔹 Đầu ra
+    ## 🔹 Đầu ra
     
-    📄 data
-    Loại: object
-    Mô tả: Thông tin cấu hình S3 và trạng thái hệ thống
+    📄 **data** (object)
+    - **Mô tả**: Thông tin cấu hình S3 và trạng thái hệ thống
+    - **Bao gồm**: 
+      - `s3`: Cấu hình S3 (enabled, endpoint, region, bucket)
+      - `file_storage`: Cấu hình file storage (upload_dir, max_file_size)
+      - `status`: Trạng thái kết nối và hoạt động
     
-    📊 apiVersion
-    Loại: string
-    Mô tả: Phiên bản API (v1)
+    📊 **apiVersion** (string)
+    - **Mô tả**: Phiên bản API hiện tại
+    - **Giá trị**: "v1"
     
-    🔢 statusCode
-    Loại: integer
-    Mô tả: Mã trạng thái HTTP (200: thành công, 500: lỗi server)
+    🔢 **statusCode** (integer)
+    - **Mô tả**: Mã trạng thái xử lý
+    - **Các giá trị**: 200 (thành công), 500 (lỗi server)
     
-    📋 shortMessage
-    Loại: string
-    Mô tả: Thông báo ngắn gọn về kết quả
+    📋 **shortMessage** (string)
+    - **Mô tả**: Thông báo ngắn gọn về kết quả
+    - **Ví dụ**: "Success", "Internal Server Error"
     
-    📖 description
-    Loại: string
-    Mô tả: Mô tả chi tiết về kết quả kiểm tra
+    📖 **description** (string)
+    - **Mô tả**: Mô tả chi tiết về kết quả kiểm tra
+    - **Ví dụ**: "Đã lấy thông tin cấu hình S3 thành công"
     
     🕒 timestamp
     Loại: string (ISO-8601)

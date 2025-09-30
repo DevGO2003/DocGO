@@ -20,7 +20,7 @@ import java.util.Set;
 @RestController
 @RequestMapping("/api/v1/user-management-service/users")
 @RequiredArgsConstructor
-@Tag(name = "User Management", description = "API quản lý người dùng")
+@Tag(name = "👤 APIs Quản lý Người dùng", description = "APIs quản lý người dùng")
 public class UserController {
     
     private final UserService userService;

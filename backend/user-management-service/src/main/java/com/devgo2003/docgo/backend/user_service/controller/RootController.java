@@ -9,7 +9,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 @RestController
-@Tag(name = "Root", description = "Root endpoint và redirect")
+@Tag(name = "🏠 Root", description = "Root endpoint và redirect")
 public class RootController {
 
     @Operation(

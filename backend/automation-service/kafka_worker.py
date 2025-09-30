@@ -448,7 +448,7 @@ class AIKafkaWorker:
 				"eventType": "ai.text.extraction.requested",
 				"eventId": uuid.uuid4().hex,
 				"timestamp": datetime.now(timezone.utc).isoformat(),
-				"source": "ai-processing-service",
+				"source": "automation-service",
 				"correlationId": event.get("correlationId") or uuid.uuid4().hex,
 				"actor": event.get("actor", {}),
 				"data": {
@@ -480,7 +480,7 @@ class AIKafkaWorker:
 			"eventType": "ai.processing.failed",
 			"eventId": uuid.uuid4().hex,
 			"timestamp": datetime.now(timezone.utc).isoformat(),
-			"source": "ai-processing-service",
+			"source": "automation-service",
 			"correlationId": event.get("correlationId") or uuid.uuid4().hex,
 			"actor": event.get("actor", {}),
 			"data": {
@@ -510,7 +510,7 @@ class AIKafkaWorker:
 			"eventType": "ai.text.extracted",
 			"eventId": uuid.uuid4().hex,
 			"timestamp": datetime.now(timezone.utc).isoformat(),
-			"source": "ai-processing-service",
+			"source": "automation-service",
 			"correlationId": event.get("correlationId") or uuid.uuid4().hex,
 			"actor": event.get("actor", {}),
 			"data": {
@@ -534,7 +534,7 @@ class AIKafkaWorker:
 			"eventType": "ai.document.classified",
 			"eventId": uuid.uuid4().hex,
 			"timestamp": datetime.now(timezone.utc).isoformat(),
-			"source": "ai-processing-service",
+			"source": "automation-service",
 			"correlationId": event.get("correlationId") or uuid.uuid4().hex,
 			"actor": event.get("actor", {}),
 			"data": {
@@ -564,7 +564,7 @@ class AIKafkaWorker:
 				"eventType": "ai.summary.creation.requested",
 				"eventId": uuid.uuid4().hex,
 				"timestamp": datetime.now(timezone.utc).isoformat(),
-				"source": "ai-processing-service",
+				"source": "automation-service",
 				"correlationId": event.get("correlationId") or uuid.uuid4().hex,
 				"actor": event.get("actor", {}),
 				"data": {
@@ -606,7 +606,7 @@ class AIKafkaWorker:
 			"eventType": "contract.summary.updated",
 			"eventId": str(uuid.uuid4()),
 			"timestamp": datetime.now(timezone.utc).isoformat(),
-			"source": "ai-processing-service",
+			"source": "automation-service",
 			"correlationId": event.get("correlationId") or str(uuid.uuid4()),
 			"actor": event.get("actor", {}),
 			"data": contract_summary,

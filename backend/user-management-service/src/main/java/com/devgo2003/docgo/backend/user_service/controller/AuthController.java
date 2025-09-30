@@ -23,7 +23,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1/user-management-service/auth")
 @RequiredArgsConstructor
-@Tag(name = "API Xác thực người dùng", description = "API xác thực: đăng nhập, đăng xuất, refresh token, OAuth2 Google")
+@Tag(name = "🔐 APIs Xác thực người dùng", description = "APIs xác thực: đăng nhập, đăng xuất, refresh token, OAuth2 Google")
 public class AuthController {
 
     private final AuthService authService;

@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
  * CHỈ SỬ DỤNG TRONG MÔI TRƯỜNG DEVELOPMENT
  */
 @RestController
-@RequestMapping("/api/v1/contract-management-service/test")
+@RequestMapping("/api/v1/document-management-service/test")
 @RequiredArgsConstructor
 @Slf4j
 @Tag(name = "Test Data Management", description = "Quản lý dữ liệu test cho Contract Management Service")

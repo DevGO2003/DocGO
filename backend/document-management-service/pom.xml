@@ -9,19 +9,11 @@
 		<version>3.5.4</version>
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
-<<<<<<< HEAD
 	<groupId>com.devgo2003.docgo.backend</groupId>
 	<artifactId>document-service</artifactId>
 	<version>1.0.0</version>
 	<name>document-management-service</name>
 	<description>Document Management Service for DocGO</description>
-=======
-	<groupId>com.devgo2003.docgo.document_management_service</groupId>
-	<artifactId>document-management-service</artifactId>
-	<version>1.0.0</version>
-	<name>document-management-service</name>
-	<description>Demo project for Spring Boot</description>
->>>>>>> e4f9e590765b2a1b7ce2f3982eff8dae6ecb472e
 
 	<properties>
 		<java.version>17</java.version>
@@ -126,7 +118,6 @@
 			<artifactId>spring-boot-devtools</artifactId>
 			<scope>runtime</scope>
 		</dependency>
-<<<<<<< HEAD
 
 		<!-- UUIDv7 generator -->
 		<dependency>
@@ -162,8 +153,6 @@
 			<artifactId>pdfbox</artifactId>
 			<version>2.0.29</version>
 		</dependency>
-=======
->>>>>>> e4f9e590765b2a1b7ce2f3982eff8dae6ecb472e
 	</dependencies>
 
 	<build>

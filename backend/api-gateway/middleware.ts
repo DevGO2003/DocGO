@@ -292,10 +292,10 @@ async function checkServiceHealth(serviceName: string): Promise<boolean> {
     
     switch (serviceName) {
       case 'contract':
-        isHealthy = await serviceManager.checkServiceHealth('contract-management-service')
+        isHealthy = await serviceManager.checkServiceHealth('document-management-service')
         break
       case 'ai':
-        isHealthy = await serviceManager.checkServiceHealth('ai-processing-service')
+        isHealthy = await serviceManager.checkServiceHealth('automation-service')
         break
       case 'file':
         isHealthy = await serviceManager.checkServiceHealth('file-storage-asset-service')

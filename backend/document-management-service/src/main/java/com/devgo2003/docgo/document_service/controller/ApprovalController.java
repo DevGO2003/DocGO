@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/v1/contract-management-service/approvals")
+@RequestMapping("/api/v1/document-management-service/approvals")
 @Tag(name = "API Quản lý Phê duyệt", description = "Các API để quản lý quy trình phê duyệt hợp đồng trong hệ thống DocGO")
 public class ApprovalController {
 

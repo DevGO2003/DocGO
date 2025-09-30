@@ -20,7 +20,7 @@ import java.util.Optional;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/v1/contract-management-service/esignatures")
+@RequestMapping("/api/v1/document-management-service/esignatures")
 @Tag(name = "API Quản lý chữ ký điện tử", description = "Các API để quản lý chữ ký điện tử trong hệ thống DocGO")
 public class ESignatureController {
 

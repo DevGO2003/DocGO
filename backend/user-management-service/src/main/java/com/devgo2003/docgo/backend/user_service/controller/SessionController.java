@@ -18,7 +18,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/user-management-service/sessions")
 @RequiredArgsConstructor
-@Tag(name = "Session Management", description = "API quản lý phiên đăng nhập")
+@Tag(name = "🕐 Session Management", description = "APIs quản lý phiên đăng nhập")
 public class SessionController {
     
     private final SessionService sessionService;

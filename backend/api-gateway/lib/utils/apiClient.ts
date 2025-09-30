@@ -167,9 +167,9 @@ export function createServiceClient(serviceName: string, baseURL: string): ApiCl
 
 // Pre-configured service clients
 export const serviceClients = {
-  auth: createServiceClient('auth', process.env.AUTH_SERVICE_URL || 'http://authentication-identity-service:8001'),
-  contract: createServiceClient('contract', process.env.CONTRACT_SERVICE_URL || 'http://contract-management-service:8002'),
-  ai: createServiceClient('ai', process.env.AI_SERVICE_URL || 'http://ai-processing-service:8003'),
+  auth: createServiceClient('auth', process.env.AUTH_SERVICE_URL || 'http://user-management-service:8001'),
+  contract: createServiceClient('contract', process.env.CONTRACT_SERVICE_URL || 'http://document-management-service:8002'),
+  ai: createServiceClient('ai', process.env.AI_SERVICE_URL || 'http://automation-service:8003'),
   file: createServiceClient('file', process.env.FILE_SERVICE_URL || 'http://file-storage-service:8004'),
 };
 

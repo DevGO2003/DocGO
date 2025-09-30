@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
  * Controller cho quản lý categories, statuses và types
  */
 @RestController
-@RequestMapping("/api/v1/contract-management-service/categories")
+@RequestMapping("/api/v1/document-management-service/categories")
 @Tag(name = "Category Management", description = "Quản lý danh mục hợp đồng")
 @Validated
 public class CategoryController {

@@ -21,32 +21,37 @@ router = APIRouter(prefix="/api/v1/automation-service/files", tags=["📁 API Qu
 file_service = FileStorageService()
 
 
-@router.post("", response_model=RestResponse[FileUploadResponse])
+@router.post("", summary="Upload file", response_model=RestResponse[FileUploadResponse])
 async def upload_file(
-    file: UploadFile = File(..., description="File cần upload"),
+    file: UploadFile = File(..., description="File cần upload lên hệ thống"),
     folder: Optional[str] = Query(None, description="Thư mục con tùy chọn trong bucket"),
     user_id: Optional[str] = Query(None, description="ID của user upload file (mặc định: public)")
 ):
     """
-    Upload file với scan và versioning
+    ## 📖 Mô tả
+    API upload file lên hệ thống với khả năng lưu trữ trên S3 hoặc local storage.
+    Hỗ trợ scan malware, versioning và quản lý metadata file.
     
-    🔹 Đầu vào
+    ## 🔹 Đầu vào
     
-    📁 file (bắt buộc, multipart/form-data)
-    Loại: UploadFile
-    Mô tả: File cần upload với scan malware và versioning
+    📁 **file** (bắt buộc, multipart/form-data)
+    - **Loại**: UploadFile
+    - **Mô tả**: File cần upload lên hệ thống
+    - **Giới hạn**: Tối đa 10MB, hỗ trợ tất cả định dạng file
     
-    📂 folder (tùy chọn, query)
-    Loại: string
-    Mô tả: Thư mục con tùy chọn trong bucket
+    📂 **folder** (tùy chọn, query)
+    - **Loại**: string
+    - **Mô tả**: Thư mục con tùy chọn trong bucket để tổ chức file
+    - **Ví dụ**: "documents", "contracts", "reports"
     
-    👤 user_id (tùy chọn, query)
-    Loại: string
-    Mô tả: ID của user upload file (mặc định: public)
+    👤 **user_id** (tùy chọn, query)
+    - **Loại**: string
+    - **Mô tả**: ID của user upload file để phân quyền truy cập
+    - **Mặc định**: "public" (truy cập công khai)
     
-    🔹 Đầu ra
+    ## 🔹 Đầu ra
     
-    📄 data
+    📄 **data** (FileUploadResponse)
     Loại: FileUploadResponse
     Mô tả: Thông tin file đã upload bao gồm file_id, filename, file_size, file_type, status, upload_time, s3_key, bucket, file_url
     """
@@ -75,26 +80,30 @@ async def upload_file(
         )
 
 
-@router.get("/{file_id}/download")
+@router.get("/{file_id}/download", summary="Download file")
 async def download_file(
     file_id: str,
     user_id: Optional[str] = Query(None, description="ID của user download file (mặc định: public)"),
     version: Optional[int] = Query(None, description="Phiên bản file cụ thể (nếu không có, tải bản mới nhất)")
 ):
     """
-    Download file
+    ## 📖 Mô tả
+    API download file từ hệ thống lưu trữ (S3 hoặc local storage).
+    Hỗ trợ download theo file_id và có thể chỉ định phiên bản cụ thể.
     
-    🔹 Đầu vào
+    ## 🔹 Đầu vào
     
-    🆔 file_id (bắt buộc, path)
-    Loại: string
-    Mô tả: ID của file cần download
+    🆔 **file_id** (bắt buộc, path)
+    - **Loại**: string
+    - **Mô tả**: ID duy nhất của file cần download
+    - **Ví dụ**: "123e4567-e89b-12d3-a456-426614174000"
     
-    👤 user_id (tùy chọn, query)
-    Loại: string
-    Mô tả: ID của user download file (mặc định: public)
+    👤 **user_id** (tùy chọn, query)
+    - **Loại**: string
+    - **Mô tả**: ID của user download file để kiểm tra quyền truy cập
+    - **Mặc định**: "public" (truy cập công khai)
     
-    🔢 version (tùy chọn, query)
+    🔢 **version** (tùy chọn, query)
     Loại: integer
     Mô tả: Phiên bản file cụ thể (nếu không có, tải bản mới nhất)
     
@@ -122,7 +131,7 @@ async def download_file(
         raise e
 
 
-@router.get("", response_model=RestResponse[FileListResponse])
+@router.get("", summary="Danh sách files", response_model=RestResponse[FileListResponse])
 async def get_all_files(
     page_number: int = Query(0, description="Số trang (mặc định: 0)"),
     page_size: int = Query(10, description="Kích thước trang (mặc định: 10)"),
@@ -131,35 +140,47 @@ async def get_all_files(
     include_deleted: bool = Query(False, description="Có bao gồm files đã xóa không (mặc định: false)")
 ):
     """
-    Lấy danh sách files với pagination chuẩn
+    ## 📖 Mô tả
+    API lấy danh sách tất cả files trong hệ thống với phân trang và sắp xếp.
+    Hỗ trợ tìm kiếm, lọc và sắp xếp theo nhiều tiêu chí khác nhau.
     
-    🔹 Đầu vào
+    ## 🔹 Đầu vào
     
-    📄 page_number (tùy chọn, query)
-    Loại: integer
-    Mô tả: Số trang (mặc định: 0)
+    📄 **page_number** (tùy chọn, query)
+    - **Loại**: integer
+    - **Mô tả**: Số trang cần lấy (bắt đầu từ 0)
+    - **Mặc định**: 0
+    - **Ví dụ**: 0, 1, 2...
     
-    📄 page_size (tùy chọn, query)
-    Loại: integer
-    Mô tả: Kích thước trang (mặc định: 10)
+    📊 **page_size** (tùy chọn, query)
+    - **Loại**: integer
+    - **Mô tả**: Số lượng files trên mỗi trang
+    - **Mặc định**: 10
+    - **Ví dụ**: 10, 20, 50...
     
-    📄 sort_by (tùy chọn, query)
-    Loại: List[str]
-    Mô tả: Danh sách các trường để sắp xếp (filename, size, created_at, updated_at, content_type)
+    🔄 **sort_by** (tùy chọn, query)
+    - **Loại**: List[string]
+    - **Mô tả**: Danh sách các trường để sắp xếp
+    - **Các giá trị**: "filename", "upload_time", "file_size", "file_type"
+    - **Ví dụ**: ["upload_time", "filename"]
     
-    📄 sort_direction (tùy chọn, query)
-    Loại: List[str]
-    Mô tả: Hướng sắp xếp (ASC/DESC)
+    📈 **sort_direction** (tùy chọn, query)
+    - **Loại**: List[string]
+    - **Mô tả**: Hướng sắp xếp cho từng trường
+    - **Các giá trị**: "ASC", "DESC"
+    - **Ví dụ**: ["DESC", "ASC"]
     
-    📄 include_deleted (tùy chọn, query)
-    Loại: boolean
-    Mô tả: Có bao gồm files đã xóa không (mặc định: false)
+    🗑️ **include_deleted** (tùy chọn, query)
+    - **Loại**: boolean
+    - **Mô tả**: Có bao gồm files đã bị xóa không
+    - **Mặc định**: false
+    - **Ví dụ**: true, false
     
-    🔹 Đầu ra
+    ## 🔹 Đầu ra
     
-    📄 data
-    Loại: FileListResponse
-    Mô tả: Danh sách files với cấu trúc response chuẩn
+    📄 **data** (FileListResponse)
+    - **Mô tả**: Danh sách files với thông tin phân trang
+    - **Bao gồm**: files[], total_elements, total_pages, current_page, page_size
     """
     try:
         response = file_service.get_all_files(page_number, page_size, sort_by, sort_direction, include_deleted)
@@ -186,7 +207,7 @@ async def get_all_files(
         )
 
 
-@router.get("/{file_id}", response_model=RestResponse[dict])
+@router.get("/{file_id}", summary="Chi tiết file", response_model=RestResponse[dict])
 async def get_file_details(
     file_id: str
 ):
@@ -230,7 +251,7 @@ async def get_file_details(
         )
 
 
-@router.delete("/{file_id}", response_model=RestResponse[dict])
+@router.delete("/{file_id}", summary="Xóa file", response_model=RestResponse[dict])
 async def delete_file(
     file_id: str,
     user_id: Optional[str] = Query(None, description="ID của user xóa file (mặc định: public)"),

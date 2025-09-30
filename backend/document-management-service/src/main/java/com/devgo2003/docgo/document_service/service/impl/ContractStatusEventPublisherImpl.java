@@ -178,7 +178,7 @@ public class ContractStatusEventPublisherImpl implements IContractStatusEventPub
         event.put("eventType", eventType);
         event.put("eventId", UUID.randomUUID().toString());
         event.put("timestamp", OffsetDateTime.now().toString());
-        event.put("source", "contract-management-service");
+        event.put("source", "document-management-service");
         event.put("correlationId", correlationId);
         
         Map<String, Object> actor = new HashMap<>();
@@ -225,7 +225,7 @@ public class ContractStatusEventPublisherImpl implements IContractStatusEventPub
             eventPayload.put("eventType", "ContractStatusChanged");
             eventPayload.put("eventId", UUID.randomUUID().toString());
             eventPayload.put("timestamp", OffsetDateTime.now().toString());
-            eventPayload.put("source", "contract-management-service");
+            eventPayload.put("source", "document-management-service");
             eventPayload.put("correlationId", event.getCorrelationId());
             
             Map<String, Object> actor = new HashMap<>();
@@ -264,7 +264,7 @@ public class ContractStatusEventPublisherImpl implements IContractStatusEventPub
             eventPayload.put("eventType", "ContractExpiryWarning");
             eventPayload.put("eventId", UUID.randomUUID().toString());
             eventPayload.put("timestamp", OffsetDateTime.now().toString());
-            eventPayload.put("source", "contract-management-service");
+            eventPayload.put("source", "document-management-service");
             eventPayload.put("correlationId", UUID.randomUUID().toString());
             
             Map<String, Object> eventData = new HashMap<>();
@@ -295,7 +295,7 @@ public class ContractStatusEventPublisherImpl implements IContractStatusEventPub
             eventPayload.put("eventType", "ContractExpired");
             eventPayload.put("eventId", UUID.randomUUID().toString());
             eventPayload.put("timestamp", OffsetDateTime.now().toString());
-            eventPayload.put("source", "contract-management-service");
+            eventPayload.put("source", "document-management-service");
             eventPayload.put("correlationId", UUID.randomUUID().toString());
             
             Map<String, Object> eventData = new HashMap<>();

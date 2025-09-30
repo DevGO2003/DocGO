@@ -202,7 +202,7 @@ function isProtectedRoute(pathname: string): boolean {
   const protectedRoutes = [
     '/api/v1/user-management-service/users',
     '/api/v1/user-management-service/approvals',
-    '/api/v1/authentication-identity-service/auth'
+    '/api/v1/user-management-service/auth'
   ];
   
   return protectedRoutes.some(route => pathname.startsWith(route));

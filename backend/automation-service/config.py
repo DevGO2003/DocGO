@@ -30,15 +30,9 @@ def get_gemini_api_key():
 #     """Lấy MongoDB Atlas connection string"""
 #     return os.getenv("MONGODB_ATLAS_URI", os.getenv("MONGODB_URI", "mongodb://localhost:27017"))
 
-<<<<<<<< HEAD:backend/automation-service/config.py
 # def get_mongodb_database():
 #     """Lấy tên database MongoDB"""
 #     return os.getenv("MONGODB_DATABASE", "docgo_ai")
-========
-def get_mongodb_database():
-    """Lấy tên database MongoDB"""
-    return os.getenv("MONGODB_DATABASE", "docgo_ai")
->>>>>>>> e4f9e590765b2a1b7ce2f3982eff8dae6ecb472e:backend/ai-service/config.py
 
 # def get_mongodb_collections():
 #     """Lấy tên các collections MongoDB"""

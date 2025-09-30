@@ -38,7 +38,7 @@ public class ContractUpdatedEventPublisher {
             eventPayload.put("eventType", "contract.updated");
             eventPayload.put("eventId", UUID.randomUUID().toString());
             eventPayload.put("timestamp", LocalDateTime.now().atOffset(ZoneOffset.UTC).toString());
-            eventPayload.put("source", "contract-management-service");
+            eventPayload.put("source", "document-management-service");
             eventPayload.put("correlationId", UUID.randomUUID().toString());
 
             Map<String, Object> actor = new HashMap<>();

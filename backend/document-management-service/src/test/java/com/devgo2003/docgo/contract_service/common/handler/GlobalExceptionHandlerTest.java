@@ -1,7 +1,8 @@
-package com.devgo2003.docgo.document_management_service.common.handler;
+package com.devgo2003.docgo.document_service.common.handler;
 
-import com.devgo2003.docgo.contract_service.common.exception.NoContentException;
-import com.devgo2003.docgo.contract_service.common.response.RestResponse;
+import com.devgo2003.docgo.document_service.common.exception.NoContentException;
+import com.devgo2003.docgo.document_service.common.response.RestResponse;
+import com.devgo2003.docgo.document_service.common.handler.GlobalExceptionHandler;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,7 +26,7 @@ public class GlobalExceptionHandlerTest {
     @BeforeEach
     void setUp() {
         handler = new GlobalExceptionHandler();
-        when(request.getRequestURI()).thenReturn("/api/v1/contract-management-service/contracts");
+        when(request.getRequestURI()).thenReturn("/api/v1/document-management-service/contracts");
     }
 
     @Test
@@ -48,6 +49,6 @@ public class GlobalExceptionHandlerTest {
         assertNull(body.getData());
         assertNotNull(body.getTimestamp());
         assertNotNull(body.getRequestId());
-        assertEquals("/api/v1/contract-management-service/contracts", body.getPath());
+        assertEquals("/api/v1/document-management-service/contracts", body.getPath());
     }
 }

@@ -57,6 +57,15 @@ export default function DashboardPage() {
   return (
     <DashboardLayout>
       <div className="space-y-8">
+        {/* Page Title */}
+        <div className="space-y-2">
+          <h1 className="text-xl font-semibold text-gray-900 tracking-tight">
+            Tổng quan Dashboard
+          </h1>
+          <p className="text-sm text-gray-600 leading-relaxed">
+            Xem tổng quan về tình hình hợp đồng và thống kê quan trọng
+          </p>
+        </div>
         {/* 4 Ô thống kê trên cùng */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {statusStats.map((s, idx) => (

@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/v1/contract-management-service/comments")
+@RequestMapping("/api/v1/document-management-service/comments")
 @Tag(name = "API Quản lý Bình luận", description = "Các API để quản lý bình luận và cộng tác trong hệ thống DocGO")
 public class CommentController {
 

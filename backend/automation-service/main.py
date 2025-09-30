@@ -83,11 +83,27 @@ def custom_openapi():
         routes=app.routes,
         openapi_version="3.1.0"
     )
-    # Tags metadata
+    # Tags metadata với icon và mô tả tiếng Việt
     tags_metadata = [
         {
-            "name": "APIs Contract Management",
-            "description": "APIs để quản lý hợp đồng trong hệ thống DocGO (chú thích)."
+            "name": "🤖 API Xử lý AI",
+            "description": "APIs xử lý trí tuệ nhân tạo - Trích xuất nội dung, phân loại tài liệu, tóm tắt hợp đồng, xử lý ngôn ngữ tự nhiên"
+        },
+        {
+            "name": "📁 API Quản lý File",
+            "description": "APIs quản lý file và lưu trữ - Upload, download, quản lý file đính kèm và tài liệu"
+        },
+        {
+            "name": "📦 API Xử lý Batch",
+            "description": "APIs xử lý hàng loạt - Xử lý nhiều tài liệu cùng lúc, quản lý job và tiến trình"
+        },
+        {
+            "name": "⚙️ API Kiểm tra Hệ thống",
+            "description": "APIs kiểm tra và cấu hình hệ thống - Health check, cấu hình S3, kiểm tra kết nối"
+        },
+        {
+            "name": "🏠 API Gốc",
+            "description": "APIs gốc của service - Health check, thông tin service, chuyển hướng"
         }
     ]
     # Merge/override tags metadata
@@ -99,25 +115,82 @@ def custom_openapi():
 
 app.openapi = custom_openapi
 
-@app.get("/", tags=["🏠 API Gốc"])
+@app.get("/", summary="Trang chủ", tags=["🏠 API Gốc"])
 async def read_root():
     """
-    Root endpoint - tự động redirect sang /docs để hiển thị API documentation
+    ## 📖 Mô tả
+    API gốc của Automation Service - tự động chuyển hướng đến trang tài liệu API.
+    Endpoint này giúp người dùng dễ dàng truy cập vào Swagger UI để xem và test các API.
+    
+    ## 🔹 Đầu vào
+    
+    Không có tham số đầu vào.
+    
+    ## 🔹 Đầu ra
+    
+    🔄 **Redirect Response** (HTTP 302)
+    - **Mô tả**: Tự động chuyển hướng đến `/docs`
+    - **Mục đích**: Hiển thị Swagger UI với tài liệu API đầy đủ
     """
     return RedirectResponse(url="/docs", status_code=302)
 
-@app.get("/swagger-ui/index.html", tags=["🏠 API Gốc"])
+@app.get("/swagger-ui/index.html", summary="Swagger UI", tags=["🏠 API Gốc"])
 async def swagger_ui_redirect():
     """
-    Swagger UI redirect endpoint - tuân thủ SpringDoc standard
-    Redirect từ /swagger-ui/index.html đến /docs
+    ## 📖 Mô tả
+    API chuyển hướng Swagger UI - tuân thủ chuẩn SpringDoc.
+    Endpoint này đảm bảo tương thích với các hệ thống sử dụng SpringDoc OpenAPI.
+    
+    ## 🔹 Đầu vào
+    
+    Không có tham số đầu vào.
+    
+    ## 🔹 Đầu ra
+    
+    🔄 **Redirect Response** (HTTP 302)
+    - **Mô tả**: Chuyển hướng từ `/swagger-ui/index.html` đến `/docs`
+    - **Mục đích**: Tuân thủ chuẩn SpringDoc và đảm bảo tương thích
     """
     return RedirectResponse(url="/docs", status_code=302)
 
-@app.get("/health", tags=["🏠 API Gốc"])
+@app.get("/health", summary="Health check", tags=["🏠 API Gốc"])
 async def health_check():
     """
-    Health check endpoint - kiểm tra trạng thái service
+    ## 📖 Mô tả
+    API kiểm tra sức khỏe của Automation Service - health check endpoint.
+    Trả về thông tin chi tiết về trạng thái service, phiên bản, và các thông số kỹ thuật.
+    
+    ## 🔹 Đầu vào
+    
+    Không có tham số đầu vào.
+    
+    ## 🔹 Đầu ra
+    
+    📄 **data** (object)
+    - **Mô tả**: Thông tin chi tiết về trạng thái service
+    - **Bao gồm**:
+      - `status`: Trạng thái service ("healthy")
+      - `service`: Tên service ("Automation Service")
+      - `version`: Phiên bản service ("2.0.0")
+      - `ai_model`: Mô hình AI được sử dụng ("Gemini 2.0 Flash")
+      - `supported_formats`: Các định dạng file được hỗ trợ
+      - `timestamp`: Thời gian kiểm tra
+    
+    📊 **apiVersion** (string)
+    - **Mô tả**: Phiên bản API hiện tại
+    - **Giá trị**: "v1"
+    
+    🔢 **statusCode** (integer)
+    - **Mô tả**: Mã trạng thái xử lý
+    - **Giá trị**: 200 (thành công)
+    
+    📋 **shortMessage** (string)
+    - **Mô tả**: Thông báo ngắn gọn về kết quả
+    - **Giá trị**: "Success"
+    
+    📖 **description** (string)
+    - **Mô tả**: Mô tả chi tiết về kết quả kiểm tra
+    - **Ví dụ**: "Service đang hoạt động bình thường"
     """
     from schemas.response import RestResponse
     

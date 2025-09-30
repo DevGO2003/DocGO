@@ -69,56 +69,62 @@ def ask_gemini(api_key: str, content: str, question: str) -> str:
 
 
 # API 1: EXTRACT (doc, pdf)
-@router.post("/document/extract", summary="Trích xuất toàn bộ nội dung file (doc/pdf)", tags=["🤖 API Xử lý AI"])
+@router.post("/document/extract", summary="Trích xuất nội dung văn bản từ file", tags=["🤖 API Xử lý AI"])
 async def extract_api(
     request: Request,
-    file: UploadFile = File(..., description="File hợp đồng (docx, pdf)"),
+    file: UploadFile = File(..., description="File tài liệu cần trích xuất (docx, pdf)"),
     gemini_api_key: str = Header(None, description="Gemini API Key (tùy chọn)")
 ):
     """
+    ## 📖 Mô tả
+    API trích xuất toàn bộ nội dung văn bản từ file tài liệu (DOCX, PDF) sử dụng AI.
+    Hỗ trợ xử lý các định dạng phổ biến và trả về nội dung văn bản thuần túy.
+    
     ## 🔹 Đầu vào
     
-    📁 file (bắt buộc, multipart/form-data)
-    Loại: UploadFile (DOCX hoặc PDF)
-    Mô tả: Tệp hợp đồng cần trích xuất toàn bộ nội dung văn bản
+    📁 **file** (bắt buộc, multipart/form-data)
+    - **Loại**: UploadFile (DOCX hoặc PDF)
+    - **Mô tả**: File tài liệu cần trích xuất nội dung văn bản
+    - **Giới hạn**: Tối đa 10MB, hỗ trợ định dạng .docx, .pdf
     
-    🔑 gemini_api_key (tùy chọn, header)
-    Loại: string
-    Mô tả: API key để gọi Gemini AI. Nếu không cung cấp, sẽ sử dụng key từ biến môi trường
+    🔑 **gemini_api_key** (tùy chọn, header)
+    - **Loại**: string
+    - **Mô tả**: API key để gọi Gemini AI. Nếu không cung cấp, sẽ sử dụng key từ biến môi trường
+    - **Ví dụ**: `GEMINI_API_KEY: your-api-key-here`
     
     ## 🔹 Đầu ra
     
-    📄 data
-    Loại: string
-    Mô tả: Chuỗi văn bản chứa toàn bộ nội dung được trích xuất từ file (không qua AI xử lý)
+    📄 **data** (string)
+    - **Mô tả**: Nội dung văn bản thuần túy được trích xuất từ file
+    - **Ví dụ**: "Điều khoản hợp đồng... Nội dung chính... Kết luận..."
     
-    📊 apiVersion
-    Loại: string
-    Mô tả: Phiên bản API (v1)
+    📊 **apiVersion** (string)
+    - **Mô tả**: Phiên bản API hiện tại
+    - **Giá trị**: "v1"
     
-    🔢 statusCode
-    Loại: integer
-    Mô tả: Mã trạng thái HTTP (200: thành công, 400: lỗi đầu vào, 204: không có nội dung, 500: lỗi server)
+    🔢 **statusCode** (integer)
+    - **Mô tả**: Mã trạng thái xử lý
+    - **Các giá trị**: 200 (thành công), 400 (lỗi đầu vào), 500 (lỗi server)
     
-    📋 shortMessage
-    Loại: string
-    Mô tả: Thông báo ngắn gọn về kết quả
+    📋 **shortMessage** (string)
+    - **Mô tả**: Thông báo ngắn gọn về kết quả
+    - **Ví dụ**: "Success", "Bad Request", "Internal Server Error"
     
-    📖 description
-    Loại: string
-    Mô tả: Mô tả chi tiết về kết quả xử lý
+    📖 **description** (string)
+    - **Mô tả**: Mô tả chi tiết về kết quả xử lý
+    - **Ví dụ**: "Đã trích xuất thành công nội dung từ file hợp đồng"
     
-    🕒 timestamp
-    Loại: string (ISO-8601)
-    Mô tả: Thời gian xử lý yêu cầu
+    🕒 **timestamp** (string, ISO-8601)
+    - **Mô tả**: Thời gian xử lý yêu cầu
+    - **Ví dụ**: "2024-01-15T10:30:00Z"
     
-    🆔 requestId
-    Loại: string (UUID)
-    Mô tả: Định danh duy nhất của yêu cầu
+    🆔 **requestId** (string, UUID)
+    - **Mô tả**: Định danh duy nhất của yêu cầu để theo dõi
+    - **Ví dụ**: "123e4567-e89b-12d3-a456-426614174000"
     
-    🛣️ path
-    Loại: string
-    Mô tả: Đường dẫn API được gọi
+    🛣️ **path** (string)
+    - **Mô tả**: Đường dẫn API được gọi
+    - **Ví dụ**: "/api/v1/automation-service/document/extract"
     """
     # Extract API logic
     temp_path = os.path.join(RESULTS_DIR, file.filename)
@@ -165,25 +171,32 @@ async def extract_api(
 
 
 # API 4: CLASSIFY (nhận diện loại tài liệu: hợp đồng, đề cương, giáo trình, sách giáo khoa, ...)
-@router.post("/document/classify", summary="Phân loại loại tài liệu (file đa định dạng hoặc text)", tags=["🤖 API Xử lý AI"])
+@router.post("/document/classify", summary="Phân loại tài liệu bằng AI", tags=["🤖 API Xử lý AI"])
 async def classify_api(
     request: Request,
     gemini_api_key: str = Header(None, description="Gemini API Key (tùy chọn)")
 ):
     """
+    ## 📖 Mô tả
+    API phân loại loại tài liệu sử dụng AI để nhận diện và phân loại các loại tài liệu khác nhau.
+    Hỗ trợ nhiều định dạng file và có thể phân loại: hợp đồng, đề cương, giáo trình, sách giáo khoa, báo cáo, v.v.
+    
     ## 🔹 Đầu vào
     
-    📁 file (tùy chọn, multipart/form-data)
-    Loại: UploadFile (txt, md, html, json, csv, xlsx, pptx, rtf, docx, pdf)
-    Mô tả: Tệp cần phân loại. Cung cấp file HOẶC text
+    📁 **file** (tùy chọn, multipart/form-data)
+    - **Loại**: UploadFile (txt, md, html, json, csv, xlsx, pptx, rtf, docx, pdf)
+    - **Mô tả**: File tài liệu cần phân loại
+    - **Lưu ý**: Chỉ cung cấp file HOẶC text, không cả hai
     
-    📝 text (tùy chọn, application/json)
-    Loại: string
-    Mô tả: Nội dung văn bản dạng chuỗi cần phân loại. Cung cấp file HOẶC text
+    📝 **text** (tùy chọn, application/json)
+    - **Loại**: string
+    - **Mô tả**: Nội dung văn bản cần phân loại
+    - **Lưu ý**: Chỉ cung cấp file HOẶC text, không cả hai
     
-    🔑 gemini_api_key (tùy chọn, header)
-    Loại: string
-    Mô tả: API key để gọi Gemini AI. Nếu không cung cấp, sẽ sử dụng key từ biến môi trường
+    🔑 **gemini_api_key** (tùy chọn, header)
+    - **Loại**: string
+    - **Mô tả**: API key để gọi Gemini AI. Nếu không cung cấp, sẽ sử dụng key từ biến môi trường
+    - **Ví dụ**: `GEMINI_API_KEY: your-api-key-here`
     
     ## 🔹 Đầu ra
     
@@ -757,7 +770,7 @@ async def classify_api(
 
 
 # API Test: Lấy cấu hình Gemini
-@router.get("/gemini/get-config", summary="Lấy cấu hình Gemini AI", tags=["⚙️ API Kiểm tra Hệ thống"])
+@router.get("/gemini/get-config", summary="Lấy cấu hình Gemini", tags=["⚙️ API Kiểm tra Hệ thống"])
 async def get_gemini_config(request: Request):
     """
     Lấy thông tin cấu hình Gemini AI và trạng thái hệ thống
@@ -1049,7 +1062,7 @@ event_service = EventService()
 
 # ==================== BATCH PROCESSING APIs ====================
 
-@router.post("/batch/process", summary="Xử lý hàng loạt", tags=["📦 API Xử lý Batch"])
+@router.post("/batch/process", summary="Xử lý batch", tags=["📦 API Xử lý Batch"])
 async def process_batch_api(
     request: Request,
     batch_request: BatchProcessingRequest
@@ -1092,7 +1105,7 @@ async def process_batch_api(
             job_id=job.id,
             total_files=len(batch_request.files),
             estimated_time=len(batch_request.files) * 30,  # 30 seconds per file
-            status_url=f"/api/v1/ai-processing-service/batch/status/{job.id}"
+            status_url=f"/api/v1/automation-service/batch/status/{job.id}"
         )
         
         return RestResponse(
@@ -1116,7 +1129,7 @@ async def process_batch_api(
             requestId=str(uuid.uuid4())
         )
 
-@router.get("/batch/status/{job_id}", summary="Trạng thái batch job", tags=["📦 API Xử lý Batch"])
+@router.get("/batch/status/{job_id}", summary="Trạng thái job", tags=["📦 API Xử lý Batch"])
 async def get_batch_job_status_api(
     request: Request,
     job_id: str
@@ -1169,7 +1182,7 @@ async def get_batch_job_status_api(
             requestId=str(uuid.uuid4())
         )
 
-@router.get("/batch/jobs", summary="Danh sách batch jobs", tags=["📦 API Xử lý Batch"])
+@router.get("/batch/jobs", summary="Danh sách jobs", tags=["📦 API Xử lý Batch"])
 async def get_batch_jobs_api(
     request: Request,
     page: int = Query(1, ge=1, description="Số trang"),

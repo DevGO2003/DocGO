@@ -1,15 +1,14 @@
-<<<<<<< HEAD
-# Contract Management Service
+# Document Management Service
 
 ## Tổng quan
-Contract Management Service là microservice Spring Boot quản lý hợp đồng với tính năng **xử lý file upload tự động bằng AI** thông qua Kafka.
+Document Management Service là microservice Spring Boot quản lý tài liệu và hợp đồng với tính năng **xử lý file upload tự động bằng AI** thông qua Kafka.
 
 ## Tính năng chính
 
-### 1. Quản lý hợp đồng cơ bản
-- CRUD operations cho hợp đồng
+### 1. Quản lý tài liệu cơ bản
+- CRUD operations cho tài liệu và hợp đồng
 - Phân trang, sắp xếp, tìm kiếm
-- Quản lý trạng thái hợp đồng
+- Quản lý trạng thái tài liệu
 - Lịch sử sự kiện và file đính kèm
 
 ### 2. **File Upload & AI Processing (MỚI)**
@@ -17,17 +16,17 @@ Contract Management Service là microservice Spring Boot quản lý hợp đồn
 - Tự động phát hiện loại file (PDF, DOCX, TXT)
 - Phân loại file: hợp đồng hoặc tài liệu thường
 - Gửi yêu cầu xử lý AI qua Kafka
-- Nhận kết quả xử lý và tự động tạo hợp đồng
+- Nhận kết quả xử lý và tự động tạo tài liệu
 
-### 3. **Contract Summary & AI Insights (MỚI)**
-- Tóm tắt hợp đồng tự động
-- Phân loại loại hợp đồng
+### 3. **Document Summary & AI Insights (MỚI)**
+- Tóm tắt tài liệu tự động
+- Phân loại loại tài liệu
 - Đánh giá mức độ rủi ro
 - Trích xuất điều khoản chính
 - Trạng thái xử lý AI
 
 ### 4. **Kafka Integration (MỚI)**
-- Producer: Gửi yêu cầu xử lý hợp đồng
+- Producer: Gửi yêu cầu xử lý tài liệu
 - Consumer: Nhận kết quả xử lý từ AI service
 - Asynchronous processing
 - Event-driven architecture
@@ -35,9 +34,9 @@ Contract Management Service là microservice Spring Boot quản lý hợp đồn
 ## Kiến trúc hệ thống
 
 ```
-Frontend → Contract Service → Kafka → AI Processing Service
+Frontend → Document Service → Kafka → Automation Service
                 ↓
-            Database (MariaDB)
+            Database (MongoDB Atlas)
                 ↓
             File Storage (Local)
 ```
@@ -46,30 +45,30 @@ Frontend → Contract Service → Kafka → AI Processing Service
 
 ### Upload file thường
 1. Frontend gửi file với `isContract=false`
-2. Contract Service lưu file và metadata
+2. Document Service lưu file và metadata
 3. Trả về response thành công
 
 ### Upload file hợp đồng
 1. Frontend gửi file với `isContract=true`
-2. Contract Service lưu file và metadata
+2. Document Service lưu file và metadata
 3. Gửi yêu cầu xử lý qua Kafka
-4. AI Processing Service xử lý file
+4. Automation Service xử lý file
 5. Gửi kết quả qua Kafka
-6. Contract Service tạo hợp đồng với thông tin AI
+6. Document Service tạo tài liệu với thông tin AI
 7. Cập nhật trạng thái xử lý
 
 ## API Endpoints
 
 ### File Upload
-- `POST /api/v1/contract-management-service/files/upload` - Upload file
-- `GET /api/v1/contract-management-service/files/{fileId}/status` - Trạng thái xử lý
+- `POST /api/v1/document-management-service/files/upload` - Upload file
+- `GET /api/v1/document-management-service/files/{fileId}/status` - Trạng thái xử lý
 
-### Contract Management
-- `POST /api/v1/contract-management-service/contracts` - Tạo hợp đồng
-- `GET /api/v1/contract-management-service/contracts` - Danh sách hợp đồng
-- `GET /api/v1/contract-management-service/contracts/{id}` - Chi tiết hợp đồng
-- `PUT /api/v1/contract-management-service/contracts/{id}` - Cập nhật hợp đồng
-- `DELETE /api/v1/contract-management-service/contracts/{id}` - Xóa hợp đồng
+### Document Management
+- `POST /api/v1/document-management-service/documents` - Tạo tài liệu
+- `GET /api/v1/document-management-service/documents` - Danh sách tài liệu
+- `GET /api/v1/document-management-service/documents/{id}` - Chi tiết tài liệu
+- `PUT /api/v1/document-management-service/documents/{id}` - Cập nhật tài liệu
+- `DELETE /api/v1/document-management-service/documents/{id}` - Xóa tài liệu
 
 ## Cấu hình
 
@@ -79,8 +78,8 @@ Frontend → Contract Service → Kafka → AI Processing Service
 
 ### Kafka
 - Bootstrap servers: localhost:9092
-- Topics: `contract-processing-requests`, `contract-processing-results`
-- Consumer group: `contract-service-group`
+- Topics: `document-processing-requests`, `document-processing-results`
+- Consumer group: `document-service-group`
 
 ### File Upload
 - Thư mục upload: `uploads/`
@@ -108,312 +107,9 @@ mvn spring-boot:run
 Ứng dụng chạy tại (qua docker compose): http://localhost:8002
 API Documentation: http://localhost:8002/docs#/
 
-## Contract Management Service - Hướng dẫn chạy
-
-## Tổng quan
-Contract Management Service là một microservice Spring Boot quản lý hợp đồng với các tính năng CRUD, phân trang, sắp xếp, tìm kiếm và **xử lý file upload tự động bằng AI**.
-
-## Tính năng mới
-- **File Upload & AI Processing**: Upload file và tự động phát hiện, xử lý hợp đồng bằng AI
-- **Kafka Integration**: Giao tiếp với các service khác qua Kafka để xử lý AI
-- **Contract Summary**: Lưu trữ thông tin tóm tắt hợp đồng (loại, rủi ro, điều khoản chính)
-- **Smart Processing**: Tự động phân loại file và xử lý theo loại
-
-## Yêu cầu hệ thống
-- Java 17 hoặc cao hơn
-- Maven 3.6+
-- MongoDB Atlas
-- **Kafka 3.0+** (bắt buộc cho tính năng AI processing)
-- Docker (tùy chọn)
-
-## Cách 1: Chạy trực tiếp với Maven
-
-### 1. Cài đặt dependencies
-```bash
-mvn clean install
-```
-
-### 2. Cấu hình database
-Tạo file `.env` từ `env/.env.example`:
-```bash
-# Windows PowerShell
-Copy-Item env/.env.example env/.env -Force
-
-# Linux/Mac
-cp env/.env.example env/.env
-```
-
-Cập nhật thông tin MongoDB Atlas trong file `env/.env`:
-```properties
-SPRING_DATA_MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/docgo_contract_service
-```
-
-### 3. Cấu hình Kafka
-Đảm bảo Kafka đang chạy và cập nhật cấu hình trong `application.properties`:
-```properties
-spring.kafka.bootstrap-servers=localhost:9092
-app.kafka.topic.contract-processing=contract-processing-requests
-app.kafka.topic.callback=contract-processing-results
-```
-
-### 4. Cấu hình MongoDB Atlas
-```bash
-# Cập nhật MongoDB Atlas connection string trong .env
-SPRING_DATA_MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/docgo_contract_service
-```
-
-### 5. Khởi động Kafka
-```bash
-# Sử dụng Docker
-docker run -d --name kafka \
-  -p 9092:9092 \
-  -e KAFKA_CFG_NODE_ID=0 \
-  -e KAFKA_CFG_PROCESS_ROLES=controller,broker \
-  -e KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093 \
-  -e KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT \
-  -e KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER \
-  -e KAFKA_CFG_INTER_BROKER_LISTENER_NAME=PLAINTEXT \
-  -e KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@kafka:9093 \
-  -e KAFKA_CFG_LOG_DIRS=/tmp/kraft-combined-logs \
-  -e KAFKA_CFG_OFFSETS_TOPIC_REPLICATION_FACTOR=1 \
-  -e KAFKA_CFG_TRANSACTION_STATE_LOG_REPLICATION_FACTOR=1 \
-  -e KAFKA_CFG_TRANSACTION_STATE_LOG_MIN_ISR=1 \
-  confluentinc/cp-kafka:7.4.0
-
-# Hoặc sử dụng docker-compose
-# cd autofiles (đã loại bỏ)
-docker-compose -f docker-compose.local.yml up kafka
-```
-
-### 6. Cập nhật database schema
-Chạy script SQL để cập nhật schema:
-```sql
--- Chạy file database/update_contract_schema.sql
--- Hoặc để Hibernate tự động tạo (spring.jpa.hibernate.ddl-auto=update)
-```
-
-### 7. Chạy ứng dụng
-```bash
-mvn spring-boot:run
-```
-
-Ứng dụng sẽ chạy tại: http://localhost:8003
-API Documentation: http://localhost:8003/docs#/
-
-## Cách 2: Chạy với Docker
-
-### 1. Build Docker image
-```bash
-# Sử dụng script có sẵn
-# cd autofiles (đã loại bỏ)
-./build-contract-service.bat  # Windows
-./build-contract-service.ps1  # PowerShell
-
-# Hoặc build thủ công
-cd backend/contract-management-service
-docker build -t docgo-contract-service:latest .
-```
-
-### 2. Chạy với docker-compose (khuyến nghị)
-```bash
-docker compose -f docker-compose.local.yml up contract-management-service
-```
-
-### 3. Chạy standalone
-```bash
-docker run -p 8003:8003 \
-  -e SPRING_DATASOURCE_URL=jdbc:mariadb://host.docker.internal:3306/docgo_contract_service \
-  -e SPRING_DATASOURCE_USERNAME=root \
-  -e SPRING_DATASOURCE_PASSWORD=your_password_here \
-  -e SPRING_KAFKA_BOOTSTRAP_SERVERS=host.docker.internal:9092 \
-  --name contract-service \
-  docgo-contract-service:latest
-```
-
-## API Endpoints
-
-### Base URL
-```
-http://localhost:8002/api/v1/contract-management-service
-```
-
-### Các endpoint chính
-- `POST /contracts` - Tạo hợp đồng mới
-- `GET /contracts` - Lấy danh sách hợp đồng (có phân trang)
-- `GET /contracts/{id}` - Lấy chi tiết hợp đồng
-- `PUT /contracts/{id}` - Cập nhật hợp đồng
-- `DELETE /contracts/{id}` - Xóa mềm hợp đồng
-- `PUT /contracts/{id}/restore` - Khôi phục hợp đồng
-- `GET /contracts/{id}/events` - Lấy lịch sử sự kiện
-- `GET /contracts/{id}/attachments` - Lấy file đính kèm
-
-### **API File Upload mới**
-- `POST /files/upload` - Upload file và xử lý hợp đồng
-- `GET /files/{fileId}/status` - Kiểm tra trạng thái xử lý file
-
-### Query Parameters cho phân trang
-- `pageNumber` (mặc định: 0)
-- `pageSize` (mặc định: 10)
-- `sortBy` - Danh sách trường sắp xếp
-- `sortDirection` - Hướng sắp xếp (ASC/DESC)
-- `searchTerm` - Từ khóa tìm kiếm
-- `includeDeleted` - Bao gồm bản ghi đã xóa (mặc định: false)
-
-## Luồng xử lý File Upload
-
-### 1. Upload file
-```
-Frontend → POST /files/upload → Contract Service
-```
-
-### 2. Phân loại file
-- Nếu `isContract=true`: Gửi yêu cầu xử lý AI qua Kafka
-- Nếu `isContract=false`: Chỉ lưu file, không xử lý AI
-
-### 3. Xử lý AI (nếu là hợp đồng)
-```
-Contract Service → Kafka → AI Processing Service → Kafka → Contract Service
-```
-
-### 4. Tạo hợp đồng
-- Tự động tạo hợp đồng với thông tin tóm tắt từ AI
-- Cập nhật trạng thái xử lý
-
 ## Cấu trúc Response
 
 Tất cả API đều trả về response theo format chuẩn:
-=======
-# File Storage Asset Service
-
-Dịch vụ FastAPI quản lý upload/download file, cấp signed URL và metadata.
-
-Docs: http://localhost:8004/docs#/
-
-## How to run this microservice
-
-**Prerequisites:**
-- Python 3.11+
-- S3-compatible storage (Filebase recommended)
-- MongoDB Atlas hoặc MongoDB local
-- Redis Cloud hoặc Redis local
-- ClamAV (tùy chọn, cho malware scanning)
-
-**Bước 1: Cấu hình môi trường**
-```powershell
-cd backend/file-storage-asset-service
-Copy-Item env/.env.example env/.env -Force
-```
-
-**Bước 2: Chỉnh sửa file env/.env**
-Mở file `env/.env` và cập nhật các thông tin sau:
-```env
-# S3 / Filebase Configuration
-S3_ENDPOINT=https://s3.filebase.com
-S3_REGION=us-east-1
-S3_ACCESS_KEY_ID=your_access_key_here
-S3_SECRET_ACCESS_KEY=your_secret_key_here
-S3_BUCKET=docgo-assets
-
-# Optional IPFS (Filebase RPC) Configuration
-IPFS_RPC_ENDPOINT=https://rpc.filebase.io
-IPFS_RPC_TOKEN=your_ipfs_token_here
-
-# ClamAV Configuration (Malware Scanner)
-CLAMD_HOST=localhost
-CLAMD_PORT=3310
-USE_CLAMD=false
-
-# File Storage Configuration
-MAX_FILE_SIZE=104857600
-ALLOWED_FILE_TYPES=pdf,docx,txt,jpg,jpeg,png,gif
-UPLOAD_DIR=uploads
-TEMP_DIR=temp
-
-# MongoDB Configuration
-MONGODB_URL=mongodb://localhost:27017
-MONGODB_DATABASE=docgo_file_storage
-MONGODB_FILES_COLLECTION=files
-MONGODB_ASSETS_COLLECTION=assets
-
-# Redis Configuration
-REDIS_URL=redis://localhost:6379
-REDIS_DB=0
-REDIS_PASSWORD=
-```
-
-**Bước 3: Tạo bucket S3 và cấu hình database**
-Trước khi chạy service, bạn cần:
-1. Tạo bucket `docgo-assets` trong Filebase hoặc S3 của bạn
-2. Cấu hình MongoDB (Atlas hoặc local)
-3. Cấu hình Redis (Cloud hoặc local)
-
-**Bước 4: Cài đặt và chạy**
-```powershell
-python -m venv venv
-./venv/Scripts/Activate.ps1
-pip install -r requirements.txt
-uvicorn main:app --reload --port 8000
-```
-
-**Docs:** `http://localhost:8004/docs#/`
-
-## API Endpoints
-
-### 🔹 File Management (Core)
-- `POST /api/v1/file-storage-asset-service/files` - Upload file
-- `GET /api/v1/file-storage-asset-service/files` - Liệt kê files (có phân trang)
-- `GET /api/v1/file-storage-asset-service/files/{file_id}/download` - Download file
-- `POST /api/v1/file-storage-asset-service/files/{file_id}/signed-url` - Tạo signed URL
-- `GET /api/v1/file-storage-asset-service/files/{file_id}/versions` - Lấy phiên bản file
-- `DELETE /api/v1/file-storage-asset-service/files/{file_id}` - Xóa file/phiên bản
-
-### 🔹 General File Management
-- `POST /api/v1/file-storage-asset-service/files/organize` - Tổ chức file vào thư mục
-- `POST /api/v1/file-storage-asset-service/files/share` - Chia sẻ file
-- `GET /api/v1/file-storage-asset-service/files/search` - Tìm kiếm files
-- `GET /api/v1/file-storage-asset-service/files/{file_id}/metadata` - Lấy metadata file
-- `POST /api/v1/file-storage-asset-service/files/backup` - Sao lưu files
-
-### 🔹 File Processing
-- `POST /api/v1/file-storage-asset-service/process/convert` - Chuyển đổi file
-- `POST /api/v1/file-storage-asset-service/process/compress` - Nén file
-- `POST /api/v1/file-storage-asset-service/process/extract` - Giải nén file
-- `POST /api/v1/file-storage-asset-service/process/validate` - Kiểm tra file
-
-### 🔹 Asset Management
-- `POST /api/v1/file-storage-asset-service/assets` - Tạo asset
-- `GET /api/v1/file-storage-asset-service/assets/{asset_id}` - Lấy thông tin asset
-- `PUT /api/v1/file-storage-asset-service/assets/{asset_id}` - Cập nhật asset
-- `DELETE /api/v1/file-storage-asset-service/assets/{asset_id}` - Xóa asset
-- `GET /api/v1/file-storage-asset-service/assets` - Lấy danh sách assets
-- `GET /api/v1/file-storage-asset-service/assets/{asset_id}/versions` - Lấy phiên bản asset
-- `PUT /api/v1/file-storage-asset-service/assets/{asset_id}/restore` - Khôi phục asset
-
-## 🔗 S3 Direct Operations
-
-### List S3 Files
-```bash
-# Lấy tất cả files
-GET /api/v1/file-storage-asset-service/files/s3
-
-# Lọc theo prefix (ví dụ: documents/)
-GET /api/v1/file-storage-asset-service/files/s3?prefix=documents/
-
-# Phân trang với continuation token
-GET /api/v1/file-storage-asset-service/files/s3?max_keys=50&continuation_token=abc123
-```
-
-### Get S3 File Info
-```bash
-# Lấy thông tin file cụ thể
-GET /api/v1/file-storage-asset-service/files/s3/documents/contract.pdf
-
-# Không bao gồm URL trong response
-GET /api/v1/file-storage-asset-service/files/s3/documents/contract.pdf?include_url=false
-```
-
-### Response Format
->>>>>>> e4f9e590765b2a1b7ce2f3982eff8dae6ecb472e
 ```json
 {
   "apiVersion": "v1",
@@ -424,7 +120,7 @@ GET /api/v1/file-storage-asset-service/files/s3/documents/contract.pdf?include_u
   "data": {...},
   "timestamp": "2025-08-23T10:00:00Z",
   "requestId": "uuid-string",
-  "path": "/api/v1/contract-management-service/contracts"
+  "path": "/api/v1/document-management-service/contracts"
 }
 ```
 
@@ -557,7 +253,7 @@ GET /actuator/metrics
 
 - **Service**: Contract Management Service
 - **Port**: 8003
-- **Base URL**: `/api/v1/contract-management-service`
+- **Base URL**: `/api/v1/document-management-service`
 - **Documentation**: `/docs`
 =======
   "description": "Đã lấy 10 files từ S3",

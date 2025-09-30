@@ -1,16 +1,9 @@
 package com.devgo2003.docgo.document_service.service.impl;
 
-<<<<<<< HEAD:backend/document-management-service/src/main/java/com/devgo2003/docgo/document_service/service/impl/TagServiceImpl.java
 import com.devgo2003.docgo.document_service.dto.TagDto;
 import com.devgo2003.docgo.document_service.entity.Tag;
 import com.devgo2003.docgo.document_service.repository.TagRepository;
 import com.devgo2003.docgo.document_service.service.ITagService;
-=======
-import com.devgo2003.docgo.contract_service.dto.TagDto;
-import com.devgo2003.docgo.contract_service.entity.Tag;
-import com.devgo2003.docgo.contract_service.repository.TagRepository;
-import com.devgo2003.docgo.contract_service.service.ITagService;
->>>>>>> e4f9e590765b2a1b7ce2f3982eff8dae6ecb472e:backend/contract-management-service/src/main/java/com/devgo2003/docgo/contract_service/service/impl/TagServiceImpl.java
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

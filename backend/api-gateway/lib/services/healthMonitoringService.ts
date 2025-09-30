@@ -28,9 +28,9 @@ class HealthMonitoringService {
   private initializeServices(): void {
     // Service URLs - same as in services.ts
     this.services.set('api-gateway', process.env.API_GATEWAY_URL || 'http://localhost:8000');
-    this.services.set('authentication-identity-service', process.env.AUTH_SERVICE_URL || 'http://localhost:8001');
-    this.services.set('contract-management-service', process.env.CONTRACT_SERVICE_URL || 'http://localhost:8002');
-    this.services.set('ai-processing-service', process.env.AI_SERVICE_URL || 'http://localhost:8017');
+    this.services.set('user-management-service', process.env.AUTH_SERVICE_URL || 'http://localhost:8001');
+    this.services.set('document-management-service', process.env.CONTRACT_SERVICE_URL || 'http://localhost:8002');
+    this.services.set('automation-service', process.env.AI_SERVICE_URL || 'http://localhost:8017');
     this.services.set('file-storage-asset-service', process.env.FILE_SERVICE_URL || 'http://localhost:8012');
     this.services.set('health-monitoring-agent', process.env.HEALTH_MONITORING_URL || 'http://localhost:8016');
     this.services.set('integration-connectors-service', process.env.INTEGRATION_SERVICE_URL || 'http://localhost:8014');

@@ -1,8 +1,4 @@
-<<<<<<< HEAD:backend/document-management-service/src/main/java/com/devgo2003/docgo/document_service/entity/Tag.java
 package com.devgo2003.docgo.document_service.entity;
-=======
-package com.devgo2003.docgo.contract_service.entity;
->>>>>>> e4f9e590765b2a1b7ce2f3982eff8dae6ecb472e:backend/contract-management-service/src/main/java/com/devgo2003/docgo/contract_service/entity/Tag.java
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

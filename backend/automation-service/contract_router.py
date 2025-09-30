@@ -9,60 +9,67 @@ from services.ai_processing_service import AIProcessingService
 router = APIRouter(prefix="/api/v1/automation-service")
 
 
-@router.post("/contracts/summarize", summary="Tóm tắt hợp đồng (hỗ trợ file và text)", tags=["APIs Contract Management"])
+@router.post("/contracts/summarize", summary="Tóm tắt hợp đồng", tags=["🤖 API Xử lý AI"])
 async def contract_summarize_api(
-    file: UploadFile = File(None, description="File hợp đồng (pdf, docx, txt, html)"),
-    text: str = Form(None, description="Nội dung hợp đồng dạng text"),
+    file: UploadFile = File(None, description="File hợp đồng cần tóm tắt (pdf, docx, txt, html)"),
+    text: str = Form(None, description="Nội dung hợp đồng dạng văn bản"),
     gemini_api_key: str = Header(None, description="Gemini API Key (tùy chọn)")
 ):
     """
+    ## 📖 Mô tả
+    API tóm tắt hợp đồng sử dụng AI để tạo ra bản tóm tắt ngắn gọn, dễ hiểu về nội dung hợp đồng.
+    Hỗ trợ nhiều định dạng file và có thể xử lý cả file upload hoặc nội dung văn bản trực tiếp.
+    
     ## 🔹 Đầu vào
     
-    📁 file (tùy chọn, multipart/form-data)
-    Loại: UploadFile (pdf, docx, txt, html)
-    Mô tả: File hợp đồng cần tóm tắt. Chỉ cần cung cấp file HOẶC text, không cần cả hai
+    📁 **file** (tùy chọn, multipart/form-data)
+    - **Loại**: UploadFile (pdf, docx, txt, html)
+    - **Mô tả**: File hợp đồng cần tóm tắt
+    - **Lưu ý**: Chỉ cung cấp file HOẶC text, không cả hai
     
-    📝 text (tùy chọn, form-data)
-    Loại: string
-    Mô tả: Nội dung hợp đồng dạng text. Chỉ cần cung cấp file HOẶC text, không cần cả hai
+    📝 **text** (tùy chọn, form-data)
+    - **Loại**: string
+    - **Mô tả**: Nội dung hợp đồng dạng văn bản cần tóm tắt
+    - **Lưu ý**: Chỉ cung cấp file HOẶC text, không cả hai
     
-    🔑 gemini_api_key (tùy chọn, header)
-    Loại: string
-    Mô tả: API key để gọi Gemini AI. Nếu không cung cấp, sẽ sử dụng key từ biến môi trường
+    🔑 **gemini_api_key** (tùy chọn, header)
+    - **Loại**: string
+    - **Mô tả**: API key để gọi Gemini AI. Nếu không cung cấp, sẽ sử dụng key từ biến môi trường
+    - **Ví dụ**: `GEMINI_API_KEY: your-api-key-here`
     
     ## 🔹 Đầu ra
     
-    📄 data
-    Loại: object hoặc string
-    Mô tả: Kết quả tóm tắt hợp đồng từ AI
+    📄 **data** (string)
+    - **Mô tả**: Bản tóm tắt hợp đồng được tạo bởi AI
+    - **Ví dụ**: "Hợp đồng này quy định về việc cung cấp dịch vụ... Các điều khoản chính..."
     
-    📊 apiVersion
-    Loại: string
-    Mô tả: Phiên bản API (v1)
+    📊 **apiVersion** (string)
+    - **Mô tả**: Phiên bản API hiện tại
+    - **Giá trị**: "v1"
     
-    🔢 statusCode
-    Loại: integer
-    Mô tả: Mã trạng thái HTTP (200: thành công, 400: lỗi đầu vào, 500: lỗi server)
+    🔢 **statusCode** (integer)
+    - **Mô tả**: Mã trạng thái xử lý
+    - **Các giá trị**: 200 (thành công), 400 (lỗi đầu vào), 500 (lỗi server)
     
-    📋 shortMessage
-    Loại: string
-    Mô tả: Thông báo ngắn gọn về kết quả
+    📋 **shortMessage** (string)
+    - **Mô tả**: Thông báo ngắn gọn về kết quả
+    - **Ví dụ**: "Success", "Bad Request", "Internal Server Error"
     
-    📖 description
-    Loại: string
-    Mô tả: Mô tả chi tiết về kết quả xử lý
+    📖 **description** (string)
+    - **Mô tả**: Mô tả chi tiết về kết quả xử lý
+    - **Ví dụ**: "Đã tóm tắt thành công hợp đồng"
     
-    🕒 timestamp
-    Loại: string (ISO-8601)
-    Mô tả: Thời gian xử lý yêu cầu
+    🕒 **timestamp** (string, ISO-8601)
+    - **Mô tả**: Thời gian xử lý yêu cầu
+    - **Ví dụ**: "2024-01-15T10:30:00Z"
     
-    🆔 requestId
-    Loại: string (UUID)
-    Mô tả: Định danh duy nhất của yêu cầu
+    🆔 **requestId** (string, UUID)
+    - **Mô tả**: Định danh duy nhất của yêu cầu để theo dõi
+    - **Ví dụ**: "123e4567-e89b-12d3-a456-426614174000"
     
-    🛣️ path
-    Loại: string
-    Mô tả: Đường dẫn API được gọi
+    🛣️ **path** (string)
+    - **Mô tả**: Đường dẫn API được gọi
+    - **Ví dụ**: "/api/v1/automation-service/contracts/summarize"
     """
     
     # Validation đầu vào

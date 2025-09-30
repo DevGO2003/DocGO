@@ -225,7 +225,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       console.log('[Auth] Fetching current user profile...')
       const res = await authAPI.getProfile()
-<<<<<<< HEAD:frontend/web-app/src/hooks/useAuth.tsx
       const payload = res.data?.data as any
       const current: User | null = payload?.user || null
       if (current) {
@@ -233,14 +232,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(current)
       } else {
         console.log('[Auth] No user field in response, payload:', payload)
-=======
-      const current = res.data?.data as unknown as User
-      if (current) {
-        console.log('[Auth] Successfully fetched user profile:', current.email)
-        setUser(current)
-      } else {
-        console.log('[Auth] No user data in response')
->>>>>>> e4f9e590765b2a1b7ce2f3982eff8dae6ecb472e:frontend/web_nextjs/src/hooks/useAuth.tsx
       }
     } catch (error) {
       console.error('[Auth] Error fetching current user:', error)

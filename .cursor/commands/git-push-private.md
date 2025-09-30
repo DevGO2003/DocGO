@@ -33,6 +33,9 @@ Gửi tất cả commits (bao gồm cả file nhạy cảm như .env*, mcp.json,
      - Sử dụng lệnh như sau (PowerShell):
        - `git add -A`
     2) Sau đó, với mỗi file nhạy cảm tìm được (ví dụ: qua lệnh `Get-ChildItem -Recurse -Include .env*,mcp.json,token*,key*`), thực hiện `git add <file>`
+    3) **QUAN TRỌNG**: Force add thư mục backup để đảm bảo backup được push lên private:
+       - `git add -f .git-backup/` (force add toàn bộ thư mục backup)
+       - Lưu ý: Thư mục .git-backup thường bị .gitignore nên cần dùng -f để force add
   2) `git status -s` sau đó tóm tắt thay đổi và gắn vào biến <message>
   3) `git commit -m "[private-push] <message>" --no-verify`
   5) Kiểm tra nếu local không có commit mới so với remote <private>: chuyển tới Phần 3.
@@ -55,11 +58,12 @@ Gửi tất cả commits (bao gồm cả file nhạy cảm như .env*, mcp.json,
          + Port/Host → ưu tiên local (SERVER_PORT).
          + Debug flag → hợp nhất logic (true nếu một bên true).
      - Nếu quá khó giải quyết, có thể cân nhắc (hạn chế) dùng `git push --no-rebase` để merge, nhưng mặc định nên rebase để tránh merge commit thừa.
-  7) Sau khi push xong, thực hiện các bước sau để đảm bảo lấy về bản mới nhất của tất cả file nhạy cảm (không chỉ .env* mà còn mcp.json):
+  7) Sau khi push xong, thực hiện các bước sau để đảm bảo lấy về bản mới nhất của tất cả file nhạy cảm (không chỉ .env* mà còn mcp.json và backup):
      - Đầu tiên, chạy: `git fetch <private>`
      - Sau đó, dùng lệnh (ưu tiên git restore thay cho git checkout để tránh warning):
-       - `git restore --source <private>/<current-branch> -- .env* mcp.json token* key* || true`
+       - `git restore --source <private>/<current-branch> -- .env* mcp.json token* key* .git-backup/ || true`
      - Nếu có nhiều file nhạy cảm khác, lặp lại lệnh trên cho từng file cần thiết hoặc bổ sung pattern tương ứng.
+     - **QUAN TRỌNG**: Thư mục .git-backup cũng cần được sync từ remote để đảm bảo backup mới nhất.
      - Lưu ý: Nếu file nhạy cảm chưa từng tồn tại trên remote, lệnh trên sẽ báo lỗi "pathspec did not match any files", nhưng nhờ `|| true` nên script không bị dừng.
      - Đảm bảo sau khi thực hiện, các giá trị của toàn bộ file nhạy cảm local đã được cập nhật theo remote.
 

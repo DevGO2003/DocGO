@@ -35,7 +35,7 @@ public class ContractKafkaService {
     /**
      * Consume SummaryCreated events từ AI Processing Service
      */
-    @KafkaListener(topics = "${kafka.ai-events-topic:ai.events}", groupId = "contract-management-service-group")
+    @KafkaListener(topics = "${kafka.ai-events-topic:ai.events}", groupId = "document-management-service-group")
     public void handleSummaryCreated(@Payload String message, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
         try {
             Map<String, Object> event = objectMapper.readValue(message, Map.class);
@@ -85,7 +85,7 @@ public class ContractKafkaService {
             contractUpdatedEvent.put("eventType", "ContractUpdated");
             contractUpdatedEvent.put("eventId", UUID.randomUUID().toString());
             contractUpdatedEvent.put("timestamp", ZonedDateTime.now().toString());
-            contractUpdatedEvent.put("source", "contract-management-service");
+            contractUpdatedEvent.put("source", "document-management-service");
             contractUpdatedEvent.put("correlationId", originalEvent.get("correlationId"));
             contractUpdatedEvent.put("actor", actor);
             

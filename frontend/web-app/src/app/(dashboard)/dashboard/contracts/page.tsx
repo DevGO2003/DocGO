@@ -3,7 +3,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { DashboardLayout } from '@/components/layout'
-import { MagnifyingGlassIcon, TagIcon } from '@heroicons/react/24/outline'
+import { MagnifyingGlassIcon, TagIcon, DocumentTextIcon } from '@heroicons/react/24/outline'
 import { contractAPI } from '@/lib/api'
 import { InlineLoading } from '@/components/ui/LoadingSpinner'
 
@@ -165,23 +165,22 @@ export default function ContractsPage() {
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        {/* Fancy Header */}
-        <div className="relative overflow-hidden rounded-2xl border border-indigo-100 bg-gradient-to-br from-indigo-50 via-white to-purple-50 p-6 shadow-sm">
-          <div className="relative z-10 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-            <div>
-              <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600">
+        {/* Page Title */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <DocumentTextIcon className="h-6 w-6 text-gray-600" />
+              <h1 className="text-xl font-semibold text-gray-900 tracking-tight">
                 Quản lý Hợp đồng
               </h1>
-              <p className="text-gray-600">Tìm kiếm, lọc trạng thái/loại và gắn thẻ nhanh</p>
             </div>
-            <div className="flex gap-2">
-              <Link href="/dashboard/import-document" className="px-4 py-2 rounded-lg bg-white text-indigo-700 border border-indigo-200 hover:bg-indigo-50 shadow-sm">
-                + Tạo hợp đồng
-              </Link>
-            </div>
+            <Link href="/dashboard/import-document" className="px-4 py-2 rounded-lg bg-white text-indigo-700 border border-indigo-200 hover:bg-indigo-50 shadow-sm transition-colors">
+              + Tạo hợp đồng
+            </Link>
           </div>
-          <div className="pointer-events-none absolute -top-16 -right-16 h-56 w-56 rounded-full bg-indigo-200/30 blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-16 -left-16 h-56 w-56 rounded-full bg-purple-200/30 blur-3xl" />
+          <p className="text-sm text-gray-600 leading-relaxed">
+            Tìm kiếm, lọc trạng thái/loại và gắn thẻ nhanh
+          </p>
         </div>
 
         {/* Filters */}

@@ -35,9 +35,6 @@ public class OpenApiConfig {
                         new Server()
                                 .url("http://localhost:8001/api/v1/user-management-service")
                                 .description("API Base URL")
-                ))
-                .tags(List.of(
-                        new Tag().name("👤 APIs Quản lý Người dùng").description("Nhóm API quản lý người dùng, vai trò, phiên và phân quyền")
                 ));
     }
 }

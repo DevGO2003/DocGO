@@ -14,15 +14,18 @@ export default function ProfilePage() {
   return (
     <DashboardLayout>
       <div className="max-w-6xl">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-          {t('profile.title')}
-        </h1>
-        <p className="text-gray-600 dark:text-gray-400 mt-2">
-          {t('profile.subtitle')}
-        </p>
-      </div>
+        {/* Page Title */}
+        <div className="space-y-2 mb-8">
+          <div className="flex items-center gap-3">
+            <UserIcon className="h-6 w-6 text-gray-600" />
+            <h1 className="text-xl font-semibold text-gray-900 tracking-tight">
+              {t('profile.title')}
+            </h1>
+          </div>
+          <p className="text-sm text-gray-600 leading-relaxed">
+            {t('profile.subtitle')}
+          </p>
+        </div>
 
       {/* Profile Tabs */}
       <div className="space-y-6">

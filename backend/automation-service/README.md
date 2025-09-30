@@ -104,8 +104,8 @@ uvicorn main:app --reload --port 8000
 #### Run (Docker):
 ```bash
 cd backend/automation-service
-docker build -t ai-processing-service .
-docker run -p 8003:8000 --env-file env/.env ai-processing-service
+docker build -t automation-service .
+docker run -p 8003:8000 --env-file env/.env automation-service
 ```
 
 ### 4. Truy cập

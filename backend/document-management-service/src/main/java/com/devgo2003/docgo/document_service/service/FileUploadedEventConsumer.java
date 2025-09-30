@@ -141,7 +141,7 @@ public class FileUploadedEventConsumer {
             fileReceivedEvent.put("eventType", "FileReceived");
             fileReceivedEvent.put("eventId", UUID.randomUUID().toString());
             fileReceivedEvent.put("timestamp", OffsetDateTime.now().toString());
-            fileReceivedEvent.put("source", "contract-management-service");
+            fileReceivedEvent.put("source", "document-management-service");
             fileReceivedEvent.put("correlationId", correlationId);
             
             Map<String, Object> actor = new HashMap<>();

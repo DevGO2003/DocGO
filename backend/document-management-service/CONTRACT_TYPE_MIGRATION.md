@@ -124,7 +124,7 @@ java -jar target/contract-service-1.0.0.jar --migrate-contract-types
 
 ### Tạo Contract với English Constant
 ```bash
-curl -X POST "http://localhost:8003/api/v1/contract-management-service/contracts" \
+curl -X POST "http://localhost:8003/api/v1/document-management-service/contracts" \
   -H "Content-Type: application/json" \
   -d '{
     "contractNumber": "HD-2024-001",
@@ -155,7 +155,7 @@ curl -X POST "http://localhost:8003/api/v1/contract-management-service/contracts
   },
   "timestamp": "2024-01-01T00:00:00Z",
   "requestId": "uuid-here",
-  "path": "/api/v1/contract-management-service/contracts"
+  "path": "/api/v1/document-management-service/contracts"
 }
 ```
 
@@ -171,7 +171,7 @@ curl -X POST "http://localhost:8003/api/v1/contract-management-service/contracts
   "data": null,
   "timestamp": "2024-01-01T00:00:00Z",
   "requestId": "uuid-here",
-  "path": "/api/v1/contract-management-service/contracts"
+  "path": "/api/v1/document-management-service/contracts"
 }
 ```
 

@@ -231,13 +231,30 @@ export default function Sidebar() {
             {visibleItems.map((item) => renderMenuRow(item))}
           </nav>
           {navigation.length > 6 && (
-            <div className="mt-auto bg-white px-2 py-3 border-t border-gray-100">
+            <div className="mt-auto bg-gradient-to-r from-gray-50 to-gray-100 px-2 py-3 border-t border-gray-200">
               <button
                 type="button"
-                className="w-full text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md px-3 py-2"
+                className="group relative w-full text-sm font-medium text-gray-700 hover:text-white bg-white hover:bg-gradient-to-r hover:from-indigo-500 hover:to-purple-600 rounded-lg px-4 py-3 shadow-sm hover:shadow-md transition-all duration-300 hover:scale-[1.02] border border-gray-200 hover:border-transparent"
                 onClick={() => setShowAll((v) => !v)}
               >
-                {showAll ? 'Thu gọn' : 'Xem thêm'}
+                <div className="flex items-center justify-center gap-2">
+                  {showAll ? (
+                    <>
+                      <svg className="w-4 h-4 transition-transform duration-300 group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                      </svg>
+                      <span>Thu gọn</span>
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-4 h-4 transition-transform duration-300 group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                      <span>Xem thêm</span>
+                    </>
+                  )}
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/10 to-purple-600/10 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               </button>
             </div>
           )}
@@ -263,13 +280,30 @@ export default function Sidebar() {
             {visibleItems.map((item) => renderMenuRow(item))}
           </nav>
           {navigation.length > 6 && (
-            <div className="mt-auto bg-white px-2 py-3 border-t border-gray-100">
+            <div className="mt-auto bg-gradient-to-r from-gray-50 to-gray-100 px-2 py-3 border-t border-gray-200">
               <button
                 type="button"
-                className="w-full text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md px-3 py-2"
+                className="group relative w-full text-sm font-medium text-gray-700 hover:text-white bg-white hover:bg-gradient-to-r hover:from-indigo-500 hover:to-purple-600 rounded-lg px-4 py-3 shadow-sm hover:shadow-md transition-all duration-300 hover:scale-[1.02] border border-gray-200 hover:border-transparent"
                 onClick={() => setShowAll((v) => !v)}
               >
-                {showAll ? 'Thu gọn' : 'Xem thêm'}
+                <div className="flex items-center justify-center gap-2">
+                  {showAll ? (
+                    <>
+                      <svg className="w-4 h-4 transition-transform duration-300 group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                      </svg>
+                      <span>Thu gọn</span>
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-4 h-4 transition-transform duration-300 group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                      <span>Xem thêm</span>
+                    </>
+                  )}
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/10 to-purple-600/10 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               </button>
             </div>
           )}

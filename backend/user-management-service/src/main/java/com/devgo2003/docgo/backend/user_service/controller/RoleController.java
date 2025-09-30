@@ -20,7 +20,7 @@ import java.util.Set;
 @RestController
 @RequestMapping("/api/v1/user-management-service/roles")
 @RequiredArgsConstructor
-@Tag(name = "Role Management", description = "API quản lý vai trò")
+@Tag(name = "🎭 Role Management", description = "APIs quản lý vai trò")
 public class RoleController {
     
     private final RoleService roleService;

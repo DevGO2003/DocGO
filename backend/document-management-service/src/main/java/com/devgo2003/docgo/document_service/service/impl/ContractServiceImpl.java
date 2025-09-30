@@ -1311,7 +1311,7 @@ public class ContractServiceImpl implements IContractService {
                 // Ensure identifier present for versioned insert
                 contract.setId(java.util.UUID.randomUUID().toString());
                 contract.setCreatedAt(LocalDateTime.now());
-                contract.setCreatedBy("ai-processing-service");
+                contract.setCreatedBy("automation-service");
                 contract.setStatus(ContractStatus.DRAFT);
                 // Provide minimal required fields
                 if (contract.getStartDate() == null) {
@@ -1363,7 +1363,7 @@ public class ContractServiceImpl implements IContractService {
             event.setContractId(savedContract.getId());
             event.setEventType(isNewContract ? "CREATE_FROM_AI" : "UPDATE_FROM_AI");
             event.setEventData("{\"message\": \"Contract " + (isNewContract ? "created" : "updated") + " from AI processing\"}");
-            event.setUserId("ai-processing-service");
+            event.setUserId("automation-service");
             eventRepository.save(event);
 
             // Publish contract updated event

@@ -19,7 +19,7 @@ import java.util.Optional;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/v1/contract-management-service/versions")
+@RequestMapping("/api/v1/document-management-service/versions")
 @Tag(name = "APIs Quản lý Phiên bản", description = "Các API để quản lý phiên bản hợp đồng trong hệ thống DocGO")
 public class VersionController {
 

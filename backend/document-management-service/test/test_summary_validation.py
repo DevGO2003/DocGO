@@ -78,7 +78,7 @@ Hợp đồng chấm dứt khi hết hạn hoặc vi phạm nghiêm trọng.
         try:
             logs = subprocess.run([
                 'docker-compose', '-f', 'script/docker-compose.local.yml', 
-                'logs', 'ai-processing-service', '--tail=50'
+                'logs', 'automation-service', '--tail=50'
             ], capture_output=True, text=True, cwd='.')
             print("AI Service Logs:")
             print(logs.stdout)

@@ -40,7 +40,7 @@ class SummaryCreatedEvent(BaseModel):
     eventType: str = Field(default="SummaryCreated", description="Loại event")
     eventId: str = Field(..., description="ID duy nhất của event")
     timestamp: datetime = Field(..., description="Thời gian tạo event")
-    source: str = Field(default="ai-processing-service", description="Nguồn tạo event")
+    source: str = Field(default="automation-service", description="Nguồn tạo event")
     correlationId: str = Field(..., description="ID tương quan")
     actor: Dict[str, Any] = Field(..., description="Thông tin người thực hiện")
     data: SummaryCreatedEventData = Field(..., description="Dữ liệu event")

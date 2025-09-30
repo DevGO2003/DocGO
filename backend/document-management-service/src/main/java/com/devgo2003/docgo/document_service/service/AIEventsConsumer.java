@@ -69,7 +69,7 @@ public class AIEventsConsumer {
             contractUpdated.put("eventType", "ContractUpdated");
             contractUpdated.put("eventId", UUID.randomUUID().toString().replace("-", ""));
             contractUpdated.put("timestamp", OffsetDateTime.now().toString());
-            contractUpdated.put("source", "contract-management-service");
+            contractUpdated.put("source", "document-management-service");
             contractUpdated.put("correlationId", correlationId);
             contractUpdated.put("actor", root.path("actor"));
 

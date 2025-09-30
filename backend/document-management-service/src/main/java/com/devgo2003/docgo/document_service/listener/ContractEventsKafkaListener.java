@@ -40,8 +40,8 @@ public class ContractEventsKafkaListener {
 
             // Kiểm tra nguồn gốc event - chỉ xử lý từ AI service
             String source = (String) event.get("source");
-            if (!"ai-processing-service".equals(source)) {
-                logger.warn("⚠️ [CONTRACT_SUMMARY_SOURCE_CHECK] Ignoring event from unexpected source: {} - chỉ xử lý từ ai-processing-service", source);
+            if (!"automation-service".equals(source)) {
+                logger.warn("⚠️ [CONTRACT_SUMMARY_SOURCE_CHECK] Ignoring event from unexpected source: {} - chỉ xử lý từ automation-service", source);
                 return;
             }
 
