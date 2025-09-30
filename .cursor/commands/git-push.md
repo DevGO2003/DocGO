@@ -62,12 +62,18 @@ Gửi tất cả commits lên remote origin
 
   9) Nếu khi push bị chặn do phát hiện secret (ví dụ: lộ file .env, token, key,...):
      - Đọc và thực hiện <backup>
-     - Dọn lịch sử để loại bỏ secret rồi force-push:
-       - Dùng `git filter-repo` (khuyến nghị) hoặc BFG để xóa file secret khỏi lịch sử.
-       - Sau đó force-push:  
-         `git push --force <origin> <current-branch>`  
-         Nếu có `<destination-branch>`:  
-         `git push --force <origin> <current-branch>:<destination-branch>`
+     - Dọn lịch sử để loại bỏ secret bằng `git filter-repo` (khuyến nghị):
+       - Cài đặt (nếu chưa có): `python -m pip install --upgrade git-filter-repo`
+       - Xóa hoàn toàn các file nhạy cảm khỏi lịch sử (ví dụ):
+         - PowerShell (chạy tại root repo):
+           - `git filter-repo --force --invert-paths --path .cursor/mcp.json --path .cursor/tools/github/env/.env --path .cursor/tools/discord/env/.env --path backend/user-management-service/env/.env`
+       - Nếu cần xóa cả giá trị hardcode trong 1 file cụ thể theo regex (ví dụ GOOGLE_* trong docker-compose.yml), cân nhắc tạm thời xóa file đó khỏi lịch sử rồi commit lại phiên bản sạch hiện tại:
+           - `git filter-repo --force --invert-paths --path docker-compose.yml`
+           - Add lại file sạch hiện tại và commit
+     - Sau đó force-push:  
+       `git push --force <origin> <current-branch>`  
+       Nếu có `<destination-branch>`:  
+       `git push --force <origin> <current-branch>:<destination-branch>`
      - Sau khi push thành công, đọc và thực hiện <restore>.
 
   Phần 3 - Đọc và thực hiện <mcp-discord> với tham số message: <message>
