@@ -33,6 +33,7 @@ public class UserPermission {
     private String permissionDescription;
 
     @Field("is_granted")
+    @Builder.Default
     private Boolean isGranted = true;
 
     @Field("created_at")

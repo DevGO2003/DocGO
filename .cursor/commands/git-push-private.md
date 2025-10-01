@@ -47,10 +47,10 @@ Gửi tất cả commits (bao gồm cả file nhạy cảm như .env*, mcp.json,
            + `git push <private> <current-branch>`
            + `git push <private> <current-branch>:<destination-branch>` (nếu branch chưa tồn tại sẽ tự tạo mới)
          - Nếu muốn theo dõi (tracking branch) cho `<destination-branch>`: `git push -u <private> <current-branch>:<destination-branch>`
-       - Nếu cần ghi đè (overwrite) branch trên remote (ví dụ: khi cần force update file nhạy cảm hoặc branch local đã rebase): dùng cả hai lệnh sau để force push lên cả hai branch:
-           + `git push <private> <current-branch> --force-with-lease`
-           + `git push <private> <current-branch>:<destination-branch> --force-with-lease`
-         (ưu tiên dùng --force-with-lease thay vì --force để tránh mất commit của người khác)
+      - Nếu cần ghi đè (overwrite) branch trên remote (ví dụ: khi cần force update file nhạy cảm hoặc branch local đã rebase): dùng lệnh sau để force push:
+          + `git push <private> <current-branch> --force`
+          + (tuỳ chọn) `git push <private> <current-branch>:<destination-branch> --force`
+        (lưu ý: --force sẽ ghi đè lịch sử nhánh trên remote, hãy sử dụng khi chắc chắn)
      - Nếu gặp conflict phức tạp hoặc nhiều file, lập Cursor TODO ghi lại các file/nội dung conflict để giải quyết dần.
      - Khi push env, hệ thống merge giá trị theo rule:
          + Database → ưu tiên remote (DATABASE_URL, MONGODB_URI).

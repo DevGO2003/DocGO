@@ -41,6 +41,7 @@ public class Invitation {
     private LocalDateTime expiresAt;
 
     @Field("status")
+    @Builder.Default
     private InvitationStatus status = InvitationStatus.PENDING;
 
     @Field("invited_by")

@@ -280,9 +280,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const endpoint = pathParts.slice(1).join('/');
 
     if (!serviceName || !endpoint) {
-      res.setHeader('Access-Control-Allow-Origin', '*');
-      res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+      // CORS headers are handled centrally in middleware
       
       return res.status(400).json({
         apiVersion: 'v1',
@@ -299,9 +297,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Lấy service instance từ enhanced service manager
     const service = enhancedServiceManager.getService(serviceName);
     if (!service) {
-      res.setHeader('Access-Control-Allow-Origin', '*');
-      res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+      // CORS headers are handled centrally in middleware
       
       return res.status(404).json({
         apiVersion: 'v1',
@@ -368,13 +364,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         });
         break;
       case 'OPTIONS':
-        // Handle CORS preflight requests
-        res.status(200);
-        res.setHeader('Access-Control-Allow-Origin', '*');
-        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-        res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
-        res.setHeader('Access-Control-Max-Age', '86400');
-        return res.end();
+        // Preflight is handled in middleware
+        return res.status(200).end();
       default:
         return res.status(405).json({
           apiVersion: 'v1',
@@ -388,20 +379,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         });
     }
 
-    // Set CORS headers for success responses
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+    // CORS headers are handled centrally in middleware
     
     return res.status(response.status).json(response.data);
 
   } catch (error: any) {
     logger.error(`❌ Enhanced proxy error:`, error);
     
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+    // CORS headers are handled centrally in middleware
     
     return res.status(500).json({
       apiVersion: 'v1',

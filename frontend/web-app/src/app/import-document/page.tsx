@@ -7,7 +7,7 @@ import ContractSummaryRender from '@/components/ContractSummaryRender'
 import EditableArrayTable from '@/components/EditableArrayTable'
 import { DocumentTextIcon, DocumentMagnifyingGlassIcon, ArrowUpTrayIcon, PlusIcon } from '@heroicons/react/24/outline'
 import { useRouter } from 'next/navigation'
-import { automationAPI } from '@/lib/api'
+import { automationAPI, fileStorageAPI } from '@/lib/api'
 import toast from 'react-hot-toast'
 
 export default function CreateContractPage() {
@@ -70,6 +70,7 @@ export default function CreateContractPage() {
   const [summaryJsonText, setSummaryJsonText] = useState<string>('')
   const [summaryJsonError, setSummaryJsonError] = useState<string>('')
   const [summarySubmitting, setSummarySubmitting] = useState<boolean>(false)
+  const [classifyResult, setClassifyResult] = useState<any | null>(null)
 
   const handleSummaryValidate = (value: string) => {
     if (!value.trim()) {
@@ -130,16 +131,70 @@ export default function CreateContractPage() {
 
     try {
       setOcrLoading(true)
-      const uploadRes = await automationAPI.uploadFile(selectedFile, apiKey || undefined)
-      const body = uploadRes.data
-      const isOk = body && (body.statusCode === 200 || body.statusCode === 201)
+      // 1) Upload trực tiếp qua automation-service (files)
+      const uploadRes = await fileStorageAPI.uploadFile(selectedFile)
+      const uploadBody = uploadRes.data
+      const uploadOk = uploadBody && (uploadBody.statusCode === 200 || uploadBody.statusCode === 201)
 
-      if (isOk) {
-        toast.success('Upload file thành công')
-      } else if (body?.statusCode === 204) {
-        toast('Upload thành công nhưng không có dữ liệu trả về', { icon: 'ℹ️' })
+      if (!uploadOk) {
+        toast.error(uploadBody?.description || 'Tải lên thất bại')
+        return
+      }
+
+      toast.success('Tải lên thành công')
+      const doMore = window.confirm('Tải lên thành công. Bạn có muốn thực hiện thao tác gì thêm không?')
+      if (doMore) {
+        // TODO: mở gợi ý thao tác tiếp theo (ví dụ: tóm tắt, phân loại, đính kèm...)
+      }
+
+      toast.success('Trích xuất văn bản thành công')
+
+      // 2) Nếu cần, vẫn có thể gọi extract lại (giữ nguyên logic)
+      const extractRes = await automationAPI.extractText(selectedFile, apiKey || undefined)
+      const extractBody = extractRes.data
+      if (extractBody?.statusCode === 200 && typeof extractBody.data === 'string') {
+        setExtractedText(extractBody.data)
+        toast.success('Trích xuất văn bản thành công')
+      } else if (extractBody?.statusCode === 204) {
+        toast('Không có nội dung để trích xuất', { icon: 'ℹ️' })
+        setExtractedText('')
       } else {
-        toast.error(body?.description || 'Upload thất bại')
+        toast.error(extractBody?.description || 'Trích xuất thất bại')
+        return
+      }
+
+      // 3) Classify tài liệu
+      let classifyBody: any
+      try {
+        const classifyRes = await automationAPI.classifyText(extractBody.data as string, apiKey || undefined)
+        classifyBody = classifyRes.data
+      } catch (e: any) {
+        // fallback thử classify bằng file nếu có lỗi
+        const classifyRes2 = await automationAPI.classifyFile(selectedFile, apiKey || undefined)
+        classifyBody = classifyRes2.data
+      }
+      if (classifyBody?.statusCode === 200) {
+        setClassifyResult(classifyBody.data)
+        toast.success('Phân loại tài liệu thành công')
+      } else if (classifyBody?.statusCode === 204) {
+        toast('Không có kết quả phân loại', { icon: 'ℹ️' })
+      } else {
+        toast.error(classifyBody?.description || 'Phân loại thất bại')
+      }
+
+      // 4) Summarize nếu là hợp đồng
+      if (classifyBody?.data?.isContract) {
+        const sumRes = await automationAPI.summarizeFile(selectedFile, apiKey || undefined)
+        const sumBody = sumRes.data
+        if (sumBody?.statusCode === 200) {
+          setSummaryData(sumBody.data)
+          toast.success('Tóm tắt hợp đồng thành công')
+          setActiveTab('summary')
+        } else if (sumBody?.statusCode === 204) {
+          toast('Không có dữ liệu tóm tắt', { icon: 'ℹ️' })
+        } else {
+          toast.error(sumBody?.description || 'Tóm tắt thất bại')
+        }
       }
     } catch (error: any) {
       console.error('Upload failed:', error)
@@ -257,13 +312,21 @@ export default function CreateContractPage() {
 
     try {
       setFileUploading(true)
-      // Simulate file upload process
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      toast.success('Tải lên file thành công!')
-      setSelectedRegularFile(null)
+      const res = await fileStorageAPI.uploadFile(selectedRegularFile)
+      const body = res.data
+
+      if (body && (body.statusCode === 200 || body.statusCode === 201)) {
+        toast.success('Tải lên file thành công!')
+        setSelectedRegularFile(null)
+      } else if (body?.statusCode === 204) {
+        toast('Không có nội dung để tải lên', { icon: 'ℹ️' })
+      } else {
+        toast.error(body?.description || 'Tải lên thất bại')
+      }
     } catch (error: any) {
       console.error('File Upload Error:', error)
-      toast.error(`Lỗi tải lên: ${error.message || 'Có lỗi xảy ra'}`)
+      const msg = error?.response?.data?.description || error?.message || 'Lỗi tải lên file'
+      toast.error(msg)
     } finally {
       setFileUploading(false)
     }
@@ -431,7 +494,7 @@ export default function CreateContractPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Page Title */}
           <TitlePanel
-            title="IMPORT DOCUMENT"
+            title="NHẬP TÀI LIỆU"
             description="Tải lên và xử lý tài liệu hợp đồng hoặc tạo hợp đồng mới"
             variant="primary"
           />
@@ -693,7 +756,7 @@ export default function CreateContractPage() {
                         ) : (
                               <>
                                 <ArrowUpTrayIcon className="w-5 h-5 mr-2" />
-                                Xác nhận upload file
+                                Xác nhận tải hợp đồng
                               </>
                         )}
                       </button>

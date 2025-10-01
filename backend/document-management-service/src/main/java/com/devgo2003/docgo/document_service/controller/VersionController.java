@@ -34,7 +34,28 @@ public class VersionController {
     @GetMapping
     @Operation(
         summary = "Lấy danh sách phiên bản (hợp nhất)",
-        description = "Lọc: contractId, changeType, isPublished, isCurrent, tags[], filePath, checksum. Khoảng thời gian: createdFrom/To, publishedFrom/To, approvedFrom/To. Sắp xếp: sortBy(createdAt|versionNumber). Tổng hợp: aggregate=count|exists."
+        description = """
+        ## 📖 Mô tả
+        Lấy danh sách phiên bản với tiêu chí lọc/sort/aggregate. Trả về theo chuẩn RestResponse.
+
+        ## 🔹 Đầu vào
+
+        📄 pageNumber, pageSize (tùy chọn, query) — integer
+        📄 sortBy (tùy chọn, query) — createdAt | versionNumber (mặc định: createdAt)
+        📄 sortDirection (tùy chọn, query) — ASC | DESC (mặc định: DESC)
+        📄 contractId (tùy chọn, query) — string
+        📄 changeType (tùy chọn, query) — enum
+        📄 isPublished, isCurrent (tùy chọn, query) — boolean
+        📄 tags[] (tùy chọn, query) — string[]
+        📄 filePath, checksum (tùy chọn, query) — string
+        📄 createdFrom/To, publishedFrom/To, approvedFrom/To (tùy chọn, query) — string (ISO-8601)
+        📄 aggregate (tùy chọn, query) — count | exists
+
+        ## 🔹 Đầu ra
+
+        📝 data — List<Version> | Long | Boolean
+        📊 apiVersion | 🔢 statusCode | 📋 shortMessage | 📖 description | 🕒 timestamp | 🆔 requestId | 🛣️ path
+        """
     )
     public ResponseEntity<RestResponse<?>> getAllVersions(
             @RequestParam(defaultValue = "0") int pageNumber,

@@ -29,7 +29,32 @@ public class ReportController {
     @GetMapping
     @Operation(
         summary = "Lấy báo cáo (hợp nhất)", 
-        description = "Lọc: contractId, type(overview|approval|version|comment|esignature|reminder|audit-log). Tổng hợp: aggregate=count|exists."
+        description = """
+        ## 📖 Mô tả
+        Lấy báo cáo tổng hợp theo loại. Trả về theo chuẩn RestResponse.
+
+        ## 🔹 Đầu vào
+
+        📄 contractId (tùy chọn, query)
+        Loại: string
+        Mô tả: Lọc theo hợp đồng
+
+        📄 type (tùy chọn, query)
+        Loại: string
+        Mô tả: overview | approval | version | comment | esignature | reminder | audit-log
+
+        📄 aggregate (tùy chọn, query)
+        Loại: string
+        Mô tả: count | exists (trả về số hoặc boolean thay vì dữ liệu báo cáo)
+
+        ## 🔹 Đầu ra
+
+        📝 data
+        Loại: Map<string, object> | Long | Boolean
+        Mô tả: Dữ liệu báo cáo hoặc tổng hợp
+
+        📊 apiVersion | 🔢 statusCode | 📋 shortMessage | 📖 description | 🕒 timestamp | 🆔 requestId | 🛣️ path
+        """
     )
     public ResponseEntity<RestResponse<?>> getAllReports(
             @RequestParam(defaultValue = "0") int pageNumber,

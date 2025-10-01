@@ -33,7 +33,94 @@ public class ApprovalController {
     @GetMapping
     @Operation(
         summary = "Lấy danh sách phê duyệt (hợp nhất)",
-        description = "Lọc: contractId, approverId, approverEmail, approverRole, status(PENDING_REVIEW|APPROVED|REJECTED|EXPIRED), priority, order, dueFrom/To. Sắp xếp: sortBy(createdAt|dueDate|order). Tổng hợp: aggregate=count|exists."
+        description = """
+        ## 📖 Mô tả
+        Lấy danh sách phê duyệt (approval) với nhiều chế độ lọc/sort/aggregate. Trả về theo chuẩn RestResponse.
+
+        ## 🔹 Đầu vào
+
+        📄 pageNumber (tùy chọn, query)
+        Loại: integer
+        Mô tả: Số trang (mặc định: 0)
+
+        📄 pageSize (tùy chọn, query)
+        Loại: integer
+        Mô tả: Kích thước trang (mặc định: 10)
+
+        📄 sortBy (tùy chọn, query)
+        Loại: string
+        Mô tả: createdAt | dueDate | order (mặc định: createdAt)
+
+        📄 sortDirection (tùy chọn, query)
+        Loại: string
+        Mô tả: ASC | DESC (mặc định: DESC)
+
+        📄 searchTerm (tùy chọn, query)
+        Loại: string
+        Mô tả: Từ khóa tìm kiếm
+
+        📄 includeDeleted (tùy chọn, query)
+        Loại: boolean
+        Mô tả: Bao gồm các approval đã xóa mềm (mặc định: false)
+
+        📄 contractId, approverId, approverEmail, approverRole (tùy chọn, query)
+        Loại: string
+        Mô tả: Các tiêu chí lọc theo hợp đồng/người phê duyệt
+
+        📄 status (tùy chọn, query)
+        Loại: enum
+        Mô tả: PENDING_REVIEW | APPROVED | REJECTED | EXPIRED
+
+        📄 priority (tùy chọn, query)
+        Loại: enum
+        Mô tả: Mức độ ưu tiên
+
+        📄 order (tùy chọn, query)
+        Loại: integer
+        Mô tả: Thứ tự phê duyệt
+
+        📄 dueFrom, dueTo (tùy chọn, query)
+        Loại: string (ISO-8601)
+        Mô tả: Khoảng thời gian due date
+
+        📄 aggregate (tùy chọn, query)
+        Loại: string
+        Mô tả: count | exists (chế độ tổng hợp; thay vì trả list)
+
+        ## 🔹 Đầu ra
+
+        📝 data
+        Loại: List<Approval> | Long | Boolean
+        Mô tả: Danh sách/đếm/kiểm tra tồn tại approval tùy theo aggregate
+
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1)
+
+        🔢 statusCode
+        Loại: integer
+        Mô tả: 200 (OK) | 204 (No Content)
+
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả
+
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý
+
+        🕒 timestamp
+        Loại: string (ISO-8601)
+        Mô tả: Thời gian xử lý yêu cầu
+
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu
+
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi
+        """
     )
     public ResponseEntity<RestResponse<?>> getAllApprovals(
             @RequestParam(defaultValue = "0") int pageNumber,
@@ -250,39 +337,46 @@ public class ApprovalController {
     @Operation(
         summary = "Tạo phê duyệt mới", 
         description = """
-        🔹 Đầu vào
-        
-        📄 approval (bắt buộc, body)
+        ## 📖 Mô tả
+        Tạo phê duyệt mới cho hợp đồng. Trả về theo chuẩn RestResponse.
+
+        ## 🔹 Đầu vào
+
+        📄 body (bắt buộc, application/json)
         Loại: ApprovalCreateRequest
-        Mô tả: Thông tin phê duyệt cần tạo (contractId, approverId, approverName, approverEmail, approverRole, priority, dueDate, approvalOrder, isRequired)
-        
-        🔹 Đầu ra
-        
-        📦 data
+        Mô tả: contractId, approverId, approverName, approverEmail, approverRole, priority, dueDate, approvalOrder, isRequired
+
+        ## 🔹 Đầu ra
+
+        📝 data
         Loại: Approval
-        Mô tả: Thông tin phê duyệt đã được tạo thành công
-        
-        🧾 apiVersion
+        Mô tả: Bản ghi phê duyệt vừa tạo
+
+        📊 apiVersion
         Loại: string
         Mô tả: Phiên bản API (v1)
-        
-        🔧 statusCode
+
+        🔢 statusCode
         Loại: integer
-        Mô tả: ma trạng thái HTTP (2[object Object]ô tả: Thông báo ngắn gọn về kết quả
-        
-        📝 description
+        Mô tả: 201 (Created)
+
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả
+
+        📖 description
         Loại: string
         Mô tả: Mô tả chi tiết về kết quả xử lý
-        
-        ⏰ timestamp
-        Loại: string
-        Mô tả: Thời điểm xử lý request (ISO-8601)
-        
+
+        🕒 timestamp
+        Loại: string (ISO-8601)
+        Mô tả: Thời gian xử lý yêu cầu
+
         🆔 requestId
-        Loại: string
-        Mô tả: ID duy nhất của request
-        
-        📍 path
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu
+
+        🛣️ path
         Loại: string
         Mô tả: Đường dẫn API được gọi
         """

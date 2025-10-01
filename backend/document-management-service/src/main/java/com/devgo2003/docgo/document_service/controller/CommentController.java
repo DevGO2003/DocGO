@@ -33,7 +33,64 @@ public class CommentController {
     @GetMapping
     @Operation(
         summary = "Lấy danh sách bình luận (hợp nhất)",
-        description = "Hỗ trợ lọc qua query: contractId, authorId, status (RESOLVED|UNRESOLVED), visibility (PUBLIC|PRIVATE|PINNED), createdFrom, createdTo, resolvedFrom, resolvedTo, minReactionCount, minReplyCount; aggregate=count|exists. Các tham số phân trang/sắp xếp giữ nguyên: pageNumber, pageSize, sortBy, sortDirection."
+        description = """
+        ## 📖 Mô tả
+        Lấy danh sách bình luận với nhiều tiêu chí lọc/sort/aggregate. Trả về theo chuẩn RestResponse.
+
+        ## 🔹 Đầu vào
+
+        📄 pageNumber, pageSize (tùy chọn, query)
+        Loại: integer
+        Mô tả: Phân trang (mặc định 0/10)
+
+        📄 sortBy (tùy chọn, query)
+        Loại: string
+        Mô tả: createdAt | reactionCount | replyCount (mặc định: createdAt)
+
+        📄 sortDirection (tùy chọn, query)
+        Loại: string
+        Mô tả: ASC | DESC (mặc định: DESC)
+
+        📄 contractId, authorId (tùy chọn, query)
+        Loại: string
+        Mô tả: Lọc theo hợp đồng/tác giả
+
+        📄 status (tùy chọn, query)
+        Loại: enum
+        Mô tả: RESOLVED | UNRESOLVED
+
+        📄 visibility (tùy chọn, query)
+        Loại: enum
+        Mô tả: PUBLIC | PRIVATE | PINNED
+
+        📄 type, priority (tùy chọn, query)
+        Loại: enum
+        Mô tả: Loại bình luận / Mức độ ưu tiên
+
+        📄 pinned, unresolved (tùy chọn, query)
+        Loại: boolean
+        Mô tả: Chỉ lấy bình luận ghim / chưa giải quyết
+
+        📄 createdFrom/To, resolvedFrom/To (tùy chọn, query)
+        Loại: string (ISO-8601)
+        Mô tả: Khoảng thời gian tạo/giải quyết
+
+        📄 minReactionCount, minReplyCount (tùy chọn, query)
+        Loại: integer
+        Mô tả: Ngưỡng lọc nâng cao
+
+        📄 aggregate (tùy chọn, query)
+        Loại: string
+        Mô tả: count | exists (chế độ tổng hợp; thay vì trả list)
+
+        ## 🔹 Đầu ra
+
+        📝 data
+        Loại: List<Comment> | Long | Boolean
+        Mô tả: Danh sách/đếm/kiểm tra tồn tại bình luận tùy theo aggregate
+
+        📊 apiVersion | 🔢 statusCode | 📋 shortMessage | 📖 description | 🕒 timestamp | 🆔 requestId | 🛣️ path
+        """
     )
     public ResponseEntity<RestResponse<?>> getAllComments(
             @RequestParam(defaultValue = "0") int pageNumber,
@@ -202,45 +259,22 @@ public class CommentController {
     @Operation(
         summary = "Tạo bình luận mới", 
         description = """
-        "Đầu vào
-        
-        "" comment (bắt buộc, body)
+        ## 📖 Mô tả
+        Tạo bình luận mới cho hợp đồng. Trả về theo chuẩn RestResponse.
+
+        ## 🔹 Đầu vào
+
+        📄 body (bắt buộc, application/json)
         Loại: CommentCreateRequest
-        mô tả: Thông tin bình luận cần tạo (contractId, authorId, authorName, authorEmail, content, commentType, parentCommentId)
-        
-        "Đầu ra
-        
-        "data
+        Mô tả: contractId, authorId, authorName, authorEmail, content, commentType, parentCommentId
+
+        ## 🔹 Đầu ra
+
+        📝 data
         Loại: Comment
-        mô tả: Thông tin bình luận đã được tạo thành công
-        
-        "S apiVersion
-        Loại: string
-        mô tả: Phiên bản API (v1)
-        
-        "statusCode
-        Loại: integer
-        mô tả: mã trạng thái HTTP (201: Created)
-        
-        "< shortMessage
-        Loại: string
-        mô tả: Thông báo ngắn gọn về kết quả
-        
-        "- description
-        Loại: string
-        mô tả: mô tả chi tiết về kết quả xử lý
-        
-        ⏰ timestamp
-        Loại: string
-        mô tả: Thời điểm xử lý request (ISO-8601)
-        
-        "- requestId
-        Loại: string
-        mô tả: ID duy nhất của request
-        
-        "path
-        Loại: string
-        mô tả: Đường dẫn API được gọi
+        Mô tả: Bình luận vừa tạo
+
+        📊 apiVersion | 🔢 statusCode(201) | 📋 shortMessage | 📖 description | 🕒 timestamp | 🆔 requestId | 🛣️ path
         """
     )
     public ResponseEntity<RestResponse<Comment>> createComment(@RequestBody CommentCreateRequest request) {

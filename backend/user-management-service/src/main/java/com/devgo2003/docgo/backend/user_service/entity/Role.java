@@ -37,9 +37,11 @@ public class Role {
     private Integer level;
 
     @Field("is_active")
+    @Builder.Default
     private Boolean isActive = true;
 
     @Field("is_system")
+    @Builder.Default
     private Boolean isSystem = false;
 
     @Field("permission_ids")

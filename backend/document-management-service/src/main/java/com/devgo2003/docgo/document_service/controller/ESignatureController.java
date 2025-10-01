@@ -35,7 +35,64 @@ public class ESignatureController {
     @GetMapping
     @Operation(
         summary = "Lấy danh sách e-signature (hợp nhất)",
-        description = "Hỗ trợ lọc: contractId, signerId, signerEmail, status(PENDING_REVIEW|SIGNED|DECLINED|EXPIRED|VERIFIED), type, verificationMethod, required(true/false). Khoảng thời gian: signedFrom/signedTo. Sắp xếp: sortBy(signedAt|createdAt). Tổng hợp: aggregate=count|exists."
+        description = """
+        ## 📖 Mô tả
+        Lấy danh sách e-signature với chế độ lọc/sort/aggregate đa dạng. Trả về theo chuẩn RestResponse.
+
+        ## 🔹 Đầu vào
+
+        📄 pageNumber, pageSize (tùy chọn, query)
+        Loại: integer
+        Mô tả: Phân trang (mặc định 0/10)
+
+        📄 sortBy (tùy chọn, query)
+        Loại: string
+        Mô tả: signedAt | createdAt | signatureOrder (mặc định: createdAt)
+
+        📄 sortDirection (tùy chọn, query)
+        Loại: string
+        Mô tả: ASC | DESC (mặc định: DESC)
+
+        📄 contractId, signerId, signerEmail (tùy chọn, query)
+        Loại: string
+        Mô tả: Lọc theo hợp đồng/người ký
+
+        📄 status (tùy chọn, query)
+        Loại: enum
+        Mô tả: PENDING_REVIEW | SIGNED | DECLINED | EXPIRED | VERIFIED
+
+        📄 type (tùy chọn, query)
+        Loại: enum
+        Mô tả: Loại chữ ký
+
+        📄 verificationMethod (tùy chọn, query)
+        Loại: enum
+        Mô tả: Phương thức xác thực
+
+        📄 required (tùy chọn, query)
+        Loại: boolean
+        Mô tả: Chỉ e-signature bắt buộc hay tùy chọn
+
+        📄 signedFrom, signedTo (tùy chọn, query)
+        Loại: string (ISO-8601)
+        Mô tả: Khoảng thời gian ký
+
+        📄 minVerificationAttempts, minReminderCount (tùy chọn, query)
+        Loại: integer
+        Mô tả: Lọc nâng cao theo số lần xác thực/nhắc nhở
+
+        📄 aggregate (tùy chọn, query)
+        Loại: string
+        Mô tả: count | exists (chế độ tổng hợp; thay vì trả list)
+
+        ## 🔹 Đầu ra
+
+        📝 data
+        Loại: List<ESignature> | Long | Boolean
+        Mô tả: Danh sách/đếm/kiểm tra tồn tại e-signature tùy theo aggregate
+
+        📊 apiVersion | 🔢 statusCode | 📋 shortMessage | 📖 description | 🕒 timestamp | 🆔 requestId | 🛣️ path
+        """
     )
     public ResponseEntity<RestResponse<?>> getAllESignatures(
             @RequestParam(defaultValue = "0") int pageNumber,
@@ -187,45 +244,22 @@ public class ESignatureController {
     @Operation(
         summary = "Tạo chữ ký điện tử mới", 
         description = """
-        🔹 Đầu vào
-        
-        🔸 eSignature (bắt buộc, body)
+        ## 📖 Mô tả
+        Tạo mới e-signature cho một hợp đồng/người ký. Trả về theo chuẩn RestResponse.
+
+        ## 🔹 Đầu vào
+
+        📄 body (bắt buộc, application/json)
         Loại: ESignatureCreateRequest
-        mô tả: Thông tin chữ ký điện tử cần tạo (contractId, signerId, signerName, signerEmail, signatureType, signatureData)
-        
-        🔹 Đầu ra
-        
-        🔸 data
+        Mô tả: contractId, signerId, signerName, signerEmail, signatureType, signatureData
+
+        ## 🔹 Đầu ra
+
+        📝 data
         Loại: ESignature
-        mô tả: Thông tin chữ ký điện tử đã được tạo thành công
-        
-        🔸 apiVersion
-        Loại: string
-        mô tả: Phiên bản API (v1)
-        
-        🔸 statusCode
-        Loại: integer
-        mô tả: mã trạng thái HTTP (201: Created)
-        
-        🔸 shortMessage
-        Loại: string
-        mô tả: Thông báo ngắn gọn về kết quả
-        
-        🔸 description
-        Loại: string
-        mô tả: mô tả chi tiết về kết quả xử lý
-        
-        🔸 timestamp
-        Loại: string
-        mô tả: Thời điểm xử lý request (ISO-8601)
-        
-        🔸 requestId
-        Loại: string
-        mô tả: ID duy nhất của request
-        
-        🔸 path
-        Loại: string
-        mô tả: Đường dẫn API được gọi
+        Mô tả: Bản ghi e-signature vừa tạo
+
+        📊 apiVersion | 🔢 statusCode(201) | 📋 shortMessage | 📖 description | 🕒 timestamp | 🆔 requestId | 🛣️ path
         """
     )
     public ResponseEntity<RestResponse<ESignature>> createESignature(@RequestBody ESignatureCreateRequest request) {

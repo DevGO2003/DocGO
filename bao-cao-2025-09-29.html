@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Báo Cáo Tiến Độ Dự Án DocGO - 2025-09-29</title>
+  <style>
+    :root {
+      --bg: #0b1220;
+      --card: #101a2b;
+      --muted: #8aa0c5;
+      --text: #e6eefc;
+      --green: #22c55e;
+      --yellow: #eab308;
+      --red: #ef4444;
+      --blue: #60a5fa;
+      --purple: #a78bfa;
+      --cyan: #22d3ee;
+      --border: #1c2a42;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; padding: 24px; background: radial-gradient(1200px 800px at 20% -10%, #1a2440 0%, #0b1220 40%);
+      color: var(--text); font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, Apple Color Emoji, Segoe UI Emoji;
+    }
+    .container { max-width: 1100px; margin: 0 auto; }
+    .header { background: linear-gradient(180deg, rgba(96,165,250,.12), rgba(167,139,250,.08)); border: 1px solid var(--border); border-radius: 16px; padding: 24px; box-shadow: 0 10px 30px rgba(0,0,0,.35); }
+    .title { margin: 0 0 8px; font-size: 24px; letter-spacing: .5px; }
+    .subtitle { margin: 0; color: var(--muted); font-size: 14px; }
+    .grid { display: grid; gap: 16px; }
+    @media (min-width: 900px) { .grid-2 { grid-template-columns: 1fr 1fr; } .grid-3 { grid-template-columns: repeat(3, 1fr); } }
+    .card { background: linear-gradient(180deg, rgba(16,26,43,.9), rgba(11,18,32,.9)); border: 1px solid var(--border); border-radius: 14px; padding: 18px; }
+    .card h3 { margin: 0 0 10px; font-size: 16px; color: #cfe2ff; }
+    .badge { display: inline-block; font-size: 12px; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--border); color: var(--muted); }
+    .ok { color: var(--green); }
+    .pending { color: var(--yellow); }
+    .fail { color: var(--red); }
+    .stat { display: flex; align-items: baseline; gap: 10px; }
+    .stat .num { font-size: 28px; font-weight: 700; }
+    .table { width: 100%; border-collapse: collapse; }
+    .table th, .table td { border-bottom: 1px solid var(--border); padding: 10px 8px; text-align: left; vertical-align: top; }
+    .table th { color: #bcd2ff; font-weight: 600; font-size: 13px; }
+    .kicker { color: var(--muted); font-size: 12px; margin-bottom: 6px; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+    .pill { display: inline-block; padding: 2px 8px; border: 1px solid var(--border); border-radius: 999px; font-size: 12px; color: var(--cyan); background: rgba(34,211,238,.08); }
+    .list { margin: 8px 0 0; padding-left: 18px; color: var(--muted); }
+    .muted { color: var(--muted); }
+    .section { margin-top: 18px; }
+  </style>
+  <meta name="robots" content="noindex" />
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1 class="title">📊 BÁO CÁO TIẾN ĐỘ DỰ ÁN DOCGO</h1>
+      <p class="subtitle">Ngày báo cáo: 2025-09-30 | Thời gian báo cáo: Ngày hôm qua (2025-09-29)</p>
+    </div>
+
+    <div class="section grid grid-3">
+      <div class="card">
+        <div class="kicker">Tổng số commit</div>
+        <div class="stat"><div class="num">2</div><span class="badge">24h qua (UTC+7)</span></div>
+      </div>
+      <div class="card">
+        <div class="kicker">Services được cập nhật</div>
+        <div class="stat"><div class="num">6</div><span class="badge">api-gateway, automation, document, user, web-app, web_nextjs</span></div>
+      </div>
+      <div class="card">
+        <div class="kicker">Thời gian làm việc (ước tính)</div>
+        <div class="stat"><div class="num">~4h</div><span class="badge">tổng hợp theo khối lượng thay đổi</span></div>
+      </div>
+    </div>
+
+    <div class="section grid grid-2">
+      <div class="card">
+        <h3>🧭 Tổng quan hoạt động</h3>
+        <table class="table">
+          <thead><tr><th>Mục tiêu</th><th>Trạng thái</th></tr></thead>
+          <tbody>
+            <tr><td>Chuẩn hóa OpenAPI đường dẫn tài liệu</td><td class="ok">✅ Hoàn thành</td></tr>
+            <tr><td>Nâng cấp UI sidebar: sắp xếp, ghim mục, tổ chức</td><td class="ok">✅ Hoàn thành</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card">
+        <h3>🧩 Phân loại commit</h3>
+        <ul class="list">
+          <li><strong>Feature</strong>: 2</li>
+          <li><span class="muted">Infrastructure</span>: 0</li>
+          <li><span class="muted">Bugfix</span>: 0</li>
+          <li><span class="muted">Documentation</span>: 0</li>
+          <li><span class="muted">Testing</span>: 0</li>
+          <li><span class="muted">Refactor</span>: 0</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="section card">
+      <h3>🧾 Chi tiết công việc thực hiện</h3>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>STT</th>
+            <th>Công việc</th>
+            <th>Commit</th>
+            <th>Thời gian (UTC+7)</th>
+            <th>Loại</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1</td>
+            <td>feat(web-app/sidebar): thêm chế độ chỉnh menu, kéo-thả sắp xếp, ghim mục; bổ sung menu 'Tổ chức'</td>
+            <td class="mono">0fc8bd5</td>
+            <td>2025-09-29 23:49:14 +0700</td>
+            <td><span class="pill">Feature</span></td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td>feat(automation): standardize OpenAPI to /api-docs; update metadata</td>
+            <td class="mono">a79ff0a</td>
+            <td>2025-09-29 14:14:05 +0700</td>
+            <td><span class="pill">Feature</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section grid grid-2">
+      <div class="card">
+        <h3>🧱 Services được cập nhật</h3>
+        <table class="table">
+          <thead><tr><th>Service</th><th>Loại</th><th>Mục đích</th></tr></thead>
+          <tbody>
+            <tr><td>api-gateway</td><td>Next.js</td><td>Cập nhật HTTP, load balancer, docs proxy</td></tr>
+            <tr><td>automation-service</td><td>FastAPI</td><td>Prettify OpenAPI, chuẩn hóa tài liệu</td></tr>
+            <tr><td>document-management-service</td><td>Spring Boot</td><td>Chuẩn hóa Swagger, controller, handler</td></tr>
+            <tr><td>user-management-service</td><td>Spring Boot</td><td>OpenAPI, bảo mật, controller</td></tr>
+            <tr><td>frontend/web-app</td><td>Next.js</td><td>Nâng cấp sidebar, UI/UX, i18n</td></tr>
+            <tr><td>frontend/web_nextjs</td><td>Next.js</td><td>Cải thiện trang và components</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card">
+        <h3>📈 Thống kê hoạt động</h3>
+        <ul class="list">
+          <li><strong>Tổng commit</strong>: 2</li>
+          <li><strong>Services cập nhật</strong>: 6</li>
+          <li><strong>Thời gian (ước tính)</strong>: ~4 giờ</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="section grid grid-2">
+      <div class="card">
+        <h3>🏁 Kết quả đạt được</h3>
+        <table class="table">
+          <thead><tr><th>Lợi ích</th><th>Mô tả</th><th>Tác động</th></tr></thead>
+          <tbody>
+            <tr><td>Đồng nhất tài liệu API</td><td>Đưa OpenAPI về đường dẫn chuẩn</td><td>Nâng cao DX, dễ tích hợp</td></tr>
+            <tr><td>Nâng cấp trải nghiệm điều hướng</td><td>Sidebar hỗ trợ sắp xếp và ghim</td><td>Tăng hiệu suất thao tác</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card">
+        <h3>🗓️ Kế hoạch tiếp theo</h3>
+        <table class="table">
+          <thead><tr><th>Ưu tiên</th><th>Công việc</th><th>Thời gian dự kiến</th></tr></thead>
+          <tbody>
+            <tr><td class="ok">Cao</td><td>Chuẩn hóa response envelope còn thiếu</td><td>1 ngày</td></tr>
+            <tr><td class="pending">Trung bình</td><td>Hoàn thiện tài liệu Swagger cho các controller</td><td>1-2 ngày</td></tr>
+            <tr><td class="pending">Trung bình</td><td>Bổ sung test cơ bản cho endpoints chính</td><td>1 ngày</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="section card">
+      <h3>🗂️ Danh sách file thay đổi (unique)</h3>
+      <details open>
+        <summary class="badge">Hiển thị/Ẩn danh sách</summary>
+        <pre class="mono" style="white-space: pre-wrap; line-height: 1.4; margin-top: 10px; color: var(--muted);">
+.cursor/rules/00_project-architecture-overview.mdc
+.cursorignore
+.github/mcp-sync.txt
+.merge-webnextjs
+backend/api-gateway/components/LoadingSpinner.tsx
+backend/api-gateway/docker-compose.yml
+backend/api-gateway/lib/cacheService.ts
+backend/api-gateway/lib/config.ts
+backend/api-gateway/lib/enhancedServiceManager.ts
+backend/api-gateway/lib/http/handleServiceError.ts
+backend/api-gateway/lib/http/statusMap.ts
+backend/api-gateway/lib/http/withApiHandler.ts
+backend/api-gateway/lib/kafka.ts
+backend/api-gateway/lib/loadBalancer.ts
+backend/api-gateway/lib/logger.ts
+backend/api-gateway/lib/services.ts
+backend/api-gateway/lib/services/authService.ts
+backend/api-gateway/lib/services/fileService.ts
+backend/api-gateway/lib/services/healthMonitoringService.ts
+backend/api-gateway/lib/swagger.ts
+backend/api-gateway/next.config.js
+backend/api-gateway/next-env.d.ts
+backend/api-gateway/package.json
+backend/api-gateway/package-lock.json
+backend/api-gateway/pages/api/[...path].ts
+backend/api-gateway/pages/api/auth/login.ts
+backend/api-gateway/pages/api/docs/[service].ts
+backend/api-gateway/pages/api/loadbalancer/stats.ts
+backend/api-gateway/pages/api/oauth2/test.ts
+backend/api-gateway/pages/api/v2/[...path].ts
+backend/api-gateway/pages/api/v2/simple/[...path].ts
+backend/automation-service/config.py
+backend/automation-service/contract_router.py
+backend/automation-service/env/.env.example
+backend/automation-service/file_router.py
+backend/automation-service/main.py
+backend/automation-service/requirements.txt
+backend/automation-service/routers.py
+backend/automation-service/s3_router.py
+backend/automation-service/schemas/file_schemas.py
+backend/automation-service/services/batch_service.py
+backend/automation-service/services/event_service.py
+backend/automation-service/services/file_service.py
+backend/automation-service/services/notification_service.py
+backend/automation-service/simple_main.py
+backend/automation-service/test.txt
+backend/document-management-service/Dockerfile
+backend/document-management-service/env/.env.example
+backend/document-management-service/pom.xml
+backend/document-management-service/src/main/java/com/devgo2003/docgo/document_service/common/handler/GlobalExceptionHandler.java
+backend/document-management-service/src/main/java/com/devgo2003/docgo/document_service/config/SwaggerConfig.java
+backend/document-management-service/src/main/java/com/devgo2003/docgo/document_service/controller/ContractController.java
+backend/document-management-service/src/main/java/com/devgo2003/docgo/document_service/controller/DocumentController.java
+backend/document-management-service/src/main/java/com/devgo2003/docgo/document_service/controller/ReminderController.java
+backend/document-management-service/src/main/java/com/devgo2003/docgo/document_service/controller/ReportController.java
+backend/document-management-service/src/main/java/com/devgo2003/docgo/document_service/controller/TagController.java
+backend/document-management-service/src/main/java/com/devgo2003/docgo/document_service/controller/VersionController.java
+backend/document-management-service/src/main/java/com/devgo2003/docgo/document_service/dto/FileDownloadResponse.java
+backend/document-management-service/src/main/java/com/devgo2003/docgo/document_service/dto/FileListResponse.java
+backend/document-management-service/src/main/java/com/devgo2003/docgo/document_service/dto/FileUploadResponse.java
+backend/document-management-service/src/main/java/com/devgo2003/docgo/document_service/file/dto/FileListResponse.java
+backend/document-management-service/src/main/java/com/devgo2003/docgo/document_service/file/FileStorageController.java
+backend/document-management-service/src/main/java/com/devgo2003/docgo/document_service/file/service/FileStorageService.java
+backend/document-management-service/src/main/java/com/devgo2003/docgo/document_service/file/service/impl/FileStorageServiceImpl.java
+backend/document-management-service/src/main/java/com/devgo2003/docgo/document_service/service/FileStorageService.java
+backend/document-management-service/src/main/java/com/devgo2003/docgo/document_service/service/impl/FileStorageServiceImpl.java
+backend/document-management-service/src/main/resources/application.properties
+backend/document-management-service/src/main/resources/application-docker.properties
+backend/file-storage-asset-service/main.py
+backend/user-management-service/Dockerfile
+backend/user-management-service/env/.env.example
+backend/user-management-service/src/main/java/com/devgo2003/docgo/backend/user_service/AuthServiceApplication.java
+backend/user-management-service/src/main/java/com/devgo2003/docgo/backend/user_service/common/handler/GlobalExceptionHandler.java
+backend/user-management-service/src/main/java/com/devgo2003/docgo/backend/user_service/config/OpenApiConfig.java
+backend/user-management-service/src/main/java/com/devgo2003/docgo/backend/user_service/config/WebRedirectConfig.java
+backend/user-management-service/src/main/java/com/devgo2003/docgo/backend/user_service/controller/OrganizationController.java
+backend/user-management-service/src/main/java/com/devgo2003/docgo/backend/user_service/controller/RoleController.java
+backend/user-management-service/src/main/java/com/devgo2003/docgo/backend/user_service/controller/SessionController.java
+backend/user-management-service/src/main/java/com/devgo2003/docgo/backend/user_service/controller/UserController.java
+backend/user-management-service/src/main/java/com/devgo2003/docgo/backend/user_service/dto/OrganizationCreateRequest.java
+backend/user-management-service/src/main/java/com/devgo2003/docgo/backend/user_service/dto/OrganizationResponse.java
+backend/user-management-service/src/main/java/com/devgo2003/docgo/backend/user_service/dto/OrganizationUpdateRequest.java
+backend/user-management-service/src/main/java/com/devgo2003/docgo/backend/user_service/entity/BaseEntity.java
+backend/user-management-service/src/main/java/com/devgo2003/docgo/backend/user_service/entity/Invitation.java
+backend/user-management-service/src/main/java/com/devgo2003/docgo/backend/user_service/entity/Organization.java
+backend/user-management-service/src/main/java/com/devgo2003/docgo/backend/user_service/entity/OrganizationMembership.java
+backend/user-management-service/src/main/java/com/devgo2003/docgo/backend/user_service/entity/OrganizationMongo.java
+backend/user-management-service/src/main/java/com/devgo2003/docgo/backend/user_service/entity/OrgRole.java
+backend/user-management-service/src/main/java/com/devgo2003/docgo/backend/user_service/entity/PermissionMongo.java
+backend/user-management-service/src/main/java/com/devgo2003/docgo/backend/user_service/entity/Role.java
+backend/user-management-service/src/main/java/com/devgo2003/docgo/backend/user_service/entity/RoleMongo.java
+backend/user-management-service/src/main/java/com/devgo2003/docgo/backend/user_service/entity/SessionMongo.java
+backend/user-management-service/src/main/java/com/devgo2003/docgo/backend/user_service/entity/SessionStatus.java
+backend/user-management-service/src/main/java/com/devgo2003/docgo/backend/user_service/entity/User.java
+backend/user-management-service/src/main/java/com/devgo2003/docgo/backend/user_service/entity/UserEvent.java
+backend/user-management-service/src/main/java/com/devgo2003/docgo/backend/user_service/entity/UserMongo.java
+backend/user-management-service/src/main/java/com/devgo2003/docgo/backend/user_service/entity/UserPermission.java
+backend/user-management-service/src/main/java/com/devgo2003/docgo/backend/user_service/entity/UserSession.java
+backend/user-management-service/src/main/java/com/devgo2003/docgo/backend/user_service/entity/UserStatus.java
+backend/user-management-service/src/main/java/com/devgo2003/docgo/backend/user_service/model/AuthResponse.java
+backend/user-management-service/src/main/java/com/devgo2003/docgo/backend/user_service/repository/InvitationRepository.java
+backend/user-management-service/src/main/java/com/devgo2003/docgo/backend/user_service/repository/OrganizationMembershipRepository.java
+backend/user-management-service/src/main/java/com/devgo2003/docgo/backend/user_service/repository/OrganizationMongoRepository.java
+backend/user-management-service/src/main/java/com/devgo2003/docgo/backend/user_service/repository/OrganizationRepository.java
+backend/user-management-service/src/main/java/com/devgo2003/docgo/backend/user_service/repository/OrgRoleRepository.java
+backend/user-management-service/src/main/java/com/devgo2003/docgo/backend/user_service/repository/PermissionMongoRepository.java
+backend/user-management-service/src/main/java/com/devgo2003/docgo/backend/user_service/repository/RoleMongoRepository.java
+backend/user-management-service/src/main/java/com/devgo2003/docgo/backend/user_service/repository/RoleRepository.java
+backend/user-management-service/src/main/java/com/devgo2003/docgo/backend/user_service/repository/SessionMongoRepository.java
+backend/user-management-service/src/main/java/com/devgo2003/docgo/backend/user_service/repository/UserMongoRepository.java
+backend/user-management-service/src/main/java/com/devgo2003/docgo/backend/user_service/repository/UserRepository.java
+backend/user-management-service/src/main/java/com/devgo2003/docgo/backend/user_service/repository/UserSessionRepository.java
+backend/user-management-service/src/main/java/com/devgo2003/docgo/backend/user_service/security/CustomUserDetailsService.java
+backend/user-management-service/src/main/java/com/devgo2003/docgo/backend/user_service/security/JwtAuthenticationFilter.java
+backend/user-management-service/src/main/java/com/devgo2003/docgo/backend/user_service/security/OAuth2LoginSuccessHandler.java
+backend/user-management-service/src/main/java/com/devgo2003/docgo/backend/user_service/security/SecurityConfig.java
+backend/user-management-service/src/main/java/com/devgo2003/docgo/backend/user_service/service/AuthService.java
+backend/user-management-service/src/main/java/com/devgo2003/docgo/backend/user_service/service/OrganizationService.java
+backend/user-management-service/src/main/java/com/devgo2003/docgo/backend/user_service/service/RoleService.java
+backend/user-management-service/src/main/java/com/devgo2003/docgo/backend/user_service/service/SessionService.java
+backend/user-management-service/src/main/java/com/devgo2003/docgo/backend/user_service/service/UserService.java
+backend/user-management-service/src/main/resources/application.properties
+frontend/package-lock.json
+frontend/web/src/components/TagSelector.tsx
+frontend/web/src/hooks/useTags.ts
+frontend/web/src/pages/TagsDemo.tsx
+frontend/web/src/services/tagService.ts
+frontend/web_nextjs/env/.env
+frontend/web_nextjs/public/locales/en/common.json
+frontend/web_nextjs/public/locales/vi/common.json
+frontend/web_nextjs/src/app/auth/oauth2/callback/page.tsx
+frontend/web_nextjs/src/app/contracts/page.tsx
+frontend/web_nextjs/src/app/import-document/page.tsx
+frontend/web_nextjs/src/app/layout.tsx
+frontend/web_nextjs/src/components/contracts/ContractControlPanel.tsx
+frontend/web_nextjs/src/components/ContractSummaryRender.tsx
+frontend/web_nextjs/src/components/EditableArrayTable.tsx
+frontend/web_nextjs/src/components/GlobalErrorSummary.tsx
+frontend/web_nextjs/src/components/layout/Header.tsx
+frontend/web_nextjs/src/components/layout/MainLayout.tsx
+frontend/web_nextjs/src/components/LoadingSpinner.tsx
+frontend/web_nextjs/src/components/MenuItemAnimation.tsx
+frontend/web_nextjs/src/components/organization/OrganizationSelector.tsx
+frontend/web_nextjs/src/components/PageTransition.tsx
+frontend/web_nextjs/src/components/Sidebar.tsx
+frontend/web_nextjs/src/components/StickyFixGlobal.tsx
+frontend/web_nextjs/src/hooks/useAuth.tsx
+frontend/web_nextjs/src/hooks/usePageErrors.ts
+frontend/web_nextjs/src/lib/api.ts
+frontend/web_nextjs/src/styles/animations.css
+frontend/web_nextjs/test-i18n-final.ps1
+frontend/web_nextjs/test-i18n-simple.ps1
+frontend/web_nextjs/test-i18n-tags.ps1
+frontend/web-app/.gitignore
+frontend/web-app/CONTRACT_CONTROL_PANEL_UPDATE.md
+frontend/web-app/CUSTOM_TABLE_FEATURES.md
+frontend/web-app/Dockerfile
+frontend/web-app/middleware.ts
+frontend/webapp/next.config.js
+frontend/web-app/next.config.js
+frontend/webapp/next-env.d.ts
+frontend/web-app/next-i18next.config.js
+frontend/web-app/OCR_TAB_FEATURE.md
+frontend/webapp/package.json
+frontend/web-app/package.json
+frontend/web-app/package-lock.json
+frontend/web-app/postcss.config.js
+frontend/web-app/README.md
+frontend/web-app/src/app/(auth)/login/page.tsx
+frontend/web-app/src/app/(auth)/register/page.tsx
+frontend/web-app/src/app/(dashboard)/admin/permissions/page.tsx
+frontend/web-app/src/app/(dashboard)/admin/users/page.tsx
+frontend/web-app/src/app/(dashboard)/analytics/analytics/page.tsx
+frontend/web-app/src/app/(dashboard)/contracts/contracts/[id]/page.tsx
+frontend/web-app/src/app/(dashboard)/contracts/contracts/loading.tsx
+frontend/web-app/src/app/(dashboard)/contracts/contracts/page.tsx
+frontend/web-app/src/app/(dashboard)/dashboard/account-approval/page.tsx
+frontend/web-app/src/app/(dashboard)/dashboard/api-docs/page.tsx
+frontend/web-app/src/app/(dashboard)/dashboard/approved/page.tsx
+frontend/web-app/src/app/(dashboard)/dashboard/contracts/[id]/page.tsx
+frontend/web-app/src/app/(dashboard)/dashboard/contracts/page.tsx
+frontend/web-app/src/app/(dashboard)/dashboard/contract-versions/page.tsx
+frontend/web-app/src/app/(dashboard)/dashboard/create-contract/page.tsx
+frontend/web-app/src/app/(dashboard)/dashboard/guide/page.tsx
+frontend/web-app/src/app/(dashboard)/dashboard/loading.tsx
+frontend/web-app/src/app/(dashboard)/dashboard/page.tsx
+frontend/web-app/src/app/(dashboard)/profile/page.tsx
+frontend/web-app/src/app/(dashboard)/tools/ai-processing/page.tsx
+frontend/web-app/src/app/(dashboard)/workflow/approval/page.tsx
+frontend/web-app/src/app/(dashboard)/workflow/collaboration/page.tsx
+frontend/web-app/src/app/(dashboard)/workflow/signature/page.tsx
+frontend/web-app/src/app/account-approval/page.tsx
+frontend/web-app/src/app/activity-history/page.tsx
+frontend/web-app/src/app/ai-processing/page.tsx
+frontend/web-app/src/app/analytics/page.tsx
+frontend/web-app/src/app/api/mock/approval-flows/route.ts
+frontend/web-app/src/app/api/mock/approvals/route.ts
+frontend/web-app/src/app/api/mock/auth/route.ts
+frontend/web-app/src/app/api/mock/comments/route.ts
+frontend/web-app/src/app/api/mock/contracts/[id]/route.ts
+frontend/web-app/src/app/api/mock/contracts/route.ts
+frontend/web-app/src/app/api/mock/ocr/route.ts
+frontend/web-app/src/app/api/mock/permissions/route.ts
+frontend/web-app/src/app/api/mock/roles/route.ts
+frontend/web-app/src/app/api/mock/signatures/route.ts
+frontend/web-app/src/app/api/mock/stats/route.ts
+frontend/web-app/src/app/api/mock/users/route.ts
+frontend/web-app/src/app/api/mock/versions/route.ts
+frontend/web-app/src/app/approval-workflow/page.tsx
+frontend/web-app/src/app/auth/login/page.tsx
+frontend/web-app/src/app/auth/oauth/callback/page.tsx
+frontend/web-app/src/app/auth/oauth2/callback/page.tsx
+frontend/web-app/src/app/backup-restore/page.tsx
+frontend/web-app/src/app/calendar/page.tsx
+frontend/web-app/src/app/collaboration-comments/page.tsx
+frontend/web-app/src/app/contracts/[id]/page.tsx
+frontend/web-app/src/app/contracts/page.tsx
+frontend/web-app/src/app/contract-versions/page.tsx
+frontend/web-app/src/app/create-contract/page.tsx
+frontend/web-app/src/app/error.tsx
+frontend/web-app/src/app/e-signature/page.tsx
+frontend/web-app/src/app/globals.css
+frontend/web-app/src/app/help-support/page.tsx
+frontend/web-app/src/app/import-document/page.tsx
+frontend/web-app/src/app/integrations/page.tsx
+frontend/webapp/src/app/layout.tsx
+frontend/web-app/src/app/layout.tsx
+frontend/web-app/src/app/loading.tsx
+frontend/web-app/src/app/not-found.tsx
+frontend/web-app/src/app/notifications/page.tsx
+frontend/webapp/src/app/page.tsx
+frontend/web-app/src/app/page.tsx
+frontend/web-app/src/app/privacy/page.tsx
+frontend/web-app/src/app/role-based-permissions/page.tsx
+frontend/web-app/src/app/settings/page.tsx
+frontend/web-app/src/app/terms/page.tsx
+frontend/web-app/src/app/test-api/page.tsx
+frontend/web-app/src/app/test-auth/page.tsx
+frontend/web-app/src/app/test-hot-reload/page.tsx
+frontend/web-app/src/app/test-no-auth/page.tsx
+frontend/web-app/src/app/test-token-management/page.tsx
+frontend/web-app/src/app/unauthorized/page.tsx
+frontend/web-app/src/app/user-management/page.tsx
+frontend/web-app/src/components/contracts/ContractControlPanel.tsx
+frontend/web-app/src/components/contracts/CustomTable.tsx
+frontend/web-app/src/components/contracts/TableSettings.tsx
+frontend/web-app/src/components/ContractSummaryRender.tsx
+frontend/web-app/src/components/EditableArrayTable.tsx
+frontend/web-app/src/components/GlobalErrorSummary.tsx
+frontend/web-app/src/components/I18nProvider.tsx
+frontend/web-app/src/components/layout/Footer.tsx
+frontend/web-app/src/components/layout/Header.tsx
+frontend/web-app/src/components/layout/index.ts
+frontend/web-app/src/components/layout/MainLayout.tsx
+frontend/web-app/src/components/LoadingProvider.tsx
+frontend/web-app/src/components/LoadingSpinner.tsx
+frontend/web-app/src/components/MenuItemAnimation.tsx
+frontend/web-app/src/components/NavigationLink.tsx
+frontend/web-app/src/components/OCRUpload.tsx
+frontend/web-app/src/components/organization/OrganizationSelector.tsx
+frontend/web-app/src/components/PageTransition.tsx
+frontend/web-app/src/components/profile/index.ts
+frontend/web-app/src/components/profile/ProfileAvatar.tsx
+frontend/web-app/src/components/profile/ProfileForm.tsx
+frontend/web-app/src/components/profile/ProfileSettings.tsx
+frontend/web-app/src/components/profile/ProfileStats.tsx
+frontend/web-app/src/components/Sidebar.tsx
+frontend/web-app/src/components/StickyFixGlobal.tsx
+frontend/web-app/src/components/TagFilter.tsx
+frontend/web-app/src/components/ui/Button.tsx
+frontend/web-app/src/components/ui/Card.tsx
+frontend/web-app/src/components/ui/EmptyState.tsx
+frontend/web-app/src/components/ui/FullPageLoading.tsx
+frontend/web-app/src/components/ui/index.ts
+frontend/web-app/src/components/ui/Input.tsx
+frontend/web-app/src/components/ui/LanguageSwitcher.tsx
+frontend/web-app/src/components/ui/LoadingSkeleton.tsx
+frontend/web-app/src/components/ui/LoadingSpinner.tsx
+frontend/web-app/src/components/ui/NotificationDropdown.tsx
+frontend/web-app/src/constants/contractTags.ts
+frontend/web-app/src/hooks/useAuth.tsx
+frontend/web-app/src/hooks/usePageErrors.ts
+frontend/web-app/src/hooks/usePageLoading.ts
+frontend/web-app/src/hooks/useTagTranslation.ts
+frontend/web-app/src/hooks/useTokenMonitor.ts
+frontend/web-app/src/hooks/useTranslation.ts
+frontend/webapp/src/lib/api.ts
+frontend/web-app/src/lib/api.ts
+frontend/web-app/src/lib/constants.ts
+frontend/web-app/src/lib/utils.ts
+frontend/web-app/src/styles/animations.css
+frontend/web-app/src/types/auth.ts
+frontend/web-app/src/types/index.ts
+frontend/web-app/src/types/notification.ts
+frontend/web-app/src/utils/api-retry.ts
+frontend/web-app/src/utils/auth-test.ts
+frontend/web-app/src/utils/cn.ts
+frontend/web-app/src/utils/constants.ts
+frontend/web-app/src/utils/contractTypeMapping.ts
+frontend/web-app/src/utils/helpers.ts
+frontend/web-app/src/utils/tagTranslations.ts
+frontend/web-app/src/utils/token-manager.ts
+frontend/web-app/src/utils/token-refresh-helper.ts
+frontend/web-app/tailwind.config.js
+frontend/web-app/test-i18n-final.ps1
+frontend/web-app/test-i18n-simple.ps1
+frontend/web-app/test-i18n-tags.ps1
+frontend/web-app/test-translations.js
+frontend/webapp/tsconfig.json
+frontend/web-app/tsconfig.json
+playground-1.mongodb.js
+prompt/03.trien-khai-api-gateway-va-user-management.md
+tatus -s
+test_contract.txt
+test-multipart.txt
+        </pre>
+      </details>
+    </div>
+
+  </div>
+</body>
+</html>
+
+
+

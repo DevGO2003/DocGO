@@ -93,9 +93,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     timestamp: new Date().toISOString()
   };
   
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  // CORS headers are handled centrally in middleware
   
   return res.status(200).json({
     apiVersion: 'v1',

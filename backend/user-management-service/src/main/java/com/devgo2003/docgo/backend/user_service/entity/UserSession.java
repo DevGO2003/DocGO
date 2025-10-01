@@ -39,6 +39,7 @@ public class UserSession {
     private String deviceInfo;
 
     @Field("is_active")
+    @Builder.Default
     private Boolean isActive = true;
 
     @Field("last_activity")
@@ -51,6 +52,7 @@ public class UserSession {
     private String refreshToken;
 
     @Field("status")
+    @Builder.Default
     private SessionStatus status = SessionStatus.ACTIVE;
 
     @Field("active_organization_id")

@@ -72,7 +72,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     console.log(`[DEBUG] 🔄 Rewritten servers to: ${gwUrl}`);
   }
 
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  // CORS headers are handled centrally in middleware
   console.log(`[DEBUG] ✅ Returning spec successfully`);
   return res.status(200).json(spec);
 }

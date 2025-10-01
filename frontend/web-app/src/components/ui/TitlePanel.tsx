@@ -3,8 +3,8 @@
 import React from 'react'
 
 export interface TitlePanelProps {
-  title: string
-  description: string
+  title: React.ReactNode
+  description: React.ReactNode
   icon?: string
   variant?: 'primary' | 'secondary' | 'success' | 'warning' | 'info'
   actionButton?: React.ReactNode
@@ -59,13 +59,14 @@ export default function TitlePanel({
   const displayIcon = icon || defaultIcons[variant]
 
   return (
-    <div className={`rounded-xl p-4 border ${styles.container} ${className}`}>
+    <div className={`rounded-2xl p-5 border shadow-sm ring-1 ring-black/[0.03] ${styles.container} ${className}`}>
       <div className="flex items-center justify-between">
         <div className="flex-1">
-          <h1 className="text-lg font-semibold tracking-tight mb-1">
-            {displayIcon} {title}
+          <h1 className={`text-2xl font-bold tracking-tight mb-1 ${styles.title}`}>
+            <span className="align-middle mr-2">{displayIcon}</span>
+            <span className="align-middle">{title}</span>
           </h1>
-          <p className="text-sm leading-relaxed">
+          <p className={`text-sm leading-relaxed ${styles.description}`}>
             {description}
           </p>
         </div>

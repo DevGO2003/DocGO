@@ -39,6 +39,7 @@ public class OrganizationMembership {
     private Set<String> roleIds;
 
     @Field("status")
+    @Builder.Default
     private MembershipStatus status = MembershipStatus.ACTIVE;
 
     @Field("joined_at")

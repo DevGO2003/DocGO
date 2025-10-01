@@ -11,7 +11,19 @@ import org.springframework.web.bind.annotation.RestController;
 public class RootController {
 
     @GetMapping("/")
-    @Operation(summary = "Redirect to docs", description = "Chuyển hướng đến trang tài liệu API")
+    @Operation(
+        summary = "Redirect to docs",
+        description = """
+        ## 📖 Mô tả
+        Chuyển hướng đến trang Swagger UI của service.
+
+        ## 🔹 Đầu vào
+        (Không có tham số)
+
+        ## 🔹 Đầu ra
+        🔄 Redirect 302 → /docs
+        """
+    )
     public ResponseEntity<Void> redirectToDocs() {
         return ResponseEntity.status(302)
                 .header("Location", "/docs")

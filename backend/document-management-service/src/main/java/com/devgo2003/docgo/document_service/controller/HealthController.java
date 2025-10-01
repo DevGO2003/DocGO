@@ -17,7 +17,25 @@ import java.util.UUID;
 public class HealthController {
 
     @GetMapping("/health")
-    @Operation(summary = "Health check", description = "Kiểm tra tình trạng service")
+    @Operation(
+        summary = "Health check",
+        description = """
+        ## 📖 Mô tả
+        Kiểm tra tình trạng hoạt động của Document Management Service. Trả về theo chuẩn RestResponse.
+
+        ## 🔹 Đầu vào
+
+        (Không có tham số)
+
+        ## 🔹 Đầu ra
+
+        📝 data
+        Loại: object
+        Mô tả: status, service, version, timestamp
+
+        📊 apiVersion | 🔢 statusCode(200) | 📋 shortMessage | 📖 description | 🕒 timestamp | 🆔 requestId | 🛣️ path
+        """
+    )
     public ResponseEntity<RestResponse<Map<String, Object>>> health() {
         String requestId = UUID.randomUUID().toString();
         return ResponseEntity.ok(RestResponse.<Map<String, Object>>builder()

@@ -33,7 +33,56 @@ public class ReminderController {
     @GetMapping
     @Operation(
         summary = "Lấy danh sách nhắc nhở (hợp nhất)",
-        description = "Hỗ trợ lọc qua query: contractId, status (PENDING_REVIEW|SENT|COMPLETED|CANCELLED|FAILED|ESCALATED), type, priority, scheduledFrom, scheduledTo, dueFrom, dueTo; aggregate=count|exists. Phân trang/sắp xếp: pageNumber, pageSize, sortBy(createdAt|scheduledAt), sortDirection."
+        description = """
+        ## 📖 Mô tả
+        Lấy danh sách nhắc nhở với nhiều tiêu chí lọc/sort/aggregate. Trả về theo chuẩn RestResponse.
+
+        ## 🔹 Đầu vào
+
+        📄 pageNumber, pageSize (tùy chọn, query)
+        Loại: integer
+        Mô tả: Phân trang (mặc định 0/10)
+
+        📄 sortBy (tùy chọn, query)
+        Loại: string
+        Mô tả: createdAt | scheduledAt (mặc định: createdAt)
+
+        📄 sortDirection (tùy chọn, query)
+        Loại: string
+        Mô tả: ASC | DESC (mặc định: DESC)
+
+        📄 contractId (tùy chọn, query)
+        Loại: string
+        Mô tả: Lọc theo hợp đồng
+
+        📄 status (tùy chọn, query)
+        Loại: enum
+        Mô tả: PENDING_REVIEW | SENT | COMPLETED | CANCELLED | FAILED | ESCALATED
+
+        📄 type, priority (tùy chọn, query)
+        Loại: enum
+        Mô tả: Loại nhắc nhở / Mức độ ưu tiên
+
+        📄 scheduledFrom/To, dueFrom/To (tùy chọn, query)
+        Loại: string (ISO-8601)
+        Mô tả: Khoảng thời gian lịch gửi/đến hạn
+
+        📄 minSentCount, minEscalationLevel (tùy chọn, query)
+        Loại: integer
+        Mô tả: Ngưỡng lọc nâng cao
+
+        📄 aggregate (tùy chọn, query)
+        Loại: string
+        Mô tả: count | exists (chế độ tổng hợp; thay vì trả list)
+
+        ## 🔹 Đầu ra
+
+        📝 data
+        Loại: List<Reminder> | Long | Boolean
+        Mô tả: Danh sách/đếm/kiểm tra tồn tại reminders tùy theo aggregate
+
+        📊 apiVersion | 🔢 statusCode | 📋 shortMessage | 📖 description | 🕒 timestamp | 🆔 requestId | 🛣️ path
+        """
     )
     public ResponseEntity<RestResponse<?>> getAllReminders(
             @RequestParam(defaultValue = "0") int pageNumber,

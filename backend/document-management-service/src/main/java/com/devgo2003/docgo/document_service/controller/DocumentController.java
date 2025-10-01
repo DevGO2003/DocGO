@@ -3,7 +3,7 @@ package com.devgo2003.docgo.document_service.controller;
 import com.devgo2003.docgo.document_service.common.response.RestResponse;
 import com.devgo2003.docgo.document_service.dto.FileDownloadResponse;
 import com.devgo2003.docgo.document_service.dto.FileListResponse;
-import com.devgo2003.docgo.document_service.dto.FileUploadResponse;
+// removed: import com.devgo2003.docgo.document_service.dto.FileUploadResponse;
 import com.devgo2003.docgo.document_service.service.FileStorageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -18,7 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
+// removed: import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -34,76 +34,6 @@ public class DocumentController {
         this.fileStorageService = fileStorageService;
     }
 
-    @Operation(
-            summary = "Upload tài liệu",
-            description = """
-            ## 📖 Mô tả
-            Tải lên tệp tài liệu và lưu trữ kèm metadata người dùng.
-
-            ## 🔹 Đầu vào
-
-            📄 file (bắt buộc, multipart/form-data)
-            Loại: MultipartFile
-            Mô tả: File tài liệu cần upload (txt, pdf, docx, etc.)
-            
-            📄 userId (tùy chọn, query)
-            Loại: string
-            Mô tả: ID của người dùng upload file
-            
-            📄 folder (tùy chọn, query)
-            Loại: string
-            Mô tả: Thư mục lưu trữ file
-            
-            ## 🔹 Đầu ra
-            
-            📝 data
-            Loại: FileUploadResponse
-            Mô tả: Thông tin file đã upload thành công
-            
-            📊 apiVersion
-            Loại: string
-            Mô tả: Phiên bản API (v1)
-            
-            🔢 statusCode
-            Loại: integer
-            Mô tả: Mã trạng thái HTTP (201: Created)
-            
-            📋 shortMessage
-            Loại: string
-            Mô tả: Thông báo ngắn gọn về kết quả
-            
-            📖 description
-            Loại: string
-            Mô tả: Mô tả chi tiết về kết quả xử lý
-            
-            🕒 timestamp
-            Loại: string (ISO-8601)
-            Mô tả: Thời gian xử lý yêu cầu
-            
-            🆔 requestId
-            Loại: string (UUID)
-            Mô tả: Định danh duy nhất của yêu cầu
-            
-            🛣️ path
-            Loại: string
-            Mô tả: Đường dẫn API được gọi
-            """,
-            responses = {
-                    @ApiResponse(responseCode = "201", description = "File uploaded successfully",
-                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = FileUploadResponse.class))),
-                    @ApiResponse(responseCode = "400", description = "Invalid input"),
-                    @ApiResponse(responseCode = "500", description = "Internal server error")
-            }
-    )
-    @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<RestResponse<FileUploadResponse>> uploadDocument(
-            @Parameter(description = "File to upload", required = true) @RequestPart("file") MultipartFile file,
-            @Parameter(description = "User ID (optional)") @RequestParam(value = "userId", required = false) String userId,
-            @Parameter(description = "Folder path (optional)") @RequestParam(value = "folder", required = false) String folder
-    ) {
-        FileUploadResponse response = fileStorageService.uploadFile(file, userId, folder);
-        return ResponseEntity.status(HttpStatus.CREATED).body(RestResponse.success(response, "Document uploaded successfully"));
-    }
 
     @Operation(
             summary = "Tải xuống tài liệu",

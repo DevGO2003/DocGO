@@ -44,6 +44,7 @@ public class Organization {
     private String website;
 
     @Field("status")
+    @Builder.Default
     private OrganizationStatus status = OrganizationStatus.ACTIVE;
 
     @Field("created_at")

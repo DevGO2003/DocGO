@@ -98,8 +98,11 @@ export async function middleware(req: NextRequest) {
       }
     }
     
-    // If no handler returned a response, proceed
-    return NextResponse.next();
+    // If no handler returned a response, proceed and attach CORS headers
+    const headers = buildCorsHeaders(req)
+    return NextResponse.next({
+      headers
+    });
     
   } catch (error) {
     console.error('[Middleware] Error:', error)
@@ -143,13 +146,7 @@ async function handleCORS(req: NextRequest): Promise<NextResponse | null> {
   if (req.method === 'OPTIONS') {
     return new NextResponse(null, {
       status: 200,
-      headers: {
-        'Access-Control-Allow-Origin': 'http://localhost:3000',
-        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
-        'Access-Control-Allow-Credentials': 'true',
-        'Access-Control-Max-Age': '86400',
-      },
+      headers: buildCorsHeaders(req)
     })
   }
   
@@ -327,6 +324,23 @@ async function checkServiceHealth(serviceName: string): Promise<boolean> {
 
 export const config = {
   matcher: ['/api/:path*'],
+}
+
+function buildCorsHeaders(req: NextRequest): HeadersInit {
+  const origin = req.headers.get('origin') || ''
+  const envOrigins = (process.env.CORS_ORIGINS || 'http://localhost:3000').split(',').map(o => o.trim()).filter(Boolean)
+  const isAllowed = origin && envOrigins.some(allowed => allowed === origin)
+  const allowOrigin = isAllowed ? origin : envOrigins[0] || ''
+
+  const headers: Record<string, string> = {
+    'Access-Control-Allow-Origin': allowOrigin,
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
+    'Access-Control-Allow-Credentials': 'true',
+    'Access-Control-Max-Age': '86400',
+    'Vary': 'Origin'
+  }
+  return headers
 }
 
 

@@ -1,6 +1,7 @@
 package com.devgo2003.docgo.backend.user_service.entity;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import org.springframework.data.annotation.CreatedDate;
@@ -60,6 +61,7 @@ public abstract class BaseEntity {
      * Trạng thái xóa: false = chưa xóa, true = đã xóa
      */
     @Field("is_deleted")
+    @Builder.Default
     private Boolean isDeleted = false;
 
     // Getters / Setters

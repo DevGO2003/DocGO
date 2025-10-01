@@ -57,9 +57,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   const endpoint = pathParts.slice(1).join('/');
 
   if (!serviceName || !endpoint) {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+    // CORS headers are handled centrally in middleware
     
     return res.status(400).json({
       apiVersion: 'v1',
@@ -76,9 +74,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   // Lấy service config
   const serviceConfig = services[serviceName];
   if (!serviceConfig) {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+    // CORS headers are handled centrally in middleware
     
     return res.status(404).json({
       apiVersion: 'v1',
@@ -148,12 +144,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       response = await axiosInstance.delete(fullEndpoint, { params: queryParams, headers: fwdHeaders });
       break;
     case 'OPTIONS':
-      res.status(200);
-      res.setHeader('Access-Control-Allow-Origin', '*');
-      res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
-      res.setHeader('Access-Control-Max-Age', '86400');
-      return res.end();
+      // Preflight is handled in middleware
+      return res.status(200).end();
     default:
       return res.status(405).json({
         apiVersion: 'v1',
@@ -170,10 +162,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   const duration = Date.now() - startTime;
   logger.info(`✅ Simple proxy ${method} ${fullPath} - ${response.status} (${duration}ms)`);
 
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+  // CORS headers are handled centrally in middleware
   
   return res.status(response.status).json(response.data);
 }

@@ -46,8 +46,71 @@ public class ContractController {
     }
 
     @Operation(
-        summary = "Lấy danh sách hợp đồng", 
-        description = "Lấy danh sách hợp đồng với phân trang, tìm kiếm và sắp xếp"
+        summary = "Lấy danh sách hợp đồng",
+        description = """
+        ## 📖 Mô tả
+        Lấy danh sách hợp đồng với phân trang, tìm kiếm và sắp xếp. Trả về theo chuẩn RestResponse.
+
+        ## 🔹 Đầu vào
+
+        📄 pageNumber (tùy chọn, query)
+        Loại: integer
+        Mô tả: Số trang (mặc định: 0)
+
+        📄 pageSize (tùy chọn, query)
+        Loại: integer
+        Mô tả: Kích thước trang (mặc định: 10)
+
+        📄 sortBy (tùy chọn, query)
+        Loại: string
+        Mô tả: Trường sắp xếp (ví dụ: createdAt, updatedAt, title)
+
+        📄 sortDirection (tùy chọn, query)
+        Loại: string
+        Mô tả: Hướng sắp xếp: ASC hoặc DESC (mặc định: DESC)
+
+        📄 searchTerm (tùy chọn, query)
+        Loại: string
+        Mô tả: Từ khóa tìm kiếm theo tiêu đề/số hợp đồng
+
+        📄 includeDeleted (tùy chọn, query)
+        Loại: boolean
+        Mô tả: Bao gồm hợp đồng đã xóa mềm (mặc định: false)
+
+        ## 🔹 Đầu ra
+
+        📝 data
+        Loại: PaginatedResponse<ContractResponseDto>
+        Mô tả: Danh sách hợp đồng theo trang với thông tin phân trang chi tiết
+
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1)
+
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái xử lý (200: OK, 204: No Content)
+
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả
+
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý
+
+        🕒 timestamp
+        Loại: string (ISO-8601)
+        Mô tả: Thời gian xử lý yêu cầu
+
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu
+
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi
+        """
     )
     @GetMapping
     public ResponseEntity<RestResponse<PaginatedResponse<ContractResponseDto>>> getAllContracts(
@@ -102,8 +165,51 @@ public class ContractController {
     }
 
     @Operation(
-        summary = "Lấy hợp đồng theo ID", 
-        description = "Lấy thông tin chi tiết hợp đồng theo ID"
+        summary = "Lấy hợp đồng theo ID",
+        description = """
+        ## 📖 Mô tả
+        Lấy thông tin chi tiết hợp đồng theo ID. Trả về theo chuẩn RestResponse.
+
+        ## 🔹 Đầu vào
+
+        🆔 id (bắt buộc, path)
+        Loại: string
+        Mô tả: ID của hợp đồng cần lấy thông tin
+
+        ## 🔹 Đầu ra
+
+        📝 data
+        Loại: ContractResponseDto
+        Mô tả: Thông tin chi tiết của hợp đồng
+
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1)
+
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái xử lý (200: OK, 404: Not Found)
+
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả
+
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý
+
+        🕒 timestamp
+        Loại: string (ISO-8601)
+        Mô tả: Thời gian xử lý yêu cầu
+
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu
+
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi
+        """
     )
     @GetMapping("/{id}")
     public ResponseEntity<RestResponse<ContractResponseDto>> getContract(@PathVariable String id) {
@@ -124,7 +230,61 @@ public class ContractController {
 
     @Operation(
         summary = "Tạo hợp đồng mới", 
-        description = "Tạo hợp đồng mới với thông tin được cung cấp",
+        description = """
+        ## 📖 Mô tả
+        Tạo hợp đồng mới với thông tin được cung cấp. Trả về theo chuẩn RestResponse.
+
+        ## 🔹 Đầu vào
+
+        📄 body (bắt buộc, application/json)
+        Loại: ContractCreateRequest
+        Mô tả: Thông tin hợp đồng cần tạo mới
+        Ví dụ:
+        {
+          "contractNumber": "HD-2024-001",
+          "title": "Hợp đồng cung cấp dịch vụ",
+          "status": "DRAFT",
+          "contractType": "SERVICE_AGREEMENT",
+          "partiesJson": "[{\"name\": \"Công ty A\", \"role\": \"Client\"}]",
+          "startDate": "2024-01-01T00:00:00",
+          "endDate": "2024-12-31T23:59:59",
+          "systemId": "SYS-001"
+        }
+
+        ## 🔹 Đầu ra
+
+        📝 data
+        Loại: Contract
+        Mô tả: Hợp đồng vừa được tạo thành công
+
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1)
+
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái xử lý (201: Created)
+
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả
+
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý
+
+        🕒 timestamp
+        Loại: string (ISO-8601)
+        Mô tả: Thời gian xử lý yêu cầu
+
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu
+
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi
+        """,
         requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
             required = true,
             content = @Content(

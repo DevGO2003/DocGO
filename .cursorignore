@@ -1,15 +1,9 @@
 # ===== Cursor bắt buộc theo dõi các thư mục và file cần thiết =====
 
-<<<<<<< HEAD
 # Luôn include toàn bộ thư mục git-backup và tất cả nội dung bên trong
 !/.git-backup/
 !**/.git-backup/**
  
-=======
-# Luôn include thư mục git-backup
-!**/.git-backup/
-
->>>>>>> e4f9e590765b2a1b7ce2f3982eff8dae6ecb472e
 # Luôn include toàn bộ thư mục .cursor và nội dung bên trong
 !/.cursor
 !**/.cursor/**
@@ -44,9 +38,6 @@ document/**/*.drawio
 !**/.env.example
 !**/.env.local
 !**/.env.*.local
-<<<<<<< HEAD
 
 # Đảm bảo track cả env trong .cursor/tools
 !/.cursor/tools/**/env/.env
-=======
->>>>>>> e4f9e590765b2a1b7ce2f3982eff8dae6ecb472e

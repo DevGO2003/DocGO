@@ -50,15 +50,18 @@ public class User {
     private String phone;
 
     @Field("status")
+    @Builder.Default
     private UserStatus status = UserStatus.ACTIVE;
 
     @Field("role")
+    @Builder.Default
     private UserRole role = UserRole.USER;
 
     @Field("last_login")
     private LocalDateTime lastLogin;
 
     @Field("email_verified")
+    @Builder.Default
     private Boolean emailVerified = false;
 
     @Field("profile_picture")
@@ -95,9 +98,11 @@ public class User {
     private Set<String> permissionIds;
 
     @Field("login_attempts")
+    @Builder.Default
     private Integer loginAttempts = 0;
 
     @Field("two_factor_enabled")
+    @Builder.Default
     private Boolean twoFactorEnabled = false;
 
     @Field("two_factor_secret")

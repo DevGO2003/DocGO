@@ -40,6 +40,7 @@ public class OrgRole {
     private String description;
 
     @Field("is_system")
+    @Builder.Default
     private Boolean isSystem = false;
 
     @Field("permissions")

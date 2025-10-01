@@ -436,7 +436,27 @@ export class AutomationAPI {
     const formData = new FormData()
     formData.append('file', file)
     
-    return apiClient.post<any>(`${this.basePath}/extract`, formData, {
+    return apiClient.post<any>(`${this.basePath}/document/extract`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        ...(apiKey && { 'GEMINI_API_KEY': apiKey }),
+      },
+    })
+  }
+
+  async classifyText(text: string, apiKey?: string) {
+    return apiClient.post<any>(`${this.basePath}/document/classify`, { text }, {
+      headers: {
+        ...(apiKey && { 'GEMINI_API_KEY': apiKey }),
+      },
+    })
+  }
+
+  async classifyFile(file: File, apiKey?: string) {
+    const formData = new FormData()
+    formData.append('file', file)
+
+    return apiClient.post<any>(`${this.basePath}/document/classify`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
         ...(apiKey && { 'GEMINI_API_KEY': apiKey }),
@@ -445,7 +465,7 @@ export class AutomationAPI {
   }
 
   async summarizeText(text: string, apiKey?: string) {
-    return apiClient.post<any>(`${this.basePath}/summarize`, { text }, {
+    return apiClient.post<any>(`${this.basePath}/contracts/summarize`, { text }, {
       headers: {
         ...(apiKey && { 'GEMINI_API_KEY': apiKey }),
       },
@@ -456,7 +476,7 @@ export class AutomationAPI {
     const formData = new FormData()
     formData.append('file', file)
     
-    return apiClient.post<any>(`${this.basePath}/summarize`, formData, {
+    return apiClient.post<any>(`${this.basePath}/contracts/summarize`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
         ...(apiKey && { 'GEMINI_API_KEY': apiKey }),
@@ -464,11 +484,12 @@ export class AutomationAPI {
     })
   }
 
-  async uploadFile(file: File, apiKey?: string) {
+  // Upload tài liệu phục vụ quy trình OCR/AI (đưa về automation-service thay vì DMS)
+  async uploadDocumentForAutomation(file: File, apiKey?: string) {
     const formData = new FormData()
     formData.append('file', file)
 
-    return apiClient.post<any>(`${this.basePath}/files/upload`, formData, {
+    return apiClient.post<any>(`${this.basePath}/document/extract`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
         ...(apiKey && { 'GEMINI_API_KEY': apiKey }),
@@ -479,7 +500,8 @@ export class AutomationAPI {
 
 // File Storage API - Sử dụng API Gateway
 export class FileStorageAPI {
-  private basePath = '/api/v1/file-storage-asset-service'
+  // Chuyển upload/lưu trữ file sang automation-service
+  private basePath = '/api/v1/automation-service/files'
 
   async uploadFile(file: File, metadata?: any) {
     const formData = new FormData()
@@ -488,7 +510,8 @@ export class FileStorageAPI {
       formData.append('metadata', JSON.stringify(metadata))
     }
     
-    return apiClient.post<any>(`${this.basePath}/upload`, formData, {
+    // POST /api/v1/automation-service/files
+    return apiClient.post<any>(`${this.basePath}`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -496,11 +519,13 @@ export class FileStorageAPI {
   }
 
   async getFile(id: string) {
-    return apiClient.get<any>(`${this.basePath}/files/${id}`)
+    // GET /api/v1/automation-service/files/{id}
+    return apiClient.get<any>(`${this.basePath}/${id}`)
   }
 
   async deleteFile(id: string) {
-    return apiClient.delete<any>(`${this.basePath}/files/${id}`)
+    // DELETE /api/v1/automation-service/files/{id}
+    return apiClient.delete<any>(`${this.basePath}/${id}`)
   }
 
   async getFiles(params?: {
@@ -509,7 +534,8 @@ export class FileStorageAPI {
     searchTerm?: string
     category?: string
   }) {
-    return apiClient.get<PaginatedResponse<any>>(`${this.basePath}/files`, { params })
+    // GET /api/v1/automation-service/files
+    return apiClient.get<PaginatedResponse<any>>(`${this.basePath}`, { params })
   }
 }
 
