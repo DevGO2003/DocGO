@@ -326,4 +326,9 @@ public class Version extends BaseEntity {
     public boolean isHotfix() {
         return changeType == ChangeType.HOTFIX;
     }
+
+    // Additional getter method for compatibility
+    public String getContractId() {
+        return contract != null ? contract.getId() : null;
+    }
 }

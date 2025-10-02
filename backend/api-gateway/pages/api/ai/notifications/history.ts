@@ -1,5 +1,4 @@
 import { NextApiRequest, NextApiResponse } from 'next'
-import { aiService } from '../../../../lib/services/aiService'
 import { createErrorResponse, generateRequestId, ValidationError } from '../../../../lib/utils/errorHandler'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -29,18 +28,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       end_date
     } = req.query
 
-    // Call AI service
-    const result = await aiService.getNotificationHistory(
-      parseInt(page as string),
-      parseInt(limit as string),
-      notification_type as string,
-      status as string,
-      start_date as string,
-      end_date as string,
-      token
+    // Notification service is not implemented yet in automation-service
+    const requestId = generateRequestId()
+    throw new ValidationError(
+      'Notification service is not implemented yet',
+      requestId,
+      '/api/ai/notifications/history'
     )
-
-    return res.status(200).json(result)
 
   } catch (error: any) {
     console.error('[AI Notifications History] Error:', error)

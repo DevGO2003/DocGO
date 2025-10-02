@@ -524,4 +524,13 @@ public class ESignature extends BaseEntity {
         LocalDateTime now = LocalDateTime.now();
         return now.isAfter(certificateValidFrom) && now.isBefore(certificateValidTo);
     }
+
+    // Additional getter methods for compatibility
+    public String getContractId() {
+        return contract != null ? contract.getId() : null;
+    }
+
+    public Boolean getRequired() {
+        return isRequired;
+    }
 }

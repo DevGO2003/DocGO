@@ -4,9 +4,9 @@
   "description": "API Gateway cho DocGO - Tích hợp 4 microservices với Next.js",
   "private": true,
   "scripts": {
-    "dev": "next dev -p 8000",
+    "dev": "next dev -p 8000 -H 0.0.0.0",
     "build": "next build",
-    "start": "next start -p 8000",
+    "start": "next start -p 8000 -H 0.0.0.0",
     "lint": "next lint",
     "type-check": "tsc --noEmit",
     "test": "jest",

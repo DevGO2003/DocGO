@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next'
-import { aiService } from '../../../lib/services/aiService'
 import { createErrorResponse, generateRequestId, ValidationError } from '../../../lib/utils/errorHandler'
+import { config as appConfig } from '../../../lib/config'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -37,11 +37,27 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Create OCR request
     const ocrRequest = {
       file,
-      geminiApiKey
+      geminiApiKey,
+      action: 'ocr' // Add action parameter to indicate OCR
     }
 
-    // Call AI service
-    const result = await aiService.performOCR(ocrRequest, token)
+    // Call automation service directly
+    const automationServiceUrl = appConfig.automationServiceUrl
+    const response = await fetch(`${automationServiceUrl}/api/v1/automation-service/v1/document/extract`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-user-token': token || '',
+        'gemini-api-key': geminiApiKey || ''
+      },
+      body: JSON.stringify(ocrRequest)
+    })
+
+    if (!response.ok) {
+      throw new Error(`Automation service error: ${response.statusText}`)
+    }
+
+    const result = await response.json()
 
     return res.status(200).json(result)
 

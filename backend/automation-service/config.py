@@ -45,9 +45,9 @@ def get_gemini_api_key():
 
 # Redis Cloud configuration
 def get_redis_url():
-    """Lấy Redis Cloud connection string"""
-    host = os.getenv("REDIS_CLOUD_HOST", "localhost")
-    port = os.getenv("REDIS_CLOUD_PORT", "6379")
+    """Lấy Redis connection string"""
+    host = os.getenv("REDIS_HOST", os.getenv("REDIS_CLOUD_HOST", "localhost"))
+    port = os.getenv("REDIS_PORT", os.getenv("REDIS_CLOUD_PORT", "6379"))
     password = os.getenv("REDIS_CLOUD_PASSWORD", "")
     if password:
         return f"redis://:{password}@{host}:{port}"

@@ -213,7 +213,7 @@ export const testRegisterData: RegisterData = {
 
 // Make tester available globally for browser console testing
 if (typeof window !== 'undefined') {
-  (window as any).authTester = new AuthIntegrationTester()
+  (window as any).authTester = new AuthIntegrationTester() as AuthIntegrationTester
   (window as any).runAuthTests = runAuthTests
 }
 

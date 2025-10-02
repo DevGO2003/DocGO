@@ -1,5 +1,4 @@
 import { NextApiRequest, NextApiResponse } from 'next'
-import { aiService } from '../../../../lib/services/aiService'
 import { createErrorResponse, generateRequestId, ValidationError } from '../../../../lib/utils/errorHandler'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -63,10 +62,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       metadata
     }
 
-    // Call AI service
-    const result = await aiService.sendNotification(notificationRequest, token)
-
-    return res.status(200).json(result)
+    // Notification service is not implemented yet in automation-service
+    const requestId = generateRequestId()
+    throw new ValidationError(
+      'Notification service is not implemented yet',
+      requestId,
+      '/api/ai/notifications/send'
+    )
 
   } catch (error: any) {
     console.error('[AI Notifications Send] Error:', error)

@@ -1,5 +1,5 @@
 # Multi-stage build for Spring Boot application
-FROM eclipse-temurin:25-jdk AS builder
+FROM eclipse-temurin:17-jdk AS builder
 
 # Thiết lập thư mục làm việc
 WORKDIR /app
@@ -20,19 +20,22 @@ COPY src ./src
 RUN mvn clean package -DskipTests
 
 # Production stage
-FROM eclipse-temurin:25-jre AS runner
+FROM eclipse-temurin:17-jre AS runner
 
 # Thiết lập thư mục làm việc
 WORKDIR /app
 
 # Copy built JAR from builder stage
-COPY --from=builder /app/target/user-service-1.0.0.jar app.jar
+COPY --from=builder /app/target/*.jar app.jar
+
+# Set proper permissions
+RUN chmod +r app.jar
 
 # Debug: List files
 RUN ls -la /app/
 
-# Expose port 8001 (theo quy tắc port mapping)
-EXPOSE 8001
+# Expose port 8000 (internal port)
+EXPOSE 8000
 
 # Command khởi chạy service
 CMD ["java", "-jar", "/app/app.jar"]

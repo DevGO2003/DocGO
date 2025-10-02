@@ -504,7 +504,7 @@ public class ESignatureService {
         summaryESignature.setSignatureType(eSignature.getSignatureType());
         summaryESignature.setStatus(eSignature.getStatus());
         summaryESignature.setVerificationMethod(eSignature.getVerificationMethod());
-        summaryESignature.setRequired(eSignature.getRequired());
+        summaryESignature.setIsRequired(eSignature.getRequired());
         summaryESignature.setSignatureOrder(eSignature.getSignatureOrder());
         summaryESignature.setSignedAt(eSignature.getSignedAt());
         summaryESignature.setCreatedAt(eSignature.getCreatedAt());
@@ -524,7 +524,7 @@ public class ESignatureService {
         minimalESignature.setSignerEmail(eSignature.getSignerEmail());
         minimalESignature.setStatus(eSignature.getStatus());
         minimalESignature.setSignatureType(eSignature.getSignatureType());
-        minimalESignature.setRequired(eSignature.getRequired());
+        minimalESignature.setIsRequired(eSignature.getRequired());
         return minimalESignature;
     }
 }

@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next'
-import { contractService } from '../../lib/services/contractService'
-import { createErrorResponse, generateRequestId, ValidationError } from '../../lib/utils/errorHandler'
+import { contractService } from '../../../lib/services/contractService'
+import { createErrorResponse, generateRequestId, ValidationError } from '../../../lib/utils/errorHandler'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const method = req.method
