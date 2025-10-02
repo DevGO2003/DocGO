@@ -116,23 +116,23 @@ export default function TestAuthPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
-                  {getStatusIcon(testResults.connectivity.success)}
+                  {getStatusIcon(testResults.connectivity?.success || false)}
                   <span>Backend Connectivity</span>
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                  <p className={getStatusColor(testResults.connectivity.success)}>
-                    {testResults.connectivity.message}
+                  <p className={getStatusColor(testResults.connectivity?.success || false)}>
+                    {testResults.connectivity?.message || 'No data'}
                   </p>
-                  {testResults.connectivity.data && (
+                  {testResults.connectivity?.data && (
                     <div className="mt-2 p-3 bg-gray-50 rounded-md">
                       <pre className="text-xs text-gray-600 overflow-auto">
                         {JSON.stringify(testResults.connectivity.data, null, 2)}
                       </pre>
                     </div>
                   )}
-                  {testResults.connectivity.error && (
+                  {testResults.connectivity?.error && (
                     <div className="mt-2 p-3 bg-red-50 rounded-md">
                       <pre className="text-xs text-red-600 overflow-auto">
                         {JSON.stringify(testResults.connectivity.error, null, 2)}
@@ -147,23 +147,23 @@ export default function TestAuthPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
-                  {getStatusIcon(testResults.oauthStatus.success)}
+                  {getStatusIcon(testResults.oauthStatus?.success || false)}
                   <span>OAuth Status</span>
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                  <p className={getStatusColor(testResults.oauthStatus.success)}>
-                    {testResults.oauthStatus.message}
+                  <p className={getStatusColor(testResults.oauthStatus?.success || false)}>
+                    {testResults.oauthStatus?.message || 'No data'}
                   </p>
-                  {testResults.oauthStatus.data && (
+                  {testResults.oauthStatus?.data && (
                     <div className="mt-2 p-3 bg-gray-50 rounded-md">
                       <pre className="text-xs text-gray-600 overflow-auto">
                         {JSON.stringify(testResults.oauthStatus.data, null, 2)}
                       </pre>
                     </div>
                   )}
-                  {testResults.oauthStatus.error && (
+                  {testResults.oauthStatus?.error && (
                     <div className="mt-2 p-3 bg-red-50 rounded-md">
                       <pre className="text-xs text-red-600 overflow-auto">
                         {JSON.stringify(testResults.oauthStatus.error, null, 2)}

@@ -2,6 +2,7 @@ package com.devgo2003.docgo.backend.user_service.service;
 
 import com.devgo2003.docgo.backend.user_service.entity.User;
 import com.devgo2003.docgo.backend.user_service.repository.UserRepository;
+import com.devgo2003.docgo.backend.user_service.dto.UserSearchRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -11,7 +12,12 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.support.PageableExecutionUtils;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -23,6 +29,8 @@ public class UserService {
     
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    
+    private final MongoTemplate mongoTemplate;
     
     public User createUser(User user) {
         log.info("Creating new user: {}", user.getUsername());
@@ -63,6 +71,127 @@ public class UserService {
     
     public List<User> searchUsers(String searchTerm) {
         return userRepository.findBySearchTerm(searchTerm);
+    }
+    
+    /**
+     * Tìm kiếm người dùng với dynamic query (MongoDB)
+     * Hỗ trợ các filter: view, searchTerm, status, roleId, organizationId, username
+     */
+    public Page<User> searchUsers(UserSearchRequest request) {
+        log.info("Searching users with request: {}", request);
+        request.normalize();
+
+        List<Criteria> criteriaList = new ArrayList<>();
+
+        // Search term - tìm kiếm trong username, email, firstName, lastName
+        if (request.getSearchTerm() != null && !request.getSearchTerm().trim().isEmpty()) {
+            String pattern = ".*" + java.util.regex.Pattern.quote(request.getSearchTerm().trim()) + ".*";
+            Criteria orCriteria = new Criteria().orOperator(
+                Criteria.where("username").regex(pattern, "i"),
+                Criteria.where("email").regex(pattern, "i"),
+                Criteria.where("firstName").regex(pattern, "i"),
+                Criteria.where("lastName").regex(pattern, "i")
+            );
+            criteriaList.add(orCriteria);
+        }
+
+        // Status filter
+        if (request.getStatus() != null) {
+            criteriaList.add(Criteria.where("status").is(request.getStatus()));
+        }
+
+        // Role ID filter (mảng roleIds chứa roleId)
+        if (request.getRoleId() != null && !request.getRoleId().trim().isEmpty()) {
+            criteriaList.add(Criteria.where("roleIds").is(request.getRoleId()));
+        }
+
+        // Organization ID filter
+        if (request.getOrganizationId() != null && !request.getOrganizationId().trim().isEmpty()) {
+            criteriaList.add(Criteria.where("organizationId").is(request.getOrganizationId()));
+        }
+
+        // Username exact match
+        if (request.getUsername() != null && !request.getUsername().trim().isEmpty()) {
+            criteriaList.add(Criteria.where("username").is(request.getUsername()));
+        }
+
+        Query query = new Query();
+        if (!criteriaList.isEmpty()) {
+            query.addCriteria(new Criteria().andOperator(criteriaList.toArray(new Criteria[0])));
+        }
+
+        // Sorting & Pagination
+        Sort.Direction direction = Sort.Direction.fromString(request.getSortDirection());
+        String sortBy = request.getSortBy();
+        if ("fullName".equalsIgnoreCase(sortBy)) {
+            sortBy = "firstName"; // fallback đơn giản
+        }
+        Pageable pageable = PageRequest.of(request.getPageNumber(), request.getPageSize(), Sort.by(direction, sortBy));
+        query.with(pageable);
+
+        List<User> users = mongoTemplate.find(query, User.class);
+        users = applyViewFilter(users, request.getView());
+
+        // Count total
+        Query countQuery = Query.of(query).limit(-1).skip(-1);
+        long total = mongoTemplate.count(countQuery, User.class);
+
+        return PageableExecutionUtils.getPage(users, pageable, () -> total);
+    }
+    
+    /**
+     * Áp dụng view filter dựa trên loại view
+     */
+    private List<User> applyViewFilter(List<User> users, String viewType) {
+        if (users == null || users.isEmpty()) {
+            return users;
+        }
+        
+        switch (viewType.toLowerCase()) {
+            case "summary":
+                return users.stream()
+                    .map(this::createSummaryView)
+                    .collect(java.util.stream.Collectors.toList());
+            case "minimal":
+                return users.stream()
+                    .map(this::createMinimalView)
+                    .collect(java.util.stream.Collectors.toList());
+            case "full":
+            default:
+                return users; // Return full data
+        }
+    }
+    
+    /**
+     * Tạo summary view của User (chỉ các trường quan trọng)
+     */
+    private User createSummaryView(User user) {
+        User summaryUser = new User();
+        summaryUser.setId(user.getId());
+        summaryUser.setUsername(user.getUsername());
+        summaryUser.setEmail(user.getEmail());
+        summaryUser.setFirstName(user.getFirstName());
+        summaryUser.setLastName(user.getLastName());
+        summaryUser.setStatus(user.getStatus());
+        summaryUser.setRoleIds(user.getRoleIds());
+        summaryUser.setOrganizationId(user.getOrganizationId());
+        summaryUser.setCreatedAt(user.getCreatedAt());
+        summaryUser.setUpdatedAt(user.getUpdatedAt());
+        return summaryUser;
+    }
+    
+    /**
+     * Tạo minimal view của User (chỉ các trường cơ bản)
+     */
+    private User createMinimalView(User user) {
+        User minimalUser = new User();
+        minimalUser.setId(user.getId());
+        minimalUser.setUsername(user.getUsername());
+        minimalUser.setEmail(user.getEmail());
+        minimalUser.setFirstName(user.getFirstName());
+        minimalUser.setLastName(user.getLastName());
+        minimalUser.setStatus(user.getStatus());
+        return minimalUser;
     }
     
     public List<User> getUsersByStatus(User.UserStatus status) {

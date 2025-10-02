@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/v1/document-management-service/reminders")
+@RequestMapping("/api/v1/document-management-service/v1/reminders")
 @Tag(name = "⏰ APIs Quản lý Nhắc nhở", description = "Các API để quản lý nhắc nhở trong hệ thống DocGO")
 public class ReminderController {
 

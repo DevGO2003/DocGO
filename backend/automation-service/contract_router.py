@@ -1,4 +1,4 @@
-from fastapi import APIRouter, File, UploadFile, Header, HTTPException, Form
+from fastapi import APIRouter, File, UploadFile, Header, HTTPException, Form, Query
 import logging
 import os
 import uuid
@@ -6,14 +6,15 @@ from datetime import datetime, timezone
 from schemas.response import RestResponse
 from services.ai_processing_service import AutomationService
 
-router = APIRouter(prefix="/api/v1/automation-service")
+router = APIRouter(prefix="/api/v1/automation-service/v1")
 
 
 @router.post("/contracts/summarize", summary="Tóm tắt hợp đồng", tags=["🤖 APIs Xử lý AI"])
 async def contract_summarize_api(
     file: UploadFile = File(None, description="File hợp đồng cần tóm tắt (pdf, docx, txt, html)"),
     text: str = Form(None, description="Nội dung hợp đồng dạng văn bản"),
-    gemini_api_key: str = Header(None, description="Gemini API Key (tùy chọn)")
+    gemini_api_key: str = Header(None, description="Gemini API Key (tùy chọn)"),
+    view: str = Query(None, description="Loại view để trả về dữ liệu (ví dụ: summary, detail, full)")
 ):
     """
     ## 📖 Mô tả

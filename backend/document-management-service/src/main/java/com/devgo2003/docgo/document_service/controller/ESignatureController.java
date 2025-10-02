@@ -20,7 +20,7 @@ import java.util.Optional;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/v1/document-management-service/esignatures")
+@RequestMapping("/api/v1/document-management-service/v1/esignatures")
 @Tag(name = "✍️ APIs Quản lý chữ ký điện tử", description = "Các API để quản lý chữ ký điện tử trong hệ thống DocGO")
 public class ESignatureController {
 
@@ -41,6 +41,10 @@ public class ESignatureController {
 
         ## 🔹 Đầu vào
 
+        👁️ view (tùy chọn, query)
+        Loại: string
+        Mô tả: Loại view dữ liệu (mặc định: full)
+        
         📄 pageNumber, pageSize (tùy chọn, query)
         Loại: integer
         Mô tả: Phân trang (mặc định 0/10)
@@ -95,6 +99,7 @@ public class ESignatureController {
         """
     )
     public ResponseEntity<RestResponse<?>> getAllESignatures(
+            @RequestParam(defaultValue = "full") String view,
             @RequestParam(defaultValue = "0") int pageNumber,
             @RequestParam(defaultValue = "10") int pageSize,
             @RequestParam(defaultValue = "createdAt") String sortBy,
@@ -210,6 +215,9 @@ public class ESignatureController {
         } else {
             eSignatures = eSignatureService.getAllESignatures();
         }
+
+        // Áp dụng view filter
+        eSignatures = eSignatureService.applyViewFilter(eSignatures, view);
 
         if (eSignatures == null || eSignatures.isEmpty()) {
             RestResponse<List<ESignature>> response = RestResponse.<List<ESignature>>builder()
@@ -962,499 +970,55 @@ public class ESignatureController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @GetMapping("/contracts/{contractId}/esignatures/count")
-    @Operation(summary = "(Deprecated) Đếm e-signature", description = "Dùng GET /esignatures?contractId=...&aggregate=count", deprecated = true)
-    public ResponseEntity<RestResponse<Long>> countESignaturesByContractId(@PathVariable String contractId) {
-        long count = eSignatureService.countESignaturesByContractId(contractId);
-        
-                RestResponse<Long> response = RestResponse.<Long>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Đếm số e-signature thành công.")
-            .data(count)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+    // Deprecated: dùng GET /esignatures?contractId=...&aggregate=count
+    
+    // Deprecated: dùng GET /esignatures?contractId=...&status=...&aggregate=count
+    
+    // Deprecated: dùng GET /esignatures?signerId=...&aggregate=count
+    
+    // Deprecated: dùng GET /esignatures?contractId=...&status=PENDING_REVIEW&aggregate=count
+    
+    // Deprecated: dùng GET /esignatures?contractId=...&status=SIGNED&aggregate=count
 
-    @GetMapping("/contracts/{contractId}/esignatures/count-by-status")
-    @Operation(summary = "(Deprecated) Đếm e-signature theo status", description = "Dùng GET /esignatures?contractId=...&status=...&aggregate=count", deprecated = true)
-    public ResponseEntity<RestResponse<Long>> countESignaturesByContractIdAndStatus(
-            @PathVariable String contractId,
-            @RequestParam ESignature.SignatureStatus status) {
-        long count = eSignatureService.countESignaturesByContractIdAndStatus(contractId, status);
-        
-                RestResponse<Long> response = RestResponse.<Long>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Đếm số e-signature theo status thành công.")
-            .data(count)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+    // Deprecated: dùng GET /esignatures?contractId=...&status=DECLINED&aggregate=count
+    
+    // Deprecated: dùng GET /esignatures?contractId=...&status=EXPIRED&aggregate=count
+    
+    // Deprecated: dùng GET /esignatures?contractId=...&status=VERIFIED&aggregate=count
+    
+    // Deprecated: dùng GET /esignatures?contractId=...&required=true&aggregate=count
+    
+    // Deprecated: dùng GET /esignatures?contractId=...&required=false&aggregate=count
 
-    @GetMapping("/esignatures/signer/{signerId}/count")
-    @Operation(summary = "(Deprecated) Đếm e-signature của signer", description = "Dùng GET /esignatures?signerId=...&aggregate=count", deprecated = true)
-    public ResponseEntity<RestResponse<Long>> countESignaturesBySignerId(@PathVariable String signerId) {
-        long count = eSignatureService.countESignaturesBySignerId(signerId);
-        
-                RestResponse<Long> response = RestResponse.<Long>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Đếm số e-signature của signer thành công.")
-            .data(count)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+    // Deprecated: dùng GET /esignatures?contractId=...&consented=true&aggregate=count
+    
+    // Deprecated: dùng GET /esignatures?contractId=...&consented=false&aggregate=count
+    
+    // Deprecated: dùng GET /esignatures?contractId=...&complianceVerified=true&aggregate=count
+    
+    // Deprecated: dùng GET /esignatures?contractId=...&complianceVerified=false&aggregate=count
+    
+    // Deprecated: dùng GET /esignatures?contractId=...&aggregate=exists
+    
+    // Deprecated: dùng GET /esignatures?contractId=...&status=PENDING_REVIEW&aggregate=exists
+    
+    // Deprecated: dùng GET /esignatures?contractId=...&status=SIGNED&aggregate=exists
+    
+    // Deprecated: dùng GET /esignatures?contractId=...&status=DECLINED&aggregate=exists
+    
+    // Deprecated: dùng GET /esignatures?contractId=...&status=EXPIRED&aggregate=exists
+    
+    // Deprecated: dùng GET /esignatures?contractId=...&status=VERIFIED&aggregate=exists
+    
+    // Deprecated: dùng GET /esignatures?contractId=...&required=true&aggregate=exists
 
-    @GetMapping("/contracts/{contractId}/esignatures/count-PENDING_REVIEW")
-    @Operation(summary = "(Deprecated) Đếm e-signature PENDING_REVIEW", description = "Dùng GET /esignatures?contractId=...&status=PENDING_REVIEW&aggregate=count", deprecated = true)
-    public ResponseEntity<RestResponse<Long>> countPendingSignaturesByContractId(@PathVariable String contractId) {
-        long count = eSignatureService.countPendingSignaturesByContractId(contractId);
-        
-                RestResponse<Long> response = RestResponse.<Long>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Đếm số e-signature PENDING_REVIEW thành công.")
-            .data(count)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
-    @GetMapping("/contracts/{contractId}/esignatures/count-signed")
-    @Operation(summary = "Đếm số e-signature signed", description = "Đếm số lượng e-signature đã signed")
-    public ResponseEntity<RestResponse<Long>> countSignedSignaturesByContractId(@PathVariable String contractId) {
-        long count = eSignatureService.countSignedSignaturesByContractId(contractId);
-        
-                RestResponse<Long> response = RestResponse.<Long>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Đếm số e-signature signed thành công.")
-            .data(count)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
-    @GetMapping("/contracts/{contractId}/esignatures/count-declined")
-    @Operation(summary = "Đếm số e-signature declined", description = "Đếm số lượng e-signature đã declined")
-    public ResponseEntity<RestResponse<Long>> countDeclinedSignaturesByContractId(@PathVariable String contractId) {
-        long count = eSignatureService.countDeclinedSignaturesByContractId(contractId);
-        
-                RestResponse<Long> response = RestResponse.<Long>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Đếm số e-signature declined thành công.")
-            .data(count)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
-    @GetMapping("/contracts/{contractId}/esignatures/count-expired")
-    @Operation(summary = "Đếm số e-signature expired", description = "Đếm số lượng e-signature đã expired")
-    public ResponseEntity<RestResponse<Long>> countExpiredSignaturesByContractId(@PathVariable String contractId) {
-        long count = eSignatureService.countExpiredSignaturesByContractId(contractId);
-        
-                RestResponse<Long> response = RestResponse.<Long>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Đếm số e-signature expired thành công.")
-            .data(count)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
-    @GetMapping("/contracts/{contractId}/esignatures/count-verified")
-    @Operation(summary = "Đếm số e-signature verified", description = "Đếm số lượng e-signature đã verified")
-    public ResponseEntity<RestResponse<Long>> countVerifiedSignaturesByContractId(@PathVariable String contractId) {
-        long count = eSignatureService.countVerifiedSignaturesByContractId(contractId);
-        
-                RestResponse<Long> response = RestResponse.<Long>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Đếm số e-signature verified thành công.")
-            .data(count)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
-    @GetMapping("/contracts/{contractId}/esignatures/count-required")
-    @Operation(summary = "Đếm số e-signature required", description = "Đếm số lượng e-signature bắt buộc")
-    public ResponseEntity<RestResponse<Long>> countRequiredSignaturesByContractId(@PathVariable String contractId) {
-        long count = eSignatureService.countRequiredSignaturesByContractId(contractId);
-        
-                RestResponse<Long> response = RestResponse.<Long>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Đếm số e-signature required thành công.")
-            .data(count)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
-    @GetMapping("/contracts/{contractId}/esignatures/count-optional")
-    @Operation(summary = "Đếm số e-signature optional", description = "Đếm số lượng e-signature tùy chọn")
-    public ResponseEntity<RestResponse<Long>> countOptionalSignaturesByContractId(@PathVariable String contractId) {
-        long count = eSignatureService.countOptionalSignaturesByContractId(contractId);
-        
-                RestResponse<Long> response = RestResponse.<Long>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Đếm số e-signature optional thành công.")
-            .data(count)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
-    @GetMapping("/contracts/{contractId}/esignatures/count-consented")
-    @Operation(summary = "Đếm số e-signature consented", description = "Đếm số lượng e-signature đã consented")
-    public ResponseEntity<RestResponse<Long>> countConsentedSignaturesByContractId(@PathVariable String contractId) {
-        long count = eSignatureService.countConsentedSignaturesByContractId(contractId);
-        
-                RestResponse<Long> response = RestResponse.<Long>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Đếm số e-signature consented thành công.")
-            .data(count)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
-    @GetMapping("/contracts/{contractId}/esignatures/count-unconsented")
-    @Operation(summary = "Đếm số e-signature unconsented", description = "Đếm số lượng e-signature chưa consented")
-    public ResponseEntity<RestResponse<Long>> countUnconsentedSignaturesByContractId(@PathVariable String contractId) {
-        long count = eSignatureService.countUnconsentedSignaturesByContractId(contractId);
-        
-                RestResponse<Long> response = RestResponse.<Long>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Đếm số e-signature unconsented thành công.")
-            .data(count)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
-    @GetMapping("/contracts/{contractId}/esignatures/count-compliance-verified")
-    @Operation(summary = "Đếm số e-signature compliance verified", description = "Đếm số lượng e-signature đã compliance verified")
-    public ResponseEntity<RestResponse<Long>> countComplianceVerifiedSignaturesByContractId(@PathVariable String contractId) {
-        long count = eSignatureService.countComplianceVerifiedSignaturesByContractId(contractId);
-        
-                RestResponse<Long> response = RestResponse.<Long>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Đếm số e-signature compliance verified thành công.")
-            .data(count)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
-    @GetMapping("/contracts/{contractId}/esignatures/count-compliance-unverified")
-    @Operation(summary = "Đếm số e-signature compliance unverified", description = "Đếm số lượng e-signature chưa compliance verified")
-    public ResponseEntity<RestResponse<Long>> countComplianceUnverifiedSignaturesByContractId(@PathVariable String contractId) {
-        long count = eSignatureService.countComplianceUnverifiedSignaturesByContractId(contractId);
-        
-                RestResponse<Long> response = RestResponse.<Long>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Đếm số e-signature compliance unverified thành công.")
-            .data(count)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
-    @GetMapping("/contracts/{contractId}/esignatures/exists")
-    @Operation(summary = "Kiểm tra có e-signature", description = "Kiểm tra contract có e-signature không")
-    public ResponseEntity<RestResponse<Boolean>> existsESignaturesByContractId(@PathVariable String contractId) {
-        boolean exists = eSignatureService.existsESignaturesByContractId(contractId);
-        
-                RestResponse<Boolean> response = RestResponse.<Boolean>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Kiểm tra có e-signature thành công.")
-            .data(exists)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
-    @GetMapping("/contracts/{contractId}/esignatures/exists-PENDING_REVIEW")
-    @Operation(summary = "Kiểm tra có e-signature PENDING_REVIEW", description = "Kiểm tra contract có e-signature PENDING_REVIEW không")
-    public ResponseEntity<RestResponse<Boolean>> existsPendingSignaturesByContractId(@PathVariable String contractId) {
-        boolean exists = eSignatureService.existsPendingSignaturesByContractId(contractId);
-        
-                RestResponse<Boolean> response = RestResponse.<Boolean>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Kiểm tra có e-signature PENDING_REVIEW thành công.")
-            .data(exists)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
-    @GetMapping("/contracts/{contractId}/esignatures/exists-signed")
-    @Operation(summary = "Kiểm tra có e-signature signed", description = "Kiểm tra contract có e-signature signed không")
-    public ResponseEntity<RestResponse<Boolean>> existsSignedSignaturesByContractId(@PathVariable String contractId) {
-        boolean exists = eSignatureService.existsSignedSignaturesByContractId(contractId);
-        
-                RestResponse<Boolean> response = RestResponse.<Boolean>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Kiểm tra có e-signature signed thành công.")
-            .data(exists)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
-    @GetMapping("/contracts/{contractId}/esignatures/exists-declined")
-    @Operation(summary = "Kiểm tra có e-signature declined", description = "Kiểm tra contract có e-signature declined không")
-    public ResponseEntity<RestResponse<Boolean>> existsDeclinedSignaturesByContractId(@PathVariable String contractId) {
-        boolean exists = eSignatureService.existsDeclinedSignaturesByContractId(contractId);
-        
-                RestResponse<Boolean> response = RestResponse.<Boolean>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Kiểm tra có e-signature declined thành công.")
-            .data(exists)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
-    @GetMapping("/contracts/{contractId}/esignatures/exists-expired")
-    @Operation(summary = "Kiểm tra có e-signature expired", description = "Kiểm tra contract có e-signature expired không")
-    public ResponseEntity<RestResponse<Boolean>> existsExpiredSignaturesByContractId(@PathVariable String contractId) {
-        boolean exists = eSignatureService.existsExpiredSignaturesByContractId(contractId);
-        
-                RestResponse<Boolean> response = RestResponse.<Boolean>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Kiểm tra có e-signature expired thành công.")
-            .data(exists)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
-    @GetMapping("/contracts/{contractId}/esignatures/exists-verified")
-    @Operation(summary = "Kiểm tra có e-signature verified", description = "Kiểm tra contract có e-signature verified không")
-    public ResponseEntity<RestResponse<Boolean>> existsVerifiedSignaturesByContractId(@PathVariable String contractId) {
-        boolean exists = eSignatureService.existsVerifiedSignaturesByContractId(contractId);
-        
-                RestResponse<Boolean> response = RestResponse.<Boolean>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Kiểm tra có e-signature verified thành công.")
-            .data(exists)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
-    @GetMapping("/contracts/{contractId}/esignatures/exists-required")
-    @Operation(summary = "Kiểm tra có e-signature required", description = "Kiểm tra contract có e-signature required không")
-    public ResponseEntity<RestResponse<Boolean>> existsRequiredSignaturesByContractId(@PathVariable String contractId) {
-        boolean exists = eSignatureService.existsRequiredSignaturesByContractId(contractId);
-        
-                RestResponse<Boolean> response = RestResponse.<Boolean>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Kiểm tra có e-signature required thành công.")
-            .data(exists)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
-    @GetMapping("/contracts/{contractId}/esignatures/exists-optional")
-    @Operation(summary = "Kiểm tra có e-signature optional", description = "Kiểm tra contract có e-signature optional không")
-    public ResponseEntity<RestResponse<Boolean>> existsOptionalSignaturesByContractId(@PathVariable String contractId) {
-        boolean exists = eSignatureService.existsOptionalSignaturesByContractId(contractId);
-        
-                RestResponse<Boolean> response = RestResponse.<Boolean>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Kiểm tra có e-signature optional thành công.")
-            .data(exists)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
-    @GetMapping("/contracts/{contractId}/esignatures/exists-consented")
-    @Operation(summary = "Kiểm tra có e-signature consented", description = "Kiểm tra contract có e-signature consented không")
-    public ResponseEntity<RestResponse<Boolean>> existsConsentedSignaturesByContractId(@PathVariable String contractId) {
-        boolean exists = eSignatureService.existsConsentedSignaturesByContractId(contractId);
-        
-                RestResponse<Boolean> response = RestResponse.<Boolean>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Kiểm tra có e-signature consented thành công.")
-            .data(exists)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
-    @GetMapping("/contracts/{contractId}/esignatures/exists-unconsented")
-    @Operation(summary = "Kiểm tra có e-signature unconsented", description = "Kiểm tra contract có e-signature unconsented không")
-    public ResponseEntity<RestResponse<Boolean>> existsUnconsentedSignaturesByContractId(@PathVariable String contractId) {
-        boolean exists = eSignatureService.existsUnconsentedSignaturesByContractId(contractId);
-        
-                RestResponse<Boolean> response = RestResponse.<Boolean>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Kiểm tra có e-signature unconsented thành công.")
-            .data(exists)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
-    @GetMapping("/contracts/{contractId}/esignatures/exists-compliance-verified")
-    @Operation(summary = "Kiểm tra có e-signature compliance verified", description = "Kiểm tra contract có e-signature compliance verified không")
-    public ResponseEntity<RestResponse<Boolean>> existsComplianceVerifiedSignaturesByContractId(@PathVariable String contractId) {
-        boolean exists = eSignatureService.existsComplianceVerifiedSignaturesByContractId(contractId);
-        
-                RestResponse<Boolean> response = RestResponse.<Boolean>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Kiểm tra có e-signature compliance verified thành công.")
-            .data(exists)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
-    @GetMapping("/contracts/{contractId}/esignatures/exists-compliance-unverified")
-    @Operation(summary = "Kiểm tra có e-signature compliance unverified", description = "Kiểm tra contract có e-signature compliance unverified không")
-    public ResponseEntity<RestResponse<Boolean>> existsComplianceUnverifiedSignaturesByContractId(@PathVariable String contractId) {
-        boolean exists = eSignatureService.existsComplianceUnverifiedSignaturesByContractId(contractId);
-        
-                RestResponse<Boolean> response = RestResponse.<Boolean>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Kiểm tra có e-signature compliance unverified thành công.")
-            .data(exists)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+    // Deprecated: dùng GET /esignatures?contractId=...&required=false&aggregate=exists
+    
+    // Deprecated: dùng GET /esignatures?contractId=...&consented=true&aggregate=exists
+    
+    // Deprecated: dùng GET /esignatures?contractId=...&consented=false&aggregate=exists
+    
+    // Deprecated: dùng GET /esignatures?contractId=...&complianceVerified=true&aggregate=exists
+    
+    // Deprecated: dùng GET /esignatures?contractId=...&complianceVerified=false&aggregate=exists
 }

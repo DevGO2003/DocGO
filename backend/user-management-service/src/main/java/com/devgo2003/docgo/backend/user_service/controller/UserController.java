@@ -3,6 +3,7 @@ package com.devgo2003.docgo.backend.user_service.controller;
 import com.devgo2003.docgo.backend.user_service.entity.User;
 import com.devgo2003.docgo.backend.user_service.service.UserService;
 import com.devgo2003.docgo.backend.user_service.common.response.RestResponse;
+import com.devgo2003.docgo.backend.user_service.dto.UserSearchRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -13,12 +14,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Pattern;
 import java.util.List;
 import java.util.Set;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/v1/user-management-service/users")
+@RequestMapping("/api/v1/user-management-service/v1/users")
 @RequiredArgsConstructor
 @Tag(name = "👤 APIs Quản lý Người dùng", description = "APIs quản lý người dùng")
 public class UserController {
@@ -27,9 +31,33 @@ public class UserController {
     
     @GetMapping
     @Operation(
-        summary = "Lấy danh sách người dùng", 
+        summary = "Lấy danh sách người dùng với filter", 
         description = """
         🔹 Đầu vào
+        
+        👁️ view (tùy chọn, query)
+        Loại: string
+        Mô tả: Loại view dữ liệu (mặc định: full)
+        
+        🔍 searchTerm (tùy chọn, query)
+        Loại: string
+        Mô tả: Từ khóa tìm kiếm trong username, email, fullName
+        
+        📊 status (tùy chọn, query)
+        Loại: User.UserStatus
+        Mô tả: Trạng thái người dùng (ACTIVE, INACTIVE, SUSPENDED, LOCKED)
+        
+        🎭 roleId (tùy chọn, query)
+        Loại: string
+        Mô tả: ID của vai trò
+        
+        🏢 organizationId (tùy chọn, query)
+        Loại: string
+        Mô tả: ID của tổ chức
+        
+        👤 username (tùy chọn, query)
+        Loại: string
+        Mô tả: Username cụ thể (tìm kiếm chính xác)
         
         📄 pageNumber (tùy chọn, query)
         Loại: integer
@@ -80,17 +108,49 @@ public class UserController {
         🛣️ path
         Loại: string
         Mô tả: Đường dẫn API được gọi
+        
+        📝 Ví dụ sử dụng:
+        - GET /users - Lấy tất cả người dùng
+        - GET /users?view=summary - Lấy view tóm tắt người dùng
+        - GET /users?status=ACTIVE - Lấy người dùng đang hoạt động
+        - GET /users?searchTerm=john&status=ACTIVE - Tìm kiếm "john" trong người dùng đang hoạt động
+        - GET /users?roleId=admin-123&organizationId=org-456 - Lấy admin của tổ chức cụ thể
+        - GET /users?username=john_doe - Tìm người dùng có username chính xác
         """
     )
     public ResponseEntity<RestResponse<Page<User>>> getAllUsers(
-            @Parameter(description = "Số trang (mặc định: 0)") @RequestParam(defaultValue = "0") int pageNumber,
-            @Parameter(description = "Kích thước trang (mặc định: 10)") @RequestParam(defaultValue = "10") int pageSize,
-            @Parameter(description = "Trường sắp xếp (mặc định: createdAt)") @RequestParam(defaultValue = "createdAt") String sortBy,
-            @Parameter(description = "Hướng sắp xếp (mặc định: DESC)") @RequestParam(defaultValue = "DESC") String sortDirection) {
+            @Parameter(description = "Loại view dữ liệu (table|card|detail|full). Mặc định: full") @RequestParam(defaultValue = "full") String view,
+            @Parameter(description = "Từ khóa tìm kiếm") @RequestParam(required = false) String searchTerm,
+            @Parameter(description = "Trạng thái người dùng") @RequestParam(required = false) User.UserStatus status,
+            @Parameter(description = "ID vai trò") @RequestParam(required = false) String roleId,
+            @Parameter(description = "ID tổ chức") @RequestParam(required = false) String organizationId,
+            @Parameter(description = "Username") @RequestParam(required = false) String username,
+            @Parameter(description = "Số trang (mặc định: 0)") @RequestParam(defaultValue = "0") @Min(value = 0, message = "Số trang phải >= 0") int pageNumber,
+            @Parameter(description = "Kích thước trang (mặc định: 10)") @RequestParam(defaultValue = "10") @Min(value = 1, message = "Kích thước trang phải >= 1") @Max(value = 100, message = "Kích thước trang phải <= 100") int pageSize,
+            @Parameter(description = "Trường sắp xếp (mặc định: createdAt)") @RequestParam(defaultValue = "createdAt") @Pattern(regexp = "^(createdAt|updatedAt|username|email|firstName|lastName|status)$", message = "Trường sắp xếp không hợp lệ") String sortBy,
+            @Parameter(description = "Hướng sắp xếp (mặc định: DESC)") @RequestParam(defaultValue = "DESC") @Pattern(regexp = "^(ASC|DESC)$", message = "Hướng sắp xếp phải là ASC hoặc DESC") String sortDirection) {
         
-        log.info("Getting all users - pageNumber: {}, pageSize: {}, sortBy: {}, sortDirection: {}", pageNumber, pageSize, sortBy, sortDirection);
+        log.info("Getting users with filters - view: {}, searchTerm: {}, status: {}, roleId: {}, organizationId: {}, username: {}, pageNumber: {}, pageSize: {}, sortBy: {}, sortDirection: {}", 
+                view, searchTerm, status, roleId, organizationId, username, pageNumber, pageSize, sortBy, sortDirection);
         
-        Page<User> users = userService.getAllUsers(pageNumber, pageSize, sortBy, sortDirection);
+        // Tạo UserSearchRequest từ các parameters
+        UserSearchRequest searchRequest = UserSearchRequest.builder()
+                .view(view)
+                .searchTerm(searchTerm)
+                .status(status)
+                .roleId(roleId)
+                .organizationId(organizationId)
+                .username(username)
+                .pageNumber(pageNumber)
+                .pageSize(pageSize)
+                .sortBy(sortBy)
+                .sortDirection(sortDirection)
+                .build();
+        
+        // Chuẩn hóa dữ liệu
+        searchRequest.normalize();
+        
+        Page<User> users = userService.searchUsers(searchRequest);
         
         return ResponseEntity.ok(RestResponse.<Page<User>>builder()
                 .statusCode(200)
@@ -220,66 +280,6 @@ public class UserController {
                 .build());
     }
     
-    @GetMapping("/status/{status}")
-    @Operation(
-        summary = "Lấy người dùng theo trạng thái", 
-        description = """
-        🔹 Đầu vào
-        
-        📊 status (bắt buộc, path)
-        Loại: User.UserStatus
-        Mô tả: Trạng thái người dùng (ACTIVE, INACTIVE, SUSPENDED, LOCKED)
-        
-        🔹 Đầu ra
-        
-        📝 data
-        Loại: List<User>
-        Mô tả: Danh sách người dùng theo trạng thái
-        
-        📊 apiVersion
-        Loại: string
-        Mô tả: Phiên bản API (v1)
-        
-        🔢 statusCode
-        Loại: integer
-        Mô tả: Mã trạng thái HTTP (200: OK, 204: No Content)
-        
-        📋 shortMessage
-        Loại: string
-        Mô tả: Thông báo ngắn gọn về kết quả
-        
-        📖 description
-        Loại: string
-        Mô tả: Mô tả chi tiết về kết quả xử lý
-        
-        🕒 timestamp
-        Loại: string (ISO-8601)
-        Mô tả: Thời gian xử lý yêu cầu
-        
-        🆔 requestId
-        Loại: string (UUID)
-        Mô tả: Định danh duy nhất của yêu cầu
-        
-        🛣️ path
-        Loại: string
-        Mô tả: Đường dẫn API được gọi
-        """
-    )
-    public ResponseEntity<RestResponse<List<User>>> getUsersByStatus(
-            @Parameter(description = "Trạng thái người dùng") @PathVariable User.UserStatus status) {
-        
-        log.info("Getting users by status: {}", status);
-        
-        List<User> users = userService.getUsersByStatus(status);
-        
-        return ResponseEntity.ok(RestResponse.<List<User>>builder()
-                .statusCode(200)
-                .shortMessage("Success")
-                .description("Đã lấy danh sách người dùng theo trạng thái thành công")
-                .data(users)
-                .build());
-    }
-    
     @PostMapping
     @Operation(
         summary = "Tạo người dùng mới", 
@@ -337,126 +337,6 @@ public class UserController {
                 .shortMessage("Created")
                 .description("Đã tạo người dùng thành công")
                 .data(createdUser)
-                .build());
-    }
-    
-    @GetMapping("/username/{username}")
-    @Operation(
-        summary = "Lấy người dùng theo username", 
-        description = """
-        🔹 Đầu vào
-        
-        👤 username (bắt buộc, path)
-        Loại: string
-        Mô tả: Username của người dùng cần tìm
-        
-        🔹 Đầu ra
-        
-        📝 data
-        Loại: User
-        Mô tả: Thông tin người dùng tìm được
-        
-        📊 apiVersion
-        Loại: string
-        Mô tả: Phiên bản API (v1)
-        
-        🔢 statusCode
-        Loại: integer
-        Mô tả: Mã trạng thái HTTP (200: OK, 404: Not Found)
-        
-        📋 shortMessage
-        Loại: string
-        Mô tả: Thông báo ngắn gọn về kết quả
-        
-        📖 description
-        Loại: string
-        Mô tả: Mô tả chi tiết về kết quả xử lý
-        
-        🕒 timestamp
-        Loại: string (ISO-8601)
-        Mô tả: Thời gian xử lý yêu cầu
-        
-        🆔 requestId
-        Loại: string (UUID)
-        Mô tả: Định danh duy nhất của yêu cầu
-        
-        🛣️ path
-        Loại: string
-        Mô tả: Đường dẫn API được gọi
-        """
-    )
-    public ResponseEntity<RestResponse<User>> getUserByUsername(
-            @Parameter(description = "Username") @PathVariable String username) {
-        
-        log.info("Getting user by username: {}", username);
-        
-        return userService.getUserByUsername(username)
-                .map(user -> ResponseEntity.ok(RestResponse.<User>builder()
-                        .statusCode(200)
-                        .shortMessage("Success")
-                        .description("Đã lấy thông tin người dùng thành công")
-                        .data(user)
-                        .build()))
-                .orElse(ResponseEntity.notFound().build());
-    }
-    
-    @GetMapping("/role/{roleId}")
-    @Operation(
-        summary = "Lấy danh sách người dùng theo vai trò", 
-        description = """
-        🔹 Đầu vào
-        
-        🎭 roleId (bắt buộc, path)
-        Loại: string
-        Mô tả: ID của vai trò
-        
-        🔹 Đầu ra
-        
-        📝 data
-        Loại: List<User>
-        Mô tả: Danh sách người dùng có vai trò này
-        
-        📊 apiVersion
-        Loại: string
-        Mô tả: Phiên bản API (v1)
-        
-        🔢 statusCode
-        Loại: integer
-        Mô tả: Mã trạng thái HTTP (200: OK, 204: No Content)
-        
-        📋 shortMessage
-        Loại: string
-        Mô tả: Thông báo ngắn gọn về kết quả
-        
-        📖 description
-        Loại: string
-        Mô tả: Mô tả chi tiết về kết quả xử lý
-        
-        🕒 timestamp
-        Loại: string (ISO-8601)
-        Mô tả: Thời gian xử lý yêu cầu
-        
-        🆔 requestId
-        Loại: string (UUID)
-        Mô tả: Định danh duy nhất của yêu cầu
-        
-        🛣️ path
-        Loại: string
-        Mô tả: Đường dẫn API được gọi
-        """
-    )
-    public ResponseEntity<RestResponse<List<User>>> getUsersByRole(
-            @Parameter(description = "ID vai trò") @PathVariable String roleId) {
-        
-        log.info("Getting users by role: {}", roleId);
-        
-        List<User> users = userService.getUsersByRole(roleId);
-        
-        return ResponseEntity.ok(RestResponse.<List<User>>builder()
-                .statusCode(200)
-                .shortMessage("Success")
-                .description("Đã lấy danh sách người dùng theo vai trò thành công")
-                .data(users)
                 .build());
     }
     
@@ -666,66 +546,6 @@ public class UserController {
                 .statusCode(200)
                 .shortMessage("Success")
                 .description("Đã lấy danh sách người dùng theo ID thành công")
-                .data(users)
-                .build());
-    }
-    
-    @GetMapping("/organization/{organizationId}")
-    @Operation(
-        summary = "Lấy danh sách người dùng theo tổ chức", 
-        description = """
-        🔹 Đầu vào
-        
-        🏢 organizationId (bắt buộc, path)
-        Loại: string
-        Mô tả: ID của tổ chức
-        
-        🔹 Đầu ra
-        
-        📝 data
-        Loại: List<User>
-        Mô tả: Danh sách người dùng thuộc tổ chức
-        
-        📊 apiVersion
-        Loại: string
-        Mô tả: Phiên bản API (v1)
-        
-        🔢 statusCode
-        Loại: integer
-        Mô tả: Mã trạng thái HTTP (200: OK, 204: No Content)
-        
-        📋 shortMessage
-        Loại: string
-        Mô tả: Thông báo ngắn gọn về kết quả
-        
-        📖 description
-        Loại: string
-        Mô tả: Mô tả chi tiết về kết quả xử lý
-        
-        🕒 timestamp
-        Loại: string (ISO-8601)
-        Mô tả: Thời gian xử lý yêu cầu
-        
-        🆔 requestId
-        Loại: string (UUID)
-        Mô tả: Định danh duy nhất của yêu cầu
-        
-        🛣️ path
-        Loại: string
-        Mô tả: Đường dẫn API được gọi
-        """
-    )
-    public ResponseEntity<RestResponse<List<User>>> getUsersByOrganization(
-            @Parameter(description = "ID tổ chức") @PathVariable String organizationId) {
-        
-        log.info("Getting users by organization: {}", organizationId);
-        
-        List<User> users = userService.getAllUsers(0, 1000, "createdAt", "DESC").getContent();
-        
-        return ResponseEntity.ok(RestResponse.<List<User>>builder()
-                .statusCode(200)
-                .shortMessage("Success")
-                .description("Đã lấy danh sách người dùng theo tổ chức thành công")
                 .data(users)
                 .build());
     }

@@ -97,7 +97,7 @@ class AuthService {
   async login(credentials: LoginRequest): Promise<LoginResponse> {
     try {
       const response: AxiosResponse<LoginResponse> = await this.client.post(
-        '/api/v1/user-management-service/auth/login',
+        '/api/v1/user-management-service/v1/auth/login',
         credentials
       );
       return response.data;
@@ -109,7 +109,7 @@ class AuthService {
   async logout(logoutData: LogoutRequest): Promise<LogoutResponse> {
     try {
       const response: AxiosResponse<LogoutResponse> = await this.client.post(
-        '/api/v1/user-management-service/auth/logout',
+        '/api/v1/user-management-service/v1/auth/logout',
         logoutData,
         {
           headers: {
@@ -126,7 +126,7 @@ class AuthService {
   async refreshToken(refreshData: RefreshTokenRequest): Promise<RefreshTokenResponse> {
     try {
       const response: AxiosResponse<RefreshTokenResponse> = await this.client.post(
-        '/api/v1/user-management-service/auth/refresh',
+        '/api/v1/user-management-service/v1/auth/refresh',
         refreshData
       );
       return response.data;
@@ -138,7 +138,7 @@ class AuthService {
   async validateToken(token: string): Promise<boolean> {
     try {
       const response = await this.client.get(
-        '/api/v1/user-management-service/auth/validate',
+        '/api/v1/user-management-service/v1/auth/validate',
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -154,7 +154,7 @@ class AuthService {
   async getProfile(token: string): Promise<any> {
     try {
       const response = await this.client.get(
-        '/api/v1/user-management-service/auth/me',
+        '/api/v1/user-management-service/v1/auth/me',
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -170,7 +170,7 @@ class AuthService {
   async healthCheck(): Promise<boolean> {
     try {
       const response = await this.client.get(
-        '/api/v1/user-management-service/health'
+        '/api/v1/user-management-service/v1/auth/health'
       );
       return response.status === 200;
     } catch (error) {

@@ -12,10 +12,11 @@ from datetime import datetime
 
 from schemas.file_schemas import FileUploadResponse, FileDownloadResponse, FileListResponse, FileDetailsResponse
 from schemas.response import RestResponse
+from schemas.view_schemas import ViewType, ViewMapper, PaginatedViewResponse
 from services.file_service import FileStorageService
 
 # Create router
-router = APIRouter(prefix="/api/v1/automation-service/files", tags=["📁 APIs Quản lý File"])
+router = APIRouter(prefix="/api/v1/automation-service/v1/files", tags=["📁 APIs Quản lý File"])
 
 # Initialize file service
 file_service = FileStorageService()
@@ -25,7 +26,8 @@ file_service = FileStorageService()
 async def upload_file(
     file: UploadFile = File(..., description="File cần upload lên hệ thống"),
     folder: Optional[str] = Query(None, description="Thư mục con tùy chọn trong bucket"),
-    user_id: Optional[str] = Query(None, description="ID của user upload file (mặc định: public)")
+    user_id: Optional[str] = Query(None, description="ID của user upload file (mặc định: public)"),
+    view: Optional[str] = Query(None, description="Loại view để trả về dữ liệu (ví dụ: summary, detail, full)")
 ):
     """
     ## 📖 Mô tả
@@ -65,7 +67,7 @@ async def upload_file(
             data=response,
             timestamp=response.upload_time.isoformat(),
             requestId=str(uuid.uuid4()),
-            path="/api/v1/automation-service/files"
+            path="/api/v1/automation-service/v1/files"
         )
     except HTTPException as e:
         return RestResponse(
@@ -76,7 +78,7 @@ async def upload_file(
             data=None,
             timestamp=datetime.now().isoformat(),
             requestId=str(uuid.uuid4()),
-            path="/api/v1/automation-service/files"
+            path="/api/v1/automation-service/v1/files"
         )
 
 
@@ -131,8 +133,9 @@ async def download_file(
         raise e
 
 
-@router.get("", summary="Danh sách files", response_model=RestResponse[FileListResponse])
+@router.get("", summary="Danh sách files với projection", response_model=RestResponse[PaginatedViewResponse])
 async def get_all_files(
+    view: str = Query("table", description="View type: table, card, detail, full (mặc định: table)"),
     page_number: int = Query(0, description="Số trang (mặc định: 0)"),
     page_size: int = Query(10, description="Kích thước trang (mặc định: 10)"),
     sort_by: Optional[List[str]] = Query(None, description="Danh sách các trường để sắp xếp"),
@@ -183,16 +186,49 @@ async def get_all_files(
     - **Bao gồm**: files[], total_elements, total_pages, current_page, page_size
     """
     try:
+        # Validate view type
+        try:
+            view_type = ViewType(view.lower())
+        except ValueError:
+            view_type = ViewType.TABLE
+        
+        # Get files from service
         response = file_service.get_all_files(page_number, page_size, sort_by, sort_direction, include_deleted)
+        
+        # Map files to view
+        view_items = []
+        for file_data in response.files:
+            # Convert file data to dict if needed
+            if hasattr(file_data, 'dict'):
+                file_dict = file_data.dict()
+            else:
+                file_dict = file_data
+            
+            # Map to view
+            view_item = ViewMapper.map_file_to_view(file_dict, view_type)
+            view_items.append(view_item)
+        
+        # Create paginated view response
+        paginated_response = PaginatedViewResponse(
+            view=view_type.value,
+            items=view_items,
+            pagination={
+                "page": response.current_page,
+                "size": response.page_size,
+                "totalElements": response.total_elements,
+                "totalPages": response.total_pages
+            }
+        )
+        
         return RestResponse(
             apiVersion="v1",
             statusCode=200,
             shortMessage="Success",
-            description="Đã lấy danh sách files thành công",
-            data=response,
+            description=f"Đã lấy danh sách files thành công với view {view_type.value}",
+            data=paginated_response,
             timestamp=datetime.now().isoformat(),
             requestId=str(uuid.uuid4()),
-            path="/api/v1/automation-service/files"
+            path="/api/v1/automation-service/v1/files"
         )
     except HTTPException as e:
         return RestResponse(
@@ -203,13 +239,14 @@ async def get_all_files(
             data=None,
             timestamp=datetime.now().isoformat(),
             requestId=str(uuid.uuid4()),
-            path="/api/v1/automation-service/files"
+            path="/api/v1/automation-service/v1/files"
         )
 
 
 @router.get("/{file_id}", summary="Chi tiết file", response_model=RestResponse[dict])
 async def get_file_details(
-    file_id: str
+    file_id: str,
+    view: Optional[str] = Query(None, description="Loại view để trả về dữ liệu (ví dụ: summary, detail, full)")
 ):
     """
     Lấy thông tin chi tiết file
@@ -236,7 +273,7 @@ async def get_file_details(
             data=response,
             timestamp=datetime.now().isoformat(),
             requestId=str(uuid.uuid4()),
-            path=f"/api/v1/automation-service/files/{file_id}"
+            path=f"/api/v1/automation-service/v1/files/{file_id}"
         )
     except HTTPException as e:
         return RestResponse(
@@ -247,7 +284,7 @@ async def get_file_details(
             data=None,
             timestamp=datetime.now().isoformat(),
             requestId=str(uuid.uuid4()),
-            path=f"/api/v1/automation-service/files/{file_id}"
+            path=f"/api/v1/automation-service/v1/files/{file_id}"
         )
 
 

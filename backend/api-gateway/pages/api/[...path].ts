@@ -14,7 +14,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     const fullPath = Array.isArray(path) ? path.join('/') : path || '';
     const method = req.method || 'GET';
 
-  logger.info(`🔄 Proxy request: ${method} /${fullPath}`);
+  // Reconstruct full API path (avoid duplicating /v1 since it is already the first segment in fullPath)
+  const fullApiPath = `/api/${fullPath}`;
+  
+  logger.info(`🔄 Proxy request: ${method} ${fullApiPath}`);
 
   // Determine service key and keep original endpoint
   const parts = fullPath.split('/').filter(Boolean);
@@ -40,26 +43,46 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     'automation-service': 'automation'
   };
 
-  // Prefer second segment when prefixed with v1
-  const primaryToken = parts[0] === 'v1' && parts.length > 1 ? parts[1] : parts[0] || '';
-
-  let serviceKey = tokenToService[primaryToken] || '';
-  if (!serviceKey) {
-    // Fallback: scan all segments for a known token
-    for (const seg of parts) {
-      if (tokenToService[seg]) {
-        serviceKey = tokenToService[seg];
-        break;
+  // Handle different path structures
+  let serviceKey = '';
+  
+  // Check for new pattern: /api/v1/service-name/v1/resource (with duplicate v1)
+  if (parts.length >= 4 && parts[0] === 'api' && parts[1] === 'v1' && parts[3] === 'v1') {
+    const serviceName = parts[2];
+    serviceKey = tokenToService[serviceName] || '';
+  }
+  // Check for automation-service pattern: /api/v1/automation-service/v1/...
+  else if (parts.length >= 3 && parts[0] === 'api' && parts[1] === 'v1' && parts[2] === 'automation-service') {
+    serviceKey = 'automation';
+  }
+  // Check for other service patterns: /api/v1/service-name/...
+  else if (parts.length >= 3 && parts[0] === 'api' && parts[1] === 'v1') {
+    const serviceName = parts[2];
+    serviceKey = tokenToService[serviceName] || '';
+  }
+  // Fallback: use original logic for backward compatibility
+  else {
+    const primaryToken = parts[0] === 'v1' && parts.length > 1 ? parts[1] : parts[0] || '';
+    serviceKey = tokenToService[primaryToken] || '';
+    
+    if (!serviceKey) {
+      // Fallback: scan all segments for a known token
+      for (const seg of parts) {
+        if (tokenToService[seg]) {
+          serviceKey = tokenToService[seg];
+          break;
+        }
       }
     }
   }
+  
   if (!serviceKey) {
     // Default to user-management if still unknown
     serviceKey = 'user-management';
   }
 
   // Keep original endpoint including /api/v1/...
-  const endpoint = `/${fullPath}`;
+  const endpoint = fullApiPath;
 
     // Get service instance
     const service = serviceManager.getService(serviceKey);

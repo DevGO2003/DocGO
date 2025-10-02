@@ -94,7 +94,7 @@ class EnhancedServiceManager {
     this.addService('user-management', {
       name: 'user-management-service',
       url: selectUrl(process.env.USER_MANAGEMENT_SERVICE_URL, 'http://user-management-service:8001', 'http://localhost:8001'),
-      healthCheck: '/api/v1/user-management-service/auth/health',
+      healthCheck: '/api/v1/user-management-service/v1/auth/health',
       timeout: 10000,
       enableCaching: true,
       cacheTTL: 300, // 5 minutes

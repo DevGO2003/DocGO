@@ -7,6 +7,7 @@ FROM base AS deps
 RUN apk add --no-cache libc6-compat
 
 # Install dependencies based on the preferred package manager
+WORKDIR /app
 COPY package.json package-lock.json* ./
 RUN npm ci --only=production
 

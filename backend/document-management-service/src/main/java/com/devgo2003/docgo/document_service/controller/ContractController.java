@@ -33,7 +33,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/document-management-service/contracts")
+@RequestMapping("/api/v1/document-management-service/v1/contracts")
 @Tag(name = "📋 APIs Contract Management", description = "APIs để quản lý hợp đồng trong hệ thống DocGO")
 public class ContractController {
 
@@ -77,6 +77,10 @@ public class ContractController {
         Loại: boolean
         Mô tả: Bao gồm hợp đồng đã xóa mềm (mặc định: false)
 
+        📄 view (tùy chọn, query)
+        Loại: string
+        Mô tả: Loại view để trả về dữ liệu (ví dụ: summary, detail, full)
+
         ## 🔹 Đầu ra
 
         📝 data
@@ -119,7 +123,8 @@ public class ContractController {
             @RequestParam(required = false) String sortBy,
             @RequestParam(required = false) String sortDirection,
             @RequestParam(required = false) String searchTerm,
-            @RequestParam(defaultValue = "false") boolean includeDeleted) {
+            @RequestParam(defaultValue = "false") boolean includeDeleted,
+            @RequestParam(required = false) String view) {
         
         // Convert single sortBy to List for service compatibility
         List<String> sortByList = sortBy != null ? List.of(sortBy) : null;
@@ -212,7 +217,9 @@ public class ContractController {
         """
     )
     @GetMapping("/{id}")
-    public ResponseEntity<RestResponse<ContractResponseDto>> getContract(@PathVariable String id) {
+    public ResponseEntity<RestResponse<ContractResponseDto>> getContract(
+            @PathVariable String id,
+            @RequestParam(required = false) String view) {
         ContractResponseDto contract = contractService.getContractWithNewFormat(id);
         RestResponse<ContractResponseDto> response = RestResponse.<ContractResponseDto>builder()
                 .apiVersion("v1")

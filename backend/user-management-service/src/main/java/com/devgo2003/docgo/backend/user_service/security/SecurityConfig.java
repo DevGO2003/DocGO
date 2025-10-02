@@ -65,7 +65,14 @@ public class SecurityConfig {
                 "/api/v1/user-management-service/auth/oauth2/test",
                 "/api/v1/user-management-service/oauth2/**",
                 "/oauth2/**",
-                "/login/oauth2/**"
+                "/login/oauth2/**",
+                // Permit duplicated paths that include the extra /v1/ segment used by AuthController
+                "/api/v1/user-management-service/v1/auth/login",
+                "/api/v1/user-management-service/v1/auth/register",
+                "/api/v1/user-management-service/v1/auth/refresh",
+                "/api/v1/user-management-service/v1/auth/logout",
+                "/api/v1/user-management-service/v1/auth/health",
+                "/api/v1/user-management-service/v1/auth/oauth2/test"
             };
         } else {
             permittedPaths = new String[]{
@@ -74,13 +81,21 @@ public class SecurityConfig {
                 "/swagger-ui.html",
                 "/v3/api-docs/**",
                 "/swagger-ui/**",
+                "/api/v1/user-management-service/v1/health",
                 "/api/v1/user-management-service/auth/login",
                 "/api/v1/user-management-service/auth/register",
                 "/api/v1/user-management-service/auth/refresh",
                 "/api/v1/user-management-service/auth/logout",
                 "/api/v1/user-management-service/auth/health",
                 "/api/v1/user-management-service/auth/oauth2/test",
-                "/api/v1/user-management-service/oauth2/**"
+                "/api/v1/user-management-service/oauth2/**",
+                // Permit duplicated paths that include the extra /v1/ segment used by AuthController
+                "/api/v1/user-management-service/v1/auth/login",
+                "/api/v1/user-management-service/v1/auth/register",
+                "/api/v1/user-management-service/v1/auth/refresh",
+                "/api/v1/user-management-service/v1/auth/logout",
+                "/api/v1/user-management-service/v1/auth/health",
+                "/api/v1/user-management-service/v1/auth/oauth2/test"
             };
         }
         

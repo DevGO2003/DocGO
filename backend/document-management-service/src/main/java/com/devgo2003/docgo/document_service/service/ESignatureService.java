@@ -466,4 +466,65 @@ public class ESignatureService {
     public List<ESignature> getAllESignatures() {
         return eSignatureRepository.findAll();
     }
+
+    /**
+     * Áp dụng view filter dựa trên loại view
+     */
+    public List<ESignature> applyViewFilter(List<ESignature> eSignatures, String viewType) {
+        if (eSignatures == null || eSignatures.isEmpty()) {
+            return eSignatures;
+        }
+        
+        switch (viewType.toLowerCase()) {
+            case "summary":
+                return eSignatures.stream()
+                    .map(this::createSummaryView)
+                    .collect(java.util.stream.Collectors.toList());
+            case "minimal":
+                return eSignatures.stream()
+                    .map(this::createMinimalView)
+                    .collect(java.util.stream.Collectors.toList());
+            case "full":
+            default:
+                return eSignatures; // Return full data
+        }
+    }
+    
+    /**
+     * Tạo summary view của ESignature (chỉ các trường quan trọng)
+     */
+    private ESignature createSummaryView(ESignature eSignature) {
+        ESignature summaryESignature = new ESignature();
+        summaryESignature.setId(eSignature.getId());
+        summaryESignature.setContractId(eSignature.getContractId());
+        summaryESignature.setSignerId(eSignature.getSignerId());
+        summaryESignature.setSignerName(eSignature.getSignerName());
+        summaryESignature.setSignerEmail(eSignature.getSignerEmail());
+        summaryESignature.setSignerRole(eSignature.getSignerRole());
+        summaryESignature.setSignatureType(eSignature.getSignatureType());
+        summaryESignature.setStatus(eSignature.getStatus());
+        summaryESignature.setVerificationMethod(eSignature.getVerificationMethod());
+        summaryESignature.setRequired(eSignature.getRequired());
+        summaryESignature.setSignatureOrder(eSignature.getSignatureOrder());
+        summaryESignature.setSignedAt(eSignature.getSignedAt());
+        summaryESignature.setCreatedAt(eSignature.getCreatedAt());
+        summaryESignature.setUpdatedAt(eSignature.getUpdatedAt());
+        return summaryESignature;
+    }
+    
+    /**
+     * Tạo minimal view của ESignature (chỉ các trường cơ bản)
+     */
+    private ESignature createMinimalView(ESignature eSignature) {
+        ESignature minimalESignature = new ESignature();
+        minimalESignature.setId(eSignature.getId());
+        minimalESignature.setContractId(eSignature.getContractId());
+        minimalESignature.setSignerId(eSignature.getSignerId());
+        minimalESignature.setSignerName(eSignature.getSignerName());
+        minimalESignature.setSignerEmail(eSignature.getSignerEmail());
+        minimalESignature.setStatus(eSignature.getStatus());
+        minimalESignature.setSignatureType(eSignature.getSignatureType());
+        minimalESignature.setRequired(eSignature.getRequired());
+        return minimalESignature;
+    }
 }

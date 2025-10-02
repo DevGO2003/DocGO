@@ -1,7 +1,7 @@
 // Authentication Integration Test Utilities
 // This file contains utilities to test the authentication integration with backend
 
-import { authAPI } from '@/lib/api'
+import { userAPI } from '@/lib/apis'
 import { LoginCredentials, RegisterData, User } from '@/types/auth'
 
 export interface AuthTestResult {
@@ -21,26 +21,19 @@ export class AuthIntegrationTester {
   // Test backend connectivity
   async testBackendConnectivity(): Promise<AuthTestResult> {
     try {
-      const response = await fetch(`${this.baseUrl}/api/v1/authentication-identity-service/auth/oauth2/test`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        signal: AbortSignal.timeout(5000)
-      })
+      const response = await userAPI.testOAuth()
 
-      if (response.ok) {
-        const data = await response.json()
+      if (response.data && response.data.statusCode === 200) {
         return {
           success: true,
           message: 'Backend connectivity test passed',
-          data: data
+          data: response.data
         }
       } else {
         return {
           success: false,
-          message: `Backend connectivity test failed: ${response.status} ${response.statusText}`,
-          error: { status: response.status, statusText: response.statusText }
+          message: `Backend connectivity test failed: ${response.data?.statusCode || 'Unknown error'}`,
+          error: response.data
         }
       }
     } catch (error: any) {
@@ -55,18 +48,18 @@ export class AuthIntegrationTester {
   // Test login endpoint
   async testLoginEndpoint(credentials: LoginCredentials): Promise<AuthTestResult> {
     try {
-      const response = await authAPI.login(credentials)
+      const response = await userAPI.login(credentials)
       
       // Check if response has expected structure
-      if (response.data?.data?.accessToken && response.data?.data?.user) {
+      if ((response.data as any)?.data?.accessToken && (response.data as any)?.data?.user) {
         return {
           success: true,
           message: 'Login endpoint test passed',
           data: {
-            hasToken: !!response.data.data.accessToken,
-            hasUser: !!response.data.data.user,
-            userRole: response.data.data.user.role,
-            userStatus: response.data.data.user.status
+            hasToken: !!(response.data as any).data.accessToken,
+            hasUser: !!(response.data as any).data.user,
+            userRole: (response.data as any).data.user.role,
+            userStatus: (response.data as any).data.user.status
           }
         }
       } else {
@@ -88,7 +81,7 @@ export class AuthIntegrationTester {
   // Test register endpoint
   async testRegisterEndpoint(registerData: RegisterData): Promise<AuthTestResult> {
     try {
-      const response = await authAPI.register(registerData)
+      const response = await userAPI.register(registerData)
       
       return {
         success: true,
@@ -112,17 +105,17 @@ export class AuthIntegrationTester {
         window.localStorage.setItem('auth_token', token)
       }
 
-      const response = await authAPI.getProfile()
+      const response = await userAPI.getProfile()
       
-      if (response.data?.data) {
+      if ((response.data as any)?.data) {
         return {
           success: true,
           message: 'Profile endpoint test passed',
           data: {
-            userId: response.data.data.id,
-            username: response.data.data.username,
-            email: response.data.data.email,
-            role: response.data.data.role
+            userId: (response.data as any).data.id,
+            username: (response.data as any).data.username,
+            email: (response.data as any).data.email,
+            role: (response.data as any).data.role
           }
         }
       } else {
@@ -144,7 +137,7 @@ export class AuthIntegrationTester {
   // Test OAuth status endpoint
   async testOAuthStatusEndpoint(): Promise<AuthTestResult> {
     try {
-      const response = await authAPI.getOAuthStatus()
+      const response = await userAPI.getOAuthStatus()
       
       return {
         success: true,
@@ -215,7 +208,7 @@ export const testRegisterData: RegisterData = {
   password: 'testpassword123',
   firstName: 'Test',
   lastName: 'User',
-  role: 'USER'
+  role: 'USER' as any
 }
 
 // Make tester available globally for browser console testing

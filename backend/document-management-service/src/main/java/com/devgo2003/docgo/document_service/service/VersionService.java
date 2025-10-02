@@ -622,4 +622,60 @@ public class VersionService {
     public List<Version> getAllVersions() {
         return versionRepository.findByIsDeletedFalse();
     }
+
+    /**
+     * Áp dụng view filter dựa trên loại view
+     */
+    public List<Version> applyViewFilter(List<Version> versions, String viewType) {
+        if (versions == null || versions.isEmpty()) {
+            return versions;
+        }
+        
+        switch (viewType.toLowerCase()) {
+            case "summary":
+                return versions.stream()
+                    .map(this::createSummaryView)
+                    .collect(java.util.stream.Collectors.toList());
+            case "minimal":
+                return versions.stream()
+                    .map(this::createMinimalView)
+                    .collect(java.util.stream.Collectors.toList());
+            case "full":
+            default:
+                return versions; // Return full data
+        }
+    }
+    
+    /**
+     * Tạo summary view của Version (chỉ các trường quan trọng)
+     */
+    private Version createSummaryView(Version version) {
+        Version summaryVersion = new Version();
+        summaryVersion.setId(version.getId());
+        summaryVersion.setContractId(version.getContractId());
+        summaryVersion.setVersionNumber(version.getVersionNumber());
+        summaryVersion.setVersionName(version.getVersionName());
+        summaryVersion.setChangeType(version.getChangeType());
+        summaryVersion.setChangesSummary(version.getChangesSummary());
+        summaryVersion.setIsPublished(version.getIsPublished());
+        summaryVersion.setIsCurrent(version.getIsCurrent());
+        summaryVersion.setCreatedAt(version.getCreatedAt());
+        summaryVersion.setUpdatedAt(version.getUpdatedAt());
+        return summaryVersion;
+    }
+    
+    /**
+     * Tạo minimal view của Version (chỉ các trường cơ bản)
+     */
+    private Version createMinimalView(Version version) {
+        Version minimalVersion = new Version();
+        minimalVersion.setId(version.getId());
+        minimalVersion.setContractId(version.getContractId());
+        minimalVersion.setVersionNumber(version.getVersionNumber());
+        minimalVersion.setVersionName(version.getVersionName());
+        minimalVersion.setChangeType(version.getChangeType());
+        minimalVersion.setIsPublished(version.getIsPublished());
+        minimalVersion.setIsCurrent(version.getIsCurrent());
+        return minimalVersion;
+    }
 }

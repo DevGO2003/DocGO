@@ -16,7 +16,7 @@ import java.util.List;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/v1/user-management-service/sessions")
+@RequestMapping("/api/v1/user-management-service/v1/sessions")
 @RequiredArgsConstructor
 @Tag(name = "🕐 APIs Quản lý Phiên đăng nhập", description = "APIs quản lý phiên đăng nhập")
 public class SessionController {
@@ -28,6 +28,10 @@ public class SessionController {
         summary = "Lấy danh sách phiên đăng nhập", 
         description = """
         🔹 Đầu vào
+        
+        👁️ view (tùy chọn, query)
+        Loại: string
+        Mô tả: Loại view dữ liệu (mặc định: full)
         
         📄 pageNumber (tùy chọn, query)
         Loại: integer
@@ -81,12 +85,13 @@ public class SessionController {
         """
     )
     public ResponseEntity<RestResponse<Page<UserSession>>> getAllSessions(
+            @Parameter(description = "Loại view dữ liệu (mặc định: full)") @RequestParam(defaultValue = "full") String view,
             @Parameter(description = "Số trang (mặc định: 0)") @RequestParam(defaultValue = "0") int pageNumber,
             @Parameter(description = "Kích thước trang (mặc định: 10)") @RequestParam(defaultValue = "10") int pageSize,
             @Parameter(description = "Trường sắp xếp (mặc định: createdAt)") @RequestParam(defaultValue = "createdAt") String sortBy,
             @Parameter(description = "Hướng sắp xếp (mặc định: DESC)") @RequestParam(defaultValue = "DESC") String sortDirection) {
         
-        log.info("Getting all sessions - pageNumber: {}, pageSize: {}, sortBy: {}, sortDirection: {}", pageNumber, pageSize, sortBy, sortDirection);
+        log.info("Getting all sessions - view: {}, pageNumber: {}, pageSize: {}, sortBy: {}, sortDirection: {}", view, pageNumber, pageSize, sortBy, sortDirection);
         
         Page<UserSession> sessions = sessionService.getAllSessions(pageNumber, pageSize, sortBy, sortDirection);
         

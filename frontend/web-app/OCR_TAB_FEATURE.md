@@ -34,9 +34,9 @@
 2. `src/app/dashboard/create-contract/page.tsx` - Thêm tab system và tích hợp OCR
 
 ### API Endpoints:
-- `/api/v1/ai-processing-service/extract` - Trích xuất văn bản từ file
-- `/api/v1/ai-processing-service/summarize` - Tóm tắt hợp đồng
-- `/api/v1/file-storage-asset-service/upload` - Upload file lên storage
+- `/api/v1/automation-service/v1/document/extract` - Trích xuất văn bản từ file
+- `/api/v1/automation-service/v1/contracts/summarize` - Tóm tắt hợp đồng
+- `/api/v1/automation-service/v1/files` - Upload file lên storage
 - `/api/mock/ocr` - Mock API fallback
 
 ## 🎨 UI/UX

@@ -2,7 +2,7 @@
 id: "rule-api-standards"
 name: "Chuẩn hóa API cho DocGO"
 description: "Chuẩn hóa URL, payload, response format cho các microservices"
-version: "1.0.0"
+version: "1.0.1"
 alwaysApply: true
 enabled: true
 priority: 20
@@ -20,7 +20,7 @@ references: []
 commands: []
 owners: ["devgo2003"]
 createdAt: "2025-09-23T00:00:00Z"
-updatedAt: "2025-09-23T00:00:00Z"
+updatedAt: "2025-10-01T00:00:00Z"
 notes: "Rule API cốt lõi, nên alwaysApply"
 language: vi
 ---
@@ -30,7 +30,7 @@ language: vi
 Mục tiêu: Đồng bộ cách đặt URL, payload, xử lý lỗi (handler), và viết tài liệu API. Quy tắc này dựa trên hiện trạng `user-management-service` và `document-management-service` (Spring Boot + GlobalExceptionHandler + RestResponse) và `automation-service` (FastAPI) và hướng tới đồng nhất giữa các service.
 
 ## 1) Quy tắc URL
-- Base path: `/api/v1/{service-name}/...`
+- Base path: `/api/v1/{service-name}/v1/...`
 - `service-name` dùng kebab-case trùng tên service trong code:
   - `user-management-service`
   - `document-management-service`
@@ -40,8 +40,8 @@ Mục tiêu: Đồng bộ cách đặt URL, payload, xử lý lỗi (handler), v
   - Chuẩn REST: `POST /users`, `GET /users`, `GET /users/{id}`, `PUT /users/{id}`, `DELETE /users/{id}`
   - Sub-resource: `GET /users/{id}/documents`, `GET /documents/{id}/attachments`, `PUT /users/{id}/restore`
   - Tác vụ Automation chuyên biệt (file hoặc chuỗi):
-    - `POST /automation-service/process`
-    - `POST /automation-service/validate`
+    - `POST /automation-service/v1/process`
+    - `POST /automation-service/v1/validate`
 - Query chuẩn phân trang, sắp xếp và lọc (giữ nguyên như trong controller):
   - `pageNumber`, `pageSize`, `sortBy`, `sortDirection`, `searchTerm`, `includeDeleted`
 
@@ -101,27 +101,27 @@ Mục tiêu: Đồng bộ cách đặt URL, payload, xử lý lỗi (handler), v
 
 ## 5) Ví dụ mô hình hóa từ hiện trạng
 - Tạo người dùng (Java):
-  - `POST /api/v1/user-management-service/users`
+  - `POST /api/v1/user-management-service/v1/users`
   - Body: `User` JSON (không gửi `id` khi tạo)
   - 201 + `RestResponse<User>`
 
 - Danh sách người dùng (Java):
-  - `GET /api/v1/user-management-service/users?pageNumber=0&pageSize=10&sortBy=...`
+  - `GET /api/v1/user-management-service/v1/users?pageNumber=0&pageSize=10&sortBy=...`
   - 200 + `RestResponse<PaginatedResponse<User>>` hoặc 200 với `statusCode: 204` khi không có dữ liệu
 
 - Lấy chi tiết người dùng (Java):
-  - `GET /api/v1/user-management-service/users/{id}` → 200 hoặc 404
+  - `GET /api/v1/user-management-service/v1/users/{id}` → 200 hoặc 404
 
 - Khôi phục người dùng (Java):
-  - `PUT /api/v1/user-management-service/users/{id}/restore` → 200
+  - `PUT /api/v1/user-management-service/v1/users/{id}/restore` → 200
 
 - Automation Process (Python):
-  - `POST /api/v1/automation-service/process`
+  - `POST /api/v1/automation-service/v1/process`
   - multipart: `file` (txt/pdf/docx) + header `API_KEY` (tùy chọn)
   - 200 + `RestResponse<string>` kết quả xử lý
 
 - Automation Validate (Python):
-  - `POST /api/v1/automation-service/validate`
+  - `POST /api/v1/automation-service/v1/validate`
   - multipart `file` (txt) hoặc JSON `{ "data": "..." }`
   - 200 + `RestResponse<object|string>`; có làm sạch JSON trong handler
 
@@ -162,7 +162,7 @@ public ResponseEntity<...> createUser(...) { ... }
 ### 9.1) Controller Level Annotations
 ```java
 @RestController
-@RequestMapping("/api/v1/document-management-service/documents")
+@RequestMapping("/api/v1/document-management-service/v1/documents")
 @Tag(name = "Document Management", description = "API quản lý tài liệu")
 public class DocumentController {
 ```
@@ -254,7 +254,7 @@ return ResponseEntity.ok(RestResponse.<Page<Document>>builder()
 
 #### API Endpoint Structure:
 ```
-GET /api/v1/document-management-service/documents
+GET /api/v1/document-management-service/v1/documents
 ├── 📋 Summary: "Lấy danh sách tài liệu"
 ├── 📖 Description: [Chi tiết đầy đủ với emoji]
 ├── 🔧 Parameters:
@@ -283,7 +283,7 @@ GET /api/v1/document-management-service/documents
   },
   "timestamp": "2024-01-01T00:00:00Z",
   "requestId": "uuid-here",
-  "path": "/api/v1/document-management-service/documents"
+  "path": "/api/v1/document-management-service/v1/documents"
 }
 ```
 

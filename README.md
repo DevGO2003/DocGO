@@ -55,19 +55,45 @@ Số lượng service ứng dụng: 4 microservices chính (api-gateway, user-ma
 git clone https://github.com/DevGO2003/DocGO.git
 cd DocGO
 
+# Setup environment variables
+cp .env.example .env
+# Chỉnh sửa .env với các giá trị thực tế (MongoDB URI, JWT Secret, Gemini API Key)
+
 # Chạy toàn bộ hệ thống
-docker compose -f docker-compose.yml up -d
+docker-compose up -d
 
 # Hoặc chạy từng service
-docker compose -f docker-compose.yml up redis kafka
-docker compose -f docker-compose.yml up web-app
-docker compose -f docker-compose.yml up api-gateway
-docker compose -f docker-compose.yml up user-management-service
-docker compose -f docker-compose.yml up document-management-service
-docker compose -f docker-compose.yml up automation-service
+docker-compose up -d kafka redis
+docker-compose up -d user-management-service
+docker-compose up -d document-management-service
+docker-compose up -d automation-service
+docker-compose up -d api-gateway
+docker-compose up -d web-app
+
+# Xem logs
+docker-compose logs -f [service-name]
+
+# Dừng hệ thống
+docker-compose down
 ```
 
-### 2. Chạy từng service riêng lẻ
+### 2. Development với Volume Mount (Hot Reload)
+
+```bash
+# Chạy với volume mount để code thay đổi được sync ngay
+docker-compose up -d
+
+# Code thay đổi trên máy host sẽ được reflect ngay trong container
+# Không cần rebuild image khi sửa code
+
+# Xem logs real-time
+docker-compose logs -f
+
+# Restart service sau khi thay đổi config
+docker-compose restart [service-name]
+```
+
+### 3. Chạy từng service riêng lẻ
 
 #### API Gateway
 ```bash
@@ -141,15 +167,47 @@ curl http://localhost:8003/docs
 ## 🔧 Cấu hình
 
 ### Environment Variables
-Mỗi service có file `.env.example` riêng. Copy và cấu hình theo môi trường:
+Dự án sử dụng file `.env` chung ở root để quản lý tất cả environment variables:
 
 ```bash
 # Copy environment template
-cp backend/[service-name]/env_example.txt backend/[service-name]/.env
+cp .env.example .env
 
-# Cấu hình database (MongoDB Atlas)
-MONGODB_ATLAS_URI=mongodb+srv://root:sapassword@devgo-docgo-cluster0.hsudzga.mongodb.net/
+# Chỉnh sửa file .env với các giá trị thực tế
+nano .env
 ```
+
+#### Các biến môi trường quan trọng:
+
+**Root .env (Infrastructure only):**
+```bash
+# Database (MongoDB Atlas)
+MONGODB_ATLAS_URI=mongodb+srv://username:password@cluster.mongodb.net/
+
+# Service Ports (có thể tùy chỉnh)
+API_GATEWAY_PORT=8000
+USER_MANAGEMENT_PORT=8001
+DOCUMENT_MANAGEMENT_PORT=8002
+AUTOMATION_PORT=8003
+WEB_APP_PORT=3000
+```
+
+**Service-specific .env files:**
+```bash
+# backend/user-management-service/.env
+JWT_SECRET=your-super-secret-jwt-key-here-change-this-in-production
+GOOGLE_CLIENT_ID=your-google-client-id-here
+
+# backend/automation-service/.env
+GEMINI_API_KEY=your-gemini-api-key-here
+```
+
+#### Ưu điểm của cách quản lý mới:
+- ✅ **Layered approach**: Infrastructure secrets ở root, service secrets ở service level
+- ✅ **Secure**: Service-specific secrets không expose ở root level
+- ✅ **Clear ownership**: Mỗi service quản lý secrets riêng
+- ✅ **Flexible**: Dễ dàng override secrets per service
+- ✅ **Template**: Có .env.example làm mẫu cho từng layer
 
 ### Database Setup (MongoDB Atlas)
 ```bash
@@ -161,6 +219,57 @@ MONGODB_ATLAS_URI=mongodb+srv://root:sapassword@devgo-docgo-cluster0.hsudzga.mon
 # - docgo_automation_service (Automation Service)
 
 # Không cần cài đặt database local, tất cả đều sử dụng MongoDB Atlas
+```
+
+## 🐛 Troubleshooting Docker
+
+### 1. Port Conflict
+```bash
+# Kiểm tra port đang sử dụng
+netstat -ano | findstr :8000
+# Dừng process hoặc thay đổi port
+```
+
+### 2. Container không khởi động
+```bash
+# Xem logs chi tiết
+docker-compose logs [service-name]
+
+# Kiểm tra trạng thái container
+docker-compose ps
+
+# Restart service
+docker-compose restart [service-name]
+```
+
+### 3. Volume Mount Issues
+```bash
+# Tạo thư mục cần thiết
+mkdir -p logs uploads results
+
+# Kiểm tra quyền truy cập
+ls -la backend/[service-name]/
+```
+
+### 4. Network Issues
+```bash
+# Kiểm tra network
+docker network ls
+docker network inspect docgo_docgo-network
+
+# Recreate network
+docker-compose down
+docker network prune
+docker-compose up -d
+```
+
+### 5. Environment Variables
+```bash
+# Kiểm tra environment variables
+docker-compose config
+
+# Verify .env files
+ls -la backend/*/env/.env
 ```
 
 ## 📁 Cấu trúc Project

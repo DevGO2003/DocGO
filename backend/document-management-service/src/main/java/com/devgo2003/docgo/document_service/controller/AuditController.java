@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/v1/document-management-service/audit-logs")
+@RequestMapping("/api/v1/document-management-service/v1/audit-logs")
 @Tag(name = "🔍 APIs Quản lý Audit Log", description = "Các API để quản lý nhật ký kiểm toán trong hệ thống DocGO")
 public class AuditController {
 

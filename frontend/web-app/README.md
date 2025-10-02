@@ -36,18 +36,16 @@ Frontend (Port 3001) → API Gateway BFF (Port 8000) → Microservices
 ```
 
 ### Microservices được hỗ trợ
-- **authentication-identity-service** (Port 8001) - Xác thực và quản lý danh tính
-- **user-management-service** (Port 8002) - Quản lý người dùng
-- **document-management-service** (Port 8003) - Quản lý hợp đồng
-- **ai-processing-service** (Port 8017) - Xử lý AI
-- **file-storage-asset-service** (Port 8012) - Lưu trữ tài liệu
+- **user-management-service** (Port 8001) - Quản lý người dùng và xác thực
+- **document-management-service** (Port 8002) - Quản lý hợp đồng
+- **automation-service** (Port 8003) - Xử lý AI và automation
 
 ### API Endpoints
-- `POST /api/v1/authentication-identity-service/auth/login` - Đăng nhập
-- `POST /api/v1/authentication-identity-service/auth/register` - Đăng ký
-- `GET /api/v1/document-management-service/contracts` - Lấy danh sách hợp đồng
-- `POST /api/v1/ai-processing-service/extract` - Trích xuất văn bản
-- `POST /api/v1/ai-processing-service/summarize` - Tóm tắt văn bản
+- `POST /api/v1/user-management-service/v1/auth/login` - Đăng nhập
+- `POST /api/v1/user-management-service/v1/auth/register` - Đăng ký
+- `GET /api/v1/document-management-service/v1/contracts` - Lấy danh sách hợp đồng
+- `POST /api/v1/automation-service/v1/document/extract` - Trích xuất văn bản
+- `POST /api/v1/automation-service/v1/contracts/summarize` - Tóm tắt văn bản
 
 ## 📁 Cấu trúc dự án
 

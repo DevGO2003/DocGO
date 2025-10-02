@@ -61,7 +61,7 @@ export const config: GatewayConfig = {
       url: process.env.USER_MANAGEMENT_SERVICE_URL || 
            buildServiceUrl('user-management-service', 8001, 8001),
       port: 8001,
-      healthCheck: '/api/v1/user-management-service/auth/health',
+      healthCheck: '/api/v1/user-management-service/v1/auth/health',
       timeout: 10000
     },
     

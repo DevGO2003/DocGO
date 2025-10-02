@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
+import { automationAPI } from '@/lib/apis'
 
 interface OCRUploadProps {
   onResult: (result: any) => void
@@ -67,36 +68,14 @@ export default function OCRUpload({ onResult, onError, loading, setLoading }: OC
 
       let result
       try {
-        // Extract text from file first
-        const formData = new FormData()
-        formData.append('file', uploadedFile)
+        // Extract text from file first using automationAPI
+        const extractRes = await automationAPI.extractText(uploadedFile)
+        const extractedText = (extractRes.data.data as any).extractedText
 
-        const res = await fetch('/api/v1/ai-processing-service/extract', {
-          method: 'POST',
-          body: formData
-        })
+        // Then summarize the extracted text using automationAPI
+        const summarizeRes = await automationAPI.summarizeText(extractedText)
 
-        if (!res.ok) {
-          throw new Error('AI service not available')
-        }
-
-        const extractData = await res.json()
-        const extractedText = extractData.data
-
-        // Then summarize the extracted text
-        const summarizeRes = await fetch('/api/v1/ai-processing-service/summarize', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ text: extractedText })
-        })
-
-        if (!summarizeRes.ok) {
-          throw new Error('AI service not available')
-        }
-
-        result = await summarizeRes.json()
+        result = summarizeRes.data
       } catch (aiError) {
         // Fallback to mock API
         console.log('AI service not available, using mock API')

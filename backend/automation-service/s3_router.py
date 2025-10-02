@@ -14,7 +14,7 @@ import uuid
 from schemas.response import RestResponse
 
 # Create router
-router = APIRouter(prefix="/api/v1/automation-service/s3", tags=["⚙️ APIs Kiểm tra Hệ thống"])
+router = APIRouter(prefix="/api/v1/automation-service/v1/s3", tags=["⚙️ APIs Kiểm tra Hệ thống"])
 
 
 @router.get("/get-config", summary="Cấu hình S3", response_model=RestResponse[dict])

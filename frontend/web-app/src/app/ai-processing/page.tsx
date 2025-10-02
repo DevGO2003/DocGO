@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react'
 import { useAuth } from '@/hooks/useAuth'
-import { aiProcessingAPI } from '@/lib/api'
+import { automationAPI } from '@/lib/apis'
 import { CogIcon, DocumentTextIcon, DocumentMagnifyingGlassIcon } from '@heroicons/react/24/outline'
 import toast from 'react-hot-toast'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
@@ -50,11 +50,11 @@ export default function AIProcessingPage() {
       setLoading(true)
       const startTime = Date.now()
       
-      const response = await aiProcessingAPI.extractText(selectedFile, apiKey || undefined)
+      const response = await automationAPI.extractText(selectedFile, apiKey || undefined)
       const data = response.data.data
       
-      setExtractedText(data.extractedText)
-      setConfidence(data.confidence || 0)
+      setExtractedText((data as any).extractedText)
+      setConfidence((data as any).confidence || 0)
       setProcessingTime(Date.now() - startTime)
       
       toast.success('Trích xuất văn bản thành công!')
@@ -78,16 +78,16 @@ export default function AIProcessingPage() {
       
       let response
       if (summarizeFile) {
-        response = await aiProcessingAPI.summarizeFile(summarizeFile, summarizeApiKey || undefined)
+        response = await automationAPI.summarizeFile(summarizeFile, summarizeApiKey || undefined)
       } else {
-        response = await aiProcessingAPI.summarizeText(inputText, summarizeApiKey || undefined)
+        response = await automationAPI.summarizeText(inputText, summarizeApiKey || undefined)
       }
       
       const data = response.data.data
       
-      setSummary(data.summary)
-      setKeyPoints(data.keyPoints || [])
-      setConfidence(data.confidence || 0)
+      setSummary((data as any).summary)
+      setKeyPoints((data as any).keyPoints || [])
+      setConfidence((data as any).confidence || 0)
       setProcessingTime(Date.now() - startTime)
       
       toast.success('Tóm tắt văn bản thành công!')

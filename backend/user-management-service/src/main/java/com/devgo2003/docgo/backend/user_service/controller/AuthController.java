@@ -21,7 +21,7 @@ import java.util.UUID;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/v1/user-management-service/auth")
+@RequestMapping("/api/v1/user-management-service/v1/auth")
 @RequiredArgsConstructor
 @Tag(name = "🔐 APIs Xác thực người dùng", description = "APIs xác thực: đăng nhập, đăng xuất, refresh token, OAuth2 Google")
 public class AuthController {
@@ -87,7 +87,7 @@ public class AuthController {
         
         🛣️ **path** (string)
         - **Mô tả**: Đường dẫn API được gọi
-        - **Ví dụ**: "/api/v1/user-management-service/auth/login"
+        - **Ví dụ**: "/api/v1/user-management-service/v1/auth/login"
         """
     )
     public ResponseEntity<RestResponse<AuthResponse>> login(@RequestBody LoginRequest request) {
@@ -104,7 +104,7 @@ public class AuthController {
                     .data(null)
                     .timestamp(ZonedDateTime.now())
                     .requestId(requestId)
-                    .path("/api/v1/user-management-service/auth/login")
+                    .path("/api/v1/user-management-service/v1/auth/login")
                     .build());
         }
 
@@ -118,7 +118,7 @@ public class AuthController {
                     .data(result)
                     .timestamp(ZonedDateTime.now())
                     .requestId(requestId)
-                    .path("/api/v1/user-management-service/auth/login")
+                    .path("/api/v1/user-management-service/v1/auth/login")
                     .build());
         }
 
@@ -130,7 +130,7 @@ public class AuthController {
                 .data(null)
                 .timestamp(ZonedDateTime.now())
                 .requestId(requestId)
-                .path("/api/v1/user-management-service/auth/login")
+                .path("/api/v1/user-management-service/v1/auth/login")
                 .build());
     }
 
@@ -183,7 +183,7 @@ public class AuthController {
         
         🛣️ **path** (string)
         - **Mô tả**: Đường dẫn API được gọi
-        - **Ví dụ**: "/api/v1/user-management-service/auth/register"
+        - **Ví dụ**: "/api/v1/user-management-service/v1/auth/register"
         """
     )
     public ResponseEntity<RestResponse<AuthResponse>> register(@RequestBody RegisterRequest request) {
@@ -201,7 +201,7 @@ public class AuthController {
                     .data(null)
                     .timestamp(ZonedDateTime.now())
                     .requestId(requestId)
-                    .path("/api/v1/user-management-service/auth/register")
+                    .path("/api/v1/user-management-service/v1/auth/register")
                     .build());
         }
 
@@ -215,7 +215,7 @@ public class AuthController {
                 .data(result.isSuccess() ? result : null)
                 .timestamp(ZonedDateTime.now())
                 .requestId(requestId)
-                .path("/api/v1/user-management-service/auth/register")
+                .path("/api/v1/user-management-service/v1/auth/register")
                 .build());
     }
 
@@ -268,7 +268,7 @@ public class AuthController {
         
         🛣️ **path** (string)
         - **Mô tả**: Đường dẫn API được gọi
-        - **Ví dụ**: "/api/v1/user-management-service/auth/refresh"
+        - **Ví dụ**: "/api/v1/user-management-service/v1/auth/refresh"
         """
     )
     public ResponseEntity<RestResponse<AuthResponse>> refresh(@RequestBody Map<String, String> body) {
@@ -283,7 +283,7 @@ public class AuthController {
                     .data(null)
                     .timestamp(ZonedDateTime.now())
                     .requestId(requestId)
-                    .path("/api/v1/user-management-service/auth/refresh")
+                    .path("/api/v1/user-management-service/v1/auth/refresh")
                     .build());
         }
 
@@ -297,7 +297,7 @@ public class AuthController {
                     .data(result)
                     .timestamp(ZonedDateTime.now())
                     .requestId(requestId)
-                    .path("/api/v1/user-management-service/auth/refresh")
+                    .path("/api/v1/user-management-service/v1/auth/refresh")
                     .build());
         }
 
@@ -309,7 +309,7 @@ public class AuthController {
                 .data(null)
                 .timestamp(ZonedDateTime.now())
                 .requestId(requestId)
-                .path("/api/v1/user-management-service/auth/refresh")
+                .path("/api/v1/user-management-service/v1/auth/refresh")
                 .build());
     }
 
@@ -327,7 +327,7 @@ public class AuthController {
                     .data(null)
                     .timestamp(ZonedDateTime.now())
                     .requestId(requestId)
-                    .path("/api/v1/user-management-service/auth/logout")
+                    .path("/api/v1/user-management-service/v1/auth/logout")
                     .build());
         }
 
@@ -340,7 +340,7 @@ public class AuthController {
                 .data(null)
                 .timestamp(ZonedDateTime.now())
                 .requestId(requestId)
-                .path("/api/v1/user-management-service/auth/logout")
+                .path("/api/v1/user-management-service/v1/auth/logout")
                 .build());
     }
 
@@ -357,7 +357,7 @@ public class AuthController {
                     .data(null)
                     .timestamp(ZonedDateTime.now())
                     .requestId(requestId)
-                    .path("/api/v1/user-management-service/auth/me")
+                    .path("/api/v1/user-management-service/v1/auth/me")
                     .build());
         }
 
@@ -394,7 +394,7 @@ public class AuthController {
                                 .data(data)
                                 .timestamp(ZonedDateTime.now())
                                 .requestId(requestId)
-                                .path("/api/v1/user-management-service/auth/me")
+                                .path("/api/v1/user-management-service/v1/auth/me")
                                 .build());
                     })
                     .orElseGet(() -> ResponseEntity.status(404).body(RestResponse.<AuthResponse>builder()
@@ -405,7 +405,7 @@ public class AuthController {
                             .data(null)
                             .timestamp(ZonedDateTime.now())
                             .requestId(requestId)
-                            .path("/api/v1/user-management-service/auth/me")
+                            .path("/api/v1/user-management-service/v1/auth/me")
                             .build()));
         } catch (Exception e) {
             return ResponseEntity.status(401).body(RestResponse.<AuthResponse>builder()
@@ -416,7 +416,7 @@ public class AuthController {
                     .data(null)
                     .timestamp(ZonedDateTime.now())
                     .requestId(requestId)
-                    .path("/api/v1/user-management-service/auth/me")
+                    .path("/api/v1/user-management-service/v1/auth/me")
                     .build());
         }
     }
@@ -433,7 +433,7 @@ public class AuthController {
                 .data(Map.of("status", "UP"))
                 .timestamp(ZonedDateTime.now())
                 .requestId(requestId)
-                .path("/api/v1/user-management-service/auth/health")
+                .path("/api/v1/user-management-service/v1/auth/health")
                 .build());
     }
 
@@ -459,7 +459,7 @@ public class AuthController {
                 .data(data)
                 .timestamp(ZonedDateTime.now())
                 .requestId(requestId)
-                .path("/api/v1/user-management-service/auth/oauth2/test")
+                .path("/api/v1/user-management-service/v1/auth/oauth2/test")
                 .build());
     }
 
@@ -477,8 +477,8 @@ public class AuthController {
         config.put("endpoints", Map.of(
             "authorization", "/oauth2/authorization/google (handled by Spring Security)",
             "callback", "/login/oauth2/code/google (handled by Spring Security)",
-            "test", "/api/v1/user-management-service/auth/oauth2/test",
-            "config", "/api/v1/user-management-service/auth/oauth2/config"
+            "test", "/api/v1/user-management-service/v1/auth/oauth2/test",
+            "config", "/api/v1/user-management-service/v1/auth/oauth2/config"
         ));
 
         return ResponseEntity.ok(RestResponse.<Map<String, Object>>builder()
@@ -489,7 +489,7 @@ public class AuthController {
                 .data(config)
                 .timestamp(ZonedDateTime.now())
                 .requestId(requestId)
-                .path("/api/v1/user-management-service/auth/oauth2/config")
+                .path("/api/v1/user-management-service/v1/auth/oauth2/config")
                 .build());
     }
 }

@@ -18,7 +18,7 @@ import java.util.Set;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/v1/user-management-service/roles")
+@RequestMapping("/api/v1/user-management-service/v1/roles")
 @RequiredArgsConstructor
 @Tag(name = "🎭 APIs Quản lý Vai trò", description = "APIs quản lý vai trò")
 public class RoleController {
@@ -30,6 +30,10 @@ public class RoleController {
         summary = "Lấy danh sách vai trò", 
         description = """
         🔹 Đầu vào
+        
+        👁️ view (tùy chọn, query)
+        Loại: string
+        Mô tả: Loại view dữ liệu (mặc định: full)
         
         📄 pageNumber (tùy chọn, query)
         Loại: integer
@@ -83,12 +87,13 @@ public class RoleController {
         """
     )
     public ResponseEntity<RestResponse<Page<Role>>> getAllRoles(
+            @Parameter(description = "Loại view dữ liệu (mặc định: full)") @RequestParam(defaultValue = "full") String view,
             @Parameter(description = "Số trang (mặc định: 0)") @RequestParam(defaultValue = "0") int pageNumber,
             @Parameter(description = "Kích thước trang (mặc định: 10)") @RequestParam(defaultValue = "10") int pageSize,
             @Parameter(description = "Trường sắp xếp (mặc định: createdAt)") @RequestParam(defaultValue = "createdAt") String sortBy,
             @Parameter(description = "Hướng sắp xếp (mặc định: DESC)") @RequestParam(defaultValue = "DESC") String sortDirection) {
         
-        log.info("Getting all roles - pageNumber: {}, pageSize: {}, sortBy: {}, sortDirection: {}", pageNumber, pageSize, sortBy, sortDirection);
+        log.info("Getting all roles - view: {}, pageNumber: {}, pageSize: {}, sortBy: {}, sortDirection: {}", view, pageNumber, pageSize, sortBy, sortDirection);
         
         Page<Role> roles = roleService.getAllRoles(pageNumber, pageSize, sortBy, sortDirection);
         

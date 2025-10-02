@@ -2,7 +2,7 @@
 // Handles retry logic for expired tokens and 401 responses
 
 import { AxiosRequestConfig, AxiosResponse } from 'axios'
-import { authAPI } from '@/lib/api'
+import { userAPI } from '@/lib/apis'
 import TokenManager from '@/utils/token-manager'
 
 export interface RetryConfig {
@@ -76,16 +76,16 @@ export class ApiRetry {
         return false
       }
 
-      const response = await authAPI.refreshToken(refreshToken)
+      const response = await userAPI.refreshToken(refreshToken)
       const refreshData = response.data?.data
 
-      if (refreshData?.accessToken) {
+      if ((refreshData as any)?.accessToken) {
         // Update stored tokens
         const newTokenData = {
-          accessToken: refreshData.accessToken,
-          refreshToken: refreshData.refreshToken || refreshToken,
-          expiresAt: Date.now() + (refreshData.expiresIn * 1000),
-          tokenType: refreshData.tokenType || 'Bearer'
+          accessToken: (refreshData as any).accessToken,
+          refreshToken: (refreshData as any).refreshToken || refreshToken,
+          expiresAt: Date.now() + ((refreshData as any).expiresIn * 1000),
+          tokenType: (refreshData as any).tokenType || 'Bearer'
         }
 
         TokenManager.storeTokens(newTokenData)

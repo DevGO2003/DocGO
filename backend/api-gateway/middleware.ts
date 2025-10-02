@@ -27,15 +27,15 @@ const publicRoutes = [
 
 function isPublicAuthPath(pathname: string): boolean {
   // Allow direct proxy calls to authentication service auth endpoints (login/register/refresh, oauth)
-  if (pathname.startsWith('/api/v1/user-management-service/auth/login')) return true
-  if (pathname.startsWith('/api/v1/user-management-service/auth/register')) return true
-  if (pathname.startsWith('/api/v1/user-management-service/auth/refresh')) return true
-  if (pathname.startsWith('/api/v1/user-management-service/auth/forgot-password')) return true
-  if (pathname.startsWith('/api/v1/user-management-service/auth/reset-password')) return true
-  if (pathname.startsWith('/api/v1/user-management-service/auth/oauth2')) return true
-  if (pathname.startsWith('/api/v1/user-management-service/oauth2')) return true
+  if (pathname.startsWith('/api/v1/user-management-service/v1/auth/login')) return true
+  if (pathname.startsWith('/api/v1/user-management-service/v1/auth/register')) return true
+  if (pathname.startsWith('/api/v1/user-management-service/v1/auth/refresh')) return true
+  if (pathname.startsWith('/api/v1/user-management-service/v1/auth/forgot-password')) return true
+  if (pathname.startsWith('/api/v1/user-management-service/v1/auth/reset-password')) return true
+  if (pathname.startsWith('/api/v1/user-management-service/v1/auth/oauth2')) return true
+  if (pathname.startsWith('/api/v1/user-management-service/v1/oauth2')) return true
   // Public health endpoint of auth service
-  if (pathname.startsWith('/api/v1/user-management-service/auth/health')) return true
+  if (pathname.startsWith('/api/v1/user-management-service/v1/auth/health')) return true
   return false
 }
 

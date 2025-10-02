@@ -25,6 +25,7 @@
 
 # Track example env files in all modules
 !**/.env.example
+!**/.env.template
 
 # Ignore sensitive environment files inside env/ directories
 **/env/.env

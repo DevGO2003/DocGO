@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/document-management-service/documents")
+@RequestMapping("/api/v1/document-management-service/v1/documents")
 @Tag(name = "📄 APIs Quản lý Tài liệu", description = "APIs quản lý tài liệu và tệp tin trong hệ thống DocGO")
 public class DocumentController {
 
@@ -168,7 +168,8 @@ public class DocumentController {
     public ResponseEntity<RestResponse<FileListResponse>> getAllDocuments(
             @Parameter(description = "Page number (default: 0)") @RequestParam(value = "page", defaultValue = "0") int page,
             @Parameter(description = "Page size (default: 10)") @RequestParam(value = "size", defaultValue = "10") int size,
-            @Parameter(description = "User ID (optional)") @RequestParam(value = "userId", required = false) String userId
+            @Parameter(description = "User ID (optional)") @RequestParam(value = "userId", required = false) String userId,
+            @Parameter(description = "Loại view dữ liệu (table|card|detail|full). Mặc định: full") @RequestParam(value = "view", defaultValue = "full") String view
     ) {
         FileListResponse documents = fileStorageService.getAllFiles(page, size, userId);
         return ResponseEntity.ok(RestResponse.success(documents, "Documents retrieved successfully"));

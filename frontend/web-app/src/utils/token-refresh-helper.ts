@@ -2,7 +2,7 @@
 // Provides proactive token refresh functionality
 
 import TokenManager from './token-manager'
-import { authAPI } from '@/lib/api'
+import { userAPI } from '@/lib/apis'
 
 export class TokenRefreshHelper {
   private static refreshPromise: Promise<boolean> | null = null
@@ -57,16 +57,16 @@ export class TokenRefreshHelper {
       }
 
       console.log('[TokenRefresh] Calling refresh token API...')
-      const response = await authAPI.refreshToken(refreshToken)
+      const response = await userAPI.refreshToken(refreshToken)
       const refreshData = response.data?.data
 
-      if (refreshData?.accessToken) {
+      if ((refreshData as any)?.accessToken) {
         // Update stored tokens
         const newTokenData = {
-          accessToken: refreshData.accessToken,
-          refreshToken: refreshData.refreshToken || refreshToken,
-          expiresAt: Date.now() + ((refreshData.expiresIn || 900) * 1000),
-          tokenType: refreshData.tokenType || 'Bearer'
+          accessToken: (refreshData as any).accessToken,
+          refreshToken: (refreshData as any).refreshToken || refreshToken,
+          expiresAt: Date.now() + (((refreshData as any).expiresIn || 900) * 1000),
+          tokenType: (refreshData as any).tokenType || 'Bearer'
         }
 
         TokenManager.storeTokens(newTokenData)

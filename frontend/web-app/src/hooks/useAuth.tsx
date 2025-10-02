@@ -296,13 +296,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setLoading(true)
     try {
       const res = await authAPI.login(credentials)
-      const authData = res.data?.data as unknown as AuthResponse
+      // Chấp nhận cả 2 dạng response: bọc trong data (RestResponse) hoặc trả thẳng payload
+      const raw = res.data as any
+      const authData = (raw?.data ?? raw) as unknown as AuthResponse
       
       if (!authData) {
         throw new Error('Invalid response from server')
       }
       
-      const { accessToken, refreshToken, expiresIn, tokenType, user } = authData
+      // Hỗ trợ cả field token cũ
+      const accessToken = (authData as any).accessToken || (authData as any).token
+      const refreshToken = (authData as any).refreshToken
+      const expiresIn = (authData as any).expiresIn ?? 900
+      const tokenType = (authData as any).tokenType || 'Bearer'
+      const user = (authData as any).user
       
       // Validate token before storing
       if (!accessToken || typeof accessToken !== 'string' || accessToken.length < 10) {
@@ -317,7 +324,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         accessToken,
         refreshToken,
         expiresAt,
-        tokenType: tokenType || 'Bearer'
+        tokenType
       }
       
       setAccessToken(accessToken)

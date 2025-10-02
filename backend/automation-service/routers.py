@@ -36,8 +36,9 @@ from schemas.event_schemas import (
     EventHandlerRequest, EventSubscriptionRequest, EventPublishRequest,
     EventHistoryRequest, EventHandlerResponse
 )
+from schemas.view_schemas import ViewType, ViewMapper, PaginatedViewResponse
 
-router = APIRouter(prefix="/api/v1/automation-service")
+router = APIRouter(prefix="/api/v1/automation-service/v1")
 
 RESULTS_DIR = os.path.join(os.path.dirname(__file__), 'results')
 os.makedirs(RESULTS_DIR, exist_ok=True)
@@ -73,7 +74,8 @@ def ask_gemini(api_key: str, content: str, question: str) -> str:
 async def extract_api(
     request: Request,
     file: UploadFile = File(..., description="File tài liệu cần trích xuất (docx, pdf)"),
-    gemini_api_key: str = Header(None, description="Gemini API Key (tùy chọn)")
+    gemini_api_key: str = Header(None, description="Gemini API Key (tùy chọn)"),
+    view: str = Query(None, description="Loại view để trả về dữ liệu (ví dụ: summary, detail, full)")
 ):
     """
     ## 📖 Mô tả
@@ -229,7 +231,8 @@ async def extract_api(
 @router.post("/document/classify", summary="Phân loại tài liệu", tags=["🤖 APIs Xử lý AI"])
 async def classify_api(
     request: Request,
-    gemini_api_key: str = Header(None, description="Gemini API Key (tùy chọn)")
+    gemini_api_key: str = Header(None, description="Gemini API Key (tùy chọn)"),
+    view: str = Query(None, description="Loại view để trả về dữ liệu (ví dụ: summary, detail, full)")
 ):
     """
     ## 📖 Mô tả
@@ -1237,9 +1240,10 @@ async def get_batch_job_status_api(
             requestId=str(uuid.uuid4())
         )
 
-@router.get("/batch/jobs", summary="Danh sách jobs", tags=["📦 APIs Xử lý Batch"])
+@router.get("/batch/jobs", summary="Danh sách jobs với projection", tags=["📦 APIs Xử lý Batch"])
 async def get_batch_jobs_api(
     request: Request,
+    view: str = Query("table", description="View type: table, card, detail, full (mặc định: table)"),
     page: int = Query(1, ge=1, description="Số trang"),
     limit: int = Query(10, ge=1, le=100, description="Số lượng mỗi trang"),
     job_type: str = Query(None, description="Loại job"),
@@ -1265,6 +1269,12 @@ async def get_batch_jobs_api(
     """
     try:
         await batch_service.initialize()
+        # Validate view type
+        try:
+            view_type = ViewType(view.lower())
+        except ValueError:
+            view_type = ViewType.TABLE
+        
         result = await batch_service.get_batch_jobs(
             page=page,
             limit=limit,
@@ -1273,11 +1283,36 @@ async def get_batch_jobs_api(
             priority=priority
         )
         
+        # Map jobs to view
+        view_items = []
+        for job_data in result.get('jobs', []):
+            # Convert job data to dict if needed
+            if hasattr(job_data, 'dict'):
+                job_dict = job_data.dict()
+            else:
+                job_dict = job_data
+            
+            # Map to view
+            view_item = ViewMapper.map_batch_job_to_view(job_dict, view_type)
+            view_items.append(view_item)
+        
+        # Create paginated view response
+        paginated_response = PaginatedViewResponse(
+            view=view_type.value,
+            items=view_items,
+            pagination={
+                "page": page,
+                "size": limit,
+                "totalElements": result.get('total', 0),
+                "totalPages": result.get('total_pages', 0)
+            }
+        )
+        
         return RestResponse(
             statusCode=200,
             shortMessage="Success",
-            description="Lấy danh sách batch jobs thành công",
-            data=result,
+            description=f"Lấy danh sách batch jobs thành công với view {view_type.value}",
+            data=paginated_response,
             path=request.url.path,
             timestamp=datetime.now(timezone.utc),
             requestId=str(uuid.uuid4())

@@ -19,7 +19,7 @@ import java.util.Optional;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/v1/document-management-service/versions")
+@RequestMapping("/api/v1/document-management-service/v1/versions")
 @Tag(name = "🔄 APIs Quản lý Phiên bản", description = "Các API để quản lý phiên bản hợp đồng trong hệ thống DocGO")
 public class VersionController {
 
@@ -40,6 +40,10 @@ public class VersionController {
 
         ## 🔹 Đầu vào
 
+        👁️ view (tùy chọn, query)
+        Loại: string
+        Mô tả: Loại view dữ liệu (mặc định: full)
+        
         📄 pageNumber, pageSize (tùy chọn, query) — integer
         📄 sortBy (tùy chọn, query) — createdAt | versionNumber (mặc định: createdAt)
         📄 sortDirection (tùy chọn, query) — ASC | DESC (mặc định: DESC)
@@ -58,6 +62,7 @@ public class VersionController {
         """
     )
     public ResponseEntity<RestResponse<?>> getAllVersions(
+            @RequestParam(defaultValue = "full") String view,
             @RequestParam(defaultValue = "0") int pageNumber,
             @RequestParam(defaultValue = "10") int pageSize,
             @RequestParam(defaultValue = "createdAt") String sortBy,
@@ -201,6 +206,9 @@ public class VersionController {
         } else {
             versions = versionService.getAllVersions();
         }
+
+        // Áp dụng view filter
+        versions = versionService.applyViewFilter(versions, view);
 
         if (versions == null || versions.isEmpty()) {
             RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
@@ -506,496 +514,33 @@ public class VersionController {
 
     // Deprecated nested route removed: dùng GET /versions?tags=...
 
-    @GetMapping("/contracts/{contractId}/versions/change-type/{changeType}/order-by-created")
-    @Operation(summary = "Lấy version theo change type sắp xếp theo thời gian tạo", description = "Lấy danh sách version theo change type sắp xếp theo thời gian tạo")
-    public ResponseEntity<RestResponse<List<Version>>> getVersionsByChangeTypeOrderByCreatedAt(
-            @PathVariable String contractId,
-            @PathVariable Version.ChangeType changeType) {
-        List<Version> versions = versionService.getVersionsByContractIdAndChangeTypeOrderByCreatedAt(contractId, changeType);
-        
-        if (versions.isEmpty()) {
-            RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
-                .apiVersion("v1")
-                .statusCode(204)
-                .shortMessage("No Content")
-                .description("Không có version nào với change type này.")
-                .data(null)
-                .timestamp(ZonedDateTime.now())
-                .requestId(UUID.randomUUID().toString())
-                .path(request.getRequestURI())
-                .build();
-            
-            return new ResponseEntity<>(response, HttpStatus.OK);
-        }
-        
-        RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Lấy danh sách version theo change type sắp xếp theo thời gian tạo thành công.")
-            .data(versions)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+    // Deprecated: dùng GET /versions?contractId=...&changeType=...&sortBy=createdAt
 
-    @GetMapping("/contracts/{contractId}/versions/change-type/{changeType}/order-by-version")
-    @Operation(summary = "Lấy version theo change type sắp xếp theo version number", description = "Lấy danh sách version theo change type sắp xếp theo version number")
-    public ResponseEntity<RestResponse<List<Version>>> getVersionsByChangeTypeOrderByVersionNumber(
-            @PathVariable String contractId,
-            @PathVariable Version.ChangeType changeType) {
-        List<Version> versions = versionService.getVersionsByContractIdAndChangeTypeOrderByVersionNumber(contractId, changeType);
-        
-        if (versions.isEmpty()) {
-            RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
-                .apiVersion("v1")
-                .statusCode(204)
-                .shortMessage("No Content")
-                .description("Không có version nào với change type này.")
-                .data(null)
-                .timestamp(ZonedDateTime.now())
-                .requestId(UUID.randomUUID().toString())
-                .path(request.getRequestURI())
-                .build();
-            
-            return new ResponseEntity<>(response, HttpStatus.OK);
-        }
-        
-        RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Lấy danh sách version theo change type sắp xếp theo version number thành công.")
-            .data(versions)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+    // Deprecated: dùng GET /versions?contractId=...&changeType=...&sortBy=versionNumber
 
-    @GetMapping("/contracts/{contractId}/versions/previous/{previousVersionId}/list")
-    @Operation(summary = "Lấy version theo previous version ID", description = "Lấy danh sách version theo previous version ID")
-    public ResponseEntity<RestResponse<List<Version>>> getVersionsByContractIdAndPreviousVersionId(
-            @PathVariable String contractId,
-            @PathVariable String previousVersionId) {
-        List<Version> versions = versionService.getVersionsByContractIdAndPreviousVersionId(contractId, previousVersionId);
-        
-        if (versions.isEmpty()) {
-                    RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
-            .apiVersion("v1")
-            .statusCode(204)
-            .shortMessage("No Content")
-            .description("Không có version nào với previous version ID này.")
-            .data(null)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-        }
-        
-        RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Lấy danh sách version theo previous version ID thành công.")
-            .data(versions)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+    // Deprecated: dùng GET /versions?contractId=...&previousVersionId=...
 
-    @GetMapping("/contracts/{contractId}/versions/file-path/{filePath}")
-    @Operation(summary = "Lấy version theo file path", description = "Lấy danh sách version theo file path")
-    public ResponseEntity<RestResponse<List<Version>>> getVersionsByFilePath(
-            @PathVariable String contractId,
-            @PathVariable String filePath) {
-        List<Version> versions = versionService.getVersionsByContractIdAndFilePath(contractId, filePath);
-        
-        if (versions.isEmpty()) {
-                    RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
-            .apiVersion("v1")
-            .statusCode(204)
-            .shortMessage("No Content")
-            .description("Không có version nào với file path này.")
-            .data(null)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-        }
-        
-        RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Lấy danh sách version theo file path thành công.")
-            .data(versions)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+    // Deprecated: dùng GET /versions?contractId=...&filePath=...
 
-    @GetMapping("/contracts/{contractId}/versions/checksum/{checksum}")
-    @Operation(summary = "Lấy version theo checksum", description = "Lấy danh sách version theo checksum")
-    public ResponseEntity<RestResponse<List<Version>>> getVersionsByChecksum(
-            @PathVariable String contractId,
-            @PathVariable String checksum) {
-        List<Version> versions = versionService.getVersionsByContractIdAndChecksum(contractId, checksum);
-        
-        if (versions.isEmpty()) {
-                    RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
-            .apiVersion("v1")
-            .statusCode(204)
-            .shortMessage("No Content")
-            .description("Không có version nào với checksum này.")
-            .data(null)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-        }
-        
-                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Lấy danh sách version theo checksum thành công.")
-            .data(versions)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+    // Deprecated: dùng GET /versions?contractId=...&checksum=...
 
-    @GetMapping("/contracts/{contractId}/versions/file-size/{fileSize}")
-    @Operation(summary = "Lấy version theo file size", description = "Lấy danh sách version theo file size")
-    public ResponseEntity<RestResponse<List<Version>>> getVersionsByFileSize(
-            @PathVariable String contractId,
-            @PathVariable Long fileSize) {
-        List<Version> versions = versionService.getVersionsByContractIdAndFileSize(contractId, fileSize);
-        
-        if (versions.isEmpty()) {
-                    RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
-            .apiVersion("v1")
-            .statusCode(204)
-            .shortMessage("No Content")
-            .description("Không có version nào với file size này.")
-            .data(null)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-        }
-        
-                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Lấy danh sách version theo file size thành công.")
-            .data(versions)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+    // Deprecated: dùng GET /versions?contractId=...&fileSize=...
+    
+    // Deprecated: dùng GET /versions?contractId=...&minFileSize=...&maxFileSize=...
+    
+    // Deprecated: dùng GET /versions?contractId=...&changeType=ROLLBACK
+    
+    // Deprecated: dùng GET /versions?contractId=...&changeType=ROLLBACK
+    
+    // Deprecated: dùng GET /versions?contractId=...&changeType=DRAFT
+    
+    // Deprecated: dùng GET /versions?contractId=...&changeType=MAJOR
 
-    @GetMapping("/contracts/{contractId}/versions/file-size-between")
-    @Operation(summary = "Lấy version theo file size trong khoảng", description = "Lấy danh sách version theo file size trong khoảng")
-    public ResponseEntity<RestResponse<List<Version>>> getVersionsByFileSizeBetween(
-            @PathVariable String contractId,
-            @RequestParam Long minSize,
-            @RequestParam Long maxSize) {
-        List<Version> versions = versionService.getVersionsByContractIdAndFileSizeBetween(contractId, minSize, maxSize);
-        
-        if (versions.isEmpty()) {
-                    RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
-            .apiVersion("v1")
-            .statusCode(204)
-            .shortMessage("No Content")
-            .description("Không có version nào với file size trong khoảng này.")
-            .data(null)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-        }
-        
-                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Lấy danh sách version theo file size trong khoảng thành công.")
-            .data(versions)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
-    @GetMapping("/contracts/{contractId}/versions/rollback")
-    @Operation(summary = "Lấy version rollback", description = "Lấy danh sách version rollback")
-    public ResponseEntity<RestResponse<List<Version>>> getRollbackVersions(@PathVariable String contractId) {
-        List<Version> versions = versionService.getRollbackVersionsByContractId(contractId);
-        
-        if (versions.isEmpty()) {
-                    RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
-            .apiVersion("v1")
-            .statusCode(204)
-            .shortMessage("No Content")
-            .description("Không có version rollback nào.")
-            .data(null)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-        }
-        
-                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Lấy danh sách version rollback thành công.")
-            .data(versions)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
-    @GetMapping("/contracts/{contractId}/versions/rollback-by-type")
-    @Operation(summary = "Lấy version rollback theo change type", description = "Lấy danh sách version rollback theo change type")
-    public ResponseEntity<RestResponse<List<Version>>> getRollbackVersionsByChangeType(@PathVariable String contractId) {
-        List<Version> versions = versionService.getRollbackVersionsByContractIdAndChangeType(contractId);
-        
-        if (versions.isEmpty()) {
-                    RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
-            .apiVersion("v1")
-            .statusCode(204)
-            .shortMessage("No Content")
-            .description("Không có version rollback nào.")
-            .data(null)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-        }
-        
-                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Lấy danh sách version rollback theo change type thành công.")
-            .data(versions)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
-    @GetMapping("/contracts/{contractId}/versions/draft")
-    @Operation(summary = "Lấy version draft", description = "Lấy danh sách version draft")
-    public ResponseEntity<RestResponse<List<Version>>> getDraftVersions(@PathVariable String contractId) {
-        List<Version> versions = versionService.getDraftVersionsByContractId(contractId);
-        
-        if (versions.isEmpty()) {
-                    RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
-            .apiVersion("v1")
-            .statusCode(204)
-            .shortMessage("No Content")
-            .description("Không có version draft nào.")
-            .data(null)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-        }
-        
-                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Lấy danh sách version draft thành công.")
-            .data(versions)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
-    @GetMapping("/contracts/{contractId}/versions/major")
-    @Operation(summary = "Lấy version major", description = "Lấy danh sách version major")
-    public ResponseEntity<RestResponse<List<Version>>> getMajorVersions(@PathVariable String contractId) {
-        List<Version> versions = versionService.getMajorVersionsByContractId(contractId);
-        
-        if (versions.isEmpty()) {
-                    RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
-            .apiVersion("v1")
-            .statusCode(204)
-            .shortMessage("No Content")
-            .description("Không có version major nào.")
-            .data(null)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-        }
-        
-                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Lấy danh sách version major thành công.")
-            .data(versions)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
-    @GetMapping("/contracts/{contractId}/versions/minor")
-    @Operation(summary = "Lấy version minor", description = "Lấy danh sách version minor")
-    public ResponseEntity<RestResponse<List<Version>>> getMinorVersions(@PathVariable String contractId) {
-        List<Version> versions = versionService.getMinorVersionsByContractId(contractId);
-        
-        if (versions.isEmpty()) {
-                    RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
-            .apiVersion("v1")
-            .statusCode(204)
-            .shortMessage("No Content")
-            .description("Không có version minor nào.")
-            .data(null)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-        }
-        
-                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Lấy danh sách version minor thành công.")
-            .data(versions)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
-    @GetMapping("/contracts/{contractId}/versions/patch")
-    @Operation(summary = "Lấy version patch", description = "Lấy danh sách version patch")
-    public ResponseEntity<RestResponse<List<Version>>> getPatchVersions(@PathVariable String contractId) {
-        List<Version> versions = versionService.getPatchVersionsByContractId(contractId);
-        
-        if (versions.isEmpty()) {
-                    RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
-            .apiVersion("v1")
-            .statusCode(204)
-            .shortMessage("No Content")
-            .description("Không có version patch nào.")
-            .data(null)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-        }
-        
-                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Lấy danh sách version patch thành công.")
-            .data(versions)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
-    @GetMapping("/contracts/{contractId}/versions/hotfix")
-    @Operation(summary = "Lấy version hotfix", description = "Lấy danh sách version hotfix")
-    public ResponseEntity<RestResponse<List<Version>>> getHotfixVersions(@PathVariable String contractId) {
-        List<Version> versions = versionService.getHotfixVersionsByContractId(contractId);
-        
-        if (versions.isEmpty()) {
-                    RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
-            .apiVersion("v1")
-            .statusCode(204)
-            .shortMessage("No Content")
-            .description("Không có version hotfix nào.")
-            .data(null)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-        }
-        
-                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Lấy danh sách version hotfix thành công.")
-            .data(versions)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+    // Deprecated: dùng GET /versions?contractId=...&changeType=MINOR
+    
+    // Deprecated: dùng GET /versions?contractId=...&changeType=PATCH
+    
+    // Deprecated: dùng GET /versions?contractId=...&changeType=HOTFIX
 
     @PutMapping("/{id}/publish")
     @Operation(summary = "Publish version", description = "Publish version")
@@ -1446,354 +991,37 @@ public class VersionController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @GetMapping("/contracts/{contractId}/versions/count")
-    @Operation(summary = "Đếm số version", description = "Đếm số lượng version")
-    public ResponseEntity<RestResponse<Long>> countVersionsByContractId(@PathVariable String contractId) {
-        long count = versionService.countVersionsByContractId(contractId);
-        
-                RestResponse<Long> response = RestResponse.<Long>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Đếm số version thành công.")
-            .data(count)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+    // Deprecated: dùng GET /versions?contractId=...&aggregate=count
+    
+    // Deprecated: dùng GET /versions?contractId=...&changeType=...&aggregate=count
+    
+    // Deprecated: dùng GET /versions?contractId=...&isPublished=...&aggregate=count
+    
+    // Deprecated: dùng GET /versions?contractId=...&isCurrent=...&aggregate=count
 
-    @GetMapping("/contracts/{contractId}/versions/count-by-change-type")
-    @Operation(summary = "Đếm số version theo change type", description = "Đếm số lượng version theo change type")
-    public ResponseEntity<RestResponse<Long>> countVersionsByContractIdAndChangeType(
-            @PathVariable String contractId,
-            @RequestParam Version.ChangeType changeType) {
-        long count = versionService.countVersionsByContractIdAndChangeType(contractId, changeType);
-        
-                RestResponse<Long> response = RestResponse.<Long>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Đếm số version theo change type thành công.")
-            .data(count)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+    // Deprecated: dùng GET /versions?contractId=...&versionNumber=...&aggregate=exists
+    
+    // Deprecated: dùng GET /versions?contractId=...&isCurrent=true&aggregate=exists
+    
+    // Deprecated: dùng GET /versions?contractId=...&isPublished=true&aggregate=exists
+    
+    // Deprecated: dùng GET /versions?contractId=...&changeType=...&aggregate=exists
+    
+    // Deprecated: dùng GET /versions?contractId=...&tags=...&aggregate=exists
+    
+    // Deprecated: dùng GET /versions?contractId=...&filePath=...&aggregate=exists
 
-    @GetMapping("/contracts/{contractId}/versions/count-by-published")
-    @Operation(summary = "Đếm số version theo published status", description = "Đếm số lượng version theo published status")
-    public ResponseEntity<RestResponse<Long>> countVersionsByContractIdAndIsPublished(
-            @PathVariable String contractId,
-            @RequestParam Boolean isPublished) {
-        long count = versionService.countVersionsByContractIdAndIsPublished(contractId, isPublished);
-        
-                RestResponse<Long> response = RestResponse.<Long>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Đếm số version theo published status thành công.")
-            .data(count)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+    // Deprecated: dùng GET /versions?contractId=...&checksum=...&aggregate=exists
+    
+    // Deprecated: dùng GET /versions?contractId=...&fileSize=...&aggregate=exists
+    
+    // Deprecated: dùng GET /versions?contractId=...&previousVersionId=...&aggregate=exists
+    
+    // Deprecated: dùng GET /versions?contractId=...&publishedBy=...&aggregate=exists
+    
+    // Deprecated: dùng GET /versions?contractId=...&approvedBy=...&aggregate=exists
 
-    @GetMapping("/contracts/{contractId}/versions/count-by-current")
-    @Operation(summary = "Đếm số version theo current status", description = "Đếm số lượng version theo current status")
-    public ResponseEntity<RestResponse<Long>> countVersionsByContractIdAndIsCurrent(
-            @PathVariable String contractId,
-            @RequestParam Boolean isCurrent) {
-        long count = versionService.countVersionsByContractIdAndIsCurrent(contractId, isCurrent);
-        
-                RestResponse<Long> response = RestResponse.<Long>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Đếm số version theo current status thành công.")
-            .data(count)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
-    @GetMapping("/contracts/{contractId}/versions/exists-by-version-number")
-    @Operation(summary = "Kiểm tra tồn tại version number", description = "Kiểm tra version number đã tồn tại chưa")
-    public ResponseEntity<RestResponse<Boolean>> existsVersionByContractIdAndVersionNumber(
-            @PathVariable String contractId,
-            @RequestParam String versionNumber) {
-        boolean exists = versionService.existsVersionByContractIdAndVersionNumber(contractId, versionNumber);
-        
-                RestResponse<Boolean> response = RestResponse.<Boolean>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Kiểm tra tồn tại version number thành công.")
-            .data(exists)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
-    @GetMapping("/contracts/{contractId}/versions/exists-current")
-    @Operation(summary = "Kiểm tra có version current", description = "Kiểm tra contract có version current không")
-    public ResponseEntity<RestResponse<Boolean>> existsCurrentVersionByContractId(@PathVariable String contractId) {
-        boolean exists = versionService.existsCurrentVersionByContractId(contractId);
-        
-                RestResponse<Boolean> response = RestResponse.<Boolean>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Kiểm tra có version current thành công.")
-            .data(exists)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
-    @GetMapping("/contracts/{contractId}/versions/exists-published")
-    @Operation(summary = "Kiểm tra có version published", description = "Kiểm tra contract có version published không")
-    public ResponseEntity<RestResponse<Boolean>> existsPublishedVersionByContractId(@PathVariable String contractId) {
-        boolean exists = versionService.existsPublishedVersionByContractId(contractId);
-        
-                RestResponse<Boolean> response = RestResponse.<Boolean>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Kiểm tra có version published thành công.")
-            .data(exists)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
-    @GetMapping("/contracts/{contractId}/versions/exists-by-change-type")
-    @Operation(summary = "Kiểm tra có version theo change type", description = "Kiểm tra contract có version theo change type không")
-    public ResponseEntity<RestResponse<Boolean>> existsVersionByChangeType(
-            @PathVariable String contractId,
-            @RequestParam Version.ChangeType changeType) {
-        boolean exists = versionService.existsVersionByChangeType(contractId, changeType);
-        
-                RestResponse<Boolean> response = RestResponse.<Boolean>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Kiểm tra có version theo change type thành công.")
-            .data(exists)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
-    @GetMapping("/contracts/{contractId}/versions/exists-by-tags")
-    @Operation(summary = "Kiểm tra có version theo tags", description = "Kiểm tra contract có version theo tags không")
-    public ResponseEntity<RestResponse<Boolean>> existsVersionByTags(
-            @PathVariable String contractId,
-            @RequestParam String[] tags) {
-        boolean exists = versionService.existsVersionByTags(contractId, tags);
-        
-                RestResponse<Boolean> response = RestResponse.<Boolean>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Kiểm tra có version theo tags thành công.")
-            .data(exists)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
-    @GetMapping("/contracts/{contractId}/versions/exists-by-file-path")
-    @Operation(summary = "Kiểm tra có version theo file path", description = "Kiểm tra contract có version theo file path không")
-    public ResponseEntity<RestResponse<Boolean>> existsVersionByFilePath(
-            @PathVariable String contractId,
-            @RequestParam String filePath) {
-        boolean exists = versionService.existsVersionByFilePath(contractId, filePath);
-        
-                RestResponse<Boolean> response = RestResponse.<Boolean>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Kiểm tra có version theo file path thành công.")
-            .data(exists)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
-    @GetMapping("/contracts/{contractId}/versions/exists-by-checksum")
-    @Operation(summary = "Kiểm tra có version theo checksum", description = "Kiểm tra contract có version theo checksum không")
-    public ResponseEntity<RestResponse<Boolean>> existsVersionByChecksum(
-            @PathVariable String contractId,
-            @RequestParam String checksum) {
-        boolean exists = versionService.existsVersionByChecksum(contractId, checksum);
-        
-                RestResponse<Boolean> response = RestResponse.<Boolean>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Kiểm tra có version theo checksum thành công.")
-            .data(exists)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
-    @GetMapping("/contracts/{contractId}/versions/exists-by-file-size")
-    @Operation(summary = "Kiểm tra có version theo file size", description = "Kiểm tra contract có version theo file size không")
-    public ResponseEntity<RestResponse<Boolean>> existsVersionByFileSize(
-            @PathVariable String contractId,
-            @RequestParam Long fileSize) {
-        boolean exists = versionService.existsVersionByFileSize(contractId, fileSize);
-        
-                RestResponse<Boolean> response = RestResponse.<Boolean>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Kiểm tra có version theo file size thành công.")
-            .data(exists)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
-    @GetMapping("/contracts/{contractId}/versions/exists-by-previous-version")
-    @Operation(summary = "Kiểm tra có version theo previous version", description = "Kiểm tra contract có version theo previous version không")
-    public ResponseEntity<RestResponse<Boolean>> existsVersionByPreviousVersionId(
-            @PathVariable String contractId,
-            @RequestParam String previousVersionId) {
-        boolean exists = versionService.existsVersionByPreviousVersionId(contractId, previousVersionId);
-        
-                RestResponse<Boolean> response = RestResponse.<Boolean>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Kiểm tra có version theo previous version thành công.")
-            .data(exists)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
-    @GetMapping("/contracts/{contractId}/versions/exists-by-published-by")
-    @Operation(summary = "Kiểm tra có version theo published by", description = "Kiểm tra contract có version theo published by không")
-    public ResponseEntity<RestResponse<Boolean>> existsVersionByPublishedBy(
-            @PathVariable String contractId,
-            @RequestParam String publishedBy) {
-        boolean exists = versionService.existsVersionByPublishedBy(contractId, publishedBy);
-        
-                RestResponse<Boolean> response = RestResponse.<Boolean>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Kiểm tra có version theo published by thành công.")
-            .data(exists)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
-    @GetMapping("/contracts/{contractId}/versions/exists-by-approved-by")
-    @Operation(summary = "Kiểm tra có version theo approved by", description = "Kiểm tra contract có version theo approved by không")
-    public ResponseEntity<RestResponse<Boolean>> existsVersionByApprovedBy(
-            @PathVariable String contractId,
-            @RequestParam String approvedBy) {
-        boolean exists = versionService.existsVersionByApprovedBy(contractId, approvedBy);
-        
-                RestResponse<Boolean> response = RestResponse.<Boolean>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Kiểm tra có version theo approved by thành công.")
-            .data(exists)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
-    @GetMapping("/contracts/{contractId}/versions/exists-by-description")
-    @Operation(summary = "Kiểm tra có version theo description", description = "Kiểm tra contract có version theo description chứa từ khóa không")
-    public ResponseEntity<RestResponse<Boolean>> existsVersionByDescriptionContaining(
-            @PathVariable String contractId,
-            @RequestParam String keyword) {
-        boolean exists = versionService.existsVersionByDescriptionContaining(contractId, keyword);
-        
-                RestResponse<Boolean> response = RestResponse.<Boolean>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Kiểm tra có version theo description thành công.")
-            .data(exists)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
-    @GetMapping("/contracts/{contractId}/versions/exists-by-changes-summary")
-    @Operation(summary = "Kiểm tra có version theo changes summary", description = "Kiểm tra contract có version theo changes summary chứa từ khóa không")
-    public ResponseEntity<RestResponse<Boolean>> existsVersionByChangesSummaryContaining(
-            @PathVariable String contractId,
-            @RequestParam String keyword) {
-        boolean exists = versionService.existsVersionByChangesSummaryContaining(contractId, keyword);
-        
-                RestResponse<Boolean> response = RestResponse.<Boolean>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Kiểm tra có version theo changes summary thành công.")
-            .data(exists)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+    // Deprecated: dùng GET /versions?contractId=...&searchTerm=...&aggregate=exists
+    
+    // Deprecated: dùng GET /versions?contractId=...&searchTerm=...&aggregate=exists
 }

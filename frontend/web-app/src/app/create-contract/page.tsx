@@ -4,7 +4,7 @@ import React, { useState, useRef } from 'react'
 import { DashboardLayout } from '@/components/layout'
 import { TitlePanel } from '@/components/ui'
 import { DocumentTextIcon, DocumentMagnifyingGlassIcon, ArrowUpTrayIcon, PlusIcon } from '@heroicons/react/24/outline'
-import { aiProcessingAPI } from '@/lib/api'
+import { automationAPI } from '@/lib/apis'
 import toast from 'react-hot-toast'
 
 export default function CreateContractPage() {
@@ -74,10 +74,10 @@ export default function CreateContractPage() {
 
     try {
       setOcrLoading(true)
-      const response = await aiProcessingAPI.extractText(selectedFile, apiKey || undefined)
+      const response = await automationAPI.extractText(selectedFile, apiKey || undefined)
       
       if (response.data?.data) {
-        setExtractedText(response.data.data)
+        setExtractedText((response.data.data as any).extractedText || '')
         toast.success('Trích xuất văn bản thành công!')
       } else {
         toast.error('Không thể trích xuất văn bản từ file')

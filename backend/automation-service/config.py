@@ -4,16 +4,16 @@ from pathlib import Path
 
 # Load .env file
 _service_dir = Path(__file__).resolve().parent
-_env_file = _service_dir / "env" / ".env"
+_env_file = _service_dir / ".env"
 
 # Load .env if exists
 if _env_file.exists():
     load_dotenv(dotenv_path=_env_file, override=False)
-    print(f"✅ Loaded .env from {_env_file}")
+    print(f"Loaded .env from {_env_file}")
 # Finally fallback to default lookup (CWD)
 else:
     load_dotenv()  # fallback to default lookup (CWD)
-    print("✅ Loaded .env from CWD")
+    print("Loaded .env from CWD")
 
 def get_gemini_api_key():
     """
