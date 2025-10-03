@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Java Spring Boot .gitignore
 
 # Compiled class files
@@ -78,7 +77,14 @@ bin/
 .vscode/
 
 # OS generated files
-=======
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
 # Python
 __pycache__/
 *.py[cod]
@@ -143,35 +149,11 @@ coverage.xml
 .DS_Store
 Thumbs.db
 
-# OS
->>>>>>> e4f9e590765b2a1b7ce2f3982eff8dae6ecb472e
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-
-<<<<<<< HEAD
-# Environment files
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
-=======
->>>>>>> e4f9e590765b2a1b7ce2f3982eff8dae6ecb472e
 # Temporary files
 *.tmp
 *.temp
 *.bak
 *.backup
-<<<<<<< HEAD
-
-# Database files
-=======
 temp/
 tmp/
 
@@ -185,18 +167,17 @@ cache/
 *.temp
 
 # Database
->>>>>>> e4f9e590765b2a1b7ce2f3982eff8dae6ecb472e
 *.db
 *.sqlite
 *.sqlite3
+*.h2.db
 
-<<<<<<< HEAD
 # Upload/temp directories
 uploads/
 temp/
 tmp/
 results/
-=======
+
 # Jupyter Notebook
 .ipynb_checkpoints
 
@@ -212,4 +193,3 @@ __pypackages__/
 # S3/Filebase cache
 .s3_cache/
 .filebase_cache/
->>>>>>> e4f9e590765b2a1b7ce2f3982eff8dae6ecb472e

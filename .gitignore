@@ -130,11 +130,7 @@ ENV/
 
 # Python service lib/ directories (ignore only in Python services)
 backend/*/lib/
-<<<<<<< HEAD
 !backend/api-gateway/lib/
-=======
-!backend/api-gateway-bff/lib/
->>>>>>> e4f9e590765b2a1b7ce2f3982eff8dae6ecb472e
 
 ###############################################################################
 # JAVA
@@ -272,12 +268,9 @@ document/**/*.pptx
 # SCRIPTS TEMPORARY DIRECTORY
 ###############################################################################
 
-<<<<<<< HEAD
-=======
 ###############################################################################
 # SCRIPTS TEMPORARY DIRECTORY
 ###############################################################################
 
->>>>>>> e4f9e590765b2a1b7ce2f3982eff8dae6ecb472e
 scripts/temp/
 .cursor/mcp.json
