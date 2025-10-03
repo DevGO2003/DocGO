@@ -333,7 +333,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Store tokens immediately (cookie + localStorage) for middleware compatibility
       try {
         TokenManager.storeTokens(newTokenData, user || null, rememberMe)
-      } catch {}
+        console.log('[Auth] Tokens stored successfully:', {
+          hasAccessToken: !!accessToken,
+          hasTokenData: !!newTokenData,
+          rememberMe: rememberMe
+        })
+      } catch (error) {
+        console.error('[Auth] Error storing tokens:', error)
+      }
 
       // Always fetch profile to normalize user fields like Google flow
       try {
@@ -574,8 +581,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [])
 
   const isAuthenticated = useMemo(() => {
-    return !!(accessToken && user && accessToken.length > 10 && !isTokenExpired())
-  }, [accessToken, user, isTokenExpired])
+    // Chỉ check accessToken và token validity, không phụ thuộc vào user object
+    // User sẽ được fetch sau khi đã authenticated
+    return !!(accessToken && accessToken.length > 10 && !isTokenExpired())
+  }, [accessToken, isTokenExpired])
 
   const value = useMemo<AuthContextValue>(() => ({ 
     user, 

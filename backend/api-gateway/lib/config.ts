@@ -34,7 +34,12 @@ export interface GatewayConfig {
  * - Local: uses localhost with external ports
  */
 function buildServiceUrl(serviceName: string, internalPort: number, externalPort: number): string {
-  const isDocker = process.env.DOCKERIZED === '1' || process.env.NODE_ENV === 'production';
+  // Check if running in Docker by looking for container environment
+  const isDocker = process.env.DOCKERIZED === '1' || 
+                   process.env.NODE_ENV === 'production' ||
+                   process.env.DOCKER_CONTAINER === '1' ||
+                   // Check if we're running inside a container
+                   (process.env.HOSTNAME && process.env.HOSTNAME.length === 12);
   
   if (isDocker) {
     return `http://${serviceName}:${internalPort}`;
@@ -59,10 +64,10 @@ export const config: GatewayConfig = {
     'user-management': {
       name: 'user-management-service',
       url: process.env.USER_MANAGEMENT_SERVICE_URL || 
-           buildServiceUrl('user-management-service', 8001, 8001),
+           buildServiceUrl('user-management-service', 8000, 8001),
       port: 8001,
-      healthCheck: '/api/v1/user-management-service/v1/auth/health',
-      timeout: 10000
+      healthCheck: '/api/v1/user-management-service/v1/health',
+      timeout: 15000
     },
     
     'document-management': {

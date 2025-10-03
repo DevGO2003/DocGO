@@ -102,9 +102,11 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
     // Use isAuthenticated instead of just checking user to avoid premature redirects
     if (!loading && !isAuthenticated) {
       // Add a small delay to prevent rapid redirects during token refresh
+      // Tăng delay để đảm bảo token được sync hoàn toàn
       const timeoutId = setTimeout(() => {
+        console.log('[DashboardLayout] Redirecting to login - isAuthenticated:', isAuthenticated, 'loading:', loading)
         router.replace('/auth/login')
-      }, 1000)
+      }, 1500) // Tăng từ 1000ms lên 1500ms
       
       return () => clearTimeout(timeoutId)
     }

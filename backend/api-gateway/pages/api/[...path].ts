@@ -1,3 +1,6 @@
+// Load environment variables first
+import '@/lib/env-loader';
+
 import { NextApiRequest, NextApiResponse } from 'next';
 import serviceManager from '@/lib/services';
 import logger from '@/lib/logger';
@@ -5,7 +8,9 @@ import { withApiHandler } from '@/lib/http/withApiHandler';
 
 export const config = {
   api: {
-    bodyParser: false
+    bodyParser: {
+      sizeLimit: '10mb',
+    }
   }
 };
 
@@ -143,11 +148,43 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     // Decide how to forward body (multipart vs json)
     const isMultipart = (headers['Content-Type'] || '').includes('multipart/form-data');
 
+    // Ensure proper body handling
+    let requestData = req.body;
+    
+    // Debug logging for request body processing (can be removed in production)
+    logger.debug('🔍 [DEBUG] Request body processing:', {
+      originalBody: req.body,
+      bodyType: typeof req.body,
+      bodyStringified: JSON.stringify(req.body),
+      isMultipart: isMultipart,
+      contentType: headers['Content-Type']
+    });
+    
+    // For non-multipart requests, ensure proper JSON serialization
+    if (!isMultipart && req.body) {
+      if (typeof req.body === 'object') {
+        // Object needs to be stringified
+        requestData = JSON.stringify(req.body);
+        // Update Content-Length header to match serialized data
+        headers['Content-Length'] = Buffer.byteLength(requestData, 'utf8').toString();
+      } else if (typeof req.body === 'string') {
+        // Already a string, use as-is
+        requestData = req.body;
+        headers['Content-Length'] = Buffer.byteLength(requestData, 'utf8').toString();
+      }
+      
+      logger.debug('🔍 [DEBUG] After body processing:', {
+        requestData: requestData,
+        requestDataType: typeof requestData,
+        contentLength: headers['Content-Length']
+      });
+    }
+
     // Make request to microservice
     const response = await service.request({
       method: method as any,
       url: endpoint,
-      data: isMultipart ? (req as any) : req.body,
+      data: isMultipart ? (req as any) : requestData,
       headers,
       params: sanitizedParams,
       maxBodyLength: Infinity,

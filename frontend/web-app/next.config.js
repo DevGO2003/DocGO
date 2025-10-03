@@ -43,9 +43,10 @@ const nextConfig = {
   },
   async rewrites() {
     return [
+      // Proxy API calls to backend, but exclude health endpoint
       {
-        source: '/api/:path*',
-        destination: 'http://localhost:8000/api/:path*',
+        source: '/api/((?!health).*)',
+        destination: 'http://localhost:8000/api/$1',
       },
     ]
   },

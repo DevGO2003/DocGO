@@ -13,7 +13,7 @@ export const useTranslation = (namespace = 'common') => {
     i18n.changeLanguage(lng)
     
     // Update URL with new locale
-    const segments = pathname.split('/')
+    const segments = (pathname || '').split('/')
     if (segments[1] === 'vi' || segments[1] === 'en') {
       segments[1] = lng
     } else {

@@ -28,7 +28,13 @@ class ServiceManager {
       baseURL: config.url,
       timeout: config.timeout,
       headers: {
-        'User-Agent': 'API-Gateway/1.0.0'
+        'User-Agent': 'API-Gateway/1.0.0',
+        'Content-Type': 'application/json'
+      },
+      // Cải thiện kết nối
+      maxRedirects: 5,
+      validateStatus: function (status) {
+        return status >= 200 && status < 300; // Chỉ coi 2xx là thành công
       }
     });
 
@@ -39,7 +45,7 @@ class ServiceManager {
         const correlationId = (config.headers?.['X-Correlation-Id'] as string) || process.env.CORRELATION_ID || '';
         const actor = (config.headers?.['X-Actor'] as string) || process.env.ACTOR || '';
         if (!config.headers) {
-          config.headers = {};
+          config.headers = {} as any;
         }
         if (!config.headers['X-Correlation-Id']) {
           config.headers['X-Correlation-Id'] = correlationId || cryptoRandomId();
@@ -131,11 +137,26 @@ class ServiceManager {
       throw new Error('User management service not available');
     }
 
+    // Debug logging for request body (can be removed in production)
+    logger.debug('🔍 [DEBUG] Login request details:', {
+      originalRequest: loginRequest,
+      requestType: typeof loginRequest,
+      requestStringified: JSON.stringify(loginRequest),
+      requestKeys: Object.keys(loginRequest || {}),
+      requestValues: Object.values(loginRequest || {})
+    });
+
     try {
       const response: AxiosResponse<RestResponse<any>> = await service.post('/api/v1/user-management-service/v1/auth/login', loginRequest);
       return response.data;
     } catch (error: any) {
-      logger.error('❌ Authentication failed:', error.response?.data || error.message);
+      logger.error('❌ Authentication failed:', {
+        error: error.response?.data || error.message,
+        requestBody: loginRequest,
+        requestBodyStringified: JSON.stringify(loginRequest),
+        errorCode: error.code,
+        errorStatus: error.response?.status
+      });
       throw error;
     }
   }

@@ -437,6 +437,29 @@ public class AuthController {
                 .build());
     }
 
+    @GetMapping("/test-auth")
+    @Operation(summary = "Test authentication", description = "Test endpoint để kiểm tra JWT authentication")
+    public ResponseEntity<RestResponse<Map<String, Object>>> testAuth(@RequestHeader(name = "Authorization", required = false) String authorization) {
+        String requestId = UUID.randomUUID().toString();
+        log.info("[AuthController] Test auth endpoint called with Authorization: {}", authorization);
+        
+        Map<String, Object> data = new HashMap<>();
+        data.put("hasAuthHeader", authorization != null);
+        data.put("authHeader", authorization);
+        data.put("timestamp", ZonedDateTime.now().toString());
+        
+        return ResponseEntity.ok(RestResponse.<Map<String, Object>>builder()
+                .apiVersion("v1")
+                .statusCode(200)
+                .shortMessage("Success")
+                .description("Test authentication endpoint")
+                .data(data)
+                .timestamp(ZonedDateTime.now())
+                .requestId(requestId)
+                .path("/api/v1/user-management-service/v1/auth/test-auth")
+                .build());
+    }
+
     // ==================== OAuth2 Endpoints ====================
 
     @GetMapping("/oauth2/test")

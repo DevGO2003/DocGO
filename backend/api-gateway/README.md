@@ -83,19 +83,19 @@ Copy-Item env_example.txt .env -Force
 cp env_example.txt .env
 ```
 
-Chỉnh sửa file `.env` với các giá trị phù hợp (ưu tiên URL nội bộ compose):
+Chỉnh sửa file `.env` với các giá trị phù hợp (ưu tiên URL nội bộ compose - dùng DNS service và cổng nội bộ 8000):
 ```env
 # API Gateway Configuration
 PORT=8000
 NODE_ENV=development
 
-# Service URLs
+# Service URLs (internal)
 USER_MANAGEMENT_SERVICE_URL=http://user-management-service:8000
 DOCUMENT_MANAGEMENT_SERVICE_URL=http://document-management-service:8000
 AUTOMATION_SERVICE_URL=http://automation-service:8000
 
-# Kafka Configuration
-KAFKA_BROKERS=localhost:9092
+# Kafka Configuration (internal)
+KAFKA_BROKERS=kafka:9092
 KAFKA_CLIENT_ID=api-gateway
 KAFKA_GROUP_ID=api-gateway-group
 

@@ -7,8 +7,9 @@ services:
 
   # Kafka Broker
   kafka:
+    container_name: kafka
     image: confluentinc/cp-kafka:7.4.0
-    container_name: docgo-kafka
+    
     ports:
       - "${KAFKA_PORT:-9092}:9092"
     environment:
@@ -26,8 +27,9 @@ services:
 
   # Zookeeper (Alternative to KRaft mode)
   zookeeper:
+    container_name: zookeeper
     image: confluentinc/cp-zookeeper:7.4.0
-    container_name: docgo-zookeeper
+    
     ports:
       - "${ZOOKEEPER_PORT:-2181}:2181"
     environment:
@@ -42,8 +44,9 @@ services:
 
   # Kafka UI (Optional - for monitoring)
   kafka-ui:
+    container_name: kafka-ui
     image: provectuslabs/kafka-ui:latest
-    container_name: docgo-kafka-ui
+    
     ports:
       - "${KAFKA_UI_PORT:-8080}:8080"
     environment:
@@ -59,8 +62,9 @@ services:
 
   # Redis (Cache and session storage)
   redis:
+    container_name: redis
     image: redis:7-alpine
-    container_name: docgo-redis
+    
     ports:
       - "${REDIS_PORT:-6379}:6379"
     volumes:
@@ -76,10 +80,11 @@ services:
 
   # User Management Service (Spring Boot)
   user-management-service:
+    container_name: user-management-service
     build:
       context: ./backend/user-management-service
       dockerfile: Dockerfile
-    container_name: docgo-user-management
+    
     ports:
       - "${USER_MANAGEMENT_PORT:-8001}:8000"
     env_file:
@@ -102,10 +107,11 @@ services:
 
   # Document Management Service (Spring Boot)
   document-management-service:
+    container_name: document-management-service
     build:
       context: ./backend/document-management-service
       dockerfile: Dockerfile
-    container_name: docgo-document-management
+    
     ports:
       - "${DOCUMENT_MANAGEMENT_PORT:-8002}:8000"
     env_file:
@@ -129,10 +135,11 @@ services:
 
   # Automation Service (FastAPI)
   automation-service:
+    container_name: automation-service
     build:
       context: ./backend/automation-service
       dockerfile: Dockerfile
-    container_name: docgo-automation
+    
     ports:
       - "${AUTOMATION_PORT:-8003}:8000"
     env_file:
@@ -158,10 +165,11 @@ services:
 
   # API Gateway (Next.js)
   api-gateway:
+    container_name: api-gateway
     build:
       context: ./backend/api-gateway
       dockerfile: Dockerfile
-    container_name: docgo-api-gateway
+    
     ports:
       - "${API_GATEWAY_PORT:-8000}:8000"
     env_file:
@@ -191,10 +199,11 @@ services:
 
   # Web App Frontend (Next.js)
   web-app:
+    container_name: web-app
     build:
       context: ./frontend/web-app
       dockerfile: Dockerfile
-    container_name: docgo-web-app
+    
     ports:
       - "${WEB_APP_PORT:-3000}:3000"
     env_file:

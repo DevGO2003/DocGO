@@ -10,7 +10,7 @@ export default function StickyFixGlobal() {
   const pathname = usePathname()
   
   // Sử dụng hook để lấy lỗi của trang hiện tại
-  const { hasErrors, criticalCount, warningCount, infoCount, errors } = usePageErrors(pathname)
+  const { hasErrors, criticalCount, warningCount, infoCount, errors } = usePageErrors(pathname || '')
   
   // Reset visibility khi chuyển trang
   useEffect(() => {

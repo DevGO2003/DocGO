@@ -27,7 +27,8 @@
     "@browsermcp/mcp": "^0.1.3",
     "@missionsquad/mcp-discord": "^1.2.2",
     "@modelcontextprotocol/server-github": "^2025.4.8",
-    "mongodb-mcp-server": "^1.0.1"
+    "mongodb-mcp-server": "^1.0.1",
+    "playwright": "^1.47.2"
   },
   "engines": {
     "node": ">=18.0.0",

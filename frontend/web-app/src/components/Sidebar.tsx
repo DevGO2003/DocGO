@@ -146,7 +146,7 @@ export default function Sidebar() {
   }
 
   const renderMenuRow = (item: typeof navigation[number]) => {
-    const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
+    const isActive = Boolean(pathname === item.href || (pathname && pathname.startsWith(item.href + '/')))
     const hasErrors = hasPageErrors(item.href)
     const isClicked = clickedItem === item.nameKey
     const isPinned = pinnedKeys.includes(item.nameKey)

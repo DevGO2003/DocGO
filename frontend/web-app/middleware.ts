@@ -6,8 +6,11 @@ const publicRoutes = [
   '/',
   '/auth/login',
   '/auth/register',
+  '/auth/forgot-password',
+  '/auth/reset-password',
   '/auth/oauth',
   '/auth/oauth2',
+  '/contact',
   '/unauthorized',
   '/test-no-auth',
   '/test-hot-reload',
@@ -59,6 +62,16 @@ export function middleware(request: NextRequest) {
     pathname.startsWith('/api/') && !pathname.startsWith('/api/v1/')
   ) {
     return NextResponse.next()
+  }
+
+  // Handle health endpoint directly
+  if (pathname === '/api/health') {
+    return NextResponse.json({
+      status: 'ok',
+      timestamp: new Date().toISOString(),
+      service: 'web-app',
+      version: '1.0.0'
+    })
   }
 
   // Check if it's a public route

@@ -57,6 +57,7 @@ public class SecurityConfig {
                 "/swagger-ui.html",
                 "/v3/api-docs/**",
                 "/swagger-ui/**",
+                "/actuator/health",
                 "/api/v1/user-management-service/auth/login",
                 "/api/v1/user-management-service/auth/register",
                 "/api/v1/user-management-service/auth/refresh",
@@ -72,6 +73,9 @@ public class SecurityConfig {
                 "/api/v1/user-management-service/v1/auth/refresh",
                 "/api/v1/user-management-service/v1/auth/logout",
                 "/api/v1/user-management-service/v1/auth/health",
+                "/api/v1/user-management-service/v1/auth/test-auth",
+                "/api/v1/user-management-service/v1/auth/me",
+                "/api/v1/user-management-service/v1/health",
                 "/api/v1/user-management-service/v1/auth/oauth2/test"
             };
         } else {
@@ -87,6 +91,7 @@ public class SecurityConfig {
                 "/api/v1/user-management-service/auth/refresh",
                 "/api/v1/user-management-service/auth/logout",
                 "/api/v1/user-management-service/auth/health",
+                "/api/v1/user-management-service/auth/test-auth",
                 "/api/v1/user-management-service/auth/oauth2/test",
                 "/api/v1/user-management-service/oauth2/**",
                 // Permit duplicated paths that include the extra /v1/ segment used by AuthController
@@ -95,6 +100,8 @@ public class SecurityConfig {
                 "/api/v1/user-management-service/v1/auth/refresh",
                 "/api/v1/user-management-service/v1/auth/logout",
                 "/api/v1/user-management-service/v1/auth/health",
+                "/api/v1/user-management-service/v1/auth/test-auth",
+                "/api/v1/user-management-service/v1/auth/me",
                 "/api/v1/user-management-service/v1/auth/oauth2/test"
             };
         }
@@ -118,6 +125,9 @@ public class SecurityConfig {
                     response.sendRedirect("http://localhost:3000/auth/login?error=oauth_failed");
                 })
             );
+        } else {
+            // Disable OAuth2 login when no client ID is provided
+            http.oauth2Login(oauth2 -> oauth2.disable());
         }
 
         return http.build();

@@ -6,13 +6,19 @@ const path = require('path');
  * Priority: .env > default
  */
 function loadEnvFiles() {
-  const envDir = path.join(__dirname, '..', 'env');
-  
-  // Then load .env
-  const envPath = path.join(envDir, '.env');
+  // Load .env from root directory
+  const envPath = path.join(__dirname, '..', '.env');
   if (fs.existsSync(envPath)) {
     loadEnvFile(envPath);
     console.log('✅ Loaded .env from', envPath);
+  }
+  
+  // Also try env directory for backward compatibility
+  const envDir = path.join(__dirname, '..', 'env');
+  const envDirPath = path.join(envDir, '.env');
+  if (fs.existsSync(envDirPath)) {
+    loadEnvFile(envDirPath);
+    console.log('✅ Loaded .env from', envDirPath);
   }
 }
 

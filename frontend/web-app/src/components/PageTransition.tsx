@@ -18,7 +18,7 @@ export function PageTransition({ children }: PageTransitionProps) {
   useEffect(() => {
     // Nếu đây là lần đầu load (currentPath rỗng)
     if (!currentPath) {
-      setCurrentPath(pathname)
+      setCurrentPath(pathname || '')
       return
     }
 
@@ -34,7 +34,7 @@ export function PageTransition({ children }: PageTransitionProps) {
 
       // Giả lập thời gian loading (có thể điều chỉnh)
       loadingTimeoutRef.current = setTimeout(() => {
-        setCurrentPath(pathname)
+        setCurrentPath(pathname || '')
         setIsLoading(false)
       }, 800) // 800ms để tạo cảm giác mượt mà
     }

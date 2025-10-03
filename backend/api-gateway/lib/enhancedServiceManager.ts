@@ -104,7 +104,7 @@ class EnhancedServiceManager {
     // Document Management Service với Load Balancing
     this.addService('document-management', {
       name: 'document-management-service',
-      url: selectUrl(process.env.DOCUMENT_MANAGEMENT_SERVICE_URL, 'http://document-management-service:8000', 'http://localhost:8002'),
+      url: selectUrl(process.env.DOCUMENT_MANAGEMENT_SERVICE_URL, 'http://document-management-service:8002', 'http://localhost:8002'),
       healthCheck: '/actuator/health',
       timeout: 10000,
       enableCaching: true,
@@ -115,7 +115,7 @@ class EnhancedServiceManager {
     // Automation Service với Load Balancing
     this.addService('automation', {
       name: 'automation-service',
-      url: selectUrl(process.env.AUTOMATION_SERVICE_URL, 'http://automation-service:8000', 'http://localhost:8003'),
+      url: selectUrl(process.env.AUTOMATION_SERVICE_URL, 'http://automation-service:8003', 'http://localhost:8003'),
       healthCheck: '/health',
       timeout: 15000,
       enableCaching: false, // Không cache cho AI processing
