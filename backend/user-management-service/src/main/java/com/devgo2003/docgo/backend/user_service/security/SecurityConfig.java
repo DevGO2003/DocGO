@@ -29,8 +29,6 @@ public class SecurityConfig {
     private final TokenBlacklist tokenBlacklistService;
     private final UserRepository userRepository;
 
-    @Value("${spring.security.oauth2.client.registration.google.client-id:}")
-    private String googleClientId;
 
     public SecurityConfig(UserRepository userRepository, JwtUtil jwtUtil, TokenBlacklist tokenBlacklistService) {
         this.userRepository = userRepository;
@@ -48,87 +46,21 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         JwtAuthenticationFilter jwtFilter = new JwtAuthenticationFilter(jwtUtil, tokenBlacklistService, userRepository);
         
-        // Build the list of permitted paths
-        final String[] permittedPaths;
-        if (googleClientId != null && !googleClientId.trim().isEmpty()) {
-            permittedPaths = new String[]{
-                "/",
-                "/docs",
-                "/swagger-ui.html",
-                "/v3/api-docs/**",
-                "/swagger-ui/**",
-                "/actuator/health",
-                "/api/v1/user-management-service/auth/login",
-                "/api/v1/user-management-service/auth/register",
-                "/api/v1/user-management-service/auth/refresh",
-                "/api/v1/user-management-service/auth/logout",
-                "/api/v1/user-management-service/auth/health",
-                "/api/v1/user-management-service/auth/oauth2/test",
-                "/api/v1/user-management-service/oauth2/**",
-                "/oauth2/**",
-                "/login/oauth2/**",
-                // Permit duplicated paths that include the extra /v1/ segment used by AuthController
-                "/api/v1/user-management-service/v1/auth/login",
-                "/api/v1/user-management-service/v1/auth/register",
-                "/api/v1/user-management-service/v1/auth/refresh",
-                "/api/v1/user-management-service/v1/auth/logout",
-                "/api/v1/user-management-service/v1/auth/health",
-                "/api/v1/user-management-service/v1/auth/test-auth",
-                "/api/v1/user-management-service/v1/auth/me",
-                "/api/v1/user-management-service/v1/health",
-                "/api/v1/user-management-service/v1/auth/oauth2/test"
-            };
-        } else {
-            permittedPaths = new String[]{
-                "/",
-                "/docs",
-                "/swagger-ui.html",
-                "/v3/api-docs/**",
-                "/swagger-ui/**",
-                "/api/v1/user-management-service/v1/health",
-                "/api/v1/user-management-service/auth/login",
-                "/api/v1/user-management-service/auth/register",
-                "/api/v1/user-management-service/auth/refresh",
-                "/api/v1/user-management-service/auth/logout",
-                "/api/v1/user-management-service/auth/health",
-                "/api/v1/user-management-service/auth/test-auth",
-                "/api/v1/user-management-service/auth/oauth2/test",
-                "/api/v1/user-management-service/oauth2/**",
-                // Permit duplicated paths that include the extra /v1/ segment used by AuthController
-                "/api/v1/user-management-service/v1/auth/login",
-                "/api/v1/user-management-service/v1/auth/register",
-                "/api/v1/user-management-service/v1/auth/refresh",
-                "/api/v1/user-management-service/v1/auth/logout",
-                "/api/v1/user-management-service/v1/auth/health",
-                "/api/v1/user-management-service/v1/auth/test-auth",
-                "/api/v1/user-management-service/v1/auth/me",
-                "/api/v1/user-management-service/v1/auth/oauth2/test"
-            };
-        }
-        
+        // JWT + OAuth2 configuration
         http
-            .cors(cors -> {})
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable())
-            .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
+            .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers(permittedPaths).permitAll()
-                .anyRequest().authenticated()
+                .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
+                .anyRequest().permitAll()
+            )
+            .oauth2Login(oauth2 -> oauth2
+                .loginPage("/login")
+                .successHandler(oAuth2LoginSuccessHandler())
+                .failureUrl("/login?error=true")
             )
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
-
-        // Enable OAuth2 configuration if Google client is configured
-        if (googleClientId != null && !googleClientId.trim().isEmpty()) {
-            OAuth2LoginSuccessHandler successHandler = new OAuth2LoginSuccessHandler(userRepository, jwtUtil);
-            http.oauth2Login(oauth2 -> oauth2
-                .successHandler(successHandler)
-                .failureHandler((request, response, exception) -> {
-                    response.sendRedirect("http://localhost:3000/auth/login?error=oauth_failed");
-                })
-            );
-        } else {
-            // Disable OAuth2 login when no client ID is provided
-            http.oauth2Login(oauth2 -> oauth2.disable());
-        }
 
         return http.build();
     }
@@ -137,13 +69,8 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         
-        // Allow specific origins for production, wildcard for development
-        String corsOrigin = System.getenv().getOrDefault("CORS_ORIGIN", "*");
-        if ("*".equals(corsOrigin)) {
-            configuration.addAllowedOriginPattern("*");
-        } else {
-            configuration.addAllowedOrigin(corsOrigin);
-        }
+        // Allow all origins for debugging
+        configuration.addAllowedOriginPattern("*");
         
         // Allow common HTTP methods
         configuration.addAllowedMethod("GET");
@@ -156,7 +83,7 @@ public class SecurityConfig {
         // Allow all headers
         configuration.addAllowedHeader("*");
         
-        // Allow credentials for OAuth2
+        // Allow credentials
         configuration.setAllowCredentials(true);
         
         // Cache preflight response for 1 hour
@@ -171,4 +98,10 @@ public class SecurityConfig {
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
+
+    @Bean
+    public OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler() {
+        return new OAuth2LoginSuccessHandler(userRepository, jwtUtil);
+    }
+
 }

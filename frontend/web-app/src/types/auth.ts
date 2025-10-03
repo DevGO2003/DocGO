@@ -165,6 +165,7 @@ export interface AuthContextValue {
   register: (data: RegisterData) => Promise<boolean>
   logout: () => Promise<void>
   setAuthData: (userData: OAuthUserData) => void
+  setTokens: (accessToken: string, refreshToken: string) => void
   refreshToken: () => Promise<boolean>
   updateProfile: (data: UpdateProfileRequest) => Promise<boolean>
   changePassword: (data: ChangePasswordRequest) => Promise<boolean>

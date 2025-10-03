@@ -55,3 +55,4 @@ Tìm kiếm code trên GitHub repositories.
 - **No results**: Gợi ý query khác
 - **Rate limit**: Chờ và thử lại
 - **Invalid parameters**: Kiểm tra page và per_page values
+

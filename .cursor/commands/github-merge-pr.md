@@ -63,3 +63,4 @@ Merge pull request trong GitHub repository.
 - **Permission denied**: Kiểm tra quyền merge
 - **Conflict**: Xử lý merge conflict
 - **Invalid merge method**: Kiểm tra merge method values
+

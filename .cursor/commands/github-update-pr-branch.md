@@ -61,3 +61,4 @@ Cập nhật pull request branch với thay đổi mới nhất từ base branch
 - **Permission denied**: Kiểm tra quyền cập nhật PR
 - **Conflict**: Xử lý merge conflict
 - **Invalid SHA**: Kiểm tra expected_head_sha format
+

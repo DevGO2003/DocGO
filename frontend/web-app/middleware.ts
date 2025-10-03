@@ -41,6 +41,7 @@ const protectedRoutes = [
   '/ai-processing',
   '/activity-history',
   '/account-approval',
+  '/import-document',
   '/test-auth',
   '/test-token-management'
 ]

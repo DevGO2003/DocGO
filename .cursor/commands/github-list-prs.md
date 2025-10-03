@@ -65,3 +65,4 @@ Liệt kê pull requests trong GitHub repository với các tùy chọn lọc.
 - **Invalid state**: Kiểm tra state values (open, closed, all)
 - **Invalid branches**: Kiểm tra head và base branches
 - **Permission denied**: Kiểm tra quyền đọc repository
+

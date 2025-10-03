@@ -57,3 +57,4 @@ Click vào element trên trang web.
 - **Element không tồn tại**: Kiểm tra element reference
 - **Click failed**: Kiểm tra element accessibility
 - **Permission denied**: Kiểm tra click permissions
+

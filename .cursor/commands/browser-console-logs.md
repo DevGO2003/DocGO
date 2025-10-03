@@ -54,3 +54,4 @@ Lấy console logs từ browser.
 - **Browser không hoạt động**: Kiểm tra browser state
 - **Console access denied**: Kiểm tra console permissions
 - **No logs available**: Thông báo không có logs
+

@@ -1,0 +1,1 @@
+﻿import React from "react"`r`n`r`nexport default function Page(){`r`n  return (`r`n    <div className="p-4">`r`n      <h1 className="text-xl font-semibold">Document Tags</h1>`r`n    </div>`r`n  )`r`n}

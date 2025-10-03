@@ -8,9 +8,8 @@ import { withApiHandler } from '@/lib/http/withApiHandler';
 
 export const config = {
   api: {
-    bodyParser: {
-      sizeLimit: '10mb',
-    }
+    // Disable bodyParser so multipart/form-data streams are forwarded intact
+    bodyParser: false
   }
 };
 

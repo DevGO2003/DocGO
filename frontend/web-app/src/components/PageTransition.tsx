@@ -4,6 +4,42 @@ import React, { useState, useEffect, useRef } from 'react'
 import { usePathname } from 'next/navigation'
 import { LoadingSpinner, ProgressSpinner } from './LoadingSpinner'
 
+// Function để kiểm tra navigation nội bộ giữa các menu items
+function isInternalMenuNavigation(fromPath: string, toPath: string): boolean {
+  // Danh sách các route menu items (dashboard routes)
+  const menuRoutes = [
+    '/dashboard',
+    '/analytics', 
+    '/contracts',
+    '/import-document',
+    '/e-signature',
+    '/collaboration-comments',
+    '/contract-versions',
+    '/approval-workflow',
+    '/role-based-permissions',
+    '/dashboard/approved',
+    '/reports',
+    '/user-management',
+    '/organization',
+    '/account-approval',
+    '/notifications',
+    '/calendar',
+    '/activity-history',
+    '/backup-restore',
+    '/integrations',
+    '/help-support',
+    '/settings',
+    '/ai-processing'
+  ]
+
+  // Kiểm tra nếu cả from và to đều là menu routes
+  const fromIsMenuRoute = menuRoutes.some(route => fromPath.startsWith(route))
+  const toIsMenuRoute = menuRoutes.some(route => toPath.startsWith(route))
+  
+  // Skip loading nếu điều hướng giữa các menu items
+  return fromIsMenuRoute && toIsMenuRoute
+}
+
 interface PageTransitionProps {
   children: React.ReactNode
 }
@@ -24,7 +60,16 @@ export function PageTransition({ children }: PageTransitionProps) {
 
     // Nếu pathname thay đổi
     if (pathname !== currentPath) {
-      // Bắt đầu loading animation
+      // Skip loading cho navigation nội bộ giữa các menu items
+      const isInternalNavigation = isInternalMenuNavigation(currentPath, pathname || '')
+      
+      if (isInternalNavigation) {
+        // Cập nhật path ngay lập tức, không hiển thị loading
+        setCurrentPath(pathname || '')
+        return
+      }
+
+      // Bắt đầu loading animation cho các trường hợp khác
       setIsLoading(true)
       
       // Clear timeout cũ nếu có

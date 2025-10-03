@@ -54,3 +54,4 @@ Quay lại trang trước trong browser history.
 - **Không có history**: Thông báo không có trang trước
 - **Navigation failed**: Kiểm tra browser state
 - **Page không load**: Kiểm tra URL accessibility
+

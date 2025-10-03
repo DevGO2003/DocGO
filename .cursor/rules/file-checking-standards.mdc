@@ -1,0 +1,117 @@
+# Quy tắc kiểm tra file tồn tại
+
+## Mục tiêu
+- Tránh ghi đè file đã tồn tại
+- Sử dụng đúng công cụ để kiểm tra file
+- Đảm bảo an toàn khi chỉnh sửa file quan trọng
+
+## Quy tắc nghiêm ngặt
+
+### ❌ KHÔNG BAO GIỜ dùng `list_dir` để kiểm tra file cụ thể:
+- `list_dir` không hiển thị file ẩn (.env, .gitignore, .cursorignore)
+- `list_dir` không phù hợp để tìm file cụ thể
+- `list_dir` chỉ dùng để xem cấu trúc thư mục tổng quan
+
+### ✅ LUÔN dùng các công cụ phù hợp:
+
+#### 1. **`read_file`** - Ưu tiên cao nhất
+```javascript
+// Kiểm tra file đã tồn tại trước khi tạo mới
+read_file(target_file: "path/to/file")
+```
+- **Dùng khi**: Kiểm tra file cụ thể đã tồn tại
+- **Ưu điểm**: Đọc được nội dung, phát hiện file ẩn
+- **Ví dụ**: `read_file(target_file: "backend/user-management-service/.env")`
+
+#### 2. **`grep`** - Tìm nội dung trong file
+```javascript
+// Tìm biến trong file .env
+grep(pattern: "GOOGLE_CLIENT_ID", path: "backend/user-management-service/.env")
+```
+- **Dùng khi**: Tìm nội dung cụ thể trong file
+- **Ưu điểm**: Tìm được pattern, hiển thị context
+- **Ví dụ**: `grep(pattern: "spring\.security", path: "application.properties")`
+
+#### 3. **`glob_file_search`** - Tìm file theo pattern
+```javascript
+// Tìm tất cả file .env
+glob_file_search(glob_pattern: "**/.env", target_directory: "backend")
+```
+- **Dùng khi**: Tìm file theo pattern, nhiều file
+- **Ưu điểm**: Tìm được nhiều file cùng lúc
+- **Ví dụ**: `glob_file_search(glob_pattern: "**/*.env*")`
+
+#### 4. **`list_dir`** - Chỉ để xem cấu trúc
+```javascript
+// Xem cấu trúc thư mục (không dùng để tìm file cụ thể)
+list_dir(target_directory: "backend/user-management-service")
+```
+- **Dùng khi**: Xem cấu trúc thư mục tổng quan
+- **Hạn chế**: Không hiển thị file ẩn, không phù hợp tìm file cụ thể
+
+## Quy trình chuẩn khi tạo/chỉnh sửa file
+
+### Bước 1: Kiểm tra file đã tồn tại
+```javascript
+// LUÔN kiểm tra trước
+read_file(target_file: "path/to/file")
+```
+
+### Bước 2: Xử lý theo kết quả
+- **File tồn tại**: Chỉnh sửa nội dung bằng `search_replace` hoặc `MultiEdit`
+- **File không tồn tại**: Tạo mới bằng `write`
+
+### Bước 3: Xác nhận thay đổi
+```javascript
+// Đọc lại để xác nhận
+read_file(target_file: "path/to/file")
+```
+
+## Ví dụ thực tế
+
+### ❌ Cách sai:
+```javascript
+// SAI: Dùng list_dir để tìm .env
+list_dir(target_directory: "backend/user-management-service")
+// Kết quả: Không thấy .env → Tạo mới → Ghi đè file đã có
+```
+
+### ✅ Cách đúng:
+```javascript
+// ĐÚNG: Dùng read_file để kiểm tra
+read_file(target_file: "backend/user-management-service/.env")
+// Kết quả: Thấy file đã có → Chỉnh sửa nội dung
+```
+
+## Áp dụng cho các loại file quan trọng
+
+### File cấu hình (.env, .properties, .yaml)
+- **BẮT BUỘC** dùng `read_file` trước
+- **KHÔNG** tạo mới nếu đã tồn tại
+- **CHỈ** chỉnh sửa nội dung cần thiết
+
+### File code (.java, .ts, .tsx, .py)
+- **NÊN** dùng `read_file` để hiểu cấu trúc
+- **DÙNG** `search_replace` để chỉnh sửa chính xác
+- **TRÁNH** ghi đè toàn bộ file
+
+### File tài liệu (.md, .txt)
+- **KIỂM TRA** nội dung hiện tại
+- **THÊM** nội dung mới thay vì thay thế
+- **GIỮ** cấu trúc và format hiện có
+
+## Ghi nhớ quan trọng
+- **File ẩn** (.env, .gitignore, .cursorignore) chỉ thấy bằng `read_file`
+- **Pattern matching** dùng `grep` hoặc `glob_file_search`
+- **Cấu trúc thư mục** mới dùng `list_dir`
+- **Ưu tiên**: `read_file` > `grep` > `glob_file_search` > `list_dir`
+
+## Xử lý lỗi
+- Nếu `read_file` trả về "File is empty": File tồn tại nhưng trống
+- Nếu `read_file` trả về lỗi: File không tồn tại
+- Nếu `grep` không tìm thấy: Pattern không có trong file
+- Nếu `list_dir` không hiển thị: File có thể là file ẩn
+
+---
+
+**Lưu ý**: Quy tắc này áp dụng cho tất cả các file trong workspace để đảm bảo an toàn và tránh ghi đè nhầm.

@@ -43,10 +43,28 @@ const nextConfig = {
   },
   async rewrites() {
     return [
-      // Proxy API calls to backend, but exclude health endpoint
+      // Proxy API calls to backend, but exclude health endpoint and static files
       {
         source: '/api/((?!health).*)',
         destination: 'http://localhost:8000/api/$1',
+      },
+    ]
+  },
+  // Ensure static files are served correctly
+  async headers() {
+    return [
+      {
+        source: '/locales/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+          {
+            key: 'Content-Type',
+            value: 'application/json; charset=utf-8',
+          },
+        ],
       },
     ]
   },

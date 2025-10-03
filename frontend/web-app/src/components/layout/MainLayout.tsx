@@ -101,12 +101,21 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
     // Only redirect if not loading and definitely not authenticated
     // Use isAuthenticated instead of just checking user to avoid premature redirects
     if (!loading && !isAuthenticated) {
-      // Add a small delay to prevent rapid redirects during token refresh
-      // Tăng delay để đảm bảo token được sync hoàn toàn
+      // Add a longer delay to ensure AuthContext has fully initialized
+      // Check localStorage directly as fallback to prevent false redirects
       const timeoutId = setTimeout(() => {
-        console.log('[DashboardLayout] Redirecting to login - isAuthenticated:', isAuthenticated, 'loading:', loading)
-        router.replace('/auth/login')
-      }, 1500) // Tăng từ 1000ms lên 1500ms
+        // Double-check auth state before redirecting
+        const hasStoredToken = typeof window !== 'undefined' && 
+          (window.localStorage.getItem('auth_token') || 
+           window.localStorage.getItem('docgo_auth_v1'))
+        
+        if (!hasStoredToken) {
+          console.log('[DashboardLayout] No stored token found, redirecting to login - isAuthenticated:', isAuthenticated, 'loading:', loading)
+          router.replace('/auth/login')
+        } else {
+          console.log('[DashboardLayout] Stored token found, waiting for AuthContext to sync - isAuthenticated:', isAuthenticated, 'loading:', loading)
+        }
+      }, 3000) // Tăng delay lên 3000ms để đảm bảo AuthContext sync hoàn toàn
       
       return () => clearTimeout(timeoutId)
     }

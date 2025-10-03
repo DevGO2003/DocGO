@@ -60,3 +60,4 @@
 - **Collection mới đã tồn tại**: Sử dụng --dropTarget hoặc chọn tên khác
 - **Invalid new name**: Kiểm tra MongoDB naming rules
 - **Permission denied**: Kiểm tra quyền rename collection
+

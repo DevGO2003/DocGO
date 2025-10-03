@@ -59,3 +59,4 @@ Gõ text vào element trên trang web.
 - **Element không tồn tại**: Kiểm tra element reference
 - **Typing failed**: Kiểm tra element accessibility
 - **Permission denied**: Kiểm tra typing permissions
+

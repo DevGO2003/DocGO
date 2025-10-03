@@ -116,8 +116,9 @@ export default function LoginPage() {
         return
       }
       
-      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
-      const googleOAuthUrl = `${baseUrl}/oauth2/authorization/google`
+      // Use dedicated auth service URL for OAuth2 (default to 8001)
+      const authServiceBase = process.env.NEXT_PUBLIC_AUTH_SERVICE_URL || 'http://localhost:8001'
+      const googleOAuthUrl = `${authServiceBase}/oauth2/authorization/google`
       
       window.location.href = googleOAuthUrl;
     } catch (error: any) {
@@ -135,8 +136,9 @@ export default function LoginPage() {
   useEffect(() => {
     const checkOauth = async () => {
       try {
-        const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
-        const url = `${baseUrl}/api/oauth2/test`
+        // Check OAuth config against the same auth service base URL
+        const authServiceBase = process.env.NEXT_PUBLIC_AUTH_SERVICE_URL || 'http://localhost:8001'
+        const url = `${authServiceBase}/api/v1/user-management-service/v1/auth/oauth2/get-config`
         const res = await fetch(url, {
           method: 'GET',
           headers: {
@@ -152,8 +154,10 @@ export default function LoginPage() {
         }
 
         const json = await res.json()
-        const enabled = !!(json?.data?.google_oauth_available ?? json?.data)
+        const enabled = !!(json?.data?.google_oauth_available)
         setOauthEnabled(enabled)
+        
+        console.log('OAuth config loaded:', json?.data)
       } catch (error: any) {
         console.warn('OAuth status check error:', error?.message || error)
         setOauthEnabled(false)
@@ -403,14 +407,3 @@ export default function LoginPage() {
     </AuthLayout>
   )
 }
-  // Show loading state while redirecting
-  return (
-
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <InlineLoading text="Đang chuyển hướng..." size="md" />
-      </div>
-
-  )
-
-}
-

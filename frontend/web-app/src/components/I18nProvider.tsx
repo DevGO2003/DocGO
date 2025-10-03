@@ -5,19 +5,12 @@ import { I18nextProvider } from 'react-i18next'
 import { useEffect, useState } from 'react'
 import FullPageLoading from './ui/FullPageLoading'
 
+// Import JSON files directly
+import viCommon from '@/../public/locales/vi/common.json'
+import enCommon from '@/../public/locales/en/common.json'
+
 const createI18nInstance = async (lng: string) => {
   const i18nInstance = createInstance()
-  
-  // Fetch JSON files
-  const [viResponse, enResponse] = await Promise.all([
-    fetch('/locales/vi/common.json'),
-    fetch('/locales/en/common.json')
-  ])
-  
-  const [viCommon, enCommon] = await Promise.all([
-    viResponse.json(),
-    enResponse.json()
-  ])
   
   i18nInstance.init({
     lng,

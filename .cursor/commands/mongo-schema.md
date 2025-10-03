@@ -53,3 +53,4 @@ Phân tích và hiển thị schema của collection MongoDB.
 - **Collection không tồn tại**: Gợi ý tạo collection mới
 - **Collection trống**: Thông báo không có documents để phân tích
 - **Timeout**: Giảm sampleSize hoặc responseBytesLimit
+

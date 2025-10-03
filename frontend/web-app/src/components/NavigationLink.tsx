@@ -13,10 +13,8 @@ interface NavigationLinkProps {
 }
 
 export function NavigationLink({ href, children, className, onClick }: NavigationLinkProps) {
-  const { setLoading } = useLoading()
-
+  // Removed setLoading to avoid duplicate loading with PageTransition
   const handleClick = () => {
-    setLoading(true)
     if (onClick) {
       onClick()
     }

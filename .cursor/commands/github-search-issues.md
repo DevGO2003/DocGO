@@ -56,3 +56,4 @@ Tìm kiếm issues và pull requests trên GitHub repositories.
 - **No results**: Gợi ý query khác
 - **Rate limit**: Chờ và thử lại
 - **Invalid parameters**: Kiểm tra page và per_page values
+

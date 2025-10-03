@@ -34,12 +34,12 @@ Khi người dùng gặp vấn đề, command này sẽ:
 
 ### 3. 💡 Đề xuất phương án (CHỈ SAU KHI ĐIỀU TRA XONG)
 
-| Phương án | Mô tả | ✅ Ưu điểm | ⚠️ Nhược điểm | 🎯 Độ khó | ⏱️ Thời gian | 💰 Chi phí |
-|-----------|-------|------------|---------------|-----------|-------------|-----------|
-| **Phương án 1** | Sửa trực tiếp | ✅ Nhanh chóng ✅ Ít thay đổi | ⚠️ Có thể gây side effect ⚠️ Không giải quyết gốc rễ | 🟢 Dễ | 🟢 < 1h | 🟢 Thấp |
-| **Phương án 2** | Refactor code | ✅ Code sạch hơn ✅ Dễ maintain | ⚠️ Cần test kỹ ⚠️ Có thể break existing | 🟡 Trung bình | 🟡 2-4h | 🟡 Trung bình |
-| **Phương án 3** | Thay đổi architecture | ✅ Giải quyết triệt để ✅ Scalable | ⚠️ Thay đổi lớn ⚠️ Cần migration | 🔴 Khó | 🔴 > 1 ngày | 🔴 Cao |
-| **Phương án 4** | Workaround tạm thời | ✅ Giải quyết ngay ✅ Không ảnh hưởng code | ⚠️ Không bền vững ⚠️ Cần fix sau | 🟢 Dễ | 🟢 < 30 phút | 🟢 Thấp |
+| # | Tên phương pháp | Chi tiết thực hiện | ✅ Ưu điểm | ⚠️ Nhược điểm | 🎯 Độ khó & Thời gian & Chi phí |
+|--|-----------------|-------------------|------------|---------------|--------------------------------|
+| **1** | Sửa trực tiếp | Thực hiện thay đổi code ngay tại vị trí lỗi, không refactor | ✅ Nhanh chóng: Giải quyết vấn đề trong thời gian ngắn✅ Ít thay đổi: Không ảnh hưởng đến các phần khác của hệ thống✅ Rủi ro thấp: Chỉ sửa đúng phần có vấn đề | ⚠️ Có thể gây side effect: Thay đổi nhỏ có thể ảnh hưởng đến logic khác⚠️ Không giải quyết gốc rễ: Chỉ xử lý triệu chứng, không cải thiện kiến trúc⚠️ Khó maintain: Code có thể trở nên phức tạp theo thời gian | 🟢 Dễ - < 1h - Thấp |
+ cải thiện chất lượng, tách biệt concerns | ✅ Code sạch hơn: Cải thiện readability và maintainability✅ Dễ maintain: Cấu trúc rõ ràng, dễ debug và mở rộng✅ Giảm technical debt: Loại bỏ code smell và anti-patterns | ⚠️ Cần test kỹ: Phải đảm bảo không break existing functionality⚠️ Có thể break existing: Thay đổi cấu trúc có thể ảnh hưởng đến integration⚠️ Thời gian dài: Cần phân tích và thiết kế lại | 🟡 Trung b| **2** | Refactor code | Tái cấu trúc code đểình - 2-4h - Trung bình |
+| **3** | Thay đổi architecture | Thiết kế lại kiến trúc hệ thống để giải quyết vấn đề triệt để | ✅ Giải quyết triệt để: Xử lý nguyên nhân gốc rễ của vấn đề✅ Scalable: Kiến trúc mới có thể mở rộng tốt hơn✅ Future-proof: Phù hợp với yêu cầu phát triển dài hạn | ⚠️ Thay đổi lớn: Ảnh hưởng đến toàn bộ hệ thống⚠️ Cần migration: Phải chuyển đổi dữ liệu và logic hiện tại⚠️ Rủi ro cao: Có thể gây downtime và mất dữ liệu | 🔴 Khó - > 1 ngày - Cao |
+| **4** | Workaround tạm thời | Tạo giải pháp tạm thời để bypass vấn đề, không sửa code chính | ✅ Giải quyết ngay: Khôi phục service trong thời gian ngắn nhất✅ Không ảnh hưởng code: Không thay đổi logic hiện tại✅ Rủi ro thấp: Không có tác động đến hệ thống chính | ⚠️ Không bền vững: Chỉ là giải pháp tạm thời, vấn đề vẫn tồn tại⚠️ Cần fix sau: Phải có kế hoạch giải quyết triệt để⚠️ Có thể gây confusion: Team có thể quên rằng đây chỉ là workaround | 🟢 Dễ - < 30 phút - Thấp |
 
 ### 4. ⭐ Best Choice
 - **Phương án được khuyến nghị** với lý do cụ thể

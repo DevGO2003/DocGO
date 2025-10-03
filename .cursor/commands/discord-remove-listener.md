@@ -56,3 +56,4 @@ Xóa message listener đã tồn tại.
 - **Listener không tồn tại**: Kiểm tra listenerId
 - **Permission denied**: Kiểm tra quyền xóa listener
 - **Invalid listenerId**: Kiểm tra listenerId format
+

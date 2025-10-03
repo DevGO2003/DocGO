@@ -132,23 +132,25 @@ export class DocumentAPI {
     return apiClient.put<ApiResponse<Document>>(`${this.basePath}/documents/${id}/restore`)
   }
 
-  // File Management
+  // File Management - DEPRECATED: Use automationAPI.uploadFile() instead
+  // This method is kept for backward compatibility but will be removed in future versions
   async uploadFile(file: File) {
-    const formData = new FormData()
-    formData.append('file', file)
-    return apiClient.post<ApiResponse<any>>(`${this.basePath}/files/upload`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    })
+    console.warn('DocumentAPI.uploadFile() is deprecated. Use automationAPI.uploadFile() instead.')
+    // Redirect to automation service
+    const { automationAPI } = await import('./automation-api')
+    return automationAPI.uploadFile(file)
   }
 
   async getFileById(id: string) {
-    return apiClient.get<ApiResponse<any>>(`${this.basePath}/files/${id}`)
+    console.warn('DocumentAPI.getFileById() is deprecated. Use automationAPI.getFileById() instead.')
+    const { automationAPI } = await import('./automation-api')
+    return automationAPI.getFileById(id)
   }
 
   async deleteFile(id: string) {
-    return apiClient.delete<ApiResponse<any>>(`${this.basePath}/files/${id}`)
+    console.warn('DocumentAPI.deleteFile() is deprecated. Use automationAPI.deleteFile() instead.')
+    const { automationAPI } = await import('./automation-api')
+    return automationAPI.deleteFile(id)
   }
 
   // Attachments

@@ -54,3 +54,4 @@ Tìm kiếm repositories trên GitHub theo query.
 - **No results**: Gợi ý query khác
 - **Rate limit**: Chờ và thử lại
 - **Invalid parameters**: Kiểm tra page và perPage values
+

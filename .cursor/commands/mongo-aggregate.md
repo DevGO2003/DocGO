@@ -58,3 +58,4 @@ Thực hiện aggregation pipeline trên collection MongoDB để phân tích d�
 - **Pipeline không hợp lệ**: Kiểm tra MongoDB aggregation syntax
 - **Performance chậm**: Gợi ý tối ưu pipeline hoặc sử dụng index
 - **Memory limit**: Giảm kích thước pipeline hoặc sử dụng allowDiskUse
+

@@ -54,3 +54,4 @@ Chụp ảnh màn hình trang web hiện tại.
 - **Page không load**: Kiểm tra trang web đã load
 - **Accessibility error**: Kiểm tra page accessibility
 - **Screenshot failed**: Kiểm tra browser permissions
+

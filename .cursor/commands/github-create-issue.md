@@ -62,3 +62,4 @@ Tạo issue mới trong GitHub repository.
 - **Permission denied**: Kiểm tra quyền tạo issue
 - **Invalid assignees**: Kiểm tra usernames tồn tại
 - **Invalid labels**: Kiểm tra labels tồn tại trong repository
+

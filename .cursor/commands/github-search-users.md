@@ -56,3 +56,4 @@ Tìm kiếm users trên GitHub.
 - **No results**: Gợi ý query khác
 - **Rate limit**: Chờ và thử lại
 - **Invalid parameters**: Kiểm tra page và per_page values
+

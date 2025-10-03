@@ -54,3 +54,4 @@ Liệt kê tất cả response handlers có sẵn.
 - **Permission denied**: Kiểm tra quyền đọc handlers
 - **Bot không có quyền**: Kiểm tra bot permissions
 - **No handlers**: Thông báo không có handlers
+

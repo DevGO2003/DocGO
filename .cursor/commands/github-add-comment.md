@@ -60,3 +60,4 @@ Thêm comment vào issue trong GitHub repository.
 - **Issue không tồn tại**: Kiểm tra issue number
 - **Permission denied**: Kiểm tra quyền comment
 - **Invalid comment body**: Kiểm tra comment content
+

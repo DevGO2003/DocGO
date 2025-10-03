@@ -23,12 +23,12 @@ const nextConfig = {
         destination: `${process.env.USER_SERVICE_URL || 'http://user-management-service:8001'}/api/v1/user-management-service/users/:path*`,
       },
       {
-        source: '/api/documents/:path*',
-        destination: `${process.env.DOCUMENT_SERVICE_URL || 'http://document-management-service:8002'}/api/v1/document-management-service/documents/:path*`,
+        source: '/api/v1/document-management-service/v1/:path*',
+        destination: `${process.env.DOCUMENT_SERVICE_URL || 'http://document-management-service:8002'}/api/v1/document-management-service/v1/:path*`,
       },
       {
-        source: '/api/automation/:path*',
-        destination: `${process.env.AUTOMATION_SERVICE_URL || 'http://automation-service:8003'}/api/v1/automation-service/:path*`,
+        source: '/api/v1/automation-service/v1/:path*',
+        destination: `${process.env.AUTOMATION_SERVICE_URL || 'http://automation-service:8003'}/api/v1/automation-service/v1/:path*`,
       }
     ]
   },

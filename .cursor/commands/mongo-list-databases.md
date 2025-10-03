@@ -47,3 +47,4 @@ Liệt kê tất cả databases có sẵn trong MongoDB cluster.
 - **Lỗi kết nối**: Kiểm tra MongoDB connection string
 - **Lỗi quyền**: Kiểm tra credentials và permissions
 - **Timeout**: Tăng thời gian timeout nếu cần
+

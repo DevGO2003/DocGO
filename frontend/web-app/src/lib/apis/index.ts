@@ -22,23 +22,18 @@ export type {
   PaginationParams
 } from './document-api'
 
-// Automation APIs
-export { automationAPI, AutomationAPI } from './automation-api'
+// Automation APIs (includes File Management)
+export { automationAPI, AutomationAPI, fileAPI } from './automation-api'
 export type { 
   ExtractResult, 
   SummarizeResult, 
   ProcessResult, 
   ValidationResult,
-  BatchProcessResult
-} from './automation-api'
-
-// File Storage APIs
-export { fileAPI, FileAPI } from './file-api'
-export type { 
+  BatchProcessResult,
   FileUploadResult, 
   FileInfo, 
   FileSearchParams 
-} from './file-api'
+} from './automation-api'
 
 // Legacy API Client (for backward compatibility) - avoid circular imports
 export { apiClient } from '../http/api-client'

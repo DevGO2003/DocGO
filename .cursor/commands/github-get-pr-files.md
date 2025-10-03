@@ -59,3 +59,4 @@ Lấy danh sách files đã thay đổi trong pull request.
 - **PR không tồn tại**: Kiểm tra pull number
 - **Permission denied**: Kiểm tra quyền đọc repository
 - **Invalid pull number**: Kiểm tra pull number format
+

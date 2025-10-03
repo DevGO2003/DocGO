@@ -67,6 +67,22 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
       </head>
       <body className={inter.className} suppressHydrationWarning>
+        {/* Global error handler */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.addEventListener('unhandledrejection', function(event) {
+                console.error('Unhandled promise rejection:', event.reason);
+                // Có thể thêm logic xử lý lỗi tại đây
+              });
+              
+              window.addEventListener('error', function(event) {
+                console.error('Global error:', event.error);
+                // Có thể thêm logic xử lý lỗi tại đây
+              });
+            `,
+          }}
+        />
         <I18nProvider>
           <LoadingProvider>
             <AuthProvider>

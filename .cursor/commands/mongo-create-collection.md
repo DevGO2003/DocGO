@@ -58,3 +58,4 @@ Tạo collection mới trong database MongoDB.
 - **Collection đã tồn tại**: Thông báo collection đã có
 - **Invalid collection name**: Kiểm tra MongoDB naming rules
 - **Permission denied**: Kiểm tra quyền tạo collection
+

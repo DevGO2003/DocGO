@@ -59,3 +59,4 @@ Lấy thông tin chi tiết của issue trong GitHub repository.
 - **Issue không tồn tại**: Kiểm tra issue number
 - **Permission denied**: Kiểm tra quyền đọc repository
 - **Invalid issue number**: Kiểm tra issue number format
+

@@ -178,7 +178,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Cleanup expired tokens on mount
     TokenManager.cleanupExpiredTokens()
     
-    setLoading(false)
+    // Add a small delay to ensure all auth state is properly initialized
+    setTimeout(() => {
+      setLoading(false)
+    }, 100)
   }, [])
 
   useEffect(() => {
@@ -446,6 +449,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [])
 
+  const setTokens = useCallback((accessToken: string, refreshToken: string) => {
+    try {
+      if (accessToken && accessToken.length > 10) {
+        // Calculate expiration time (default 1 hour)
+        const expiresAt = Date.now() + (3600 * 1000) // 1 hour
+        
+        // Create token data object
+        const newTokenData: TokenData = {
+          accessToken,
+          refreshToken,
+          expiresAt,
+          tokenType: 'Bearer'
+        }
+        
+        setAccessToken(accessToken)
+        setTokenData(newTokenData)
+        
+        // Store tokens immediately
+        TokenManager.storeTokens(newTokenData, null)
+        
+        console.log('[Auth] Tokens set successfully via OAuth2 callback')
+      }
+    } catch (error) {
+      console.error('Error setting tokens:', error)
+    }
+  }, [])
+
   const refreshToken = useCallback(async (retryCount = 0): Promise<boolean> => {
     const maxRetries = 3
     const baseDelay = 1000 // 1 second
@@ -595,6 +625,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     register, 
     logout, 
     setAuthData, 
+    setTokens,
     refreshToken, 
     updateProfile,
     changePassword,
@@ -602,7 +633,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     resetPassword,
     validateToken,
     isTokenExpired
-  }), [user, accessToken, loading, isAuthenticated, login, register, logout, setAuthData, refreshToken, updateProfile, changePassword, forgotPassword, resetPassword, validateToken, isTokenExpired])
+  }), [user, accessToken, loading, isAuthenticated, login, register, logout, setAuthData, setTokens, refreshToken, updateProfile, changePassword, forgotPassword, resetPassword, validateToken, isTokenExpired])
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

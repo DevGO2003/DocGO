@@ -57,3 +57,4 @@ Xóa toàn bộ database MongoDB.
 - **Database không tồn tại**: Thông báo database không có
 - **Permission denied**: Kiểm tra quyền xóa database
 - **Database đang sử dụng**: Gợi ý dừng connections trước
+

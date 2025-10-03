@@ -56,3 +56,4 @@ Chờ một khoảng thời gian trước khi thực hiện hành động tiếp
 - **Time không hợp lệ**: Kiểm tra time value
 - **Wait failed**: Kiểm tra browser state
 - **Permission denied**: Kiểm tra wait permissions
+

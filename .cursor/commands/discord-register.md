@@ -56,3 +56,4 @@
 - **Permission denied**: Kiểm tra quyền đăng ký commands
 - **Bot không có quyền**: Kiểm tra bot permissions
 - **Commands đã tồn tại**: Thông báo commands đã được đăng ký
+

@@ -53,3 +53,4 @@
 - **Collection không tồn tại**: Gợi ý tạo collection mới
 - **Filter không hợp lệ**: Kiểm tra JSON syntax
 - **Timeout**: Tối ưu filter hoặc sử dụng index
+

@@ -34,7 +34,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/document-management-service/v1/contracts")
-@Tag(name = "📋 APIs Contract Management", description = "APIs để quản lý hợp đồng trong hệ thống DocGO")
+@Tag(name = "📋 APIs Quản lý Hợp đồng", description = "APIs để quản lý hợp đồng trong hệ thống DocGO")
 public class ContractController {
 
     private final IContractService contractService;

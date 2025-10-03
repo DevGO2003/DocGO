@@ -50,3 +50,4 @@ Liệt kê tất cả collections trong một database MongoDB cụ thể.
 - **Database không tồn tại**: Gợi ý tạo database mới
 - **Lỗi quyền**: Kiểm tra permissions cho database
 - **Database trống**: Thông báo không có collections
+

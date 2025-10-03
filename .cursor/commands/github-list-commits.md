@@ -61,3 +61,4 @@ Liệt kê commits của branch trong GitHub repository.
 - **Branch không tồn tại**: Kiểm tra branch name
 - **SHA không hợp lệ**: Kiểm tra commit SHA
 - **Permission denied**: Kiểm tra quyền đọc repository
+

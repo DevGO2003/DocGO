@@ -59,3 +59,4 @@ Giải thích query execution plan của MongoDB query.
 - **Method không hợp lệ**: Kiểm tra MongoDB method syntax
 - **Arguments không hợp lệ**: Kiểm tra method arguments
 - **Permission denied**: Kiểm tra quyền explain query
+

@@ -57,3 +57,4 @@ Nhấn phím trên bàn phím.
 - **Key không hợp lệ**: Kiểm tra key name
 - **Key press failed**: Kiểm tra keyboard permissions
 - **Permission denied**: Kiểm tra key press permissions
+

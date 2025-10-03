@@ -58,3 +58,4 @@ Xóa collection khỏi database MongoDB.
 - **Collection không tồn tại**: Thông báo collection không có
 - **Permission denied**: Kiểm tra quyền xóa collection
 - **Database không tồn tại**: Gợi ý tạo database mới
+

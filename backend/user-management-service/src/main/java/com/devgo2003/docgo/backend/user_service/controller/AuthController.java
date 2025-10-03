@@ -462,57 +462,81 @@ public class AuthController {
 
     // ==================== OAuth2 Endpoints ====================
 
-    @GetMapping("/oauth2/test")
-    @Operation(summary = "Test OAuth2 endpoint", description = "Kiểm tra xem OAuth2 có hoạt động không")
-    public ResponseEntity<RestResponse<Map<String, Object>>> testOAuth2() {
-        String requestId = UUID.randomUUID().toString();
-        log.info("[{}] OAuth2 test endpoint called", requestId);
-
-        Map<String, Object> data = new HashMap<>();
-        data.put("google_oauth_available", googleClientId != null && !googleClientId.trim().isEmpty());
-        data.put("google_client_id", googleClientId);
-        data.put("google_redirect_uri", googleRedirectUri);
-        data.put("note", "OAuth2 authorization endpoints are handled by Spring Security");
-
-        return ResponseEntity.ok(RestResponse.<Map<String, Object>>builder()
-                .apiVersion("v1")
-                .statusCode(200)
-                .shortMessage("Success")
-                .description("OAuth2 test endpoint hoạt động bình thường")
-                .data(data)
-                .timestamp(ZonedDateTime.now())
-                .requestId(requestId)
-                .path("/api/v1/user-management-service/v1/auth/oauth2/test")
-                .build());
-    }
-
-    @GetMapping("/oauth2/config")
-    @Operation(summary = "OAuth2 Configuration", description = "Lấy thông tin cấu hình OAuth2")
+    @GetMapping("/oauth2/get-config")
+    @Operation(
+        summary = "Lấy cấu hình OAuth2", 
+        description = """
+        🔹 Đầu vào
+        
+        📄 Không có tham số đầu vào
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: Map<String, Object>
+        Mô tả: Thông tin cấu hình OAuth2 và trạng thái hoạt động
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1)
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK)
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý
+        
+        🕒 timestamp
+        Loại: string (ISO-8601)
+        Mô tả: Thời gian xử lý yêu cầu
+        
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu
+        
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi
+        """
+    )
     public ResponseEntity<RestResponse<Map<String, Object>>> getOAuth2Config() {
         String requestId = UUID.randomUUID().toString();
-        log.info("[{}] OAuth2 config endpoint called", requestId);
+        log.info("[{}] OAuth2 get-config endpoint called", requestId);
 
         Map<String, Object> config = new HashMap<>();
-        config.put("google_client_id", googleClientId);
-        config.put("google_redirect_uri", googleRedirectUri);
-        config.put("google_project_id", googleProjectId);
-        config.put("note", "OAuth2 authorization endpoints are handled by Spring Security");
+        
+        // Thông tin cấu hình OAuth2 (với null check)
+        config.put("google_client_id", googleClientId != null ? googleClientId : "");
+        config.put("google_redirect_uri", googleRedirectUri != null ? googleRedirectUri : "");
+        config.put("google_project_id", googleProjectId != null ? googleProjectId : "");
+        
+        // Trạng thái hoạt động (gộp từ test endpoint)
+        config.put("google_oauth_available", googleClientId != null && !googleClientId.trim().isEmpty());
+        
+        // Thông tin endpoints
         config.put("endpoints", Map.of(
             "authorization", "/oauth2/authorization/google (handled by Spring Security)",
             "callback", "/login/oauth2/code/google (handled by Spring Security)",
-            "test", "/api/v1/user-management-service/v1/auth/oauth2/test",
-            "config", "/api/v1/user-management-service/v1/auth/oauth2/config"
+            "config", "/api/v1/user-management-service/v1/oauth2/get-config"
         ));
+        
+        config.put("note", "OAuth2 authorization endpoints are handled by Spring Security");
 
         return ResponseEntity.ok(RestResponse.<Map<String, Object>>builder()
                 .apiVersion("v1")
                 .statusCode(200)
                 .shortMessage("Success")
-                .description("Thông tin cấu hình OAuth2")
+                .description("Thông tin cấu hình OAuth2 và trạng thái hoạt động")
                 .data(config)
                 .timestamp(ZonedDateTime.now())
                 .requestId(requestId)
-                .path("/api/v1/user-management-service/v1/auth/oauth2/config")
+                .path("/api/v1/user-management-service/v1/oauth2/get-config")
                 .build());
     }
 }

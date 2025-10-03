@@ -58,3 +58,4 @@ Chọn option trong dropdown trên trang web.
 - **Element không tồn tại**: Kiểm tra element reference
 - **Select failed**: Kiểm tra element accessibility
 - **Permission denied**: Kiểm tra select permissions
+

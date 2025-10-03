@@ -60,3 +60,4 @@ Xóa một hoặc nhiều documents từ collection MongoDB.
 - **Filter không hợp lệ**: Kiểm tra JSON syntax
 - **Không có documents phù hợp**: Thông báo và gợi ý filter khác
 - **Permission denied**: Kiểm tra quyền xóa
+

@@ -59,3 +59,4 @@
 - **Permission denied**: Kiểm tra quyền đọc tin nhắn
 - **Server không tồn tại**: Kiểm tra server name hoặc ID
 - **Invalid limit**: Kiểm tra limit value (1-100)
+

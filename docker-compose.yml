@@ -197,7 +197,7 @@ services:
   # FRONTEND
   # ==========================================
 
-  # Web App Frontend (Next.js)
+  # Web App Frontend (Next.js) - Development Mode
   web-app:
     container_name: web-app
     build:
@@ -209,7 +209,7 @@ services:
     env_file:
       - .env
     environment:
-      - NODE_ENV=production
+      - NODE_ENV=development
       - PORT=3000
       - NEXT_PUBLIC_API_URL=http://localhost:${API_GATEWAY_PORT:-8000}
       - NEXT_PUBLIC_USER_SERVICE_URL=http://localhost:${USER_MANAGEMENT_PORT:-8001}
@@ -220,6 +220,9 @@ services:
     networks:
       - docgo-network
     volumes:
+      - ./frontend/web-app:/app
+      - /app/node_modules
+      - /app/.next
       - ./logs/web-app:/app/logs
     restart: unless-stopped
 

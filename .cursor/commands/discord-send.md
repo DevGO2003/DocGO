@@ -59,3 +59,4 @@ Gửi tin nhắn đến Discord channel.
 - **Permission denied**: Kiểm tra quyền gửi tin nhắn
 - **Server không tồn tại**: Kiểm tra server name hoặc ID
 - **Message quá dài**: Giảm độ dài message
+
