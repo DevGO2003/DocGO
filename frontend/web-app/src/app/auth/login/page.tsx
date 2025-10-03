@@ -403,3 +403,14 @@ export default function LoginPage() {
     </AuthLayout>
   )
 }
+  // Show loading state while redirecting
+  return (
+
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <InlineLoading text="Đang chuyển hướng..." size="md" />
+      </div>
+
+  )
+
+}
+
